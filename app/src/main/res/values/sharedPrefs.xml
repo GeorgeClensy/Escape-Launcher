@@ -20,4 +20,5 @@
     <string name="Haptic" translatable="false">Haptics</string>
     <string name="WasChangingLauncher" translatable="false">WasChangingLauncher</string>
     <string name="autoThemeSwitch" translatable="false">AutoThemeSwitch</string>
+    <string name="show_date" translatable="false">ShowDate</string>
 </resources>

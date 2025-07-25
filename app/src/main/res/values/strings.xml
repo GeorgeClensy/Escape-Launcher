@@ -63,6 +63,8 @@
     <string name="personalization">Personalize</string>
     <string name="done">Done</string>
     <string name="syncLightDark">Sync with system light/dark</string>
+    <string name="match_system_wallpaper">Match system wallpaper with Escape background</string>
+    <string name="date">Date</string>
 
     <!-- Apps challenge strings -->
     <string name="open_challenges">Open Challenges</string>

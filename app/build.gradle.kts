@@ -1,5 +1,3 @@
-@file:Suppress("UnstableApiUsage")
-
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
@@ -18,8 +16,7 @@ android {
         minSdk = 26
         targetSdk = 36
         versionCode = 2
-        versionName = "2.1"
-
+        versionName = "2.2"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
             useSupportLibrary = true
@@ -135,6 +132,7 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 }
+
 java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(17)

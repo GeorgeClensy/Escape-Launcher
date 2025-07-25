@@ -57,6 +57,8 @@ import com.geecee.escapelauncher.utils.managers.getTotalUsageForDate
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
+import java.text.SimpleDateFormat
+import java.util.Locale
 import com.geecee.escapelauncher.MainAppViewModel as MainAppModel
 
 /**
@@ -94,6 +96,18 @@ fun HomeScreen(
                         stringResource(R.string.BigClock),
                         false
                     ),
+                    homeAlignment = getHomeAlignment(mainAppModel.getContext())
+                )
+            }
+        }
+
+        //Date
+        item {
+            if (getBooleanSetting(
+                    mainAppModel.getContext(), stringResource(R.string.show_date), false
+                )
+            ) {
+                Date(
                     homeAlignment = getHomeAlignment(mainAppModel.getContext())
                 )
             }
@@ -152,7 +166,7 @@ fun HomeScreen(
                         (getWidgetWidth(mainAppModel.getContext())).dp,
                         (getWidgetHeight(mainAppModel.getContext())).dp
                     )
-                    .padding(0.dp, 7.dp))
+                    .padding(0.dp, (7.5).dp))
         }
 
         //Apps
@@ -260,7 +274,7 @@ fun Clock(
                             color = MaterialTheme.colorScheme.onPrimaryContainer,
                             fontWeight = FontWeight.SemiBold,
                             style = MaterialTheme.typography.headlineLarge,
-                            textAlign = TextAlign.Center,
+                            textAlign = TextAlign.Center
                         )
                     }
                 }
@@ -281,7 +295,7 @@ fun Clock(
                             color = MaterialTheme.colorScheme.onPrimaryContainer,
                             fontWeight = FontWeight.SemiBold,
                             style = MaterialTheme.typography.headlineLarge,
-                            textAlign = TextAlign.Center,
+                            textAlign = TextAlign.Center
                         )
                     }
                 }
@@ -293,7 +307,8 @@ fun Clock(
             color = MaterialTheme.colorScheme.onPrimaryContainer,
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.SemiBold,
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth(),
             textAlign = when (homeAlignment) {
                 Alignment.Start -> TextAlign.Start
                 Alignment.End -> TextAlign.End
@@ -301,6 +316,41 @@ fun Clock(
             }
         )
     }
+}
+
+@Composable
+fun Date(
+    homeAlignment: Alignment.Horizontal
+) {
+    val dateFormat = SimpleDateFormat("EEE d MMM", Locale.getDefault())
+
+    fun getCurrentDate(): String {
+        return dateFormat.format(java.util.Date())
+    }
+
+    var date by remember { mutableStateOf(getCurrentDate()) }
+
+    LaunchedEffect(Unit) {
+        while (true) {
+            date = getCurrentDate()
+            delay(1000)
+        }
+    }
+
+    Text(
+        text = date,
+        color = MaterialTheme.colorScheme.onPrimaryContainer,
+        style = MaterialTheme.typography.bodyLarge,
+        fontWeight = FontWeight.SemiBold,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding((7.5).dp, 0.dp, 0.dp, (7.5).dp),
+        textAlign = when (homeAlignment) {
+            Alignment.Start -> TextAlign.Start
+            Alignment.End -> TextAlign.End
+            else -> TextAlign.Center
+        }
+    )
 }
 
 /**
@@ -316,6 +366,7 @@ fun HomeScreenScreenTime(
                 MaterialTheme.shapes.extraLarge
             )
             .background(MaterialTheme.colorScheme.surfaceVariant)
+            .padding(0.dp,(7.5).dp)
     ) {
         Text(
             text = screenTime,

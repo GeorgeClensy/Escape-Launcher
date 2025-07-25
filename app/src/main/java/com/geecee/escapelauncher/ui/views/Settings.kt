@@ -35,6 +35,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
@@ -71,6 +72,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -118,6 +121,7 @@ import com.geecee.escapelauncher.utils.setWidgetWidth
 import com.geecee.escapelauncher.utils.showLauncherSelector
 import com.geecee.escapelauncher.utils.showLauncherSettingsMenu
 import com.geecee.escapelauncher.utils.toggleBooleanSetting
+import kotlin.math.max
 import com.geecee.escapelauncher.MainAppViewModel as MainAppModel
 
 /**
@@ -487,6 +491,17 @@ fun PersonalizationOptions(
                     mainAppModel.getContext(),
                     it,
                     mainAppModel.getContext().resources.getString(R.string.ShowClock)
+                )
+            })
+
+        SettingsSwitch(
+            label = stringResource(id = R.string.date), checked = getBooleanSetting(
+                mainAppModel.getContext(), stringResource(R.string.show_date), false
+            ), onCheckedChange = {
+                toggleBooleanSetting(
+                    mainAppModel.getContext(),
+                    it,
+                    mainAppModel.getContext().resources.getString(R.string.show_date)
                 )
             })
 
@@ -974,12 +989,12 @@ fun ThemeCard(
     isLSelected: MutableState<Boolean>,
     updateLTheme: (theme: Int) -> Unit,
     updateDTheme: (theme: Int) -> Unit,
+    modifier: Modifier,
     onClick: (theme: Int) -> Unit
 ) {
     Box(
-        Modifier
+        modifier
             .size(120.dp)
-            .padding(8.dp)
             .clip(RoundedCornerShape(16.dp))
             .clickable {
                 onClick(theme)
@@ -1189,6 +1204,19 @@ fun ThemeOptions(
 
     val backgroundInteractionSource = remember { MutableInteractionSource() }
 
+
+    val themeIds = listOf(11, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
+
+    val configuration = LocalConfiguration.current
+    val density = LocalDensity.current
+
+    val screenWidthDp = configuration.screenWidthDp.dp
+    val estimatedItemWidth = 128.dp + 16.dp  // Item width + padding
+    val itemsPerRow: Int = remember(screenWidthDp, density) {
+        val screenWidthPx = with(density) { screenWidthDp.toPx() }
+        val itemWidthPx = with(density) { estimatedItemWidth.toPx() }
+        max(1, (screenWidthPx / itemWidthPx).toInt())
+    }
     LazyVerticalGrid(
         GridCells.Adaptive(minSize = 128.dp), modifier = Modifier
             .fillMaxSize()
@@ -1250,66 +1278,88 @@ fun ThemeOptions(
                 mainAppModel.appTheme.value = newTheme
             }
         }
+        item(span = { GridItemSpan(maxLineSpan) }) {
+            Button({
+                AppUtils.setSolidColorWallpaperHomeScreen(mainAppModel.getContext(), mainAppModel.appTheme.value.background)
+            }){
+                Text(stringResource(R.string.match_system_wallpaper))
+            }
+        }
+        item(span = { GridItemSpan(maxLineSpan) }) {
+            Spacer(Modifier.height(15.dp))
+        }
 
-        // Create theme cards
-        val themeIds = listOf(11, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
+        itemsIndexed(themeIds) { index, themeId ->
+            val columnInRow = index % itemsPerRow
+            val isFirstInRow = columnInRow == 0
+            val isLastInRow = columnInRow == itemsPerRow - 1
 
-        themeIds.forEach { themeId ->
-            item {
-                ThemeCard(
-                    theme = themeId,
-                    showLightDarkPicker = mutableStateOf(currentHighlightedThemeCard.intValue == themeId),
-                    isSelected = mutableStateOf(currentSelectedTheme.intValue == themeId),
-                    isDSelected = mutableStateOf(currentSelectedDTheme.intValue == themeId),
-                    isLSelected = mutableStateOf(currentSelectedLTheme.intValue == themeId),
-                    updateLTheme = { theme ->
-                        setIntSetting(context, context.getString(R.string.lTheme), theme)
-                        val newTheme = refreshTheme(
-                            context = context,
-                            settingToChange = context.getString(R.string.theme),
-                            autoThemeChange = context.getString(R.string.autoThemeSwitch),
-                            dSettingToChange = context.getString(R.string.dTheme),
-                            lSettingToChange = context.getString(R.string.lTheme),
-                            isSystemDarkTheme = isSystemDark
-                        )
-                        mainAppModel.appTheme.value = newTheme
-                        currentSelectedLTheme.intValue = theme
-                        currentHighlightedThemeCard.intValue = -1
-                    },
-                    updateDTheme = { theme ->
-                        setIntSetting(context, context.getString(R.string.dTheme), theme)
-                        val newTheme = refreshTheme(
-                            context = context,
-                            settingToChange = context.getString(R.string.theme),
-                            autoThemeChange = context.getString(R.string.autoThemeSwitch),
-                            dSettingToChange = context.getString(R.string.dTheme),
-                            lSettingToChange = context.getString(R.string.lTheme),
-                            isSystemDarkTheme = isSystemDark
-                        )
-                        mainAppModel.appTheme.value = newTheme
-                        currentSelectedDTheme.intValue = theme
-                        currentHighlightedThemeCard.intValue = -1
-                    }) { theme ->
-                    if (getBooleanSetting(
-                            context, context.getString(R.string.autoThemeSwitch), false
-                        )
-                    ) {
-                        // For auto theme mode, show light/dark picker
-                        currentHighlightedThemeCard.intValue = theme
-                    } else {
-                        // For single theme mode, just set the theme
-                        setIntSetting(context, context.getString(R.string.theme), theme)
-                        val newTheme = refreshTheme(
-                            context = context,
-                            settingToChange = context.getString(R.string.theme),
-                            autoThemeChange = context.getString(R.string.autoThemeSwitch),
-                            dSettingToChange = context.getString(R.string.dTheme),
-                            lSettingToChange = context.getString(R.string.lTheme),
-                            isSystemDarkTheme = isSystemDark
-                        )
-                        mainAppModel.appTheme.value = newTheme
-                        currentSelectedTheme.intValue = theme
-                    }
+            val horizontalPadding = 8.dp
+            val verticalPadding = 8.dp
+
+            val modifier = Modifier
+                .padding(
+                    start = if (isFirstInRow) 0.dp else horizontalPadding,
+                    end = if (isLastInRow) 0.dp else horizontalPadding,
+                    top = verticalPadding,
+                    bottom = verticalPadding
+                )
+
+            ThemeCard(
+                theme = themeId,
+                showLightDarkPicker = mutableStateOf(currentHighlightedThemeCard.intValue == themeId),
+                isSelected = mutableStateOf(currentSelectedTheme.intValue == themeId),
+                isDSelected = mutableStateOf(currentSelectedDTheme.intValue == themeId),
+                isLSelected =  mutableStateOf(currentSelectedLTheme.intValue == themeId),
+                updateLTheme = { theme ->
+                    setIntSetting(context, context.getString(R.string.lTheme), theme)
+                    val newTheme = refreshTheme(
+                        context = context,
+                        settingToChange = context.getString(R.string.theme),
+                        autoThemeChange = context.getString(R.string.autoThemeSwitch),
+                        dSettingToChange = context.getString(R.string.dTheme),
+                        lSettingToChange = context.getString(R.string.lTheme),
+                        isSystemDarkTheme = isSystemDark
+                    )
+                    mainAppModel.appTheme.value = newTheme
+                    currentSelectedLTheme.intValue = theme
+                    currentHighlightedThemeCard.intValue = -1
+                },
+                updateDTheme = { theme ->
+                    setIntSetting(context, context.getString(R.string.dTheme), theme)
+                    val newTheme = refreshTheme(
+                        context = context,
+                        settingToChange = context.getString(R.string.theme),
+                        autoThemeChange = context.getString(R.string.autoThemeSwitch),
+                        dSettingToChange = context.getString(R.string.dTheme),
+                        lSettingToChange = context.getString(R.string.lTheme),
+                        isSystemDarkTheme = isSystemDark
+                    )
+                    mainAppModel.appTheme.value = newTheme
+                    currentSelectedDTheme.intValue = theme
+                    currentHighlightedThemeCard.intValue = -1
+                },
+                modifier = modifier)
+            { theme ->
+                if (getBooleanSetting(
+                        context, context.getString(R.string.autoThemeSwitch), false
+                    )
+                ) {
+                    // For auto theme mode, show light/dark picker
+                    currentHighlightedThemeCard.intValue = theme
+                } else {
+                    // For single theme mode, just set the theme
+                    setIntSetting(context, context.getString(R.string.theme), theme)
+                    val newTheme = refreshTheme(
+                        context = context,
+                        settingToChange = context.getString(R.string.theme),
+                        autoThemeChange = context.getString(R.string.autoThemeSwitch),
+                        dSettingToChange = context.getString(R.string.dTheme),
+                        lSettingToChange = context.getString(R.string.lTheme),
+                        isSystemDarkTheme = isSystemDark
+                    )
+                    mainAppModel.appTheme.value = newTheme
+                    currentSelectedTheme.intValue = theme
                 }
             }
         }
