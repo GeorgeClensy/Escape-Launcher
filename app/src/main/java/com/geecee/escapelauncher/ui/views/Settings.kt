@@ -72,9 +72,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
@@ -601,7 +601,8 @@ fun WidgetOptions(context: Context, goBack: () -> Unit) {
         contract = ActivityResultContracts.StartActivityForResult()
     ) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
-            val newWidgetId = result.data?.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, -1) ?: -1
+            val newWidgetId =
+                result.data?.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, -1) ?: -1
             if (newWidgetId != -1) {
                 appWidgetId = newWidgetId
                 saveWidgetId(context, appWidgetId)
@@ -657,7 +658,10 @@ fun WidgetOptions(context: Context, goBack: () -> Unit) {
                     // Request bind widget permission
                     val bindIntent = Intent(AppWidgetManager.ACTION_APPWIDGET_BIND).apply {
                         putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, newWidgetId)
-                        putExtra(AppWidgetManager.EXTRA_APPWIDGET_PROVIDER, widgetProviderInfo.provider)
+                        putExtra(
+                            AppWidgetManager.EXTRA_APPWIDGET_PROVIDER,
+                            widgetProviderInfo.provider
+                        )
                     }
                     bindWidgetPermissionLauncher.launch(bindIntent)
                 }
@@ -987,10 +991,10 @@ fun ThemeCard(
     isSelected: MutableState<Boolean>,
     isDSelected: MutableState<Boolean>,
     isLSelected: MutableState<Boolean>,
-    updateLTheme: (theme: Int) -> Unit,
-    updateDTheme: (theme: Int) -> Unit,
+    updateLTheme: (Int) -> Unit,
+    updateDTheme: (Int) -> Unit,
     modifier: Modifier,
-    onClick: (theme: Int) -> Unit
+    onClick: (Int) -> Unit
 ) {
     Box(
         modifier
@@ -1207,10 +1211,9 @@ fun ThemeOptions(
 
     val themeIds = listOf(11, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
 
-    val configuration = LocalConfiguration.current
     val density = LocalDensity.current
 
-    val screenWidthDp = configuration.screenWidthDp.dp
+    val screenWidthDp = LocalWindowInfo.current.containerSize.width.dp
     val estimatedItemWidth = 128.dp + 16.dp  // Item width + padding
     val itemsPerRow: Int = remember(screenWidthDp, density) {
         val screenWidthPx = with(density) { screenWidthDp.toPx() }
@@ -1280,8 +1283,11 @@ fun ThemeOptions(
         }
         item(span = { GridItemSpan(maxLineSpan) }) {
             Button({
-                AppUtils.setSolidColorWallpaperHomeScreen(mainAppModel.getContext(), mainAppModel.appTheme.value.background)
-            }){
+                AppUtils.setSolidColorWallpaperHomeScreen(
+                    mainAppModel.getContext(),
+                    mainAppModel.appTheme.value.background
+                )
+            }) {
                 Text(stringResource(R.string.match_system_wallpaper))
             }
         }
@@ -1305,12 +1311,26 @@ fun ThemeOptions(
                     bottom = verticalPadding
                 )
 
+            val isSelected = remember(themeId, currentSelectedTheme.intValue) {
+                mutableStateOf(currentSelectedTheme.intValue == themeId)
+            }
+            val isDSelected = remember(themeId, currentSelectedDTheme.intValue) {
+                mutableStateOf(currentSelectedDTheme.intValue == themeId)
+            }
+            val isLSelected = remember(themeId, currentSelectedLTheme.intValue) {
+                mutableStateOf(currentSelectedLTheme.intValue == themeId)
+            }
+            val showLightDarkPicker = remember(themeId, currentSelectedDTheme.intValue, currentSelectedLTheme.intValue, currentHighlightedThemeCard.intValue) {
+                mutableStateOf(currentHighlightedThemeCard.intValue == themeId)
+            }
+
+
             ThemeCard(
                 theme = themeId,
-                showLightDarkPicker = mutableStateOf(currentHighlightedThemeCard.intValue == themeId),
-                isSelected = mutableStateOf(currentSelectedTheme.intValue == themeId),
-                isDSelected = mutableStateOf(currentSelectedDTheme.intValue == themeId),
-                isLSelected =  mutableStateOf(currentSelectedLTheme.intValue == themeId),
+                showLightDarkPicker = showLightDarkPicker,
+                isSelected = isSelected,
+                isDSelected = isDSelected,
+                isLSelected = isLSelected,
                 updateLTheme = { theme ->
                     setIntSetting(context, context.getString(R.string.lTheme), theme)
                     val newTheme = refreshTheme(
@@ -1339,7 +1359,8 @@ fun ThemeOptions(
                     currentSelectedDTheme.intValue = theme
                     currentHighlightedThemeCard.intValue = -1
                 },
-                modifier = modifier)
+                modifier = modifier
+            )
             { theme ->
                 if (getBooleanSetting(
                         context, context.getString(R.string.autoThemeSwitch), false
