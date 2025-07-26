@@ -127,8 +127,13 @@ fun getPrivateSpaceApps(context: Context): List<InstalledApp> {
  * Shows the system app info page for an app in Private Space.
  */
 @RequiresApi(Build.VERSION_CODES.VANILLA_ICE_CREAM)
-fun showPrivateSpaceAppInfo(installedApp: InstalledApp, context: Context, sourceBounds: Rect? = null) {
-    val launcherApps = context.getSystemService(Context.LAUNCHER_APPS_SERVICE) as? LauncherApps ?: return
+fun showPrivateSpaceAppInfo(
+    installedApp: InstalledApp,
+    context: Context,
+    sourceBounds: Rect? = null
+) {
+    val launcherApps =
+        context.getSystemService(Context.LAUNCHER_APPS_SERVICE) as? LauncherApps ?: return
     val userManager = getSystemService(context, UserManager::class.java) ?: return
 
     userManager.userProfiles.find {
@@ -152,7 +157,8 @@ fun showPrivateSpaceAppInfo(installedApp: InstalledApp, context: Context, source
  */
 @RequiresApi(Build.VERSION_CODES.VANILLA_ICE_CREAM)
 fun uninstallPrivateSpaceApp(installedApp: InstalledApp, context: Context) {
-    val launcherApps = context.getSystemService(Context.LAUNCHER_APPS_SERVICE) as? LauncherApps ?: return
+    val launcherApps =
+        context.getSystemService(Context.LAUNCHER_APPS_SERVICE) as? LauncherApps ?: return
     val userManager = getSystemService(context, UserManager::class.java) ?: return
 
     userManager.userProfiles.find {
@@ -247,10 +253,10 @@ fun PrivateSpaceSettings(
                 val settingKey = context.resources.getString(R.string.SearchHiddenPrivateSpace)
                 SettingsSwitch(
                     stringResource(R.string.hide_private_space_in_search),
-                    getBooleanSetting(context, settingKey, false)
-                ) { value ->
-                    setBooleanSetting(context, settingKey, value)
-                }
+                    getBooleanSetting(context, settingKey, false),
+                    onCheckedChange = { value ->
+                        setBooleanSetting(context, settingKey, value)
+                    })
                 Button(
                     onClick = {
                         onDismiss()

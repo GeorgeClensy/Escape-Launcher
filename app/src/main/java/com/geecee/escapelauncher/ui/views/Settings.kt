@@ -25,7 +25,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -124,6 +123,7 @@ import com.geecee.escapelauncher.utils.toggleBooleanSetting
 import kotlin.math.max
 import com.geecee.escapelauncher.MainAppViewModel as MainAppModel
 
+
 /**
  * Settings title header with back button
  *
@@ -135,7 +135,7 @@ fun SettingsHeader(goBack: () -> Unit, title: String) {
     Row(
         modifier = Modifier
             .combinedClickable(onClick = { goBack() })
-            .padding(0.dp, 120.dp, 0.dp, 0.dp)
+            .padding(0.dp, 120.dp, 0.dp, 8.dp)
             .height(70.dp) // Set a fixed height for the header
     ) {
         Icon(
@@ -168,34 +168,55 @@ fun SettingsHeader(goBack: () -> Unit, title: String) {
 fun SettingsSwitch(
     label: String,
     checked: Boolean,
-    onCheckedChange: (Boolean) -> Unit
+    onCheckedChange: (Boolean) -> Unit,
+    isTopOfGroup: Boolean = false,
+    isBottomOfGroup: Boolean = false
 ) {
     var isChecked by remember { mutableStateOf(checked) }
 
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 12.dp),
-        verticalAlignment = Alignment.CenterVertically
+    // Define the base corner size
+    val groupEdgeCornerRadius = 24.dp
+    val defaultCornerRadius = 8.dp
+
+    val topStartRadius = if (isTopOfGroup) groupEdgeCornerRadius else defaultCornerRadius
+    val topEndRadius = if (isTopOfGroup) groupEdgeCornerRadius else defaultCornerRadius
+    val bottomStartRadius = if (isBottomOfGroup) groupEdgeCornerRadius else defaultCornerRadius
+    val bottomEndRadius = if (isBottomOfGroup) groupEdgeCornerRadius else defaultCornerRadius
+
+    Card(
+        modifier = Modifier.padding(vertical = 1.dp),
+        shape = RoundedCornerShape(
+            topStart = topStartRadius,
+            topEnd = topEndRadius,
+            bottomEnd = bottomEndRadius,
+            bottomStart = bottomStartRadius
+        )
     ) {
-        Text(
-            text = label,
+        Row(
             modifier = Modifier
-                .weight(1f)
-                .padding(end = 8.dp), // Add space between text and switch
-            color = MaterialTheme.colorScheme.onPrimaryContainer,
-            style = MaterialTheme.typography.bodyMedium
-        )
-        Switch(
-            checked = isChecked,
-            onCheckedChange = {
-                isChecked = it
-                onCheckedChange(isChecked)
-            }
-        )
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp, vertical = 12.dp)
+                .height(48.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = label,
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(end = 8.dp), // Add space between text and switch
+                color = MaterialTheme.colorScheme.onPrimaryContainer,
+                style = MaterialTheme.typography.bodyMedium
+            )
+            Switch(
+                checked = isChecked,
+                onCheckedChange = {
+                    isChecked = it
+                    onCheckedChange(isChecked)
+                }
+            )
+        }
     }
 }
-
 
 /**
  * Settings navigation item with label and arrow
@@ -203,49 +224,70 @@ fun SettingsSwitch(
  * @param label The text to be shown
  * @param diagonalArrow Whether the arrow should be pointed upwards to signal that pressing this will take you out of Escape Launcher
  * @param onClick When composable is clicked
+ * @param isTopOfGroup Whether this item is at the top of a group of items, for corner rounding
+ * @param isBottomOfGroup Whether this item is at the bottom of a group of items, for corner rounding
  */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun SettingsNavigationItem(
-    label: String, diagonalArrow: Boolean?, onClick: () -> Unit
+    label: String,
+    diagonalArrow: Boolean?,
+    onClick: () -> Unit,
+    isTopOfGroup: Boolean = false,
+    isBottomOfGroup: Boolean = false
 ) {
-    Row(
-        Modifier
-            .fillMaxWidth()
+    // Define the base corner size
+    val groupEdgeCornerRadius = 24.dp
+    val defaultCornerRadius = 8.dp
+
+    val topStartRadius = if (isTopOfGroup) groupEdgeCornerRadius else defaultCornerRadius
+    val topEndRadius = if (isTopOfGroup) groupEdgeCornerRadius else defaultCornerRadius
+    val bottomStartRadius = if (isBottomOfGroup) groupEdgeCornerRadius else defaultCornerRadius
+    val bottomEndRadius = if (isBottomOfGroup) groupEdgeCornerRadius else defaultCornerRadius
+
+    Card(
+        modifier = Modifier
+            .padding(vertical = 1.dp)
             .combinedClickable(onClick = onClick),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Text(
-            label,
-            Modifier
-                .padding(0.dp, 15.dp)
-                .fillMaxWidth(0.9f)
-                .fillMaxHeight(),
-            color = MaterialTheme.colorScheme.onPrimaryContainer,
-            style = MaterialTheme.typography.bodyMedium,
-            textAlign = TextAlign.Left,
+        shape = RoundedCornerShape(
+            topStart = topStartRadius,
+            topEnd = topEndRadius,
+            bottomEnd = bottomEndRadius,
+            bottomStart = bottomStartRadius
         )
-        if (!diagonalArrow!!) {
-            Icon(
-                Icons.AutoMirrored.Default.KeyboardArrowRight,
-                "",
-                Modifier
-                    .size(48.dp)
-                    .fillMaxSize(0.1f)
-                    .fillMaxHeight(),
-                tint = MaterialTheme.colorScheme.onPrimaryContainer,
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp, vertical = 12.dp)
+                .height(48.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                text = label,
+                modifier = Modifier
+                    .weight(1f) // Allow text to take available space
+                    .padding(end = 8.dp), // Add space between text and icon
+                color = MaterialTheme.colorScheme.onPrimaryContainer,
+                style = MaterialTheme.typography.bodyMedium,
+                textAlign = TextAlign.Left,
             )
-        } else {
-            Icon(
-                Icons.AutoMirrored.Default.KeyboardArrowRight,
-                "",
-                Modifier
-                    .size(48.dp)
-                    .fillMaxWidth(0.1f)
-                    .fillMaxHeight()
-                    .rotate(-45f),
-                tint = MaterialTheme.colorScheme.onPrimaryContainer,
-            )
+            val iconModifier = Modifier.size(24.dp) // Standardized icon size slightly
+            if (diagonalArrow == true) { // Explicitly check for true
+                Icon(
+                    Icons.AutoMirrored.Default.KeyboardArrowRight,
+                    contentDescription = null, // Content description can be null for decorative icons
+                    modifier = iconModifier.rotate(-45f),
+                    tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                )
+            } else {
+                Icon(
+                    Icons.AutoMirrored.Default.KeyboardArrowRight,
+                    contentDescription = null, // Content description can be null for decorative icons
+                    modifier = iconModifier,
+                    tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                )
+            }
         }
     }
 }
@@ -459,12 +501,10 @@ fun PersonalizationOptions(
     ) {
         SettingsHeader(goBack, stringResource(R.string.personalization))
 
-        HorizontalDivider(Modifier.padding(0.dp, 15.dp))
-
         SettingsSwitch(
             label = stringResource(id = R.string.search_box), checked = getBooleanSetting(
                 mainAppModel.getContext(), stringResource(R.string.ShowSearchBox), true
-            ), onCheckedChange = {
+            ), isTopOfGroup = true,onCheckedChange = {
                 toggleBooleanSetting(
                     mainAppModel.getContext(),
                     it,
@@ -543,6 +583,7 @@ fun PersonalizationOptions(
             checked = getBooleanSetting(
                 mainAppModel.getContext(), stringResource(R.string.ScreenTimeOnHome)
             ),
+            isBottomOfGroup = true,
             onCheckedChange = {
                 toggleBooleanSetting(
                     mainAppModel.getContext(),
@@ -554,6 +595,7 @@ fun PersonalizationOptions(
         SettingsNavigationItem(
             label = stringResource(id = R.string.widget),
             false,
+            isTopOfGroup =  true,
             onClick = { navController.navigate("widget") })
 
         SettingsNavigationItem(
@@ -569,6 +611,7 @@ fun PersonalizationOptions(
         SettingsNavigationItem(
             label = stringResource(id = R.string.choose_font),
             false,
+            isBottomOfGroup = true,
             onClick = { navController.navigate("chooseFont") })
 
         Spacer(Modifier.height(120.dp))
@@ -1243,43 +1286,46 @@ fun ThemeOptions(
         }
         item(span = { GridItemSpan(maxLineSpan) }) {
             SettingsSwitch(
-                stringResource(R.string.syncLightDark), getBooleanSetting(
+                stringResource(R.string.syncLightDark),
+                getBooleanSetting(
                     context, context.getString(R.string.autoThemeSwitch), false
-                )
-            ) { switch ->
-                // Disable normal selection box or set it correctly
-                if (switch) {
-                    currentSelectedTheme.intValue = -1
-                } else {
-                    currentSelectedTheme.intValue = getIntSetting(context, settingToChange, 11)
-                }
+                ),
+                onCheckedChange = { switch ->
+                    // Disable normal selection box or set it correctly
+                    if (switch) {
+                        currentSelectedTheme.intValue = -1
+                    } else {
+                        currentSelectedTheme.intValue = getIntSetting(context, settingToChange, 11)
+                    }
 
-                if (switch) {
-                    currentSelectedDTheme.intValue = getIntSetting(context, dSettingToChange, -1)
-                    currentSelectedLTheme.intValue = getIntSetting(context, lSettingToChange, -1)
-                } else {
-                    currentSelectedDTheme.intValue = -1
-                    currentSelectedLTheme.intValue = -1
-                }
+                    if (switch) {
+                        currentSelectedDTheme.intValue =
+                            getIntSetting(context, dSettingToChange, -1)
+                        currentSelectedLTheme.intValue =
+                            getIntSetting(context, lSettingToChange, -1)
+                    } else {
+                        currentSelectedDTheme.intValue = -1
+                        currentSelectedLTheme.intValue = -1
+                    }
 
-                // Remove the light dark button
-                currentHighlightedThemeCard.intValue = -1
+                    // Remove the light dark button
+                    currentHighlightedThemeCard.intValue = -1
 
-                setBooleanSetting(
-                    context, context.getString(R.string.autoThemeSwitch), switch
-                )
+                    setBooleanSetting(
+                        context, context.getString(R.string.autoThemeSwitch), switch
+                    )
 
-                // Reload
-                val newTheme = refreshTheme(
-                    context = context,
-                    settingToChange = context.getString(R.string.theme),
-                    autoThemeChange = context.getString(R.string.autoThemeSwitch),
-                    dSettingToChange = context.getString(R.string.dTheme),
-                    lSettingToChange = context.getString(R.string.lTheme),
-                    isSystemDarkTheme = isSystemDark
-                )
-                mainAppModel.appTheme.value = newTheme
-            }
+                    // Reload
+                    val newTheme = refreshTheme(
+                        context = context,
+                        settingToChange = context.getString(R.string.theme),
+                        autoThemeChange = context.getString(R.string.autoThemeSwitch),
+                        dSettingToChange = context.getString(R.string.dTheme),
+                        lSettingToChange = context.getString(R.string.lTheme),
+                        isSystemDarkTheme = isSystemDark
+                    )
+                    mainAppModel.appTheme.value = newTheme
+                })
         }
         item(span = { GridItemSpan(maxLineSpan) }) {
             Button({
@@ -1320,7 +1366,12 @@ fun ThemeOptions(
             val isLSelected = remember(themeId, currentSelectedLTheme.intValue) {
                 mutableStateOf(currentSelectedLTheme.intValue == themeId)
             }
-            val showLightDarkPicker = remember(themeId, currentSelectedDTheme.intValue, currentSelectedLTheme.intValue, currentHighlightedThemeCard.intValue) {
+            val showLightDarkPicker = remember(
+                themeId,
+                currentSelectedDTheme.intValue,
+                currentSelectedLTheme.intValue,
+                currentHighlightedThemeCard.intValue
+            ) {
                 mutableStateOf(currentHighlightedThemeCard.intValue == themeId)
             }
 
