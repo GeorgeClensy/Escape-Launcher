@@ -17,7 +17,7 @@ class HiddenAppsManager(context: Context) {
 
     private fun saveHiddenApps(hiddenApps: List<String>) {
         val json = gson.toJson(hiddenApps)
-        sharedPreferences.edit() {
+        sharedPreferences.edit {
             putString(FAVORITE_APPS_KEY, json)
         }
     }

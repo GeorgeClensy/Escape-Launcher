@@ -52,7 +52,7 @@ class ChallengesManager(context: Context) {
 
     private fun saveChallengeApps(challengeApps: List<String>) {
         val json = gson.toJson(challengeApps)
-        sharedPreferences.edit() {
+        sharedPreferences.edit {
             putString(FAVORITE_APPS_KEY, json)
         }
     }

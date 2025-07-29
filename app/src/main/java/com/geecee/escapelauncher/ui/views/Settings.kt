@@ -94,6 +94,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.geecee.escapelauncher.R
 import com.geecee.escapelauncher.ui.theme.AppTheme
+import com.geecee.escapelauncher.ui.theme.getTypographyFromFontName
 import com.geecee.escapelauncher.ui.theme.refreshTheme
 import com.geecee.escapelauncher.ui.theme.transparentHalf
 import com.geecee.escapelauncher.utils.AppUtils
@@ -139,7 +140,8 @@ fun AutoResizingText(
     style: TextStyle = MaterialTheme.typography.bodyMedium,
     minFontSize: TextUnit = 10.sp,
     maxLines: Int = 1,
-    color: Color = MaterialTheme.colorScheme.onPrimaryContainer
+    color: Color = MaterialTheme.colorScheme.onPrimaryContainer,
+    fontFamily: androidx.compose.ui.text.font.FontFamily? = MaterialTheme.typography.bodyMedium.fontFamily
 ) {
     BoxWithConstraints(modifier = modifier) {
         val density = LocalDensity.current
@@ -207,7 +209,8 @@ fun AutoResizingText(
             style = style.copy(fontSize = currentFontSize),
             maxLines = maxLines,
             overflow = TextOverflow.Ellipsis,
-            color = color
+            color = color,
+            fontFamily = fontFamily,
         )
     }
 }
@@ -252,8 +255,7 @@ fun SettingsHeader(goBack: () -> Unit, title: String) {
 @Composable
 fun SettingsSubheading(title: String) {
     Row(
-        modifier = Modifier
-            .padding(0.dp, 30.dp, 0.dp, 2.dp)
+        modifier = Modifier.padding(0.dp, 30.dp, 0.dp, 2.dp)
     ) {
         Text(
             text = title,
@@ -296,8 +298,7 @@ fun SettingsSwitch(
             .clickable {
                 isChecked = !isChecked
                 onCheckedChange(isChecked)
-            },
-        shape = RoundedCornerShape(
+            }, shape = RoundedCornerShape(
             topStart = topStartRadius,
             topEnd = topEndRadius,
             bottomEnd = bottomEndRadius,
@@ -308,8 +309,7 @@ fun SettingsSwitch(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 24.dp, vertical = 12.dp)
-                .height(48.dp),
-            verticalAlignment = Alignment.CenterVertically
+                .height(48.dp), verticalAlignment = Alignment.CenterVertically
         ) {
             AutoResizingText(
                 text = label,
@@ -320,12 +320,10 @@ fun SettingsSwitch(
                 style = MaterialTheme.typography.bodyMedium
             )
             Switch(
-                checked = isChecked,
-                onCheckedChange = {
+                checked = isChecked, onCheckedChange = {
                     isChecked = it
                     onCheckedChange(isChecked)
-                }
-            )
+                })
         }
     }
 }
@@ -417,7 +415,8 @@ fun SettingsButton(
     label: String,
     onClick: () -> Unit,
     isTopOfGroup: Boolean = false,
-    isBottomOfGroup: Boolean = false
+    isBottomOfGroup: Boolean = false,
+    fontFamily: androidx.compose.ui.text.font.FontFamily? = MaterialTheme.typography.bodyMedium.fontFamily,
 ) {
     // Define the base corner size
     val groupEdgeCornerRadius = 24.dp
@@ -452,7 +451,8 @@ fun SettingsButton(
                     .weight(1f) // Allow text to take available space
                     .padding(end = 8.dp), // Add space between text and icon
                 color = MaterialTheme.colorScheme.onPrimaryContainer,
-                style = MaterialTheme.typography.bodyMedium
+                style = MaterialTheme.typography.bodyMedium,
+                fontFamily = fontFamily
             )
         }
     }
@@ -502,8 +502,7 @@ fun ThemeCard(
                     onClick(theme)
                 }
                 .background(AppTheme.fromId(theme).scheme.background)
-                .height(72.dp)
-        ) {
+                .height(72.dp)) {
             AnimatedVisibility(
                 isSelected.value && !showLightDarkPicker.value && !showLightDarkPicker.value,
                 enter = fadeIn(),
@@ -724,6 +723,86 @@ fun SettingsSingleChoiceSegmentedButtons(
     Card(
         modifier = Modifier
             .fillMaxWidth()
+            .padding(vertical = 1.dp), shape = RoundedCornerShape(
+            topStart = topStartRadius,
+            topEnd = topEndRadius,
+            bottomStart = bottomStartRadius,
+            bottomEnd = bottomEndRadius
+        )
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            AutoResizingText(
+                text = label,
+                color = MaterialTheme.colorScheme.onPrimaryContainer,
+                modifier = Modifier.weight(1f)
+            )
+
+            SingleChoiceSegmentedButtonRow(
+                modifier = Modifier
+                    .padding(start = 16.dp)
+                    .weight(4f)
+            ) {
+                options.forEachIndexed { index, optionLabel ->
+                    SegmentedButton(
+                        shape = SegmentedButtonDefaults.itemShape(
+                            index = index, count = options.size
+                        ), onClick = {
+                            currentSelectedIndex = index
+                            onSelectedIndexChange(index)
+                        }, selected = index == currentSelectedIndex
+                    ) {
+                        Text(text = optionLabel, overflow = TextOverflow.Ellipsis, maxLines = 1)
+                    }
+                }
+            }
+        }
+    }
+}
+
+/**
+ * A setting item with a label on the left, a Slider in the middle, and a reset Icon on the right.
+ * Visually styled to match SettingsSingleChoiceSegmentedButtons.
+ *
+ * @param label The text for the label displayed to the left of the slider.
+ * @param value The current value of the slider.
+ * @param onValueChange Callback that is invoked when the slider's value changes.
+ * @param valueRange The range of values that the slider can take.
+ * @param steps The number of discrete steps the slider can snap to between the min and max values.
+ * @param onReset Callback that is invoked when the reset icon is clicked.
+ * @param modifier Optional [Modifier] for this composable.
+ * @param isTopOfGroup Whether this item is the first in a group of settings, for corner rounding.
+ * @param isBottomOfGroup Whether this item is the last in a group of settings, for corner rounding.
+ */
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun SettingsSlider(
+    label: String,
+    value: Float,
+    onValueChange: (Float) -> Unit,
+    valueRange: ClosedFloatingPointRange<Float>,
+    steps: Int,
+    onReset: () -> Unit,
+    modifier: Modifier = Modifier,
+    isTopOfGroup: Boolean = false,
+    isBottomOfGroup: Boolean = false
+) {
+    val groupEdgeCornerRadius = 24.dp
+    val defaultCornerRadius = 8.dp
+
+    val topStartRadius = if (isTopOfGroup) groupEdgeCornerRadius else defaultCornerRadius
+    val topEndRadius = if (isTopOfGroup) groupEdgeCornerRadius else defaultCornerRadius
+    val bottomStartRadius = if (isBottomOfGroup) groupEdgeCornerRadius else defaultCornerRadius
+    val bottomEndRadius = if (isBottomOfGroup) groupEdgeCornerRadius else defaultCornerRadius
+
+    Card(
+        modifier = modifier
+            .fillMaxWidth()
             .padding(vertical = 1.dp),
         shape = RoundedCornerShape(
             topStart = topStartRadius,
@@ -735,35 +814,36 @@ fun SettingsSingleChoiceSegmentedButtons(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 12.dp),
+                .padding(horizontal = 24.dp, vertical = 12.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            AutoResizingText(
+            Text(
                 text = label,
-                color = MaterialTheme.colorScheme.onPrimaryContainer,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                style = MaterialTheme.typography.bodyLarge,
                 modifier = Modifier.weight(1f)
             )
 
-            SingleChoiceSegmentedButtonRow(
-                modifier = Modifier.padding(start = 16.dp).weight(3f)
-            ) {
-                options.forEachIndexed { index, optionLabel ->
-                    SegmentedButton(
-                        shape = SegmentedButtonDefaults.itemShape(
-                            index = index,
-                            count = options.size
-                        ),
-                        onClick = {
-                            currentSelectedIndex = index
-                            onSelectedIndexChange(index)
-                        },
-                        selected = index == currentSelectedIndex
-                    ) {
-                        Text(text = optionLabel, overflow = TextOverflow.Ellipsis, maxLines = 1)
-                    }
-                }
-            }
+            Slider(
+                value = value,
+                onValueChange = onValueChange,
+                valueRange = valueRange,
+                steps = steps,
+                modifier = Modifier
+                    .weight(1.5f)
+                    .padding(horizontal = 16.dp)
+            )
+
+            Icon(
+                imageVector = Icons.Default.Refresh,
+                contentDescription = stringResource(R.string.reset_to_default),
+                modifier = Modifier
+                    .size(40.dp)
+                    .padding(start = 8.dp)
+                    .clickable(onClick = onReset),
+                tint = MaterialTheme.colorScheme.primary,
+            )
         }
     }
 }
@@ -907,9 +987,7 @@ fun MainSettingsPage(
             label = stringResource(id = R.string.haptic_feedback),
             isBottomOfGroup = true,
             checked = getBooleanSetting(
-                mainAppModel.getContext(),
-                stringResource(R.string.Haptic),
-                true
+                mainAppModel.getContext(), stringResource(R.string.Haptic), true
             ),
             onCheckedChange = {
                 toggleBooleanSetting(
@@ -998,8 +1076,7 @@ fun MainSettingsPage(
             onSelectedIndexChange = { newIndex ->
                 selectedHomeVerticalIndex = newIndex
                 changeHomeVAlignment(mainAppModel.getContext(), newIndex)
-            }
-        )
+            })
 
         val appsAlignmentOptions = listOf(
             stringResource(R.string.left),
@@ -1094,12 +1171,9 @@ fun MainSettingsPage(
         SettingsSubheading(stringResource(id = R.string.other))
 
         SettingsSwitch(
-            label = stringResource(id = R.string.Analytics),
-            checked = getBooleanSetting(
+            label = stringResource(id = R.string.Analytics), checked = getBooleanSetting(
                 mainAppModel.getContext(), stringResource(R.string.Analytics), true
-            ),
-            isTopOfGroup = true,
-            onCheckedChange = {
+            ), isTopOfGroup = true, onCheckedChange = {
                 toggleBooleanSetting(
                     mainAppModel.getContext(),
                     it,
@@ -1127,8 +1201,7 @@ fun MainSettingsPage(
             isBottomOfGroup = true,
             onClick = {
                 navController.navigate("devOptions")
-            }
-        )
+            })
 
         SettingsSpacer()
     }
@@ -1197,12 +1270,9 @@ fun ThemeOptions(
         }
         item {
             SettingsSwitch(
-                stringResource(R.string.syncLightDark),
-                getBooleanSetting(
+                stringResource(R.string.syncLightDark), getBooleanSetting(
                     context, context.getString(R.string.autoThemeSwitch), false
-                ),
-                isTopOfGroup = true,
-                onCheckedChange = { switch ->
+                ), isTopOfGroup = true, onCheckedChange = { switch ->
                     // Disable normal selection box or set it correctly
                     if (switch) {
                         currentSelectedTheme.intValue = -1
@@ -1241,12 +1311,9 @@ fun ThemeOptions(
         }
         item {
             SettingsButton(
-                stringResource(R.string.match_system_wallpaper),
-                isBottomOfGroup = true,
-                onClick = {
+                stringResource(R.string.match_system_wallpaper), isBottomOfGroup = true, onClick = {
                     AppUtils.setSolidColorWallpaperHomeScreen(
-                        mainAppModel.getContext(),
-                        mainAppModel.appTheme.value.background
+                        mainAppModel.getContext(), mainAppModel.appTheme.value.background
                     )
                 })
         }
@@ -1376,9 +1443,7 @@ fun WidgetOptions(context: Context, goBack: () -> Unit) {
                     launchWidgetConfiguration(context, appWidgetId)
                 } else {
                     appWidgetHostView = appWidgetHost.createView(
-                        context,
-                        appWidgetId,
-                        widgetInfo
+                        context, appWidgetId, widgetInfo
                     ).apply {
                         setAppWidget(appWidgetId, widgetInfo)
                     }
@@ -1388,210 +1453,120 @@ fun WidgetOptions(context: Context, goBack: () -> Unit) {
     }
 
     if (showCustomPicker) {
-        CustomWidgetPicker(
-            onWidgetSelected = { widgetProviderInfo ->
-                // Allocate widget ID
-                val newWidgetId = appWidgetHost.allocateAppWidgetId()
+        CustomWidgetPicker(onWidgetSelected = { widgetProviderInfo ->
+            // Allocate widget ID
+            val newWidgetId = appWidgetHost.allocateAppWidgetId()
 
-                // Try to bind widget
-                val allocated = appWidgetManager.bindAppWidgetIdIfAllowed(
-                    newWidgetId,
-                    widgetProviderInfo.provider
-                )
+            // Try to bind widget
+            val allocated = appWidgetManager.bindAppWidgetIdIfAllowed(
+                newWidgetId, widgetProviderInfo.provider
+            )
 
-                if (allocated) {
-                    // Widget successfully bound
-                    appWidgetId = newWidgetId
-                    saveWidgetId(context, appWidgetId)
+            if (allocated) {
+                // Widget successfully bound
+                appWidgetId = newWidgetId
+                saveWidgetId(context, appWidgetId)
 
-                    // Check if widget needs configuration
-                    needsConfiguration = isWidgetConfigurable(context, appWidgetId)
-                    if (needsConfiguration) {
-                        launchWidgetConfiguration(context, appWidgetId)
-                    } else {
-                        appWidgetHostView = appWidgetHost.createView(
-                            context,
-                            appWidgetId,
-                            widgetProviderInfo
-                        ).apply {
-                            setAppWidget(appWidgetId, widgetProviderInfo)
-                        }
-                    }
+                // Check if widget needs configuration
+                needsConfiguration = isWidgetConfigurable(context, appWidgetId)
+                if (needsConfiguration) {
+                    launchWidgetConfiguration(context, appWidgetId)
                 } else {
-                    // Request bind widget permission
-                    val bindIntent = Intent(AppWidgetManager.ACTION_APPWIDGET_BIND).apply {
-                        putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, newWidgetId)
-                        putExtra(
-                            AppWidgetManager.EXTRA_APPWIDGET_PROVIDER,
-                            widgetProviderInfo.provider
-                        )
+                    appWidgetHostView = appWidgetHost.createView(
+                        context, appWidgetId, widgetProviderInfo
+                    ).apply {
+                        setAppWidget(appWidgetId, widgetProviderInfo)
                     }
-                    bindWidgetPermissionLauncher.launch(bindIntent)
                 }
+            } else {
+                // Request bind widget permission
+                val bindIntent = Intent(AppWidgetManager.ACTION_APPWIDGET_BIND).apply {
+                    putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, newWidgetId)
+                    putExtra(
+                        AppWidgetManager.EXTRA_APPWIDGET_PROVIDER, widgetProviderInfo.provider
+                    )
+                }
+                bindWidgetPermissionLauncher.launch(bindIntent)
+            }
 
-                // Close the picker
-                showCustomPicker = false
-            },
-            onDismiss = { showCustomPicker = false }
-        )
+            // Close the picker
+            showCustomPicker = false
+        }, onDismiss = { showCustomPicker = false })
     }
 
     Column(
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.Start,
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState())
     ) {
         SettingsHeader(goBack, stringResource(R.string.widget))
 
-        HorizontalDivider(Modifier.padding(0.dp, 15.dp))
+        SettingsButton(
+            label = stringResource(R.string.remove_widget), isTopOfGroup = true, onClick = {
+                removeWidget(context)
+                appWidgetHostView = null
+                appWidgetId = -1
+            })
 
-        Button(modifier = Modifier.fillMaxWidth(), onClick = {
-            removeWidget(context)
-            appWidgetHostView = null  // Clear current widget view
-            appWidgetId = -1  // Reset widget ID
-        }) {
-            Text(stringResource(R.string.remove_widget))
-        }
+        SettingsButton(
+            label = stringResource(R.string.select_widget),
+            isBottomOfGroup = true,
+            onClick = { showCustomPicker = true })
 
-        Spacer(Modifier.height(10.dp))
-
-        Button(
-            modifier = Modifier.fillMaxWidth(),
-            onClick = { showCustomPicker = true }
-        ) {
-            Text(stringResource(R.string.select_widget))
-        }
-
-        Spacer(Modifier.height(20.dp))
+        SettingsSpacer()
 
         // Widget offset slider
-        Box(Modifier.fillMaxWidth()) {
-            var sliderPosition by remember { mutableFloatStateOf(getWidgetOffset(context)) }
-            Row {
-                Text(
-                    stringResource(id = R.string.offset),
-                    Modifier.padding(0.dp, 15.dp),
-                    color = MaterialTheme.colorScheme.onPrimaryContainer,
-                    style = MaterialTheme.typography.bodyMedium,
-                    textAlign = TextAlign.Center,
-                )
-
-                Slider(
-                    value = sliderPosition,
-                    onValueChange = {
-                        sliderPosition = it
-                        setWidgetOffset(context, sliderPosition)
-                    },
-                    valueRange = -20f..20f,
-                    steps = 20,
-                    modifier = Modifier
-                        .fillMaxWidth(0.85F)
-                        .align(Alignment.CenterVertically)
-                        .padding(20.dp, 0.dp, 20.dp, 0.dp)
-                )
-            }
-
-            Icon(
-                Icons.Default.Refresh,
-                contentDescription = "Reset to default",
-                Modifier
-                    .size(48.dp)
-                    .fillMaxSize()
-                    .align(Alignment.CenterEnd)
-                    .combinedClickable {
-                        sliderPosition = 0F
-                        setWidgetOffset(context, sliderPosition)
-                    }
-                    .padding(8.dp),
-                tint = MaterialTheme.colorScheme.primary,
-            )
-        }
+        var offsetSliderPosition by remember { mutableFloatStateOf(getWidgetOffset(context)) }
+        SettingsSlider(
+            label = stringResource(id = R.string.offset),
+            value = offsetSliderPosition,
+            onValueChange = {
+                offsetSliderPosition = it
+                setWidgetOffset(context, offsetSliderPosition)
+            },
+            valueRange = -20f..20f,
+            steps = 19,
+            onReset = {
+                offsetSliderPosition = 0F
+                setWidgetOffset(context, offsetSliderPosition)
+            },
+            isTopOfGroup = true
+        )
 
         // Widget height slider
-        Box(Modifier.fillMaxWidth()) {
-            var sliderPosition by remember { mutableFloatStateOf(getWidgetHeight(context)) }
-            Row {
-                Text(
-                    stringResource(id = R.string.height),
-                    Modifier.padding(0.dp, 15.dp),
-                    color = MaterialTheme.colorScheme.onPrimaryContainer,
-                    style = MaterialTheme.typography.bodyMedium,
-                    textAlign = TextAlign.Center,
-                )
-
-                Slider(
-                    value = sliderPosition,
-                    onValueChange = {
-                        sliderPosition = it
-                        setWidgetHeight(context, sliderPosition)
-                    },
-                    valueRange = 100f..400f,
-                    steps = 10,
-                    modifier = Modifier
-                        .fillMaxWidth(0.85F)
-                        .align(Alignment.CenterVertically)
-                        .padding(20.dp, 0.dp, 20.dp, 0.dp)
-                )
-            }
-
-            Icon(
-                Icons.Default.Refresh,
-                contentDescription = "Reset to default",
-                Modifier
-                    .size(48.dp)
-                    .fillMaxSize()
-                    .align(Alignment.CenterEnd)
-                    .combinedClickable {
-                        sliderPosition = 125F
-                        setWidgetHeight(context, sliderPosition)
-                    }
-                    .padding(8.dp),
-                tint = MaterialTheme.colorScheme.primary,
-            )
-        }
+        var heightSliderPosition by remember { mutableFloatStateOf(getWidgetHeight(context)) }
+        SettingsSlider(
+            label = stringResource(id = R.string.height),
+            value = heightSliderPosition,
+            onValueChange = {
+                heightSliderPosition = it
+                setWidgetHeight(context, heightSliderPosition)
+            },
+            valueRange = 100f..400f,
+            steps = 9,
+            onReset = {
+                heightSliderPosition = 125F
+                setWidgetHeight(context, heightSliderPosition)
+            })
 
         // Widget width slider
-        Box(Modifier.fillMaxWidth()) {
-            var sliderPosition by remember { mutableFloatStateOf(getWidgetWidth(context)) }
-            Row {
-                Text(
-                    stringResource(id = R.string.width),
-                    Modifier.padding(0.dp, 15.dp),
-                    color = MaterialTheme.colorScheme.onPrimaryContainer,
-                    style = MaterialTheme.typography.bodyMedium,
-                    textAlign = TextAlign.Center,
-                )
-
-                Slider(
-                    value = sliderPosition,
-                    onValueChange = {
-                        sliderPosition = it
-                        setWidgetWidth(context, sliderPosition)
-                    },
-                    valueRange = 100f..400f,
-                    steps = 10,
-                    modifier = Modifier
-                        .fillMaxWidth(0.85F)
-                        .align(Alignment.CenterVertically)
-                        .padding(20.dp, 0.dp, 20.dp, 0.dp)
-                )
-            }
-
-            Icon(
-                Icons.Default.Refresh,
-                contentDescription = "Reset to default",
-                Modifier
-                    .size(48.dp)
-                    .fillMaxSize()
-                    .align(Alignment.CenterEnd)
-                    .combinedClickable {
-                        sliderPosition = 250F
-                        setWidgetWidth(context, sliderPosition)
-                    }
-                    .padding(8.dp),
-                tint = MaterialTheme.colorScheme.primary,
-            )
-        }
+        var widthSliderPosition by remember { mutableFloatStateOf(getWidgetWidth(context)) }
+        SettingsSlider(
+            label = stringResource(id = R.string.width),
+            value = widthSliderPosition,
+            onValueChange = {
+                widthSliderPosition = it
+                setWidgetWidth(context, widthSliderPosition)
+            },
+            valueRange = 100f..400f,
+            steps = 9,
+            onReset = {
+                widthSliderPosition = 250F
+                setWidgetWidth(context, widthSliderPosition)
+            },
+            isBottomOfGroup = true
+        )
+        SettingsSpacer()
     }
 }
 
@@ -1752,6 +1727,20 @@ fun OpenChallenges(
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ChooseFont(context: Context, activity: Activity, goBack: () -> Unit) {
+    val fontNames = listOf(
+        "Jost",
+        "Inter",
+        "Lexend",
+        "Work Sans",
+        "Poppins",
+        "Roboto",
+        "Open Sans",
+        "Lora",
+        "Outfit",
+        "IBM Plex Sans",
+        "IBM Plex Serif"
+    )
+
     Column(
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.Start,
@@ -1760,144 +1749,19 @@ fun ChooseFont(context: Context, activity: Activity, goBack: () -> Unit) {
             .verticalScroll(rememberScrollState())
     ) {
         SettingsHeader(goBack, stringResource(R.string.font))
-        HorizontalDivider(Modifier.padding(0.dp, 15.dp))
-        Text(
-            "Jost",
-            modifier = Modifier
-                .padding(0.dp, 15.dp)
-                .combinedClickable(onClick = {
-                    setStringSetting(context, context.resources.getString(R.string.Font), "Jost")
+
+        fontNames.forEachIndexed { index, fontName ->
+            SettingsButton(
+                label = fontName,
+                onClick = {
+                    setStringSetting(context, context.resources.getString(R.string.Font), fontName)
                     resetActivity(context, activity)
-                }),
-            color = MaterialTheme.colorScheme.onPrimaryContainer,
-            style = MaterialTheme.typography.bodyMedium
-        )
-        Text(
-            "Inter",
-            modifier = Modifier
-                .padding(0.dp, 15.dp)
-                .combinedClickable(onClick = {
-                    setStringSetting(context, context.resources.getString(R.string.Font), "Inter")
-                    resetActivity(context, activity)
-                }),
-            color = MaterialTheme.colorScheme.onPrimaryContainer,
-            style = MaterialTheme.typography.bodyMedium
-        )
-        Text(
-            "Lexend",
-            modifier = Modifier
-                .padding(0.dp, 15.dp)
-                .combinedClickable(onClick = {
-                    setStringSetting(context, context.resources.getString(R.string.Font), "Lexend")
-                    resetActivity(context, activity)
-                }),
-            color = MaterialTheme.colorScheme.onPrimaryContainer,
-            style = MaterialTheme.typography.bodyMedium
-        )
-        Text(
-            "Work Sans",
-            modifier = Modifier
-                .padding(0.dp, 15.dp)
-                .combinedClickable(onClick = {
-                    setStringSetting(
-                        context, context.resources.getString(R.string.Font), "Work Sans"
-                    )
-                    resetActivity(context, activity)
-                }),
-            color = MaterialTheme.colorScheme.onPrimaryContainer,
-            style = MaterialTheme.typography.bodyMedium
-        )
-        Text(
-            "Poppins",
-            modifier = Modifier
-                .padding(0.dp, 15.dp)
-                .combinedClickable(onClick = {
-                    setStringSetting(
-                        context, context.resources.getString(R.string.Font), "Poppins"
-                    )
-                    resetActivity(context, activity)
-                }),
-            color = MaterialTheme.colorScheme.onPrimaryContainer,
-            style = MaterialTheme.typography.bodyMedium
-        )
-        Text(
-            "Roboto",
-            modifier = Modifier
-                .padding(0.dp, 15.dp)
-                .combinedClickable(onClick = {
-                    setStringSetting(
-                        context, context.resources.getString(R.string.Font), "Roboto"
-                    )
-                    resetActivity(context, activity)
-                }),
-            color = MaterialTheme.colorScheme.onPrimaryContainer,
-            style = MaterialTheme.typography.bodyMedium
-        )
-        Text(
-            "Open Sans",
-            modifier = Modifier
-                .padding(0.dp, 15.dp)
-                .combinedClickable(onClick = {
-                    setStringSetting(
-                        context, context.resources.getString(R.string.Font), "Open Sans"
-                    )
-                    resetActivity(context, activity)
-                }),
-            color = MaterialTheme.colorScheme.onPrimaryContainer,
-            style = MaterialTheme.typography.bodyMedium
-        )
-        Text(
-            "Lora",
-            modifier = Modifier
-                .padding(0.dp, 15.dp)
-                .combinedClickable(onClick = {
-                    setStringSetting(
-                        context, context.resources.getString(R.string.Font), "Lora"
-                    )
-                    resetActivity(context, activity)
-                }),
-            color = MaterialTheme.colorScheme.onPrimaryContainer,
-            style = MaterialTheme.typography.bodyMedium
-        )
-        Text(
-            "Outfit",
-            modifier = Modifier
-                .padding(0.dp, 15.dp)
-                .combinedClickable(onClick = {
-                    setStringSetting(
-                        context, context.resources.getString(R.string.Font), "Outfit"
-                    )
-                    resetActivity(context, activity)
-                }),
-            color = MaterialTheme.colorScheme.onPrimaryContainer,
-            style = MaterialTheme.typography.bodyMedium
-        )
-        Text(
-            "IBM Plex Sans",
-            modifier = Modifier
-                .padding(0.dp, 15.dp)
-                .combinedClickable(onClick = {
-                    setStringSetting(
-                        context, context.resources.getString(R.string.Font), "IBM Plex Sans"
-                    )
-                    resetActivity(context, activity)
-                }),
-            color = MaterialTheme.colorScheme.onPrimaryContainer,
-            style = MaterialTheme.typography.bodyMedium
-        )
-        Text(
-            "IBM Plex Serif",
-            modifier = Modifier
-                .padding(0.dp, 15.dp)
-                .combinedClickable(onClick = {
-                    setStringSetting(
-                        context, context.resources.getString(R.string.Font), "IBM Plex Serif"
-                    )
-                    resetActivity(context, activity)
-                }),
-            color = MaterialTheme.colorScheme.onPrimaryContainer,
-            style = MaterialTheme.typography.bodyMedium
-        )
+                },
+                isTopOfGroup = index == 0,
+                isBottomOfGroup = index == fontNames.lastIndex,
+                fontFamily = getTypographyFromFontName(fontName).bodyMedium.fontFamily
+            )
+        }
         SettingsSpacer()
     }
 }

@@ -69,6 +69,7 @@
     <string name="screen_time">Screen Time</string>
     <string name="other">Other</string>
     <string name="general">General</string>
+    <string name="reset_to_default">Reset to default</string>
 
     <!-- Apps challenge strings -->
     <string name="open_challenges">Open Challenges</string>
