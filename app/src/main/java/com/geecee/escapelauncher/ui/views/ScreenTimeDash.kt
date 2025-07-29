@@ -258,7 +258,7 @@ fun HigherRec(percent: Int, modifier: Modifier = Modifier) {
         modifier = modifier
             .clip(MaterialTheme.shapes.extraLarge)
             .aspectRatio(1f)
-            .background(MaterialTheme.colorScheme.secondaryContainer)
+            .background(MaterialTheme.colorScheme.surfaceContainerHighest)
     ) {
         val boxWithConstraintsScope = this
         val padding = boxWithConstraintsScope.maxWidth * 0.1f
@@ -305,7 +305,7 @@ fun DaySpent(percent: Int, modifier: Modifier = Modifier) {
         modifier = modifier
             .aspectRatio(1f)
             .clip(CircleShape)
-            .background(MaterialTheme.colorScheme.secondaryContainer)
+            .background(MaterialTheme.colorScheme.surfaceContainerHighest)
     ) {
         val boxWithConstraintsScope = this
         val padding = boxWithConstraintsScope.maxWidth * 0.1f
@@ -403,7 +403,7 @@ fun AppUsages(modifier: Modifier, content: @Composable () -> Unit) {
         modifier
             .fillMaxSize()
             .clip(MaterialTheme.shapes.extraLarge)
-            .background(MaterialTheme.colorScheme.secondaryContainer)
+            .background(MaterialTheme.colorScheme.surfaceContainerHighest)
     ) {
         Column(
             Modifier.padding(20.dp)

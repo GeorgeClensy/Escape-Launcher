@@ -32,7 +32,8 @@
         <activity
             android:name=".MainHomeScreen"
             android:exported="true"
-            android:theme="@style/Theme.EscapeLauncher.Splash">
+            android:theme="@style/Theme.EscapeLauncher.Splash"
+            >
 
             <!-- Disable Analytics collection initially -->
             <meta-data android:name="firebase_analytics_collection_enabled" android:value="false" />
