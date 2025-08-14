@@ -1,7 +1,6 @@
 package com.geecee.escapelauncher.ui.views
 
 import android.app.Activity
-import android.app.ActivityOptions
 import android.appwidget.AppWidgetHost
 import android.appwidget.AppWidgetHostView
 import android.appwidget.AppWidgetManager
@@ -24,6 +23,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -34,8 +34,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.verticalScroll
@@ -43,22 +45,25 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.sharp.Close
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Slider
+import androidx.compose.material3.SwipeToDismissBox
+import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
@@ -67,18 +72,21 @@ import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextAlign
@@ -127,6 +135,8 @@ import com.geecee.escapelauncher.utils.setWidgetWidth
 import com.geecee.escapelauncher.utils.showLauncherSelector
 import com.geecee.escapelauncher.utils.showLauncherSettingsMenu
 import com.geecee.escapelauncher.utils.toggleBooleanSetting
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import com.geecee.escapelauncher.MainAppViewModel as MainAppModel
 
 //
@@ -141,7 +151,7 @@ fun AutoResizingText(
     minFontSize: TextUnit = 10.sp,
     maxLines: Int = 1,
     color: Color = MaterialTheme.colorScheme.onPrimaryContainer,
-    fontFamily: androidx.compose.ui.text.font.FontFamily? = MaterialTheme.typography.bodyMedium.fontFamily
+    fontFamily: FontFamily? = MaterialTheme.typography.bodyMedium.fontFamily
 ) {
     BoxWithConstraints(modifier = modifier) {
         val density = LocalDensity.current
@@ -416,7 +426,7 @@ fun SettingsButton(
     onClick: () -> Unit,
     isTopOfGroup: Boolean = false,
     isBottomOfGroup: Boolean = false,
-    fontFamily: androidx.compose.ui.text.font.FontFamily? = MaterialTheme.typography.bodyMedium.fontFamily,
+    fontFamily: FontFamily? = MaterialTheme.typography.bodyMedium.fontFamily,
 ) {
     // Define the base corner size
     val groupEdgeCornerRadius = 24.dp
@@ -457,6 +467,109 @@ fun SettingsButton(
         }
     }
 }
+
+/**
+ * Settings button that can be swiped to be dismissed
+ *
+ * @param label The text to be shown
+ * @param onClick When composable is clicked
+ * @param onDeleteClick When composable is swiped to be deleted
+ * @param isTopOfGroup Whether this item is at the top of a group of items, for corner rounding
+ * @param isBottomOfGroup Whether this item is at the bottom of a group of items, for corner rounding
+ */
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
+@Composable
+fun SettingsSwipeableButton(
+    label: String,
+    onClick: () -> Unit,
+    onDeleteClick: () -> Unit,
+    isTopOfGroup: Boolean = false,
+    isBottomOfGroup: Boolean = false,
+    fontFamily: FontFamily? = MaterialTheme.typography.bodyMedium.fontFamily,
+) {
+    val groupEdgeCornerRadius = 24.dp
+    val defaultCornerRadius = 8.dp
+
+    val topStartRadius = if (isTopOfGroup) groupEdgeCornerRadius else defaultCornerRadius
+    val topEndRadius = if (isTopOfGroup) groupEdgeCornerRadius else defaultCornerRadius
+    val bottomStartRadius = if (isBottomOfGroup) groupEdgeCornerRadius else defaultCornerRadius
+    val bottomEndRadius = if (isBottomOfGroup) groupEdgeCornerRadius else defaultCornerRadius
+
+    val dismissState = rememberSwipeToDismissBoxState(
+        confirmValueChange = { dismissValue ->
+            if (dismissValue == SwipeToDismissBoxValue.EndToStart) {
+                onDeleteClick()
+                true
+            } else false
+        }
+    )
+
+    SwipeToDismissBox(
+        state = dismissState,
+        modifier = Modifier.padding(vertical = 1.dp),
+        enableDismissFromStartToEnd = false,
+        enableDismissFromEndToStart = true,
+        backgroundContent = {
+            val revealedWidthDp = dismissState.progress.dp
+
+            Box(
+                Modifier
+                    .fillMaxSize(),
+                contentAlignment = Alignment.CenterEnd
+            ) {
+                if (revealedWidthDp > 0.dp) {
+                    Button(
+                        onClick = onDeleteClick,
+                        modifier = Modifier
+                            .fillMaxHeight()
+                            .fillMaxWidth(dismissState.progress),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.error,
+                            contentColor = MaterialTheme.colorScheme.onError
+                        ),
+                        contentPadding = PaddingValues(horizontal = 12.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Delete,
+                            contentDescription = stringResource(R.string.remove),
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
+                }
+            }
+        }
+    ) {
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .combinedClickable(onClick = onClick),
+            shape = RoundedCornerShape(
+                topStart = topStartRadius,
+                topEnd = topEndRadius,
+                bottomEnd = bottomEndRadius,
+                bottomStart = bottomStartRadius
+            )
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp, vertical = 12.dp)
+                    .height(48.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    text = label,
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(end = 8.dp),
+                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                    style = MaterialTheme.typography.bodyMedium.copy(fontFamily = fontFamily)
+                )
+            }
+        }
+    }
+}
+
 
 /**
  * Theme select card
@@ -843,6 +956,43 @@ fun SettingsSlider(
                     .padding(start = 8.dp)
                     .clickable(onClick = onReset),
                 tint = MaterialTheme.colorScheme.primary,
+            )
+        }
+    }
+}
+
+@Composable
+fun SettingsFullScreenMessage(text: String, icon: ImageVector, modifier: Modifier = Modifier) {
+    Box(modifier) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier
+                .align(Alignment.Center)
+                .padding(horizontal = 24.dp)
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(120.dp)
+                    .background(
+                        color = MaterialTheme.colorScheme.primaryContainer,
+                        shape = CircleShape
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                    modifier = Modifier.size(64.dp)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Text(
+                text = text,
+                style = MaterialTheme.typography.bodyMedium,
+                textAlign = TextAlign.Center
             )
         }
     }
@@ -1497,7 +1647,9 @@ fun WidgetOptions(context: Context, goBack: () -> Unit) {
     Column(
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.Start,
-        modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState())
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
     ) {
         SettingsHeader(goBack, stringResource(R.string.widget))
 
@@ -1581,64 +1733,79 @@ fun WidgetOptions(context: Context, goBack: () -> Unit) {
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun HiddenApps(
-    mainAppModel: MainAppModel, goBack: () -> Unit
+    mainAppModel: MainAppModel,
+    goBack: () -> Unit
 ) {
-    Column(
-        verticalArrangement = Arrangement.Top,
-        horizontalAlignment = Alignment.Start,
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-    ) {
-        SettingsHeader(goBack, stringResource(R.string.hidden_apps))
+    val coroutineScope = rememberCoroutineScope()
+    val haptics = LocalHapticFeedback.current
+    var hiddenAppsList by remember { mutableStateOf(mainAppModel.hiddenAppsManager.getHiddenApps()) }
 
-        HorizontalDivider(Modifier.padding(0.dp, 15.dp))
+    if (!hiddenAppsList.isEmpty()) {
+        LazyColumn(
+            verticalArrangement = Arrangement.Top,
+            horizontalAlignment = Alignment.Start,
+            modifier = Modifier.fillMaxSize()
+        ) {
+            item {
+                SettingsHeader(goBack, stringResource(R.string.hidden_apps))
+            }
 
-        val haptics = LocalHapticFeedback.current
-        val hiddenApps = remember { mutableStateOf(mainAppModel.hiddenAppsManager.getHiddenApps()) }
+            items(
+                items = hiddenAppsList,
+                key = { it } // use package name as unique key
+            ) { appPackageName ->
+                // Animate the removal of the item
+                var visible by remember { mutableStateOf(true) }
 
-        for (app in hiddenApps.value) {
-            Box(Modifier.fillMaxWidth()) {
-                Text(
-                    AppUtils.getAppNameFromPackageName(mainAppModel.getContext(), app),
-                    modifier = Modifier
-                        .padding(0.dp, 15.dp)
-                        .combinedClickable(onClick = {
-                            val launchIntent =
-                                mainAppModel.getContext().packageManager.getLaunchIntentForPackage(
-                                    app
-                                )
-                            if (launchIntent != null) {
-                                launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                                val options = ActivityOptions.makeBasic()
-                                mainAppModel.getContext()
-                                    .startActivity(launchIntent, options.toBundle())
+                AnimatedVisibility(
+                    visible = visible,
+                    exit = fadeOut(animationSpec = tween(500))
+                ) {
+                    SettingsSwipeableButton(
+                        label = AppUtils.getAppNameFromPackageName(
+                            mainAppModel.getContext(),
+                            appPackageName
+                        ),
+                        onClick = {},
+                        onDeleteClick = {
+                            // Trigger haptic feedback
+                            haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                            // Animate item out
+                            visible = false
+                            // Remove from your list after a short delay to let animation run
+                            coroutineScope.launch {
+                                delay(500)
+                                mainAppModel.hiddenAppsManager.removeHiddenApp(appPackageName)
+                                hiddenAppsList = mainAppModel.hiddenAppsManager.getHiddenApps()
                             }
-                        }, onLongClick = {
-                            mainAppModel.hiddenAppsManager.removeHiddenApp(app)
-                            haptics.performHapticFeedback(hapticFeedbackType = HapticFeedbackType.LongPress)
-                            hiddenApps.value = mainAppModel.hiddenAppsManager.getHiddenApps()
-                        }),
-                    color = MaterialTheme.colorScheme.onPrimaryContainer,
-                    style = MaterialTheme.typography.bodyMedium
-                )
+                        },
+                        isTopOfGroup = hiddenAppsList.firstOrNull() == appPackageName,
+                        isBottomOfGroup = hiddenAppsList.lastOrNull() == appPackageName
+                    )
+                }
+            }
 
-                Icon(
-                    Icons.Sharp.Close,
-                    "",
-                    Modifier
-                        .align(Alignment.CenterEnd)
-                        .size(30.dp)
-                        .fillMaxSize()
-                        .combinedClickable(onClick = {
-                            mainAppModel.hiddenAppsManager.removeHiddenApp(app)
-                            haptics.performHapticFeedback(hapticFeedbackType = HapticFeedbackType.LongPress)
-                            hiddenApps.value = mainAppModel.hiddenAppsManager.getHiddenApps()
-                        }),
-                    tint = MaterialTheme.colorScheme.onPrimaryContainer,
+            item {
+                SettingsSpacer()
+            }
+        }
+    } else {
+        Column {
+            SettingsHeader(goBack, stringResource(R.string.hidden_apps))
+
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .weight(1f), // takes all remaining space
+                contentAlignment = Alignment.Center // centers content in that space
+            ) {
+                SettingsFullScreenMessage(
+                    text = stringResource(R.string.no_hidden_apps),
+                    icon = Icons.Default.Info
                 )
             }
         }
+
     }
 }
 
@@ -1668,49 +1835,17 @@ fun OpenChallenges(
     ) {
         SettingsHeader(goBack, stringResource(R.string.open_challenges))
 
-        HorizontalDivider(Modifier.padding(0.dp, 15.dp))
-
-        for (app in challengeApps.value) {
-            Box(Modifier.fillMaxWidth()) {
-                Text(
-                    AppUtils.getAppNameFromPackageName(mainAppModel.getContext(), app),
-                    modifier = Modifier
-                        .padding(0.dp, 15.dp)
-                        .combinedClickable(onClick = {
-                            val launchIntent =
-                                mainAppModel.getContext().packageManager.getLaunchIntentForPackage(
-                                    app
-                                )
-                            if (launchIntent != null) {
-                                launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                                val options = ActivityOptions.makeBasic()
-                                mainAppModel.getContext()
-                                    .startActivity(launchIntent, options.toBundle())
-                            }
-                        }, onLongClick = {
-                            mainAppModel.challengesManager.removeChallengeApp(app)
-                            haptics.performHapticFeedback(hapticFeedbackType = HapticFeedbackType.LongPress)
-                            challengeApps.value = mainAppModel.challengesManager.getChallengeApps()
-                        }),
-                    color = MaterialTheme.colorScheme.onPrimaryContainer,
-                    style = MaterialTheme.typography.bodyMedium
-                )
-
-                Icon(
-                    Icons.Sharp.Close,
-                    "",
-                    Modifier
-                        .align(Alignment.CenterEnd)
-                        .size(30.dp)
-                        .fillMaxSize()
-                        .combinedClickable(onClick = {
-                            mainAppModel.challengesManager.removeChallengeApp(app)
-                            haptics.performHapticFeedback(hapticFeedbackType = HapticFeedbackType.LongPress)
-                            challengeApps.value = mainAppModel.challengesManager.getChallengeApps()
-                        }),
-                    tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                )
-            }
+        challengeApps.value.forEachIndexed { index, app ->
+            SettingsButton(
+                label = AppUtils.getAppNameFromPackageName(mainAppModel.getContext(), app),
+                onClick = {
+                    mainAppModel.challengesManager.removeChallengeApp(app)
+                    haptics.performHapticFeedback(hapticFeedbackType = HapticFeedbackType.LongPress)
+                    challengeApps.value = mainAppModel.challengesManager.getChallengeApps()
+                },
+                isTopOfGroup = index == 0,
+                isBottomOfGroup = index == challengeApps.value.lastIndex
+            )
         }
     }
 }
@@ -1780,32 +1915,15 @@ fun DevOptions(context: Context, goBack: () -> Unit) {
     ) {
         SettingsHeader(goBack, "Developer Options")
 
-        HorizontalDivider(Modifier.padding(0.dp, 15.dp))
-
-        Box(Modifier.fillMaxWidth()) {
-            Text(
-                "First time",
-                Modifier.padding(0.dp, 15.dp),
-                color = MaterialTheme.colorScheme.onPrimaryContainer,
-                style = MaterialTheme.typography.bodyMedium,
-                textAlign = TextAlign.Center,
-            )
-
-            var checked by remember { mutableStateOf(true) }
-            checked = getBooleanSetting(context, stringResource(R.string.FirstTime), false)
-
-            Switch(
-                checked = checked, onCheckedChange = {
-                    checked = it
-                    setBooleanSetting(
-                        context, context.resources.getString(R.string.FirstTime), true
-                    )
-                    setBooleanSetting(
-                        context, context.resources.getString(R.string.FirstTimeAppDrawHelp), true
-                    )
-                }, Modifier.align(Alignment.CenterEnd)
-            )
-        }
+        SettingsSwitch(
+            "First time",
+            getBooleanSetting(context, "FirstTime", false),
+            onCheckedChange = { it ->
+                setBooleanSetting(context, "FirstTime", it)
+            },
+            isTopOfGroup = true,
+            isBottomOfGroup = true
+        )
     }
 }
 

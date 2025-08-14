@@ -70,6 +70,8 @@
     <string name="other">Other</string>
     <string name="general">General</string>
     <string name="reset_to_default">Reset to default</string>
+    <string name="remove">Remove</string>
+    <string name="no_hidden_apps">Long hold an app in the apps list and press hide to hide it.</string>
 
     <!-- Apps challenge strings -->
     <string name="open_challenges">Open Challenges</string>

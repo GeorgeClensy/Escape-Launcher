@@ -394,7 +394,6 @@ object AppUtils{
      * @param context The context of the application or activity.
      * @param color The color to set as the wallpaper.
      */
-    @Suppress("unused")
     fun setSolidColorWallpaperHomeScreen(context: Context, color: ComposeColor) {
         val wallpaperManager = WallpaperManager.getInstance(context)
 
