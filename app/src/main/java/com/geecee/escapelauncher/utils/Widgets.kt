@@ -31,18 +31,14 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -59,8 +55,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
 import androidx.core.content.edit
 import androidx.core.graphics.drawable.toBitmap
 import com.geecee.escapelauncher.R
@@ -114,59 +108,26 @@ fun CustomWidgetPicker(
     // Load widget providers grouped by app
     val widgetProviders = remember { loadWidgetsGroupedByApp(context) }
 
-    Dialog(
-        onDismissRequest = onDismiss,
-        properties = DialogProperties(
-            usePlatformDefaultWidth = false,
-            dismissOnBackPress = true,
-            dismissOnClickOutside = true
-        )
+    ModalBottomSheet(
+        onDismissRequest = onDismiss
     ) {
         Surface(
             modifier = Modifier
-                .fillMaxWidth(0.9f)  // Take 90% of screen width
-                .fillMaxHeight(0.8f), // Take 80% of screen height
-            shape = RoundedCornerShape(16.dp),
-            color = MaterialTheme.colorScheme.background
+                .fillMaxWidth()
+                .fillMaxHeight(0.8f),
+            shape = MaterialTheme.shapes.extraLarge
         ) {
-            Scaffold(
-                topBar = {
-                    TopAppBar(
-                        title = {
-                            Text(
-                                "Widgets",
-                                style = MaterialTheme.typography.bodyLarge
-                            )
-                        },
-                        navigationIcon = {
-                            IconButton(onClick = onDismiss) {
-                                Icon(
-                                    Icons.AutoMirrored.Default.ArrowBack,
-                                    contentDescription = "Back"
-                                )
-                            }
-                        }
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(bottom = 16.dp)
+            ) {
+                items(widgetProviders.size) { index ->
+                    val (appInfo, widgets) = widgetProviders.entries.elementAt(index)
+                    WidgetAppItem(
+                        appInfo = appInfo,
+                        widgets = widgets,
+                        onWidgetSelected = onWidgetSelected
                     )
-                }
-            ) { paddingValues ->
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues)
-                ) {
-                    LazyColumn(
-                        modifier = Modifier.fillMaxSize(),
-                        contentPadding = PaddingValues(bottom = 16.dp)
-                    ) {
-                        items(widgetProviders.size) { index ->
-                            val (appInfo, widgets) = widgetProviders.entries.elementAt(index)
-                            WidgetAppItem(
-                                appInfo = appInfo,
-                                widgets = widgets,
-                                onWidgetSelected = onWidgetSelected
-                            )
-                        }
-                    }
                 }
             }
         }
@@ -244,12 +205,6 @@ fun WidgetAppItem(
             )
         }
 
-        // Divider
-        HorizontalDivider(
-            modifier = Modifier.padding(start = 64.dp),
-            color = MaterialTheme.colorScheme.outlineVariant
-        )
-
         // Widget previews when expanded
         AnimatedVisibility(visible = expanded) {
             if (widgets.isNotEmpty()) {
@@ -267,6 +222,7 @@ fun WidgetAppItem(
         }
     }
 }
+
 
 @Composable
 fun WidgetPreviewItem(
