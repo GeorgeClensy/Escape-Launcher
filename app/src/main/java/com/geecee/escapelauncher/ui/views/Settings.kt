@@ -37,7 +37,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.verticalScroll
@@ -46,7 +45,6 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
@@ -79,7 +77,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
@@ -961,43 +958,6 @@ fun SettingsSlider(
     }
 }
 
-@Composable
-fun SettingsFullScreenMessage(text: String, icon: ImageVector, modifier: Modifier = Modifier) {
-    Box(modifier) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier
-                .align(Alignment.Center)
-                .padding(horizontal = 24.dp)
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(120.dp)
-                    .background(
-                        color = MaterialTheme.colorScheme.primaryContainer,
-                        shape = CircleShape
-                    ),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = icon,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                    modifier = Modifier.size(64.dp)
-                )
-            }
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            Text(
-                text = text,
-                style = MaterialTheme.typography.bodyMedium,
-                textAlign = TextAlign.Center
-            )
-        }
-    }
-}
-
 //
 // MENUS
 //
@@ -1740,72 +1700,53 @@ fun HiddenApps(
     val haptics = LocalHapticFeedback.current
     var hiddenAppsList by remember { mutableStateOf(mainAppModel.hiddenAppsManager.getHiddenApps()) }
 
-    if (!hiddenAppsList.isEmpty()) {
-        LazyColumn(
-            verticalArrangement = Arrangement.Top,
-            horizontalAlignment = Alignment.Start,
-            modifier = Modifier.fillMaxSize()
-        ) {
-            item {
-                SettingsHeader(goBack, stringResource(R.string.hidden_apps))
-            }
-
-            items(
-                items = hiddenAppsList,
-                key = { it } // use package name as unique key
-            ) { appPackageName ->
-                // Animate the removal of the item
-                var visible by remember { mutableStateOf(true) }
-
-                AnimatedVisibility(
-                    visible = visible,
-                    exit = fadeOut(animationSpec = tween(500))
-                ) {
-                    SettingsSwipeableButton(
-                        label = AppUtils.getAppNameFromPackageName(
-                            mainAppModel.getContext(),
-                            appPackageName
-                        ),
-                        onClick = {},
-                        onDeleteClick = {
-                            // Trigger haptic feedback
-                            haptics.performHapticFeedback(HapticFeedbackType.LongPress)
-                            // Animate item out
-                            visible = false
-                            // Remove from your list after a short delay to let animation run
-                            coroutineScope.launch {
-                                delay(500)
-                                mainAppModel.hiddenAppsManager.removeHiddenApp(appPackageName)
-                                hiddenAppsList = mainAppModel.hiddenAppsManager.getHiddenApps()
-                            }
-                        },
-                        isTopOfGroup = hiddenAppsList.firstOrNull() == appPackageName,
-                        isBottomOfGroup = hiddenAppsList.lastOrNull() == appPackageName
-                    )
-                }
-            }
-
-            item {
-                SettingsSpacer()
-            }
-        }
-    } else {
-        Column {
+    LazyColumn(
+        verticalArrangement = Arrangement.Top,
+        horizontalAlignment = Alignment.Start,
+        modifier = Modifier.fillMaxSize()
+    ) {
+        item {
             SettingsHeader(goBack, stringResource(R.string.hidden_apps))
+        }
 
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .weight(1f), // takes all remaining space
-                contentAlignment = Alignment.Center // centers content in that space
+        items(
+            items = hiddenAppsList,
+            key = { it } // use package name as unique key
+        ) { appPackageName ->
+            // Animate the removal of the item
+            var visible by remember { mutableStateOf(true) }
+
+            AnimatedVisibility(
+                visible = visible,
+                exit = fadeOut(animationSpec = tween(500))
             ) {
-                SettingsFullScreenMessage(
-                    text = stringResource(R.string.no_hidden_apps),
-                    icon = Icons.Default.Info
+                SettingsSwipeableButton(
+                    label = AppUtils.getAppNameFromPackageName(
+                        mainAppModel.getContext(),
+                        appPackageName
+                    ),
+                    onClick = {},
+                    onDeleteClick = {
+                        // Trigger haptic feedback
+                        haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                        // Animate item out
+                        visible = false
+                        // Remove from your list after a short delay to let animation run
+                        coroutineScope.launch {
+                            delay(500)
+                            mainAppModel.hiddenAppsManager.removeHiddenApp(appPackageName)
+                            hiddenAppsList = mainAppModel.hiddenAppsManager.getHiddenApps()
+                        }
+                    },
+                    isTopOfGroup = hiddenAppsList.firstOrNull() == appPackageName,
+                    isBottomOfGroup = hiddenAppsList.lastOrNull() == appPackageName
                 )
             }
         }
 
+        item {
+            SettingsSpacer()
+        }
     }
 }
 
@@ -1825,27 +1766,54 @@ fun OpenChallenges(
     val challengeApps =
         remember { mutableStateOf(mainAppModel.challengesManager.getChallengeApps()) }
     val haptics = LocalHapticFeedback.current
+    val coroutineScope = rememberCoroutineScope()
 
-    Column(
+    LazyColumn(
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.Start,
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
+        modifier = Modifier.fillMaxSize()
     ) {
-        SettingsHeader(goBack, stringResource(R.string.open_challenges))
+        item {
+            SettingsHeader(goBack, stringResource(R.string.open_challenges))
+        }
 
-        challengeApps.value.forEachIndexed { index, app ->
-            SettingsButton(
-                label = AppUtils.getAppNameFromPackageName(mainAppModel.getContext(), app),
-                onClick = {
-                    mainAppModel.challengesManager.removeChallengeApp(app)
-                    haptics.performHapticFeedback(hapticFeedbackType = HapticFeedbackType.LongPress)
-                    challengeApps.value = mainAppModel.challengesManager.getChallengeApps()
-                },
-                isTopOfGroup = index == 0,
-                isBottomOfGroup = index == challengeApps.value.lastIndex
-            )
+        items(
+            items = challengeApps.value,
+            key = { it } // use package name as unique key
+        ) { appPackageName ->
+            // Animate the removal of the item
+            var visible by remember { mutableStateOf(true) }
+
+            AnimatedVisibility(
+                visible = visible,
+                exit = fadeOut(animationSpec = tween(500))
+            ) {
+                SettingsSwipeableButton(
+                    label = AppUtils.getAppNameFromPackageName(
+                        mainAppModel.getContext(),
+                        appPackageName
+                    ),
+                    onClick = {},
+                    onDeleteClick = {
+                        // Trigger haptic feedback
+                        haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                        // Animate item out
+                        visible = false
+                        // Remove from your list after a short delay to let animation run
+                        coroutineScope.launch {
+                            delay(500)
+                            mainAppModel.challengesManager.removeChallengeApp(appPackageName)
+                            challengeApps.value = mainAppModel.challengesManager.getChallengeApps()
+                        }
+                    },
+                    isTopOfGroup =  challengeApps.value.firstOrNull() == appPackageName,
+                    isBottomOfGroup =  challengeApps.value.lastOrNull() == appPackageName
+                )
+            }
+        }
+
+        item {
+            SettingsSpacer()
         }
     }
 }
