@@ -3,7 +3,6 @@ package com.geecee.escapelauncher.ui.views
 import android.app.Activity
 import android.appwidget.AppWidgetHost
 import android.appwidget.AppWidgetHostView
-import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProviderInfo
 import android.content.Context
 import androidx.compose.animation.AnimatedVisibility
