@@ -4,10 +4,8 @@ import android.app.Activity
 import android.appwidget.AppWidgetHost
 import android.appwidget.AppWidgetHostView
 import android.appwidget.AppWidgetManager
+import android.appwidget.AppWidgetProviderInfo
 import android.content.Context
-import android.content.Intent
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -1527,81 +1525,36 @@ fun ThemeOptions(
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun WidgetOptions(context: Context, goBack: () -> Unit) {
-    var needsConfiguration by remember { mutableStateOf(false) }
-    val appWidgetManager = AppWidgetManager.getInstance(context)
-    var appWidgetId by remember { mutableIntStateOf(getSavedWidgetId(context)) }
-    var appWidgetHostView by remember { mutableStateOf<AppWidgetHostView?>(null) }
     val appWidgetHost = remember { AppWidgetHost(context, 1) }
 
-    // State for showing the custom picker
+    var appWidgetId by remember { mutableIntStateOf(getSavedWidgetId(context)) }
+    var appWidgetHostView by remember { mutableStateOf<AppWidgetHostView?>(null) }
     var showCustomPicker by remember { mutableStateOf(false) }
 
-    // Activity result launcher for binding widget permission
-    val bindWidgetPermissionLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.StartActivityForResult()
-    ) { result ->
-        if (result.resultCode == Activity.RESULT_OK) {
-            val newWidgetId =
-                result.data?.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, -1) ?: -1
-            if (newWidgetId != -1) {
-                appWidgetId = newWidgetId
-                saveWidgetId(context, appWidgetId)
-                val widgetInfo = appWidgetManager.getAppWidgetInfo(appWidgetId)
+    // Common setup logic for binding/creating widget
+    fun setupWidget(widgetId: Int, info: AppWidgetProviderInfo?) {
+        if (widgetId == -1 || info == null) return
+        appWidgetId = widgetId
+        saveWidgetId(context, widgetId)
 
-                needsConfiguration = isWidgetConfigurable(context, appWidgetId)
-                if (needsConfiguration) {
-                    launchWidgetConfiguration(context, appWidgetId)
-                } else {
-                    appWidgetHostView = appWidgetHost.createView(
-                        context, appWidgetId, widgetInfo
-                    ).apply {
-                        setAppWidget(appWidgetId, widgetInfo)
-                    }
-                }
+        if (isWidgetConfigurable(context, widgetId)) {
+            launchWidgetConfiguration(context, info, widgetId)
+        } else {
+            appWidgetHostView = appWidgetHost.createView(context, widgetId, info).apply {
+                setAppWidget(widgetId, info)
             }
         }
     }
 
     if (showCustomPicker) {
-        CustomWidgetPicker(onWidgetSelected = { widgetProviderInfo ->
-            // Allocate widget ID
-            val newWidgetId = appWidgetHost.allocateAppWidgetId()
-
-            // Try to bind widget
-            val allocated = appWidgetManager.bindAppWidgetIdIfAllowed(
-                newWidgetId, widgetProviderInfo.provider
-            )
-
-            if (allocated) {
-                // Widget successfully bound
-                appWidgetId = newWidgetId
-                saveWidgetId(context, appWidgetId)
-
-                // Check if widget needs configuration
-                needsConfiguration = isWidgetConfigurable(context, appWidgetId)
-                if (needsConfiguration) {
-                    launchWidgetConfiguration(context, appWidgetId)
-                } else {
-                    appWidgetHostView = appWidgetHost.createView(
-                        context, appWidgetId, widgetProviderInfo
-                    ).apply {
-                        setAppWidget(appWidgetId, widgetProviderInfo)
-                    }
-                }
-            } else {
-                // Request bind widget permission
-                val bindIntent = Intent(AppWidgetManager.ACTION_APPWIDGET_BIND).apply {
-                    putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, newWidgetId)
-                    putExtra(
-                        AppWidgetManager.EXTRA_APPWIDGET_PROVIDER, widgetProviderInfo.provider
-                    )
-                }
-                bindWidgetPermissionLauncher.launch(bindIntent)
-            }
-
-            // Close the picker
-            showCustomPicker = false
-        }, onDismiss = { showCustomPicker = false })
+        CustomWidgetPicker(
+            onWidgetSelected = { info ->
+                val newId = appWidgetHost.allocateAppWidgetId()
+                setupWidget(newId, info)
+                showCustomPicker = false
+            },
+            onDismiss = { showCustomPicker = false }
+        )
     }
 
     Column(
@@ -1610,77 +1563,85 @@ fun WidgetOptions(context: Context, goBack: () -> Unit) {
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
-    ) {
+    )
+    {
         SettingsHeader(goBack, stringResource(R.string.widget))
 
         SettingsButton(
-            label = stringResource(R.string.remove_widget), isTopOfGroup = true, onClick = {
+            label = stringResource(R.string.remove_widget),
+            isTopOfGroup = true,
+            onClick = {
                 removeWidget(context)
                 appWidgetHostView = null
                 appWidgetId = -1
-            })
+            }
+        )
 
         SettingsButton(
             label = stringResource(R.string.select_widget),
             isBottomOfGroup = true,
-            onClick = { showCustomPicker = true })
+            onClick = { showCustomPicker = true }
+        )
 
         SettingsSpacer()
 
-        // Widget offset slider
-        var offsetSliderPosition by remember { mutableFloatStateOf(getWidgetOffset(context)) }
+        // Offset slider
+        var offset by remember { mutableFloatStateOf(getWidgetOffset(context)) }
         SettingsSlider(
-            label = stringResource(id = R.string.offset),
-            value = offsetSliderPosition,
+            label = stringResource(R.string.offset),
+            value = offset,
             onValueChange = {
-                offsetSliderPosition = it
-                setWidgetOffset(context, offsetSliderPosition)
+                offset = it
+                setWidgetOffset(context, offset)
             },
             valueRange = -20f..20f,
             steps = 19,
             onReset = {
-                offsetSliderPosition = 0F
-                setWidgetOffset(context, offsetSliderPosition)
+                offset = 0f
+                setWidgetOffset(context, offset)
             },
             isTopOfGroup = true
         )
 
-        // Widget height slider
-        var heightSliderPosition by remember { mutableFloatStateOf(getWidgetHeight(context)) }
+        // Height slider
+        var height by remember { mutableFloatStateOf(getWidgetHeight(context)) }
         SettingsSlider(
-            label = stringResource(id = R.string.height),
-            value = heightSliderPosition,
+            label = stringResource(R.string.height),
+            value = height,
             onValueChange = {
-                heightSliderPosition = it
-                setWidgetHeight(context, heightSliderPosition)
+                height = it
+                setWidgetHeight(context, height)
             },
             valueRange = 100f..400f,
             steps = 9,
             onReset = {
-                heightSliderPosition = 125F
-                setWidgetHeight(context, heightSliderPosition)
-            })
+                height = 125f
+                setWidgetHeight(context, height)
+            }
+        )
 
-        // Widget width slider
-        var widthSliderPosition by remember { mutableFloatStateOf(getWidgetWidth(context)) }
+        // Width slider
+        var width by remember { mutableFloatStateOf(getWidgetWidth(context)) }
         SettingsSlider(
-            label = stringResource(id = R.string.width),
-            value = widthSliderPosition,
+            label = stringResource(R.string.width),
+            value = width,
             onValueChange = {
-                widthSliderPosition = it
-                setWidgetWidth(context, widthSliderPosition)
+                width = it
+                setWidgetWidth(context, width)
             },
             valueRange = 100f..400f,
             steps = 9,
             onReset = {
-                widthSliderPosition = 250F
-                setWidgetWidth(context, widthSliderPosition)
+                width = 250f
+                setWidgetWidth(context, width)
             },
             isBottomOfGroup = true
         )
+
         SettingsSpacer()
     }
 }
+
 
 /**
  * Page that lets you manage hidden apps
@@ -1806,8 +1767,8 @@ fun OpenChallenges(
                             challengeApps.value = mainAppModel.challengesManager.getChallengeApps()
                         }
                     },
-                    isTopOfGroup =  challengeApps.value.firstOrNull() == appPackageName,
-                    isBottomOfGroup =  challengeApps.value.lastOrNull() == appPackageName
+                    isTopOfGroup = challengeApps.value.firstOrNull() == appPackageName,
+                    isBottomOfGroup = challengeApps.value.lastOrNull() == appPackageName
                 )
             }
         }

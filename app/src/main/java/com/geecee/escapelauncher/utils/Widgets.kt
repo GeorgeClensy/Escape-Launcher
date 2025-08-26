@@ -1,5 +1,7 @@
 package com.geecee.escapelauncher.utils
 
+import android.app.Activity
+import android.app.ActivityOptions
 import android.appwidget.AppWidgetHost
 import android.appwidget.AppWidgetHostView
 import android.appwidget.AppWidgetManager
@@ -8,6 +10,8 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.drawable.Drawable
+import android.os.Build
+import android.os.Bundle
 import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
@@ -59,6 +63,187 @@ import androidx.core.content.edit
 import androidx.core.graphics.drawable.toBitmap
 import com.geecee.escapelauncher.R
 
+// Constants for SharedPreferences used in widget saving/loading
+private const val WIDGET_PREFS_NAME = "widget_prefs"
+private const val WIDGET_ID_KEY = "widget_id"
+private const val INVALID_WIDGET_ID = -1
+
+/**
+ * Activity for showing the widget configuration
+ *
+ * @author George Clensy
+ */
+class ConfigureAppWidgetActivity : Activity() {
+    /**
+     * The app widget host for getting a widget
+     *
+     * @author George Clensy
+     */
+    private lateinit var appWidgetHost: AppWidgetHost
+
+    /**
+     * The app widget manager for managing widgets
+     *
+     * @author George Clensy
+     */
+    private lateinit var appWidgetManager: AppWidgetManager
+
+    /**
+     * The ID of the widget being configured
+     *
+     * @author George Clensy
+     */
+    private var appWidgetId: Int = AppWidgetManager.INVALID_APPWIDGET_ID
+
+    /**
+     * Activity entry point
+     *
+     * @author George Clensy
+     */
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        appWidgetHost = AppWidgetHost(this, 44203)
+        appWidgetManager = AppWidgetManager.getInstance(this)
+
+        val appWidgetProviderInfo: AppWidgetProviderInfo? =
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                intent.getParcelableExtra(
+                    EXTRA_APP_WIDGET_PROVIDER_INFO,
+                    AppWidgetProviderInfo::class.java
+                )
+            } else {
+                @Suppress("DEPRECATION")
+                intent.getParcelableExtra(EXTRA_APP_WIDGET_PROVIDER_INFO)
+            }
+        if (appWidgetProviderInfo == null) {
+            Log.e("Widgets", "No app widget provider info provided, canceling")
+            setResult(RESULT_CANCELED)
+            finish()
+            return
+        }
+
+        // Use existing widget ID if provided
+        appWidgetId = intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, INVALID_WIDGET_ID)
+        if (appWidgetId == INVALID_WIDGET_ID) {
+            // Allocate a new widget ID only if none provided
+            appWidgetId = appWidgetHost.allocateAppWidgetId()
+        }
+
+        configureAppWidget(appWidgetProviderInfo, appWidgetId)
+    }
+
+    /**
+     * Checks that the widget is configurable and then starts the configuration activity for the ID using the widget host
+     *
+     * @author George Clensy
+     */
+    private fun configureAppWidget(widget: AppWidgetProviderInfo, appWidgetId: Int) {
+        if (widget.configure != null) {
+            appWidgetHost.startAppWidgetConfigureActivityForResult(
+                this,
+                appWidgetId,
+                0,
+                REQUEST_CODE_CONFIGURE,
+                getConfigurationOptions(),
+            )
+        } else {
+            finishWithResult(appWidgetId)
+        }
+    }
+
+    /**
+     * Returns the configurationOptions as a Bundle? for starting the widget configuration activity
+     *
+     * @author George Clensy
+     * @return Bundle? with ActivityOptions.makeBasic and .setPendingIntentBackgroundActivityStartMode(ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOW_IF_VISIBLE)
+     */
+    private fun getConfigurationOptions(): Bundle? {
+        if (Build.VERSION.SDK_INT < 34) return null
+        val mode = if (Build.VERSION.SDK_INT >= 36) {
+            ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOW_IF_VISIBLE
+        } else {
+            @Suppress("DEPRECATION")
+            ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED
+        }
+        return ActivityOptions.makeBasic()
+            .setPendingIntentBackgroundActivityStartMode(mode)
+            .toBundle()
+    }
+
+
+
+    /**
+     * Finishes the activity
+     *
+     * @author George Clensy
+     */
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        when (requestCode) {
+            REQUEST_CODE_BIND -> {
+                if (resultCode == RESULT_OK) {
+                    val widget = appWidgetManager.getAppWidgetInfo(appWidgetId)
+                    configureAppWidget(widget, appWidgetId)
+                } else {
+                    appWidgetHost.deleteAppWidgetId(appWidgetId)
+                    setResult(RESULT_CANCELED)
+                    finish()
+                }
+            }
+
+            REQUEST_CODE_CONFIGURE -> {
+                if (resultCode == RESULT_OK) {
+                    finishWithResult(appWidgetId)
+                } else {
+                    appWidgetHost.deleteAppWidgetId(appWidgetId)
+                    setResult(RESULT_CANCELED)
+                    finish()
+                }
+            }
+
+            else -> {
+                setResult(RESULT_CANCELED)
+                finish()
+            }
+        }
+    }
+
+    /**
+     * Finishes the config activity with success
+     */
+    private fun finishWithResult(widgetId: Int) {
+        val data = Intent().apply {
+            putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, widgetId)
+            val providerInfo: AppWidgetProviderInfo? =
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    intent.getParcelableExtra(EXTRA_APP_WIDGET_PROVIDER_INFO, AppWidgetProviderInfo::class.java)
+                } else {
+                    @Suppress("DEPRECATION")
+                    intent.getParcelableExtra(EXTRA_APP_WIDGET_PROVIDER_INFO)
+                }
+            putExtra(EXTRA_APP_WIDGET_PROVIDER_INFO, providerInfo)
+        }
+
+        setResult(RESULT_OK, data)
+        finish()
+    }
+
+    companion object {
+        const val REQUEST_CODE_CONFIGURE = 1
+        const val REQUEST_CODE_BIND = 2
+        const val EXTRA_APP_WIDGET_PROVIDER_INFO = "extra_app_widget_provider_info"
+    }
+}
+
+//
+// Composables
+//
+
+/**
+ * This is the composable that you place on the home screen that actually displays the widget
+ *
+ * @author George Clensy
+ */
 @Composable
 fun WidgetsScreen(
     context: Context,
@@ -66,14 +251,14 @@ fun WidgetsScreen(
 ) {
     val appWidgetManager = AppWidgetManager.getInstance(context)
     val appWidgetHost = remember { AppWidgetHost(context, 1) }
-    val appWidgetId by remember { mutableIntStateOf(getSavedWidgetId(context)) }
+    val appWidgetId by remember { mutableIntStateOf(getSavedWidgetId(context)) } // The ID of the widget being used. This is set by escape launcher
     var appWidgetHostView by remember { mutableStateOf<AppWidgetHostView?>(null) }
 
 
     // On appWidgetId change, re-setup the widget view
     LaunchedEffect(appWidgetId) {
         try {
-            if (appWidgetId != -1) {
+            if (appWidgetId != INVALID_WIDGET_ID) {
                 val widgetInfo = appWidgetManager.getAppWidgetInfo(appWidgetId)
                 if (widgetInfo != null) {
                     appWidgetHostView =
@@ -81,11 +266,16 @@ fun WidgetsScreen(
                             setAppWidget(appWidgetId, widgetInfo)
                         }
                 } else {
-                    Log.e("WidgetsScreen", "Widget info not found for ID $appWidgetId")
+                    Log.e("Widgets", "Widget info not found for ID $appWidgetId")
                 }
             }
         } catch (e: Exception) {
-            Log.e("Widget error", e.message.toString())
+            Log.e("Widgets", e.message.toString())
+            android.widget.Toast.makeText(
+                context,
+                "Error loading widget",
+                android.widget.Toast.LENGTH_SHORT
+            ).show()
         }
     }
 
@@ -97,6 +287,13 @@ fun WidgetsScreen(
     }
 }
 
+/**
+ * The widget picker itself
+ *
+ * @author George Clensy
+ * @param onWidgetSelected Unit for when a widget is selected
+ * @param onDismiss Unit for when the picker is dismissed
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CustomWidgetPicker(
@@ -124,7 +321,7 @@ fun CustomWidgetPicker(
                 items(widgetProviders.size) { index ->
                     val (appInfo, widgets) = widgetProviders.entries.elementAt(index)
                     WidgetAppItem(
-                        appInfo = appInfo,
+                        widgetAppData = appInfo,
                         widgets = widgets,
                         onWidgetSelected = onWidgetSelected
                     )
@@ -134,9 +331,17 @@ fun CustomWidgetPicker(
     }
 }
 
+/**
+ * The app folder in the widget menu
+ *
+ * @author George Clensy
+ * @param widgetAppData The app data
+ * @param widgets A list of the apps widgets
+ * @param onWidgetSelected Unit for when a widget is selected
+ */
 @Composable
 fun WidgetAppItem(
-    appInfo: AppInfo,
+    widgetAppData: WidgetAppData,
     widgets: List<WidgetInfo>,
     onWidgetSelected: (AppWidgetProviderInfo) -> Unit
 ) {
@@ -170,7 +375,7 @@ fun WidgetAppItem(
                         .background(MaterialTheme.colorScheme.surfaceVariant),
                     contentAlignment = Alignment.Center
                 ) {
-                    appInfo.icon?.let {
+                    widgetAppData.icon?.let {
                         Image(
                             bitmap = it.toBitmap().asImageBitmap(),
                             contentDescription = null,
@@ -186,7 +391,7 @@ fun WidgetAppItem(
                 // App name and widget count
                 Column {
                     Text(
-                        text = appInfo.appName,
+                        text = widgetAppData.appName,
                         style = MaterialTheme.typography.bodyLarge
                     )
                     Text(
@@ -223,7 +428,13 @@ fun WidgetAppItem(
     }
 }
 
-
+/**
+ * The widget preview you click on to select it on the widget picker
+ *
+ * @author George Clensy
+ * @param widget Widget information to display
+ * @param onClick Unit ran when widget is clicked
+ */
 @Composable
 fun WidgetPreviewItem(
     widget: WidgetInfo,
@@ -275,13 +486,30 @@ fun WidgetPreviewItem(
     }
 }
 
-// Data classes for widgets
-data class AppInfo(
+/**
+ * Details of an app that has widgets
+ *
+ * @author George Clensy
+ * @param packageName The package name for the app
+ * @param appName The display name of the app
+ * @param icon The apps icon
+ */
+data class WidgetAppData(
     val packageName: String,
     val appName: String,
     val icon: Drawable?
 )
 
+/**
+ * The information for an individual widget
+ *
+ * @author George Clensy
+ * @param provider The widget provider
+ * @param label The widget label
+ * @param previewImage The widget preview image
+ * @param minWidth The widgets minimum width
+ * @param minHeight The widgets maximum height
+ */
 data class WidgetInfo(
     val provider: AppWidgetProviderInfo,
     val label: String,
@@ -290,8 +518,14 @@ data class WidgetInfo(
     val minHeight: Int
 )
 
-// Load all available widgets and group them by app
-fun loadWidgetsGroupedByApp(context: Context): Map<AppInfo, List<WidgetInfo>> {
+/**
+ * Returns all available widget grouped by app in a map
+ *
+ * @author George Clensy
+ * @param context The application context
+ * @return A map of a widget app data to a list of widget information
+ */
+fun loadWidgetsGroupedByApp(context: Context): Map<WidgetAppData, List<WidgetInfo>> {
     val appWidgetManager = AppWidgetManager.getInstance(context)
     val packageManager = context.packageManager
 
@@ -303,21 +537,21 @@ fun loadWidgetsGroupedByApp(context: Context): Map<AppInfo, List<WidgetInfo>> {
         .groupBy { it.provider.packageName }
         .mapKeys { (packageName, _) ->
             // Get app info for each package
-            val appInfo = try {
+            val widgetAppData = try {
                 val applicationInfo = packageManager.getApplicationInfo(packageName, 0)
-                AppInfo(
+                WidgetAppData(
                     packageName = packageName,
                     appName = packageManager.getApplicationLabel(applicationInfo).toString(),
                     icon = packageManager.getApplicationIcon(packageName)
                 )
             } catch (_: PackageManager.NameNotFoundException) {
-                AppInfo(
+                WidgetAppData(
                     packageName = packageName,
                     appName = packageName.split(".").last(),
                     icon = null
                 )
             }
-            appInfo
+            widgetAppData
         }
         .mapValues { (_, providers) ->
             providers.map { providerInfo ->
@@ -332,113 +566,202 @@ fun loadWidgetsGroupedByApp(context: Context): Map<AppInfo, List<WidgetInfo>> {
         }
 }
 
-fun launchWidgetConfiguration(context: Context, appWidgetId: Int) {
-    val appWidgetManager = AppWidgetManager.getInstance(context)
-    val appWidgetInfo = appWidgetManager.getAppWidgetInfo(appWidgetId)
-    val configureComponent = appWidgetInfo?.configure
+//
+// Config stuff
+//
 
-    configureComponent?.let {
-        val resolveInfo = context.packageManager.resolveActivity(
-            Intent().setComponent(configureComponent),
-            PackageManager.MATCH_DEFAULT_ONLY
-        )
-
-        if (resolveInfo?.activityInfo?.exported == true) {
-            val configureIntent = Intent().apply {
-                component = it
-                putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
-                flags = Intent.FLAG_ACTIVITY_NEW_TASK // Add this flag
-            }
-            context.startActivity(configureIntent)
-        } else {
-            Log.w("WidgetsScreen", "Configuration activity is not exported and cannot be started.")
+/**
+ * This launches the apps widget configuration activity and opens the configuration for a specific widget
+ *
+ * @return Will return true on success, on failure, will return false and return error message to log with tag "Widgets"
+ * @author George Clensy
+ */
+fun launchWidgetConfiguration(
+    context: Context,
+    appWidgetProviderInfo: AppWidgetProviderInfo,
+    appWidgetId: Int
+): Boolean {
+    return try {
+        val intent = Intent(context, ConfigureAppWidgetActivity::class.java).apply {
+            putExtra(ConfigureAppWidgetActivity.EXTRA_APP_WIDGET_PROVIDER_INFO, appWidgetProviderInfo)
+            putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         }
+
+        context.startActivity(intent)
+        true
+    } catch (e: Exception) {
+        Log.e("Widgets", "Failed to launch ConfigureAppWidgetActivity: ${e.message}")
+        false
     }
 }
 
+/**
+ * Checks if a specific widget ID has configuration
+ *
+ * @author George Clensy
+ * @param context The application context
+ * @param appWidgetId The widget to check
+ * @return Returns a Boolean indicating if the widget has configuration
+ */
 fun isWidgetConfigurable(context: Context, appWidgetId: Int): Boolean {
     val appWidgetManager = AppWidgetManager.getInstance(context)
     val appWidgetInfo = appWidgetManager.getAppWidgetInfo(appWidgetId) ?: return false
-    val configureComponent = appWidgetInfo.configure ?: return false
-
-    // Check if the configuration activity is exported
-    val resolveInfo = context.packageManager.resolveActivity(
-        Intent().setComponent(configureComponent),
-        PackageManager.MATCH_DEFAULT_ONLY
-    )
-    return resolveInfo != null && resolveInfo.activityInfo.exported
+    return appWidgetInfo.configure != null
 }
 
+//
+// Saving and loading
+//
+
+/**
+ * Saves the provided widget ID to SharedPreferences.
+ * The widget ID is stored in a file named [WIDGET_PREFS_NAME] with the key [WIDGET_ID_KEY].
+ *
+ * @author George Clensy
+ * @param context The application context, used to access SharedPreferences.
+ * @param widgetId The ID of the widget to be saved.
+ */
 fun saveWidgetId(context: Context, widgetId: Int) {
-    val prefs = context.getSharedPreferences("widget_prefs", Context.MODE_PRIVATE)
+    val prefs = context.getSharedPreferences(WIDGET_PREFS_NAME, Context.MODE_PRIVATE)
     prefs.edit {
-        putInt("widget_id", widgetId)
+        putInt(WIDGET_ID_KEY, widgetId)
     }
 }
 
+/**
+ * Retrieves the saved widget ID from SharedPreferences.
+ * The widget ID is loaded from a file named [WIDGET_PREFS_NAME] using the key [WIDGET_ID_KEY].
+ * If no widget ID is found, it returns [INVALID_WIDGET_ID] (-1).
+ *
+ * @author George Clensy
+ * @param context The application context, used to access SharedPreferences.
+ * @return The saved widget ID, or [INVALID_WIDGET_ID] if no ID is found.
+ */
 fun getSavedWidgetId(context: Context): Int {
-    val prefs = context.getSharedPreferences("widget_prefs", Context.MODE_PRIVATE)
-    return prefs.getInt("widget_id", -1)
+    val prefs = context.getSharedPreferences(WIDGET_PREFS_NAME, Context.MODE_PRIVATE)
+    return prefs.getInt(WIDGET_ID_KEY, INVALID_WIDGET_ID)
 }
 
+/**
+ * Removes the currently saved widget by setting its ID to [INVALID_WIDGET_ID] (-1) in SharedPreferences.
+ * This effectively indicates that no widget is currently selected or displayed.
+ * The operation uses the SharedPreferences file [WIDGET_PREFS_NAME] and key [WIDGET_ID_KEY].
+ *
+ * @author George Clensy
+ * @param context The application context, used to access SharedPreferences.
+ */
 fun removeWidget(context: Context) {
-    // Save the updated widget ID to shared preferences
-    saveWidgetId(context, -1)
+    saveWidgetId(context, INVALID_WIDGET_ID)
 }
 
+//
+// Widget Settings
+//
+
+/**
+ * Sets the widget's horizontal offset on the screen.
+ * This value is saved in the shared preferences file defined by [R.string.settings_pref_file_name].
+ * The specific key used for storing the offset is "WidgetOffset".
+ *
+ * @author George Clensy
+ * @param context The application context.
+ * @param sliderPosition The new horizontal offset for the widget.
+ */
 fun setWidgetOffset(context: Context, sliderPosition: Float) {
     val sharedPreferences = context.getSharedPreferences(
-        R.string.settings_pref_file_name.toString(), Context.MODE_PRIVATE
+        context.getString(R.string.settings_pref_file_name), Context.MODE_PRIVATE
     )
     sharedPreferences.edit {
-
         putFloat("WidgetOffset", sliderPosition)
-
     }
 }
 
+/**
+ * Retrieves the widget's horizontal offset from shared preferences.
+ * This value is stored in the shared preferences file defined by [R.string.settings_pref_file_name].
+ * The specific key used for storing the offset is "WidgetOffset".
+ * If no value is found, it defaults to 0f.
+ *
+ * @author George Clensy
+ * @param context The application context.
+ * @return The widget's horizontal offset, or 0f if not set.
+ */
 fun getWidgetOffset(context: Context): Float {
     val sharedPreferences = context.getSharedPreferences(
-        R.string.settings_pref_file_name.toString(), Context.MODE_PRIVATE
+        context.getString(R.string.settings_pref_file_name), Context.MODE_PRIVATE
     )
-
     return sharedPreferences.getFloat("WidgetOffset", 0f)
 }
 
+/**
+ * Sets the widget's height.
+ * This value is saved in the shared preferences file defined by [R.string.settings_pref_file_name].
+ * The specific key used for storing the height is "WidgetHeight".
+ *
+ * @author George Clensy
+ * @param context The application context.
+ * @param sliderPosition The new height for the widget.
+ */
 fun setWidgetHeight(context: Context, sliderPosition: Float) {
     val sharedPreferences = context.getSharedPreferences(
-        R.string.settings_pref_file_name.toString(), Context.MODE_PRIVATE
+        context.getString(R.string.settings_pref_file_name), Context.MODE_PRIVATE
     )
     sharedPreferences.edit {
-
         putFloat("WidgetHeight", sliderPosition)
-
     }
 }
 
+/**
+ * Retrieves the widget's width from shared preferences.
+ * This value is stored in the shared preferences file defined by [R.string.settings_pref_file_name].
+ * The specific key used for storing the width is "WidgetWidth".
+ * If no value is found, it defaults to 150f.
+ *
+ * @author George Clensy
+ * @param context The application context.
+ * @return The widget's width, or 150f if not set.
+ */
 fun getWidgetWidth(context: Context): Float {
     val sharedPreferences = context.getSharedPreferences(
-        R.string.settings_pref_file_name.toString(), Context.MODE_PRIVATE
+        context.getString(R.string.settings_pref_file_name), Context.MODE_PRIVATE
     )
 
     return sharedPreferences.getFloat("WidgetWidth", 150f)
 }
 
+/**
+ * Sets the widget's width.
+ * This value is saved in the shared preferences file defined by [R.string.settings_pref_file_name].
+ * The specific key used for storing the width is "WidgetWidth".
+ *
+ * @author George Clensy
+ * @param context The application context.
+ * @param sliderPosition The new width for the widget.
+ */
 fun setWidgetWidth(context: Context, sliderPosition: Float) {
     val sharedPreferences = context.getSharedPreferences(
-        R.string.settings_pref_file_name.toString(), Context.MODE_PRIVATE
+        context.getString(R.string.settings_pref_file_name), Context.MODE_PRIVATE
     )
     sharedPreferences.edit {
-
         putFloat("WidgetWidth", sliderPosition)
-
     }
 }
 
+/**
+ * Retrieves the widget's height from shared preferences.
+ * This value is stored in the shared preferences file defined by [R.string.settings_pref_file_name].
+ * The specific key used for storing the height is "WidgetHeight".
+ * If no value is found, it defaults to 125f.
+ *
+ * @author George Clensy
+ * @param context The application context.
+ * @return The widget's height, or 125f if not set.
+ */
 fun getWidgetHeight(context: Context): Float {
     val sharedPreferences = context.getSharedPreferences(
-        R.string.settings_pref_file_name.toString(), Context.MODE_PRIVATE
+        context.getString(R.string.settings_pref_file_name), Context.MODE_PRIVATE
     )
-
     return sharedPreferences.getFloat("WidgetHeight", 125f)
 }
+
