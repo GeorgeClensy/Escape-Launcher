@@ -32,7 +32,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
@@ -271,11 +270,6 @@ fun WidgetsScreen(
             }
         } catch (e: Exception) {
             Log.e("Widgets", e.message.toString())
-            android.widget.Toast.makeText(
-                context,
-                "Error loading widget",
-                android.widget.Toast.LENGTH_SHORT
-            ).show()
         }
     }
 
@@ -304,6 +298,10 @@ fun CustomWidgetPicker(
 
     // Load widget providers grouped by app
     val widgetProviders = remember { loadWidgetsGroupedByApp(context) }
+    // Sort the widget providers by app name
+    val sortedWidgetEntries = remember(widgetProviders) {
+        widgetProviders.entries.sortedBy { it.key.appName }
+    }
 
     ModalBottomSheet(
         onDismissRequest = onDismiss
@@ -318,8 +316,8 @@ fun CustomWidgetPicker(
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = PaddingValues(bottom = 16.dp)
             ) {
-                items(widgetProviders.size) { index ->
-                    val (appInfo, widgets) = widgetProviders.entries.elementAt(index)
+                items(sortedWidgetEntries.size) { index ->
+                    val (appInfo, widgets) = sortedWidgetEntries[index] // Use the sorted list
                     WidgetAppItem(
                         widgetAppData = appInfo,
                         widgets = widgets,
@@ -367,25 +365,6 @@ fun WidgetAppItem(
             Row(
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // App icon
-                Box(
-                    modifier = Modifier
-                        .size(48.dp)
-                        .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.surfaceVariant),
-                    contentAlignment = Alignment.Center
-                ) {
-                    widgetAppData.icon?.let {
-                        Image(
-                            bitmap = it.toBitmap().asImageBitmap(),
-                            contentDescription = null,
-                            modifier = Modifier
-                                .size(36.dp)
-                                .clip(CircleShape)
-                        )
-                    }
-                }
-
                 Spacer(modifier = Modifier.width(16.dp))
 
                 // App name and widget count
