@@ -7,7 +7,7 @@
   Welcome to Escape Launcher
 </h1>
 
-> Escape is now Escape launcher. This is so I can make more Escape apps for different platforms and purposes without it getting confusing.
+> Hi! Escape launcher isn't dead it's just really slow cuz it's just a side project of mine. I will eventually relesase at some point. Thanks
 
 Join our discord! [Click Here!](https://discord.gg/9u5eVTFsyS)
 
