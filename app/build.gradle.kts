@@ -118,7 +118,6 @@ dependencies {
     // Firebase
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.analytics)
-    implementation(libs.firebase.crashlytics.buildtools)
     implementation(libs.firebase.crashlytics)
     implementation(libs.firebase.perf)
     implementation(libs.google.firebase.messaging)
