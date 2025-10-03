@@ -3,8 +3,13 @@ package com.geecee.escapelauncher.ui.views
 import android.app.Activity
 import android.appwidget.AppWidgetHost
 import android.appwidget.AppWidgetHostView
+import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProviderInfo
 import android.content.Context
+import android.content.Intent
+import android.util.Log
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -1524,7 +1529,7 @@ fun ThemeOptions(
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun WidgetOptions(context: Context, goBack: () -> Unit) {
-    val appWidgetHost = remember { AppWidgetHost(context, 1) }
+    val appWidgetHost = remember { AppWidgetHost(context, 44203) }
 
     var appWidgetId by remember { mutableIntStateOf(getSavedWidgetId(context)) }
     var appWidgetHostView by remember { mutableStateOf<AppWidgetHostView?>(null) }
@@ -1545,10 +1550,28 @@ fun WidgetOptions(context: Context, goBack: () -> Unit) {
         }
     }
 
+    val bindWidgetPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode != Activity.RESULT_OK) {
+            Log.e("Widgets", "Insufficient widget permissions")
+        }
+    }
+
     if (showCustomPicker) {
         CustomWidgetPicker(
             onWidgetSelected = { info ->
                 val newId = appWidgetHost.allocateAppWidgetId()
+
+                // Request bind widget permission
+                val bindIntent = Intent(AppWidgetManager.ACTION_APPWIDGET_BIND).apply {
+                    putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, newId)
+                    putExtra(
+                        AppWidgetManager.EXTRA_APPWIDGET_PROVIDER, info.provider
+                    )
+                }
+                bindWidgetPermissionLauncher.launch(bindIntent)
+
                 setupWidget(newId, info)
                 showCustomPicker = false
             },

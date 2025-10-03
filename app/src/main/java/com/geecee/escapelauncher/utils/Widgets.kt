@@ -249,7 +249,7 @@ fun WidgetsScreen(
     modifier: Modifier
 ) {
     val appWidgetManager = AppWidgetManager.getInstance(context)
-    val appWidgetHost = remember { AppWidgetHost(context, 1) }
+    val appWidgetHost = remember { AppWidgetHost(context, 44203) }
     val appWidgetId by remember { mutableIntStateOf(getSavedWidgetId(context)) } // The ID of the widget being used. This is set by escape launcher
     var appWidgetHostView by remember { mutableStateOf<AppWidgetHostView?>(null) }
 
