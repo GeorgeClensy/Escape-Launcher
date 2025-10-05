@@ -66,6 +66,7 @@ import com.geecee.escapelauncher.R
 private const val WIDGET_PREFS_NAME = "widget_prefs"
 private const val WIDGET_ID_KEY = "widget_id"
 private const val INVALID_WIDGET_ID = -1
+const val WIDGET_HOST_ID = 44203
 
 /**
  * Activity for showing the widget configuration
@@ -101,7 +102,7 @@ class ConfigureAppWidgetActivity : Activity() {
      */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        appWidgetHost = AppWidgetHost(this, 44203)
+        appWidgetHost = AppWidgetHost(this, WIDGET_HOST_ID)
         appWidgetManager = AppWidgetManager.getInstance(this)
 
         val appWidgetProviderInfo: AppWidgetProviderInfo? =
@@ -249,7 +250,7 @@ fun WidgetsScreen(
     modifier: Modifier
 ) {
     val appWidgetManager = AppWidgetManager.getInstance(context)
-    val appWidgetHost = remember { AppWidgetHost(context, 44203) }
+    val appWidgetHost = remember { AppWidgetHost(context, WIDGET_HOST_ID) }
     val appWidgetId by remember { mutableIntStateOf(getSavedWidgetId(context)) } // The ID of the widget being used. This is set by escape launcher
     var appWidgetHostView by remember { mutableStateOf<AppWidgetHostView?>(null) }
 

@@ -107,6 +107,7 @@ import com.geecee.escapelauncher.ui.theme.transparentHalf
 import com.geecee.escapelauncher.utils.AppUtils
 import com.geecee.escapelauncher.utils.AppUtils.loadTextFromAssets
 import com.geecee.escapelauncher.utils.CustomWidgetPicker
+import com.geecee.escapelauncher.utils.WIDGET_HOST_ID
 import com.geecee.escapelauncher.utils.changeAppsAlignment
 import com.geecee.escapelauncher.utils.changeHomeAlignment
 import com.geecee.escapelauncher.utils.changeHomeVAlignment
@@ -1529,32 +1530,80 @@ fun ThemeOptions(
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun WidgetOptions(context: Context, goBack: () -> Unit) {
-    val appWidgetHost = remember { AppWidgetHost(context, 44203) }
-
+    val appWidgetManager = AppWidgetManager.getInstance(context)
+    val appWidgetHost = remember { AppWidgetHost(context, WIDGET_HOST_ID) }
     var appWidgetId by remember { mutableIntStateOf(getSavedWidgetId(context)) }
     var appWidgetHostView by remember { mutableStateOf<AppWidgetHostView?>(null) }
     var showCustomPicker by remember { mutableStateOf(false) }
 
-    // Common setup logic for binding/creating widget
-    fun setupWidget(widgetId: Int, info: AppWidgetProviderInfo?) {
-        if (widgetId == -1 || info == null) return
-        appWidgetId = widgetId
-        saveWidgetId(context, widgetId)
-
-        if (isWidgetConfigurable(context, widgetId)) {
-            launchWidgetConfiguration(context, info, widgetId)
-        } else {
-            appWidgetHostView = appWidgetHost.createView(context, widgetId, info).apply {
-                setAppWidget(widgetId, info)
-            }
-        }
+    // Called whenever the widget cannot be loaded or bound
+    fun widgetCouldNotBind(message: String) {
+        Log.e("Widgets", "Widget could not bind: $message")
+        goBack()
     }
 
+    // Shows the widget permission dialog
     val bindWidgetPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
     ) { result ->
         if (result.resultCode != Activity.RESULT_OK) {
-            Log.e("Widgets", "Insufficient widget permissions")
+            widgetCouldNotBind("User denied widget bind permission")
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        val tempId = appWidgetHost.allocateAppWidgetId()
+        val dummyProviders = appWidgetManager.installedProviders
+        val testProvider = dummyProviders.firstOrNull()
+
+        if (testProvider != null) {
+            val alreadyAllowed =
+                appWidgetManager.bindAppWidgetIdIfAllowed(tempId, testProvider.provider)
+
+            if (!alreadyAllowed) {
+                val bindIntent = Intent(AppWidgetManager.ACTION_APPWIDGET_BIND).apply {
+                    putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, tempId)
+                    putExtra(AppWidgetManager.EXTRA_APPWIDGET_PROVIDER, testProvider.provider)
+                }
+                try {
+                    bindWidgetPermissionLauncher.launch(bindIntent)
+                } catch (e: Exception) {
+                    widgetCouldNotBind("Failed to launch widget bind request: ${e.message}")
+                }
+            }
+        } else {
+            widgetCouldNotBind("No available widget providers found to check permission")
+        }
+    }
+
+    // Common setup logic for binding/creating widget
+    fun setupWidget(widgetId: Int, info: AppWidgetProviderInfo?) {
+        if (widgetId == -1) {
+            widgetCouldNotBind("Invalid widget ID (-1)")
+            return
+        }
+        if (info == null) {
+            widgetCouldNotBind("AppWidgetProviderInfo was null")
+            return
+        }
+
+        appWidgetId = widgetId
+        saveWidgetId(context, widgetId)
+
+        if (isWidgetConfigurable(context, widgetId)) {
+            try {
+                launchWidgetConfiguration(context, info, widgetId)
+            } catch (e: Exception) {
+                widgetCouldNotBind("Failed to launch widget configuration: ${e.message}")
+            }
+        } else {
+            try {
+                appWidgetHostView = appWidgetHost.createView(context, widgetId, info).apply {
+                    setAppWidget(widgetId, info)
+                }
+            } catch (e: Exception) {
+                widgetCouldNotBind("Failed to create widget view: ${e.message}")
+            }
         }
     }
 
@@ -1563,21 +1612,21 @@ fun WidgetOptions(context: Context, goBack: () -> Unit) {
             onWidgetSelected = { info ->
                 val newId = appWidgetHost.allocateAppWidgetId()
 
-                // Request bind widget permission
-                val bindIntent = Intent(AppWidgetManager.ACTION_APPWIDGET_BIND).apply {
-                    putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, newId)
-                    putExtra(
-                        AppWidgetManager.EXTRA_APPWIDGET_PROVIDER, info.provider
-                    )
+                try {
+                    if (appWidgetManager.bindAppWidgetIdIfAllowed(newId, info.provider)) {
+                        setupWidget(newId, info)
+                        showCustomPicker = false
+                    } else {
+                        widgetCouldNotBind("AppWidgetManager refused to bind the selected widget")
+                    }
+                } catch (e: Exception) {
+                    widgetCouldNotBind("Exception while trying to bind widget: ${e.message}")
                 }
-                bindWidgetPermissionLauncher.launch(bindIntent)
-
-                setupWidget(newId, info)
-                showCustomPicker = false
             },
             onDismiss = { showCustomPicker = false }
         )
     }
+
 
     Column(
         verticalArrangement = Arrangement.Top,
