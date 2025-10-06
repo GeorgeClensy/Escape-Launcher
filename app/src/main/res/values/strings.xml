@@ -14,7 +14,7 @@
     <string name="hide">Hide</string>
     <string name="add_to_fav">Add To Favourites</string>
     <string name="rem_from_fav">Remove From Favourites</string>
-    <string name="add_open_challenge">Add Open Challenge</string>
+    <string name="add_open_challenge">Add Open Countdown</string>
     <string name="app_info">App Info</string>
     <string name="search">Search</string>
     <string name="unlock_private_space">Unlock Private Space</string>
@@ -40,7 +40,7 @@
     <string name="alignments">Alignments</string>
     <string name="choose_font">Choose Font</string>
     <string name="select_widget">Select Widget</string>
-    <string name="manage_open_challenges">Manage Open Challenges</string>
+    <string name="manage_open_challenges">Manage App Countdown</string>
     <string name="manage_hidden_apps">Manage Hidden Apps</string>
     <string name="escape_launcher">Escape launcher</string>
     <string name="auto_open">Quick search</string>
@@ -74,7 +74,7 @@
     <string name="no_hidden_apps">Long hold an app in the apps list and press hide to hide it.</string>
 
     <!-- Apps challenge strings -->
-    <string name="open_challenges">Open Challenges</string>
+    <string name="open_challenges">App Countdown</string>
 
     <!-- First time strings -->
     <string name="continue_str">Continue</string>
