@@ -96,7 +96,8 @@ fun HomeScreen(
                         stringResource(R.string.BigClock),
                         false
                     ),
-                    homeAlignment = getHomeAlignment(mainAppModel.getContext())
+                    homeAlignment = getHomeAlignment(mainAppModel.getContext()),
+                    twelveHour = getBooleanSetting(mainAppModel.getContext(), stringResource(R.string.twelve_hour_clock), false)
                 )
             }
         }
@@ -237,16 +238,16 @@ fun HomeScreen(
  */
 @Composable
 fun Clock(
-    bigClock: Boolean, homeAlignment: Alignment.Horizontal
+    bigClock: Boolean, homeAlignment: Alignment.Horizontal, twelveHour: Boolean
 ) {
-    var time by remember { mutableStateOf(getCurrentTime()) }
+    var time by remember { mutableStateOf(getCurrentTime(twelveHour)) }
     val parts = time.split(":")
     val hours = parts[0]
     val minutes = parts[1]
 
     LaunchedEffect(Unit) {
         while (true) {
-            time = getCurrentTime()
+            time = getCurrentTime(twelveHour)
             delay(1000) // Update every second
         }
     }

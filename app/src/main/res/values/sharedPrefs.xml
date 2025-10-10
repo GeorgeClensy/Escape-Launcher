@@ -22,4 +22,5 @@
     <string name="autoThemeSwitch" translatable="false">AutoThemeSwitch</string>
     <string name="show_date" translatable="false">ShowDate</string>
     <string name="vertical_home" translatable="false">VerticalHome</string>
+    <string name="twelve_hour_clock" translatable="false">TwelveHourClock</string>
 </resources>

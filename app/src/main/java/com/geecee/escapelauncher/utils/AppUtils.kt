@@ -236,9 +236,12 @@ object AppUtils{
      *
      * @return String the time with the format HH:mm
      */
-    fun getCurrentTime(): String {
+    fun getCurrentTime(twelveHour: Boolean): String {
         val now = LocalTime.now()
-        val formatter = DateTimeFormatter.ofPattern("HH:mm") // Format as hours:minutes:seconds
+        var formatter = DateTimeFormatter.ofPattern("HH:mm") // Format as hours:minutes:seconds
+        if(twelveHour){
+            formatter = DateTimeFormatter.ofPattern("hh:mm")
+        }
         return now.format(formatter)
     }
 

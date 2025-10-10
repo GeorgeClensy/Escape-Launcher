@@ -1125,6 +1125,17 @@ fun MainSettingsPage(
             })
 
         SettingsSwitch(
+            label = stringResource(id = R.string.twelve_hour_clock_setting), checked = getBooleanSetting(
+                mainAppModel.getContext(), stringResource(R.string.twelve_hour_clock), false
+            ), onCheckedChange = {
+                toggleBooleanSetting(
+                    mainAppModel.getContext(),
+                    it,
+                    mainAppModel.getContext().resources.getString(R.string.twelve_hour_clock)
+                )
+            })
+
+        SettingsSwitch(
             label = stringResource(id = R.string.date), checked = getBooleanSetting(
                 mainAppModel.getContext(), stringResource(R.string.show_date), false
             ), onCheckedChange = {
@@ -1712,7 +1723,6 @@ fun WidgetOptions(context: Context, goBack: () -> Unit) {
         SettingsSpacer()
     }
 }
-
 
 /**
  * Page that lets you manage hidden apps
