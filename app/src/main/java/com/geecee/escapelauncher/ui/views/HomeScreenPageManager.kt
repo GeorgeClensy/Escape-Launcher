@@ -59,6 +59,7 @@ import com.geecee.escapelauncher.utils.AppUtils.doHapticFeedBack
 import com.geecee.escapelauncher.utils.AppUtils.formatScreenTime
 import com.geecee.escapelauncher.utils.AppUtils.resetHome
 import com.geecee.escapelauncher.utils.InstalledApp
+import com.geecee.escapelauncher.utils.getBooleanSetting
 import com.geecee.escapelauncher.utils.managers.OpenChallenge
 import com.geecee.escapelauncher.utils.setBooleanSetting
 import kotlinx.coroutines.delay
@@ -92,7 +93,44 @@ class HomeScreenModel(application: Application, private val mainAppViewModel: Ma
     val favoriteApps = mutableStateListOf<InstalledApp>()
 
     val appsListScrollState = LazyListState()
-    val pagerState = PagerState(1, 0f) { 3 }
+
+    val pagerState = PagerState(
+        currentPage = if (getBooleanSetting(
+                context = mainAppViewModel.getContext(),
+                setting = mainAppViewModel.getContext().resources.getString(R.string.hideScreenTimePage),
+                defaultValue = false
+            )
+        ) {
+            0
+        } else {
+            1
+        },
+        currentPageOffsetFraction = 0f
+    ) {
+        if (getBooleanSetting(
+                context = mainAppViewModel.getContext(),
+                setting = mainAppViewModel.getContext().resources.getString(R.string.hideScreenTimePage),
+                defaultValue = false
+            )
+        ) {
+            2
+        } else {
+            3
+        }
+    }
+
+    suspend fun goToMainPage() {
+        if (getBooleanSetting(
+                context = mainAppViewModel.getContext(),
+                setting = mainAppViewModel.getContext().resources.getString(R.string.hideScreenTimePage),
+                defaultValue = false
+            )
+        ) {
+            pagerState.scrollToPage(0)
+        } else {
+            pagerState.scrollToPage(1)
+        }
+    }
 
     val currentSelectedPrivateApp =
         mutableStateOf(InstalledApp("", "", ComponentName("", ""))) //Only used for the bottom sheet
@@ -179,9 +217,9 @@ fun HomeScreenPageManager(
     }
 
     // Home Screen Pages
-    HorizontalPager(
+    HorizontalPager (
         state = homeScreenModel.pagerState,
-        Modifier
+        modifier = Modifier
             .fillMaxSize()
             .combinedClickable(
                 onClick = {}, onLongClickLabel = {}.toString(),
@@ -197,23 +235,40 @@ fun HomeScreenPageManager(
                 indication = null, interactionSource = homeScreenModel.interactionSource
             )
     ) { page ->
-
-
-        when (page) {
-            0 -> ScreenTimeDashboard(
+        if (getBooleanSetting(
                 context = mainAppModel.getContext(),
-                mainAppModel = mainAppModel
+                setting = mainAppModel.getContext().resources.getString(R.string.hideScreenTimePage),
+                defaultValue = false
             )
+        ) {
+            when (page) {
+                0 -> HomeScreen(
+                    mainAppModel = mainAppModel,
+                    homeScreenModel = homeScreenModel
+                )
 
-            1 -> HomeScreen(
-                mainAppModel = mainAppModel,
-                homeScreenModel = homeScreenModel
-            )
+                1 -> AppsList(
+                    mainAppModel = mainAppModel,
+                    homeScreenModel = homeScreenModel
+                )
+            }
+        } else {
+            when (page) {
+                0 -> ScreenTimeDashboard(
+                    context = mainAppModel.getContext(),
+                    mainAppModel = mainAppModel
+                )
 
-            2 -> AppsList(
-                mainAppModel = mainAppModel,
-                homeScreenModel = homeScreenModel
-            )
+                1 -> HomeScreen(
+                    mainAppModel = mainAppModel,
+                    homeScreenModel = homeScreenModel
+                )
+
+                2 -> AppsList(
+                    mainAppModel = mainAppModel,
+                    homeScreenModel = homeScreenModel
+                )
+            }
         }
     }
 
@@ -247,7 +302,7 @@ fun HomeScreenPageManager(
                         homeScreenModel.isCurrentAppFavorite.value = true
                         homeScreenModel.showBottomSheet.value = false
                         homeScreenModel.coroutineScope.launch {
-                            homeScreenModel.pagerState.scrollToPage(1)
+                            homeScreenModel.goToMainPage()
                         }
                     }
                     homeScreenModel.reloadFavouriteApps()
@@ -345,16 +400,18 @@ fun HomeScreenItem(
 ) {
     Row(
         verticalAlignment = Alignment.Bottom,
-        horizontalArrangement = when(alignment){
+        horizontalArrangement = when (alignment) {
             Alignment.Start -> Arrangement.Start
             Alignment.CenterHorizontally -> Arrangement.Center
             Alignment.End -> Arrangement.End
             else -> Arrangement.Center
         },
-        modifier = modifier.combinedClickable(
-            onClick = onAppClick,
-            onLongClick = onAppLongClick
-        ).fillMaxWidth()
+        modifier = modifier
+            .combinedClickable(
+                onClick = onAppClick,
+                onLongClick = onAppLongClick
+            )
+            .fillMaxWidth()
     ) {
         // App name text with click and long click handlers
         Text(
@@ -380,8 +437,8 @@ fun HomeScreenItem(
 
 @Preview
 @Composable
-fun HomeScreeItemPrev(){
-    EscapeTheme(remember{mutableStateOf(offLightScheme)}){
+fun HomeScreeItemPrev() {
+    EscapeTheme(remember { mutableStateOf(offLightScheme) }) {
         HomeScreenItem(
             modifier = Modifier,
             appName = "App Name",

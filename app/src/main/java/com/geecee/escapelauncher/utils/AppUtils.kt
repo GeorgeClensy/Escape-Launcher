@@ -289,7 +289,7 @@ object AppUtils{
         homeScreenModel.coroutineScope.launch {
             delay(200)
             if (shouldGoToFirstPage == true) {
-                homeScreenModel.pagerState.scrollToPage(1)
+                homeScreenModel.goToMainPage()
                 homeScreenModel.appsListScrollState.scrollToItem(0)
             }
             homeScreenModel.searchExpanded.value = false

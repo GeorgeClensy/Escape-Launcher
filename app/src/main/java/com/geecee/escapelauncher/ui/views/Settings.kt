@@ -1261,6 +1261,17 @@ fun MainSettingsPage(
             })
 
         SettingsSwitch(
+            label = stringResource(id = R.string.hide_screen_time_page), checked = getBooleanSetting(
+                mainAppModel.getContext(), stringResource(R.string.hideScreenTimePage)
+            ),  onCheckedChange = {
+                toggleBooleanSetting(
+                    mainAppModel.getContext(),
+                    it,
+                    mainAppModel.getContext().resources.getString(R.string.hideScreenTimePage)
+                )
+            })
+
+        SettingsSwitch(
             label = stringResource(id = R.string.screen_time_on_home_screen),
             checked = getBooleanSetting(
                 mainAppModel.getContext(), stringResource(R.string.ScreenTimeOnHome)
