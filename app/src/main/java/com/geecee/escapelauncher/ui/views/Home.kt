@@ -58,6 +58,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
+import java.util.Calendar
 import java.util.Locale
 import com.geecee.escapelauncher.MainAppViewModel as MainAppModel
 
@@ -333,10 +334,19 @@ fun Date(
 
     LaunchedEffect(Unit) {
         while (true) {
+            val calendar = Calendar.getInstance()
+            val now = calendar.timeInMillis
+            calendar.add(Calendar.DAY_OF_YEAR, 1)
+            calendar.set(Calendar.HOUR_OF_DAY, 0)
+            calendar.set(Calendar.MINUTE, 0)
+            calendar.set(Calendar.SECOND, 0)
+            calendar.set(Calendar.MILLISECOND, 0)
+            val delayMillis = calendar.timeInMillis - now
+            delay(delayMillis)
             date = getCurrentDate()
-            delay(1000)
         }
     }
+
 
     Text(
         text = date,
@@ -345,7 +355,7 @@ fun Date(
         fontWeight = FontWeight.SemiBold,
         modifier = Modifier
             .fillMaxWidth()
-            .padding((7.5).dp, 0.dp, 0.dp, (7.5).dp),
+            .padding(0.dp, 0.dp, 0.dp, (7.5).dp),
         textAlign = when (homeAlignment) {
             Alignment.Start -> TextAlign.Start
             Alignment.End -> TextAlign.End
