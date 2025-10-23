@@ -1435,10 +1435,10 @@ fun ThemeOptions(
                     // Reload
                     val newTheme = refreshTheme(
                         context = context,
-                        settingToChange = context.getString(R.string.theme),
-                        autoThemeChange = context.getString(R.string.autoThemeSwitch),
-                        dSettingToChange = context.getString(R.string.dTheme),
-                        lSettingToChange = context.getString(R.string.lTheme),
+                        settingToRetrieve = context.getString(R.string.theme),
+                        autoThemeRetrieve = context.getString(R.string.autoThemeSwitch),
+                        dSettingToRetrieve = context.getString(R.string.dTheme),
+                        lSettingToRetrieve = context.getString(R.string.lTheme),
                         isSystemDarkTheme = isSystemDark
                     )
                     mainAppModel.appTheme.value = newTheme
@@ -1484,10 +1484,10 @@ fun ThemeOptions(
                     setIntSetting(context, context.getString(R.string.lTheme), theme)
                     val newTheme = refreshTheme(
                         context = context,
-                        settingToChange = context.getString(R.string.theme),
-                        autoThemeChange = context.getString(R.string.autoThemeSwitch),
-                        dSettingToChange = context.getString(R.string.dTheme),
-                        lSettingToChange = context.getString(R.string.lTheme),
+                        settingToRetrieve = context.getString(R.string.theme),
+                        autoThemeRetrieve = context.getString(R.string.autoThemeSwitch),
+                        dSettingToRetrieve = context.getString(R.string.dTheme),
+                        lSettingToRetrieve = context.getString(R.string.lTheme),
                         isSystemDarkTheme = isSystemDark
                     )
                     mainAppModel.appTheme.value = newTheme
@@ -1498,10 +1498,10 @@ fun ThemeOptions(
                     setIntSetting(context, context.getString(R.string.dTheme), theme)
                     val newTheme = refreshTheme(
                         context = context,
-                        settingToChange = context.getString(R.string.theme),
-                        autoThemeChange = context.getString(R.string.autoThemeSwitch),
-                        dSettingToChange = context.getString(R.string.dTheme),
-                        lSettingToChange = context.getString(R.string.lTheme),
+                        settingToRetrieve = context.getString(R.string.theme),
+                        autoThemeRetrieve = context.getString(R.string.autoThemeSwitch),
+                        dSettingToRetrieve = context.getString(R.string.dTheme),
+                        lSettingToRetrieve = context.getString(R.string.lTheme),
                         isSystemDarkTheme = isSystemDark
                     )
                     mainAppModel.appTheme.value = newTheme
@@ -1523,10 +1523,10 @@ fun ThemeOptions(
                         setIntSetting(context, context.getString(R.string.theme), theme)
                         val newTheme = refreshTheme(
                             context = context,
-                            settingToChange = context.getString(R.string.theme),
-                            autoThemeChange = context.getString(R.string.autoThemeSwitch),
-                            dSettingToChange = context.getString(R.string.dTheme),
-                            lSettingToChange = context.getString(R.string.lTheme),
+                            settingToRetrieve = context.getString(R.string.theme),
+                            autoThemeRetrieve = context.getString(R.string.autoThemeSwitch),
+                            dSettingToRetrieve = context.getString(R.string.dTheme),
+                            lSettingToRetrieve = context.getString(R.string.lTheme),
                             isSystemDarkTheme = isSystemDark
                         )
                         mainAppModel.appTheme.value = newTheme

@@ -1,7 +1,5 @@
 package com.geecee.escapelauncher.ui.views
 
-import android.app.Application
-import android.content.ComponentName
 import android.content.Intent
 import android.provider.Settings
 import androidx.compose.animation.AnimatedVisibility
@@ -9,7 +7,6 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -17,9 +14,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.PagerState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -32,7 +27,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -46,11 +40,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
-import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.viewModelScope
-import com.geecee.escapelauncher.MainAppViewModel
+import com.geecee.escapelauncher.HomeScreenModel
 import com.geecee.escapelauncher.R
 import com.geecee.escapelauncher.ui.theme.EscapeTheme
 import com.geecee.escapelauncher.ui.theme.offLightScheme
@@ -58,7 +48,6 @@ import com.geecee.escapelauncher.utils.AppUtils
 import com.geecee.escapelauncher.utils.AppUtils.doHapticFeedBack
 import com.geecee.escapelauncher.utils.AppUtils.formatScreenTime
 import com.geecee.escapelauncher.utils.AppUtils.resetHome
-import com.geecee.escapelauncher.utils.InstalledApp
 import com.geecee.escapelauncher.utils.getBooleanSetting
 import com.geecee.escapelauncher.utils.managers.OpenChallenge
 import com.geecee.escapelauncher.utils.setBooleanSetting
@@ -66,127 +55,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import com.geecee.escapelauncher.MainAppViewModel as MainAppModel
 
-
-/**
- * Home Screen View Model
- */
-class HomeScreenModel(application: Application, private val mainAppViewModel: MainAppViewModel) :
-    AndroidViewModel(application) {
-    var currentSelectedApp = mutableStateOf(InstalledApp("", "", ComponentName("", "")))
-
-    @Suppress("MemberVisibilityCanBePrivate")
-    var isCurrentAppHidden = mutableStateOf(false)
-    var isCurrentAppChallenged = mutableStateOf(false)
-    var isCurrentAppFavorite = mutableStateOf(false)
-
-    var showOpenChallenge = mutableStateOf(false)
-    var showBottomSheet = mutableStateOf(false)
-    var showPrivateSpaceSettings = mutableStateOf(false)
-
-    var searchText = mutableStateOf("")
-    var searchExpanded = mutableStateOf(false)
-
-    val coroutineScope = viewModelScope
-    val interactionSource = MutableInteractionSource()
-
-    val installedApps = mutableStateListOf<InstalledApp>()
-    val favoriteApps = mutableStateListOf<InstalledApp>()
-
-    val appsListScrollState = LazyListState()
-
-    val pagerState = PagerState(
-        currentPage = if (getBooleanSetting(
-                context = mainAppViewModel.getContext(),
-                setting = mainAppViewModel.getContext().resources.getString(R.string.hideScreenTimePage),
-                defaultValue = false
-            )
-        ) {
-            0
-        } else {
-            1
-        },
-        currentPageOffsetFraction = 0f
-    ) {
-        if (getBooleanSetting(
-                context = mainAppViewModel.getContext(),
-                setting = mainAppViewModel.getContext().resources.getString(R.string.hideScreenTimePage),
-                defaultValue = false
-            )
-        ) {
-            2
-        } else {
-            3
-        }
-    }
-
-    suspend fun goToMainPage() {
-        if (getBooleanSetting(
-                context = mainAppViewModel.getContext(),
-                setting = mainAppViewModel.getContext().resources.getString(R.string.hideScreenTimePage),
-                defaultValue = false
-            )
-        ) {
-            pagerState.scrollToPage(0)
-        } else {
-            pagerState.scrollToPage(1)
-        }
-    }
-
-    val currentSelectedPrivateApp =
-        mutableStateOf(InstalledApp("", "", ComponentName("", ""))) //Only used for the bottom sheet
-    var showPrivateBottomSheet = mutableStateOf(false)
-
-    init {
-        loadApps()
-        reloadFavouriteApps()
-    }
-
-    fun loadApps() {
-        coroutineScope.launch {
-            installedApps.clear()
-            installedApps.addAll(
-                AppUtils.getAllInstalledApps(mainAppViewModel.getContext()).sortedBy {
-                    it.displayName
-                })
-        }
-    }
-
-    fun reloadFavouriteApps() {
-        coroutineScope.launch {
-            val newFavoriteApps = mainAppViewModel.favoriteAppsManager.getFavoriteApps()
-                .mapNotNull { packageName ->
-                    installedApps.find { it.packageName == packageName }
-                }
-
-            favoriteApps.apply {
-                clear()
-                addAll(newFavoriteApps)
-            }
-        }
-    }
-
-    fun updateSelectedApp(app: InstalledApp) {
-        currentSelectedApp.value = app
-        isCurrentAppFavorite.value = favoriteApps.contains(app)
-        isCurrentAppChallenged.value =
-            mainAppViewModel.challengesManager.doesAppHaveChallenge(app.packageName)
-        isCurrentAppHidden.value = mainAppViewModel.hiddenAppsManager.isAppHidden(app.packageName)
-
-    }
-}
-
-class HomeScreenModelFactory(
-    private val application: Application,
-    private val mainAppViewModel: MainAppViewModel
-) : ViewModelProvider.Factory {
-    override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        if (modelClass.isAssignableFrom(HomeScreenModel::class.java)) {
-            @Suppress("UNCHECKED_CAST")
-            return HomeScreenModel(application, mainAppViewModel) as T
-        }
-        throw IllegalArgumentException("Unknown ViewModel class")
-    }
-}
 
 /**
  *  Main composable for home screen:

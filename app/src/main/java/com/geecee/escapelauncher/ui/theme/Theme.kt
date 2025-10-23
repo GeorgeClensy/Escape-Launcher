@@ -12,6 +12,7 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -559,6 +560,7 @@ fun EscapeTheme(
     colorScheme: MutableState<ColorScheme>, content: @Composable (() -> Unit)
 ) {
     val context = LocalContext.current
+    val resources = LocalResources.current
 
     // Make the typography
     val fontFamily = remember {
@@ -567,7 +569,7 @@ fun EscapeTheme(
                 Font(
                     googleFont = GoogleFont(
                         getStringSetting(
-                            context, context.resources.getString(R.string.Font), "Jost"
+                            context, resources.getString(R.string.Font), "Jost"
                         ), true
                     ), fontProvider = provider
                 )
@@ -666,25 +668,25 @@ enum class AppTheme(val id: Int, val scheme: ColorScheme, @StringRes val nameRes
 
 fun refreshTheme(
     context: Context,
-    settingToChange: String,
-    autoThemeChange: String,
-    dSettingToChange: String,
-    lSettingToChange: String,
+    settingToRetrieve: String,
+    autoThemeRetrieve: String,
+    dSettingToRetrieve: String,
+    lSettingToRetrieve: String,
     isSystemDarkTheme: Boolean
 ): ColorScheme {
     val colorScheme: ColorScheme
-    var settingToChange = settingToChange
+    var settingToRetrieve = settingToRetrieve
 
-    if (getBooleanSetting(context, autoThemeChange, false)) {
-        settingToChange = if (isSystemDarkTheme) {
-            dSettingToChange
+    if (getBooleanSetting(context, autoThemeRetrieve, false)) {
+        settingToRetrieve = if (isSystemDarkTheme) {
+            dSettingToRetrieve
         } else {
-            lSettingToChange
+            lSettingToRetrieve
         }
     }
 
     // Set theme
-    colorScheme = AppTheme.fromId(getIntSetting(context, settingToChange, 11)).scheme
+    colorScheme = AppTheme.fromId(getIntSetting(context, settingToRetrieve, 11)).scheme
 
     return colorScheme
 }

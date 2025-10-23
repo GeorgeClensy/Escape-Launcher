@@ -1,6 +1,5 @@
 package com.geecee.escapelauncher
 
-import android.app.Application
 import android.content.BroadcastReceiver
 import android.content.ComponentName
 import android.content.Context
@@ -9,10 +8,6 @@ import android.content.IntentFilter
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
-import android.view.View
-import android.view.WindowInsets
-import android.view.WindowInsetsController
-import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -28,16 +23,15 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
-import androidx.lifecycle.AndroidViewModel
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.compose.NavHost
@@ -45,9 +39,6 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.geecee.escapelauncher.ui.theme.AppTheme
 import com.geecee.escapelauncher.ui.theme.EscapeTheme
-import com.geecee.escapelauncher.ui.theme.offLightScheme
-import com.geecee.escapelauncher.ui.views.HomeScreenModel
-import com.geecee.escapelauncher.ui.views.HomeScreenModelFactory
 import com.geecee.escapelauncher.ui.views.HomeScreenPageManager
 import com.geecee.escapelauncher.ui.views.Onboarding
 import com.geecee.escapelauncher.ui.views.Settings
@@ -59,9 +50,6 @@ import com.geecee.escapelauncher.utils.PrivateSpaceStateReceiver
 import com.geecee.escapelauncher.utils.ScreenOffReceiver
 import com.geecee.escapelauncher.utils.getBooleanSetting
 import com.geecee.escapelauncher.utils.getIntSetting
-import com.geecee.escapelauncher.utils.managers.ChallengesManager
-import com.geecee.escapelauncher.utils.managers.FavoriteAppsManager
-import com.geecee.escapelauncher.utils.managers.HiddenAppsManager
 import com.geecee.escapelauncher.utils.managers.ScreenTimeManager
 import com.geecee.escapelauncher.utils.managers.getUsageForApp
 import com.geecee.escapelauncher.utils.managers.scheduleDailyCleanup
@@ -69,84 +57,6 @@ import com.google.firebase.Firebase
 import com.google.firebase.messaging.messaging
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
-
-class MainAppViewModel(application: Application) : AndroidViewModel(application) {
-    private val appContext: Context = application.applicationContext // The app context
-
-    fun getContext(): Context = appContext // Returns the context
-
-    var appTheme: MutableState<ColorScheme> = mutableStateOf(offLightScheme) // App material theme
-
-    // Managers
-
-    val favoriteAppsManager: FavoriteAppsManager =
-        FavoriteAppsManager(application) // Favorite apps manager
-
-    val hiddenAppsManager: HiddenAppsManager = HiddenAppsManager(application) // Hidden apps manager
-
-    val challengesManager: ChallengesManager =
-        ChallengesManager(application) // Manager for challenges
-
-    // Other stuff
-
-    var isAppOpened: Boolean =
-        false // Set to true when an app is opened and false when it is closed again, used mainly for screen time
-
-    val isPrivateSpaceUnlocked: MutableState<Boolean> =
-        mutableStateOf(false) // If the private space is unlocked, set by a registered receiver when the private space is closed or opened
-
-    val shouldGoHomeOnResume: MutableState<Boolean> =
-        mutableStateOf(false) // This is to check whether to go back to the first page of the home screen the next time onResume is called, It is only ever used once in AllApps when you come back from signing into private space
-
-    // Screen time related things
-
-    private val dateFormat =
-        SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()) // Format for the date
-
-    fun getToday(): String {
-        return dateFormat.format(Date())
-    } // Returns the current date
-
-    val screenTimeCache =
-        mutableStateMapOf<String, Long>() // Cache mapping package name to screen time
-
-    val shouldReloadScreenTime: MutableState<Int> =
-        mutableIntStateOf(0) // This exists because the screen time is retrieved in LaunchedEffects so it'll reload when the value of this is changed
-
-    fun updateAppScreenTime(packageName: String) {
-        viewModelScope.launch(Dispatchers.IO) {
-            val screenTime = getUsageForApp(packageName, getToday())
-            screenTimeCache[packageName] = screenTime
-        }
-    } // Function to update a single app's cached screen time
-
-    @Suppress("unused")
-    fun reloadScreenTimeCache(packageNames: List<String>) {
-        viewModelScope.launch(Dispatchers.IO) {
-            packageNames.forEach { packageName ->
-                val screenTime = getUsageForApp(packageName, getToday())
-                screenTimeCache[packageName] = screenTime
-            }
-            shouldReloadScreenTime.value++
-        }
-    } // Reloads the screen times
-
-    suspend fun getScreenTimeAsync(packageName: String, forceRefresh: Boolean = false): Long {
-        if (forceRefresh || !screenTimeCache.containsKey(packageName)) {
-            val screenTime = getUsageForApp(packageName, getToday())
-            screenTimeCache[packageName] = screenTime
-            return screenTime
-        }
-        return screenTimeCache[packageName] ?: 0L
-    } // Function to get screen time from cache or compute if missing
-
-    fun getCachedScreenTime(packageName: String): Long {
-        return screenTimeCache[packageName] ?: 0L
-    } // Non-suspend function that just returns the cached value without fetching
-}
 
 class MainHomeScreen : ComponentActivity() {
     private lateinit var privateSpaceReceiver: PrivateSpaceStateReceiver
@@ -197,7 +107,11 @@ class MainHomeScreen : ComponentActivity() {
         }
 
         // Set up the application content
-        setContent { SetUpContent() }
+        setContent {
+            SetUpTheme {
+                SetupNavHost(determineStartDestination(LocalContext.current))
+            }
+        }
 
         // Register screen off receiver
         screenOffReceiver = ScreenOffReceiver {
@@ -306,6 +220,8 @@ class MainHomeScreen : ComponentActivity() {
         } catch (ex: Exception) {
             Log.e("ERROR", ex.toString())
         }
+
+
     }
 
     override fun onDestroy() {
@@ -328,28 +244,18 @@ class MainHomeScreen : ComponentActivity() {
      */
     @Suppress("DEPRECATION")
     private fun configureFullScreenMode() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            window.setDecorFitsSystemWindows(false)
-            window.insetsController?.apply {
-                hide(WindowInsets.Type.systemBars())
-                systemBarsBehavior = WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
-            }
-        } else {
-            window.decorView.systemUiVisibility = (
-                    View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or
-                            View.SYSTEM_UI_FLAG_FULLSCREEN or
-                            View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-                    )
-            window.addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN)
-        }
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+        val controller = WindowInsetsControllerCompat(window, window.decorView)
+        controller.hide(WindowInsetsCompat.Type.statusBars()) // hide status bar only
+        controller.systemBarsBehavior =
+            WindowInsetsControllerCompat.BEHAVIOR_DEFAULT
     }
 
     /**
-     * The main parent composable for the app
-     * Contains EscapeTheme & SetupNavHost
+     * Sets up theme by retrieving theme that should be used and then passing it and the content into an EscapeTheme composable
      */
     @Composable
-    private fun SetUpContent() {
+    private fun SetUpTheme(content: @Composable () -> Unit) {
         val colorScheme: ColorScheme
         var settingToChange = stringResource(R.string.Theme)
 
@@ -376,7 +282,7 @@ class MainHomeScreen : ComponentActivity() {
         }
 
         EscapeTheme(viewModel.appTheme) {
-            SetupNavHost(determineStartDestination(LocalContext.current))
+            content()
         }
     }
 

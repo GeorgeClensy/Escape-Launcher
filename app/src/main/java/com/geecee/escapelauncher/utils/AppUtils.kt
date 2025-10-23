@@ -21,8 +21,8 @@ import androidx.compose.ui.hapticfeedback.HapticFeedback
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.core.graphics.createBitmap
 import androidx.core.splashscreen.SplashScreen
+import com.geecee.escapelauncher.HomeScreenModel
 import com.geecee.escapelauncher.R
-import com.geecee.escapelauncher.ui.views.HomeScreenModel
 import com.geecee.escapelauncher.utils.managers.ScreenTimeManager
 import com.google.firebase.Firebase
 import com.google.firebase.analytics.FirebaseAnalytics
