@@ -556,9 +556,6 @@ fun SettingsSwipeableButton(
                 topEnd = topEndRadius,
                 bottomEnd = bottomEndRadius,
                 bottomStart = bottomStartRadius
-            ),
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.primaryContainer
             )
         ) {
             Row(
@@ -1782,6 +1779,26 @@ fun HiddenApps(
     ) {
         item {
             SettingsHeader(goBack, stringResource(R.string.hidden_apps))
+        }
+
+        item{
+            SettingsSwitch(
+                label = stringResource(R.string.show_hidden_apps_in_search),
+                checked = getBooleanSetting(
+                    mainAppModel.getContext(),
+                    stringResource(R.string.showHiddenAppsInSearch),
+                    false
+                ),
+                onCheckedChange = { it ->
+                    toggleBooleanSetting(
+                        mainAppModel.getContext(),
+                        it,
+                        mainAppModel.getContext().resources.getString(R.string.showHiddenAppsInSearch)
+                    )
+                },
+                isTopOfGroup = true,
+                isBottomOfGroup = true
+            )
         }
 
         item {

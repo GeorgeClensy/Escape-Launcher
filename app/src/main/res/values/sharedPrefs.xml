@@ -24,4 +24,5 @@
     <string name="vertical_home" translatable="false">VerticalHome</string>
     <string name="twelve_hour_clock" translatable="false">TwelveHourClock</string>
     <string name="hideScreenTimePage" translatable="false">HideScreenTimePage</string>
+    <string name="showHiddenAppsInSearch" translatable="false">ShowHiddenAppsInSearch</string>
 </resources>

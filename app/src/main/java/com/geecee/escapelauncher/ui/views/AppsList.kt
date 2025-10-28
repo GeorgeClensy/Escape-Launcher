@@ -143,20 +143,32 @@ fun AppsList(
                                 mainAppModel.getContext().resources.getString(R.string.SearchAutoOpen),
                                 false
                             )
+
                             if (autoOpen && filteredApps.size == 1) {
+
                                 val appInfo = filteredApps.first()
 
-                                homeScreenModel.updateSelectedApp(appInfo)
-
-                                AppUtils.openApp(
-                                    app = appInfo,
-                                    overrideOpenChallenge = false,
-                                    openChallengeShow = homeScreenModel.showOpenChallenge,
-                                    mainAppModel = mainAppModel,
-                                    homeScreenModel = homeScreenModel
+                                var shouldShowHiddenApps = !mainAppModel.hiddenAppsManager.isAppHidden(
+                                    appInfo.packageName
                                 )
 
-                                resetHome(homeScreenModel)
+                                if(!homeScreenModel.searchText.value.isBlank() && getBooleanSetting(mainAppModel.getContext(), mainAppModel.getContext().getString(R.string.showHiddenAppsInSearch), false)) {
+                                    shouldShowHiddenApps = true
+                                }
+
+                                if(shouldShowHiddenApps) {
+                                    homeScreenModel.updateSelectedApp(appInfo)
+
+                                    AppUtils.openApp(
+                                        app = appInfo,
+                                        overrideOpenChallenge = false,
+                                        openChallengeShow = homeScreenModel.showOpenChallenge,
+                                        mainAppModel = mainAppModel,
+                                        homeScreenModel = homeScreenModel
+                                    )
+
+                                    resetHome(homeScreenModel)
+                                }
                             }
                         },
                         keyboardDone = { _ ->
@@ -211,10 +223,16 @@ fun AppsList(
                 }
             )
             { app ->
+                var shouldShowHiddenApps = !mainAppModel.hiddenAppsManager.isAppHidden(
+                    app.packageName
+                )
+
+                if(!homeScreenModel.searchText.value.isBlank() && getBooleanSetting(mainAppModel.getContext(), stringResource(R.string.showHiddenAppsInSearch), false)) {
+                    shouldShowHiddenApps = true
+                }
+
                 // Draw app if its not hidden and not Escape itself
-                if (!app.packageName.contains("com.geecee.escapelauncher") && !mainAppModel.hiddenAppsManager.isAppHidden(
-                        app.packageName
-                    )
+                if (!app.packageName.contains("com.geecee.escapelauncher") && shouldShowHiddenApps
                 ) {
                     val screenTime =
                         remember { mutableLongStateOf(mainAppModel.getCachedScreenTime(app.packageName)) }
