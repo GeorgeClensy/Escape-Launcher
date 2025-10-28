@@ -1,13 +1,18 @@
 package com.geecee.escapelauncher.ui.views
 
 import android.app.Activity
+import android.app.admin.DevicePolicyManager
 import android.appwidget.AppWidgetHost
 import android.appwidget.AppWidgetHostView
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProviderInfo
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
@@ -123,6 +128,7 @@ import com.geecee.escapelauncher.utils.getWidgetWidth
 import com.geecee.escapelauncher.utils.isDefaultLauncher
 import com.geecee.escapelauncher.utils.isWidgetConfigurable
 import com.geecee.escapelauncher.utils.launchWidgetConfiguration
+import com.geecee.escapelauncher.utils.managers.MyDeviceAdminReceiver
 import com.geecee.escapelauncher.utils.removeWidget
 import com.geecee.escapelauncher.utils.resetActivity
 import com.geecee.escapelauncher.utils.saveWidgetId
@@ -1028,7 +1034,7 @@ fun Settings(
                 "devOptions",
                 enterTransition = { fadeIn(tween(300)) },
                 exitTransition = { fadeOut(tween(300)) }) {
-                DevOptions(context = mainAppModel.getContext()) { navController.popBackStack() }
+                DevOptions(mainAppModel = mainAppModel, context = mainAppModel.getContext()) { navController.popBackStack() }
             }
             composable(
                 "theme",
@@ -1926,7 +1932,8 @@ fun ChooseFont(context: Context, activity: Activity, goBack: () -> Unit) {
  * Developer options in settings
  */
 @Composable
-fun DevOptions(context: Context, goBack: () -> Unit) {
+fun DevOptions(mainAppModel: MainAppModel, context: Context, goBack: () -> Unit) {
+
     Column(
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.Start,
@@ -1942,10 +1949,32 @@ fun DevOptions(context: Context, goBack: () -> Unit) {
             onCheckedChange = { it ->
                 setBooleanSetting(context, "FirstTime", it)
             },
-            isTopOfGroup = true,
-            isBottomOfGroup = true
+            isTopOfGroup = true
+        )
+
+        SettingsButton(
+            label = "Test Screen Off",
+            isBottomOfGroup = true,
+            onClick = {
+                mainAppModel.blackOverlay.value = true
+
+                Handler(Looper.getMainLooper()).postDelayed({
+                    val devicePolicyManager =
+                        context.getSystemService(DevicePolicyManager::class.java)
+                    val compName = ComponentName(context, MyDeviceAdminReceiver::class.java)
+
+                    if (devicePolicyManager.isAdminActive(compName)) {
+                        devicePolicyManager.lockNow()
+                    } else {
+                        Toast.makeText(context, "Enable Device Admin first", Toast.LENGTH_SHORT).show()
+                    }
+
+                    mainAppModel.blackOverlay.value = false
+                }, 300)
+            }
         )
     }
+
 }
 
 /**

@@ -1,7 +1,12 @@
 package com.geecee.escapelauncher.ui.views
 
+import android.app.admin.DevicePolicyManager
+import android.content.ComponentName
 import android.content.Intent
+import android.os.Handler
+import android.os.Looper
 import android.provider.Settings
+import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -49,6 +54,7 @@ import com.geecee.escapelauncher.utils.AppUtils.doHapticFeedBack
 import com.geecee.escapelauncher.utils.AppUtils.formatScreenTime
 import com.geecee.escapelauncher.utils.AppUtils.resetHome
 import com.geecee.escapelauncher.utils.getBooleanSetting
+import com.geecee.escapelauncher.utils.managers.MyDeviceAdminReceiver
 import com.geecee.escapelauncher.utils.managers.OpenChallenge
 import com.geecee.escapelauncher.utils.setBooleanSetting
 import kotlinx.coroutines.delay
@@ -100,7 +106,24 @@ fun HomeScreenPageManager(
                         false
                     )
                 },
-                indication = null, interactionSource = homeScreenModel.interactionSource
+                indication = null, interactionSource = homeScreenModel.interactionSource,
+                onDoubleClick = {
+                    mainAppModel.blackOverlay.value = true
+
+                    Handler(Looper.getMainLooper()).postDelayed({
+                        val devicePolicyManager =
+                            mainAppModel.getContext().getSystemService(DevicePolicyManager::class.java)
+                        val compName = ComponentName(mainAppModel.getContext(), MyDeviceAdminReceiver::class.java)
+
+                        if (devicePolicyManager.isAdminActive(compName)) {
+                            devicePolicyManager.lockNow()
+                        } else {
+                            Toast.makeText(mainAppModel.getContext(), "Enable Device Admin first", Toast.LENGTH_SHORT).show()
+                        }
+
+                        mainAppModel.blackOverlay.value = false
+                    }, 300)
+                }
             )
     ) { page ->
         if (getBooleanSetting(
