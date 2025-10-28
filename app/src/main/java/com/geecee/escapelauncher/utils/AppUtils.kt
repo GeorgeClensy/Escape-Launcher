@@ -428,4 +428,25 @@ object AppUtils{
             (blue * 255).toInt()
         )
     }
+
+    fun getInstalledAppFromPackageName(context: Context, packageName: String): InstalledApp? {
+        return try {
+            val pm: PackageManager = context.packageManager
+            val appInfo = pm.getApplicationInfo(packageName, 0)
+            val displayName = pm.getApplicationLabel(appInfo).toString()
+            val launchIntent = pm.getLaunchIntentForPackage(packageName)
+
+            // Some apps might not have a launchable activity
+            val componentName = launchIntent?.component ?: ComponentName(packageName, "")
+
+            InstalledApp(
+                displayName = displayName,
+                packageName = packageName,
+                componentName = componentName
+            )
+        } catch (e: PackageManager.NameNotFoundException) {
+            e.printStackTrace()
+            null
+        }
+    }
 }

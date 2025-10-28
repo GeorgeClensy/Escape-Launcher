@@ -25,6 +25,7 @@
 
     <!-- Hidden Apps strings-->
     <string name="hidden_apps">Hidden Apps</string>
+    <string name="swipe_to_show_app">Swipe to unhide app</string>
 
     <!-- Settings strings-->
     <string name="settings">Settings</string>

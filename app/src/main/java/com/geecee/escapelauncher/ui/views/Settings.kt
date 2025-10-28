@@ -30,7 +30,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -57,6 +56,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -104,6 +104,7 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.geecee.escapelauncher.HomeScreenModel
 import com.geecee.escapelauncher.R
 import com.geecee.escapelauncher.ui.theme.AppTheme
 import com.geecee.escapelauncher.ui.theme.getTypographyFromFontName
@@ -111,6 +112,7 @@ import com.geecee.escapelauncher.ui.theme.refreshTheme
 import com.geecee.escapelauncher.ui.theme.transparentHalf
 import com.geecee.escapelauncher.utils.AppUtils
 import com.geecee.escapelauncher.utils.AppUtils.loadTextFromAssets
+import com.geecee.escapelauncher.utils.AppUtils.resetHome
 import com.geecee.escapelauncher.utils.CustomWidgetPicker
 import com.geecee.escapelauncher.utils.WIDGET_HOST_ID
 import com.geecee.escapelauncher.utils.changeAppsAlignment
@@ -502,13 +504,14 @@ fun SettingsSwipeableButton(
     val bottomEndRadius = if (isBottomOfGroup) groupEdgeCornerRadius else defaultCornerRadius
 
     val dismissState = rememberSwipeToDismissBoxState(
-        confirmValueChange = { dismissValue ->
-            if (dismissValue == SwipeToDismissBoxValue.EndToStart) {
-                onDeleteClick()
-                true
-            } else false
-        }
+        positionalThreshold = { it * 0.5f }
     )
+
+    LaunchedEffect(dismissState.currentValue) {
+        if (dismissState.currentValue == SwipeToDismissBoxValue.EndToStart) {
+            onDeleteClick()
+        }
+    }
 
     SwipeToDismissBox(
         state = dismissState,
@@ -516,31 +519,30 @@ fun SettingsSwipeableButton(
         enableDismissFromStartToEnd = false,
         enableDismissFromEndToStart = true,
         backgroundContent = {
-            val revealedWidthDp = dismissState.progress.dp
-
-            Box(
-                Modifier
-                    .fillMaxSize(),
-                contentAlignment = Alignment.CenterEnd
+            // Background while swiping
+            Card(
+                modifier = Modifier.fillMaxSize(),
+                shape = RoundedCornerShape(
+                    topStart = topStartRadius,
+                    topEnd = topEndRadius,
+                    bottomEnd = bottomEndRadius,
+                    bottomStart = bottomStartRadius
+                ),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.error
+                )
             ) {
-                if (revealedWidthDp > 0.dp) {
-                    Button(
-                        onClick = onDeleteClick,
-                        modifier = Modifier
-                            .fillMaxHeight()
-                            .fillMaxWidth(dismissState.progress),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.error,
-                            contentColor = MaterialTheme.colorScheme.onError
-                        ),
-                        contentPadding = PaddingValues(horizontal = 12.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Delete,
-                            contentDescription = stringResource(R.string.remove),
-                            modifier = Modifier.size(24.dp)
-                        )
-                    }
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = 24.dp),
+                    contentAlignment = Alignment.CenterEnd
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Delete,
+                        contentDescription = stringResource(R.string.remove),
+                        tint = MaterialTheme.colorScheme.onError
+                    )
                 }
             }
         }
@@ -554,6 +556,9 @@ fun SettingsSwipeableButton(
                 topEnd = topEndRadius,
                 bottomEnd = bottomEndRadius,
                 bottomStart = bottomStartRadius
+            ),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.primaryContainer
             )
         ) {
             Row(
@@ -575,6 +580,7 @@ fun SettingsSwipeableButton(
         }
     }
 }
+
 
 
 /**
@@ -981,6 +987,7 @@ fun SettingsSlider(
 @Composable
 fun Settings(
     mainAppModel: MainAppModel,
+    homeScreenModel: HomeScreenModel,
     goBack: () -> Unit,
     activity: Activity,
 ) {
@@ -1013,7 +1020,8 @@ fun Settings(
                 enterTransition = { fadeIn(tween(300)) },
                 exitTransition = { fadeOut(tween(300)) }) {
                 HiddenApps(
-                    mainAppModel
+                    mainAppModel = mainAppModel,
+                    homeScreenModel = homeScreenModel
                 ) { navController.popBackStack() }
             }
             composable(
@@ -1034,7 +1042,10 @@ fun Settings(
                 "devOptions",
                 enterTransition = { fadeIn(tween(300)) },
                 exitTransition = { fadeOut(tween(300)) }) {
-                DevOptions(mainAppModel = mainAppModel, context = mainAppModel.getContext()) { navController.popBackStack() }
+                DevOptions(
+                    mainAppModel = mainAppModel,
+                    context = mainAppModel.getContext()
+                ) { navController.popBackStack() }
             }
             composable(
                 "theme",
@@ -1131,9 +1142,11 @@ fun MainSettingsPage(
             })
 
         SettingsSwitch(
-            label = stringResource(id = R.string.twelve_hour_clock_setting), checked = getBooleanSetting(
+            label = stringResource(id = R.string.twelve_hour_clock_setting),
+            checked = getBooleanSetting(
                 mainAppModel.getContext(), stringResource(R.string.twelve_hour_clock), false
-            ), onCheckedChange = {
+            ),
+            onCheckedChange = {
                 toggleBooleanSetting(
                     mainAppModel.getContext(),
                     it,
@@ -1267,9 +1280,11 @@ fun MainSettingsPage(
             })
 
         SettingsSwitch(
-            label = stringResource(id = R.string.hide_screen_time_page), checked = getBooleanSetting(
+            label = stringResource(id = R.string.hide_screen_time_page),
+            checked = getBooleanSetting(
                 mainAppModel.getContext(), stringResource(R.string.hideScreenTimePage)
-            ),  onCheckedChange = {
+            ),
+            onCheckedChange = {
                 toggleBooleanSetting(
                     mainAppModel.getContext(),
                     it,
@@ -1753,6 +1768,7 @@ fun WidgetOptions(context: Context, goBack: () -> Unit) {
 @Composable
 fun HiddenApps(
     mainAppModel: MainAppModel,
+    homeScreenModel: HomeScreenModel,
     goBack: () -> Unit
 ) {
     val coroutineScope = rememberCoroutineScope()
@@ -1766,6 +1782,10 @@ fun HiddenApps(
     ) {
         item {
             SettingsHeader(goBack, stringResource(R.string.hidden_apps))
+        }
+
+        item {
+            SettingsSubheading(stringResource(R.string.swipe_to_show_app))
         }
 
         items(
@@ -1784,7 +1804,24 @@ fun HiddenApps(
                         mainAppModel.getContext(),
                         appPackageName
                     ),
-                    onClick = {},
+                    onClick = {
+                        val app = AppUtils.getInstalledAppFromPackageName(
+                            mainAppModel.getContext(),
+                            appPackageName
+                        )
+
+                        app?.let {
+                            AppUtils.openApp(
+                                app = it,
+                                overrideOpenChallenge = false,
+                                openChallengeShow = homeScreenModel.showOpenChallenge,
+                                mainAppModel = mainAppModel,
+                                homeScreenModel = homeScreenModel
+                            )
+                        }
+
+                        resetHome(homeScreenModel)
+                    },
                     onDeleteClick = {
                         // Trigger haptic feedback
                         haptics.performHapticFeedback(HapticFeedbackType.LongPress)
@@ -1966,7 +2003,8 @@ fun DevOptions(mainAppModel: MainAppModel, context: Context, goBack: () -> Unit)
                     if (devicePolicyManager.isAdminActive(compName)) {
                         devicePolicyManager.lockNow()
                     } else {
-                        Toast.makeText(context, "Enable Device Admin first", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, "Enable Device Admin first", Toast.LENGTH_SHORT)
+                            .show()
                     }
 
                     mainAppModel.blackOverlay.value = false
