@@ -21,7 +21,6 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.ColorScheme
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -39,6 +38,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.geecee.escapelauncher.ui.theme.AppTheme
+import com.geecee.escapelauncher.ui.theme.BackgroundColor
 import com.geecee.escapelauncher.ui.theme.EscapeTheme
 import com.geecee.escapelauncher.ui.views.HomeScreenPageManager
 import com.geecee.escapelauncher.ui.views.Onboarding
@@ -331,7 +331,7 @@ class MainHomeScreen : ComponentActivity() {
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(color = MaterialTheme.colorScheme.background)
+                .background(color = BackgroundColor)
         ) {
             NavHost(navController, startDestination = startDestination) {
                 composable(

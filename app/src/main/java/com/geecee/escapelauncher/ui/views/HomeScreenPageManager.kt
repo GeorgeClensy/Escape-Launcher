@@ -47,8 +47,10 @@ import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
 import com.geecee.escapelauncher.HomeScreenModel
 import com.geecee.escapelauncher.R
+import com.geecee.escapelauncher.ui.theme.ContentColor
 import com.geecee.escapelauncher.ui.theme.EscapeTheme
 import com.geecee.escapelauncher.ui.theme.offLightScheme
+import com.geecee.escapelauncher.ui.theme.primaryContentColor
 import com.geecee.escapelauncher.utils.AppUtils
 import com.geecee.escapelauncher.utils.AppUtils.doHapticFeedBack
 import com.geecee.escapelauncher.utils.AppUtils.formatScreenTime
@@ -308,7 +310,7 @@ fun HomeScreenItem(
         Text(
             appName,
             modifier = Modifier.padding(vertical = 15.dp),
-            color = MaterialTheme.colorScheme.onPrimaryContainer,
+            color = primaryContentColor,
             style = MaterialTheme.typography.bodyMedium
         )
 
@@ -319,7 +321,7 @@ fun HomeScreenItem(
                 modifier = Modifier
                     .padding(vertical = 15.dp, horizontal = 5.dp)
                     .alpha(0.5f),
-                color = MaterialTheme.colorScheme.onPrimaryContainer,
+                color = primaryContentColor,
                 style = MaterialTheme.typography.bodySmall
             )
         }
@@ -371,14 +373,14 @@ fun HomeScreenBottomSheet(
                 Icon(
                     Icons.Default.Settings,
                     contentDescription = "App Options",
-                    tint = MaterialTheme.colorScheme.onSurface,
+                    tint = ContentColor,
                     modifier = Modifier
                         .size(45.dp)
                         .padding(end = 10.dp)
                 )
                 Text(
                     title,
-                    color = MaterialTheme.colorScheme.onSurface,
+                    color = ContentColor,
                     fontSize = 32.sp,
                     style = MaterialTheme.typography.titleMedium
                 )
@@ -393,7 +395,7 @@ fun HomeScreenBottomSheet(
                         modifier = Modifier
                             .padding(vertical = 10.dp)
                             .combinedClickable(onClick = action.onClick),
-                        color = MaterialTheme.colorScheme.onSurface,
+                        color = ContentColor,
                         style = MaterialTheme.typography.bodyMedium
                     )
                 }

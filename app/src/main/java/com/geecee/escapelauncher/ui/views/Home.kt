@@ -41,6 +41,9 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import com.geecee.escapelauncher.HomeScreenModel
 import com.geecee.escapelauncher.R
+import com.geecee.escapelauncher.ui.theme.CardContainerColor
+import com.geecee.escapelauncher.ui.theme.ContentColor
+import com.geecee.escapelauncher.ui.theme.primaryContentColor
 import com.geecee.escapelauncher.utils.AppUtils
 import com.geecee.escapelauncher.utils.AppUtils.doHapticFeedBack
 import com.geecee.escapelauncher.utils.AppUtils.formatScreenTime
@@ -274,7 +277,7 @@ fun Clock(
                     ) {
                         Text(
                             text = digit.toString(),
-                            color = MaterialTheme.colorScheme.onPrimaryContainer,
+                            color = primaryContentColor,
                             fontWeight = FontWeight.SemiBold,
                             style = MaterialTheme.typography.headlineLarge,
                             textAlign = TextAlign.Center
@@ -295,7 +298,7 @@ fun Clock(
                     ) {
                         Text(
                             text = digit.toString(),
-                            color = MaterialTheme.colorScheme.onPrimaryContainer,
+                            color = primaryContentColor,
                             fontWeight = FontWeight.SemiBold,
                             style = MaterialTheme.typography.headlineLarge,
                             textAlign = TextAlign.Center
@@ -307,7 +310,7 @@ fun Clock(
     } else {
         Text(
             text = time,
-            color = MaterialTheme.colorScheme.onPrimaryContainer,
+            color = primaryContentColor,
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.SemiBold,
             modifier = Modifier
@@ -351,7 +354,7 @@ fun Date(
 
     Text(
         text = date,
-        color = MaterialTheme.colorScheme.onPrimaryContainer,
+        color = primaryContentColor,
         style = MaterialTheme.typography.bodyLarge,
         fontWeight = FontWeight.SemiBold,
         modifier = Modifier
@@ -377,12 +380,12 @@ fun HomeScreenScreenTime(
             .clip(
                 MaterialTheme.shapes.extraLarge
             )
-            .background(MaterialTheme.colorScheme.surfaceVariant)
+            .background(CardContainerColor)
             .padding(0.dp,(7.5).dp)
     ) {
         Text(
             text = screenTime,
-            color = MaterialTheme.colorScheme.onPrimaryContainer,
+            color = primaryContentColor,
             style = MaterialTheme.typography.bodyLarge,
             fontWeight = FontWeight.SemiBold,
             modifier = Modifier.padding(25.dp)
@@ -401,7 +404,7 @@ fun FirstTimeHelp() {
         )
     ) {
         Column(
-            Modifier.background(MaterialTheme.colorScheme.surfaceVariant)
+            Modifier.background(CardContainerColor)
         ) {
             Row(
                 Modifier
@@ -412,13 +415,13 @@ fun FirstTimeHelp() {
                     Icons.AutoMirrored.Rounded.ArrowForward,
                     "",
                     Modifier.align(Alignment.CenterVertically),
-                    tint = MaterialTheme.colorScheme.onPrimaryContainer
+                    tint = ContentColor
                 )
                 Spacer(Modifier.width(5.dp))
                 Text(
                     stringResource(R.string.swipe_for_all_apps),
                     modifier = Modifier,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                    color = ContentColor,
                     style = MaterialTheme.typography.bodyMedium
                 )
             }
@@ -432,13 +435,13 @@ fun FirstTimeHelp() {
                     Icons.Default.Settings,
                     "",
                     Modifier.align(Alignment.CenterVertically),
-                    tint = MaterialTheme.colorScheme.onPrimaryContainer
+                    tint = ContentColor
                 )
                 Spacer(Modifier.width(5.dp))
                 Text(
                     stringResource(R.string.hold_for_settings),
                     modifier = Modifier,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                    color = ContentColor,
                     style = MaterialTheme.typography.bodyMedium
                 )
             }

@@ -12,7 +12,6 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -65,6 +64,13 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import com.geecee.escapelauncher.HomeScreenModel
 import com.geecee.escapelauncher.R
+import com.geecee.escapelauncher.ui.theme.BackgroundColor
+import com.geecee.escapelauncher.ui.theme.CardContainerColor
+import com.geecee.escapelauncher.ui.theme.CardContainerColorDisabled
+import com.geecee.escapelauncher.ui.theme.ContentColor
+import com.geecee.escapelauncher.ui.theme.ContentColorDisabled
+import com.geecee.escapelauncher.ui.theme.SecondaryCardContainerColor
+import com.geecee.escapelauncher.ui.theme.primaryContentColor
 import com.geecee.escapelauncher.utils.AppUtils
 import com.geecee.escapelauncher.utils.AppUtils.doHapticFeedBack
 import com.geecee.escapelauncher.utils.AppUtils.resetHome
@@ -94,7 +100,6 @@ fun AppsList(
 
     Box(
         Modifier
-            .background(MaterialTheme.colorScheme.background)
             .fillMaxSize(),
     ) {
         LazyColumn(
@@ -349,7 +354,7 @@ fun AppsListHeader() {
     Spacer(modifier = Modifier.height(140.dp))
     Text(
         text = stringResource(id = R.string.all_apps),
-        color = MaterialTheme.colorScheme.onPrimaryContainer,
+        color = primaryContentColor,
         style = MaterialTheme.typography.titleMedium
     )
 }
@@ -395,7 +400,7 @@ fun AnimatedPillSearchBar(
             }
             .animateContentSize(),
         shape = RoundedCornerShape(28.dp),
-        color = MaterialTheme.colorScheme.onPrimaryContainer) {
+        color = primaryContentColor) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
@@ -405,7 +410,7 @@ fun AnimatedPillSearchBar(
             Icon(
                 imageVector = Icons.Default.Search,
                 contentDescription = "Search Icon",
-                tint = MaterialTheme.colorScheme.background,
+                tint = BackgroundColor,
                 modifier = Modifier
                     .padding(5.dp, 0.dp)
                     .size(25.dp)
@@ -415,7 +420,7 @@ fun AnimatedPillSearchBar(
                 Text(
                     stringResource(id = R.string.search),
                     modifier = Modifier.animateContentSize(),
-                    color = MaterialTheme.colorScheme.background,
+                    color = BackgroundColor,
                     style = MaterialTheme.typography.bodyMedium
                 )
             }
@@ -450,7 +455,7 @@ fun AnimatedPillSearchBar(
                         keyboardDone(searchText.text)
                     }),
                     textStyle = MaterialTheme.typography.bodyMedium.copy(
-                        color = MaterialTheme.colorScheme.background
+                        color = BackgroundColor
                     )
                 )
             }
@@ -489,10 +494,10 @@ fun PrivateSpace(mainAppModel: MainAppModel, homeScreenModel: HomeScreenModel) {
             .fillMaxWidth()
             .clip(MaterialTheme.shapes.extraLarge),
         colors = CardColors(
-            containerColor = MaterialTheme.colorScheme.secondaryContainer,
-            contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-            disabledContentColor = MaterialTheme.colorScheme.secondaryContainer,
-            disabledContainerColor = MaterialTheme.colorScheme.onSecondaryContainer,
+            containerColor = CardContainerColor,
+            contentColor = ContentColor,
+            disabledContentColor = CardContainerColorDisabled,
+            disabledContainerColor = ContentColorDisabled,
         )
     ) {
         Column(
@@ -516,10 +521,10 @@ fun PrivateSpace(mainAppModel: MainAppModel, homeScreenModel: HomeScreenModel) {
                         {
                             homeScreenModel.showPrivateSpaceSettings.value = true
                         }, Modifier, colors = IconButtonColors(
-                            containerColor = MaterialTheme.colorScheme.primaryContainer,
-                            contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                            disabledContainerColor = MaterialTheme.colorScheme.primaryContainer,
-                            disabledContentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                            containerColor = SecondaryCardContainerColor,
+                            contentColor = ContentColor,
+                            disabledContainerColor = SecondaryCardContainerColor,
+                            disabledContentColor = ContentColor
                         )
                     ) {
                         Icon(
@@ -533,10 +538,10 @@ fun PrivateSpace(mainAppModel: MainAppModel, homeScreenModel: HomeScreenModel) {
                             homeScreenModel.searchExpanded.value = false
                             homeScreenModel.searchText.value = ""
                         }, Modifier, colors = IconButtonColors(
-                            containerColor = MaterialTheme.colorScheme.primaryContainer,
-                            contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                            disabledContainerColor = MaterialTheme.colorScheme.primaryContainer,
-                            disabledContentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                            containerColor = SecondaryCardContainerColor,
+                            contentColor = ContentColor,
+                            disabledContainerColor = SecondaryCardContainerColor,
+                            disabledContentColor = ContentColor
                         )
                     ) {
                         Icon(

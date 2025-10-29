@@ -40,7 +40,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.Card
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -78,6 +77,8 @@ import com.geecee.escapelauncher.ui.composables.SettingsSubheading
 import com.geecee.escapelauncher.ui.composables.SettingsSwipeableButton
 import com.geecee.escapelauncher.ui.composables.SettingsSwitch
 import com.geecee.escapelauncher.ui.composables.ThemeCard
+import com.geecee.escapelauncher.ui.theme.CardContainerColor
+import com.geecee.escapelauncher.ui.theme.ContentColor
 import com.geecee.escapelauncher.ui.theme.getTypographyFromFontName
 import com.geecee.escapelauncher.ui.theme.refreshTheme
 import com.geecee.escapelauncher.utils.AppUtils
@@ -1244,7 +1245,7 @@ fun PrivacyPolicyDialog(mainAppModel: MainAppModel, showPolicyDialog: MutableSta
                 loadTextFromAssets(mainAppModel.getContext(), "Privacy Policy.txt")?.let { text ->
                     BasicText(
                         text = text, style = TextStyle(
-                            color = MaterialTheme.colorScheme.onPrimaryContainer,
+                            color = ContentColor,
                             textAlign = TextAlign.Start,
                             fontWeight = FontWeight.Normal
                         ), modifier = Modifier.fillMaxWidth()
@@ -1260,10 +1261,10 @@ fun PrivacyPolicyDialog(mainAppModel: MainAppModel, showPolicyDialog: MutableSta
                         .align(Alignment.CenterHorizontally)
                         .padding(bottom = 8.dp),
                     colors = ButtonColors(
-                        MaterialTheme.colorScheme.onPrimaryContainer,
-                        MaterialTheme.colorScheme.background,
-                        MaterialTheme.colorScheme.onPrimaryContainer,
-                        MaterialTheme.colorScheme.background
+                        CardContainerColor,
+                        ContentColor,
+                        CardContainerColor,
+                        ContentColor
                     )
                 ) {
                     Text("OK")

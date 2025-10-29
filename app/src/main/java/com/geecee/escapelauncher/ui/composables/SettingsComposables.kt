@@ -71,13 +71,13 @@ import androidx.compose.ui.unit.isUnspecified
 import androidx.compose.ui.unit.sp
 import com.geecee.escapelauncher.R
 import com.geecee.escapelauncher.ui.theme.AppTheme
+import com.geecee.escapelauncher.ui.theme.CardContainerColor
+import com.geecee.escapelauncher.ui.theme.CardContainerColorDisabled
+import com.geecee.escapelauncher.ui.theme.ContentColor
+import com.geecee.escapelauncher.ui.theme.ContentColorDisabled
+import com.geecee.escapelauncher.ui.theme.ErrorContainerColor
+import com.geecee.escapelauncher.ui.theme.ErrorContentColor
 import com.geecee.escapelauncher.ui.theme.transparentHalf
-
-// Shared constants
-private val SettingsCardContainerColor: Color @Composable get() = MaterialTheme.colorScheme.surfaceContainerHigh
-private val SettingsCardContentColor: Color @Composable get() = MaterialTheme.colorScheme.onSurface
-private val SettingsCardContainerColorDisabled: Color @Composable get() = MaterialTheme.colorScheme.surfaceContainerLow
-private val SettingsCardContentColorDisabled: Color @Composable get() = MaterialTheme.colorScheme.onSurface
 
 @Composable
 fun AutoResizingText(
@@ -86,7 +86,7 @@ fun AutoResizingText(
     style: TextStyle = MaterialTheme.typography.bodyMedium,
     minFontSize: TextUnit = 10.sp,
     maxLines: Int = 1,
-    color: Color = MaterialTheme.colorScheme.onPrimaryContainer,
+    color: Color = ContentColor,
     fontFamily: FontFamily? = MaterialTheme.typography.bodyMedium.fontFamily
 ) {
     BoxWithConstraints(modifier = modifier) {
@@ -178,7 +178,7 @@ fun SettingsHeader(goBack: () -> Unit, title: String) {
         Icon(
             Icons.AutoMirrored.Default.ArrowBack,
             contentDescription = "Go Back",
-            tint = MaterialTheme.colorScheme.onPrimaryContainer,
+            tint = ContentColor,
             modifier = Modifier
                 .size(48.dp)
                 .align(Alignment.CenterVertically)
@@ -186,7 +186,6 @@ fun SettingsHeader(goBack: () -> Unit, title: String) {
         Spacer(modifier = Modifier.width(5.dp))
         AutoResizingText(
             text = title,
-            color = MaterialTheme.colorScheme.onPrimaryContainer,
             style = MaterialTheme.typography.titleMedium,
             modifier = Modifier.align(Alignment.CenterVertically)
         )
@@ -204,7 +203,7 @@ fun SettingsSubheading(title: String) {
     ) {
         Text(
             text = title,
-            color = MaterialTheme.colorScheme.onPrimaryContainer,
+            color = ContentColor,
             style = MaterialTheme.typography.bodyMedium,
             modifier = Modifier.align(Alignment.CenterVertically)
         )
@@ -249,8 +248,8 @@ fun SettingsSwitch(
             bottomEnd = bottomEndRadius,
             bottomStart = bottomStartRadius
         ), colors = CardDefaults.cardColors(
-            containerColor = SettingsCardContainerColor,
-            contentColor = SettingsCardContentColor
+            containerColor = CardContainerColor,
+            contentColor = ContentColor
         )
     ) {
         Row(
@@ -264,7 +263,6 @@ fun SettingsSwitch(
                 modifier = Modifier
                     .weight(1f)
                     .padding(end = 8.dp), // Add space between text and switch
-                color = MaterialTheme.colorScheme.onPrimaryContainer,
                 style = MaterialTheme.typography.bodyMedium
             )
             Switch(
@@ -313,8 +311,8 @@ fun SettingsNavigationItem(
             bottomEnd = bottomEndRadius,
             bottomStart = bottomStartRadius
         ), colors = CardDefaults.cardColors(
-            containerColor = SettingsCardContainerColor,
-            contentColor = SettingsCardContentColor
+            containerColor = CardContainerColor,
+            contentColor = ContentColor
         )
     ) {
         Row(
@@ -329,7 +327,6 @@ fun SettingsNavigationItem(
                 modifier = Modifier
                     .weight(1f) // Allow text to take available space
                     .padding(end = 8.dp), // Add space between text and icon
-                color = MaterialTheme.colorScheme.onPrimaryContainer,
                 style = MaterialTheme.typography.bodyMedium,
             )
             val iconModifier = Modifier.size(24.dp) // Standardized icon size slightly
@@ -338,14 +335,14 @@ fun SettingsNavigationItem(
                     Icons.AutoMirrored.Default.KeyboardArrowRight,
                     contentDescription = null, // Content description can be null for decorative icons
                     modifier = iconModifier.rotate(-45f),
-                    tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                    tint = ContentColor,
                 )
             } else {
                 Icon(
                     Icons.AutoMirrored.Default.KeyboardArrowRight,
                     contentDescription = null, // Content description can be null for decorative icons
                     modifier = iconModifier,
-                    tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                    tint = ContentColor,
                 )
             }
         }
@@ -391,14 +388,14 @@ fun SettingsButton(
         ),
         colors = if (!isDisabled) {
             CardDefaults.cardColors(
-                containerColor = SettingsCardContainerColor,
-                contentColor = SettingsCardContentColor
+                containerColor = CardContainerColor,
+                contentColor = ContentColor
             )
         }
         else {
             CardDefaults.cardColors(
-                containerColor = SettingsCardContainerColorDisabled,
-                contentColor = SettingsCardContentColorDisabled
+                containerColor = CardContainerColorDisabled,
+                contentColor = ContentColorDisabled
             )
         }
     ) {
@@ -414,7 +411,6 @@ fun SettingsButton(
                 modifier = Modifier
                     .weight(1f) // Allow text to take available space
                     .padding(end = 8.dp), // Add space between text and icon
-                color = MaterialTheme.colorScheme.onPrimaryContainer,
                 style = MaterialTheme.typography.bodyMedium,
                 fontFamily = fontFamily
             )
@@ -475,7 +471,8 @@ fun SettingsSwipeableButton(
                     bottomStart = bottomStartRadius
                 ),
                 colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.error
+                    containerColor = ErrorContainerColor,
+                    contentColor = ErrorContentColor
                 )
             ) {
                 Box(
@@ -487,7 +484,7 @@ fun SettingsSwipeableButton(
                     Icon(
                         imageVector = Icons.Default.Delete,
                         contentDescription = stringResource(R.string.remove),
-                        tint = MaterialTheme.colorScheme.onError
+                        tint = ErrorContentColor
                     )
                 }
             }
@@ -503,8 +500,8 @@ fun SettingsSwipeableButton(
                 bottomEnd = bottomEndRadius,
                 bottomStart = bottomStartRadius
             ), colors = CardDefaults.cardColors(
-                containerColor = SettingsCardContainerColor,
-                contentColor = SettingsCardContentColor
+                containerColor = CardContainerColor,
+                contentColor = ContentColor
             )
         ) {
             Row(
@@ -514,12 +511,11 @@ fun SettingsSwipeableButton(
                     .height(48.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Text(
+                AutoResizingText(
                     text = label,
                     modifier = Modifier
                         .weight(1f)
                         .padding(end = 8.dp),
-                    color = MaterialTheme.colorScheme.onPrimaryContainer,
                     style = MaterialTheme.typography.bodyMedium.copy(fontFamily = fontFamily)
                 )
             }
@@ -798,8 +794,8 @@ fun SettingsSingleChoiceSegmentedButtons(
             bottomStart = bottomStartRadius,
             bottomEnd = bottomEndRadius
         ), colors = CardDefaults.cardColors(
-            containerColor = SettingsCardContainerColor,
-            contentColor = SettingsCardContentColor
+            containerColor = CardContainerColor,
+            contentColor = ContentColor
         )
     ) {
         Row(
@@ -811,7 +807,6 @@ fun SettingsSingleChoiceSegmentedButtons(
         ) {
             AutoResizingText(
                 text = label,
-                color = MaterialTheme.colorScheme.onPrimaryContainer,
                 modifier = Modifier.weight(1f)
             )
 
@@ -882,8 +877,8 @@ fun SettingsSlider(
             bottomStart = bottomStartRadius,
             bottomEnd = bottomEndRadius
         ), colors = CardDefaults.cardColors(
-            containerColor = SettingsCardContainerColor,
-            contentColor = SettingsCardContentColor
+            containerColor = CardContainerColor,
+            contentColor = ContentColor
         )
     ) {
         Row(
@@ -893,9 +888,8 @@ fun SettingsSlider(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Text(
+            AutoResizingText(
                 text = label,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 style = MaterialTheme.typography.bodyLarge,
                 modifier = Modifier.weight(1f)
             )
@@ -917,7 +911,7 @@ fun SettingsSlider(
                     .size(40.dp)
                     .padding(start = 8.dp)
                     .clickable(onClick = onReset),
-                tint = MaterialTheme.colorScheme.primary,
+                tint = ContentColor,
             )
         }
     }

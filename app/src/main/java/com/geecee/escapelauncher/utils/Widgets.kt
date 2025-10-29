@@ -61,6 +61,9 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.edit
 import androidx.core.graphics.drawable.toBitmap
 import com.geecee.escapelauncher.R
+import com.geecee.escapelauncher.ui.theme.BackgroundColor
+import com.geecee.escapelauncher.ui.theme.ContentColor
+import com.geecee.escapelauncher.ui.theme.primaryContentColor
 
 // Constants for SharedPreferences used in widget saving/loading
 private const val WIDGET_PREFS_NAME = "widget_prefs"
@@ -372,12 +375,13 @@ fun WidgetAppItem(
                 Column {
                     Text(
                         text = widgetAppData.appName,
-                        style = MaterialTheme.typography.bodyLarge
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = primaryContentColor
                     )
                     Text(
                         text = "${widgets.size} ${if (widgets.size == 1) "widget" else "widgets"}",
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = ContentColor
                     )
                 }
             }
@@ -433,7 +437,7 @@ fun WidgetPreviewItem(
             modifier = Modifier
                 .size(100.dp)
                 .clip(RoundedCornerShape(8.dp))
-                .background(MaterialTheme.colorScheme.surface)
+                .background(BackgroundColor)
                 .padding(4.dp),
             contentAlignment = Alignment.Center
         ) {
@@ -449,7 +453,7 @@ fun WidgetPreviewItem(
                     imageVector = Icons.Default.Search,
                     contentDescription = null,
                     modifier = Modifier.size(36.dp),
-                    tint = MaterialTheme.colorScheme.primary
+                    tint = ContentColor
                 )
             }
         }

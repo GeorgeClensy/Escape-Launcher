@@ -41,6 +41,7 @@ import androidx.core.content.ContextCompat.getSystemService
 import androidx.core.net.toUri
 import com.geecee.escapelauncher.R
 import com.geecee.escapelauncher.ui.composables.SettingsSwitch
+import com.geecee.escapelauncher.ui.theme.ContentColor
 import com.geecee.escapelauncher.ui.theme.transparentHalf
 
 private const val PRIVATE_SPACE_USER_TYPE = "android.os.usertype.profile.PRIVATE"
@@ -193,7 +194,7 @@ fun PrivateAppItem(
     Text(
         appName,
         modifier = modifier,
-        color = MaterialTheme.colorScheme.onBackground,
+        color = ContentColor,
         style = MaterialTheme.typography.bodyMedium
     )
 }

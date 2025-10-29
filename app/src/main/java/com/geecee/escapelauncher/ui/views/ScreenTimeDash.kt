@@ -41,8 +41,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.geecee.escapelauncher.MainAppViewModel
 import com.geecee.escapelauncher.R
+import com.geecee.escapelauncher.ui.theme.CardContainerColor
+import com.geecee.escapelauncher.ui.theme.ContentColor
 import com.geecee.escapelauncher.ui.theme.escapeGreen
 import com.geecee.escapelauncher.ui.theme.escapeRed
+import com.geecee.escapelauncher.ui.theme.primaryContentColor
 import com.geecee.escapelauncher.utils.AppUtils
 import com.geecee.escapelauncher.utils.managers.AppUsageEntity
 import com.geecee.escapelauncher.utils.managers.getScreenTimeListSorted
@@ -136,7 +139,6 @@ fun ScreenTimeDashboard(context: Context, mainAppModel: MainAppViewModel) {
     // UI for ScreenTime screen
     Column(
         Modifier
-            .background(MaterialTheme.colorScheme.background)
             .fillMaxSize()
             .padding(15.dp, 0.dp)
             .verticalScroll(rememberScrollState())
@@ -204,7 +206,7 @@ fun ScreenTimeDashboard(context: Context, mainAppModel: MainAppViewModel) {
                     text = stringResource(R.string.no_apps_used),
                     modifier = Modifier.align(Alignment.CenterHorizontally),
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                    color = ContentColor
                 )
             }
         }
@@ -242,7 +244,7 @@ fun ScreenTime(time: String, increased: Boolean, modifier: Modifier) {
             text = time,
             style = MaterialTheme.typography.titleMedium,
             modifier = modifier,
-            color = MaterialTheme.colorScheme.onPrimaryContainer,
+            color = primaryContentColor,
             fontWeight = FontWeight.SemiBold
         )
 
@@ -258,7 +260,7 @@ fun HigherRec(percent: Int, modifier: Modifier = Modifier) {
         modifier = modifier
             .clip(MaterialTheme.shapes.extraLarge)
             .aspectRatio(1f)
-            .background(MaterialTheme.colorScheme.surfaceContainerHighest)
+            .background(CardContainerColor)
     ) {
         val boxWithConstraintsScope = this
         val padding = boxWithConstraintsScope.maxWidth * 0.1f
@@ -290,7 +292,7 @@ fun HigherRec(percent: Int, modifier: Modifier = Modifier) {
                     textAlign = TextAlign.Center,
                     fontWeight = FontWeight.SemiBold
                 ),
-                color = MaterialTheme.colorScheme.onPrimaryContainer
+                color = ContentColor
             )
         }
     }
@@ -305,7 +307,7 @@ fun DaySpent(percent: Int, modifier: Modifier = Modifier) {
         modifier = modifier
             .aspectRatio(1f)
             .clip(CircleShape)
-            .background(MaterialTheme.colorScheme.surfaceContainerHighest)
+            .background(CardContainerColor)
     ) {
         val boxWithConstraintsScope = this
         val padding = boxWithConstraintsScope.maxWidth * 0.1f
@@ -337,7 +339,7 @@ fun DaySpent(percent: Int, modifier: Modifier = Modifier) {
                     textAlign = TextAlign.Center,
                     fontWeight = FontWeight.SemiBold
                 ),
-                color = MaterialTheme.colorScheme.onPrimaryContainer
+                color = ContentColor
             )
         }
     }
@@ -357,7 +359,7 @@ fun AppUsage(appName: String, increased: Boolean, time: String, modifier: Modifi
             text = if (appName.length > 12) appName.take(12) + "..." else appName,
             modifier = Modifier.align(Alignment.CenterStart),
             style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onPrimaryContainer
+            color = ContentColor
         )
 
         Row(
@@ -387,7 +389,7 @@ fun AppUsage(appName: String, increased: Boolean, time: String, modifier: Modifi
                 text = time,
                 style = MaterialTheme.typography.bodyMedium,
                 modifier = modifier,
-                color = MaterialTheme.colorScheme.onPrimaryContainer,
+                color = ContentColor,
                 fontWeight = FontWeight.SemiBold
             )
         }
@@ -403,7 +405,7 @@ fun AppUsages(modifier: Modifier, content: @Composable () -> Unit) {
         modifier
             .fillMaxSize()
             .clip(MaterialTheme.shapes.extraLarge)
-            .background(MaterialTheme.colorScheme.surfaceContainerHighest)
+            .background(CardContainerColor)
     ) {
         Column(
             Modifier.padding(20.dp)
