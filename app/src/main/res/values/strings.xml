@@ -61,7 +61,6 @@
     <string name="screen_time_on_home_screen">Home Screen Time</string>
     <string name="hide_private_space_in_search">Hidden private space</string>
     <string name="haptic_feedback">Haptic feedback</string>
-    <string name="personalization">Personalize</string>
     <string name="done">Done</string>
     <string name="syncLightDark">Sync with system light/dark</string>
     <string name="match_system_wallpaper">Match system wallpaper with theme</string>
@@ -72,7 +71,6 @@
     <string name="general">General</string>
     <string name="reset_to_default">Reset to default</string>
     <string name="remove">Remove</string>
-    <string name="no_hidden_apps">Long hold an app in the apps list and press hide to hide it.</string>
     <string name="twelve_hour_clock_setting">12 Hour Clock</string>
     <string name="hide_screen_time_page">Hide screen time page</string>
     <string name="show_hidden_apps_in_search">Show hidden apps in search</string>
