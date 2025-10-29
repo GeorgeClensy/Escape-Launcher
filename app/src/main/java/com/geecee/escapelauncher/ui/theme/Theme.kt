@@ -1,11 +1,13 @@
 package com.geecee.escapelauncher.ui.theme
 
 import android.content.Context
+import android.os.Build
 import androidx.annotation.StringRes
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Typography
 import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
@@ -635,9 +637,16 @@ fun EscapeTheme(
         )
     )
 
-    MaterialTheme(
-        colorScheme = colorScheme.value, typography = typography, content = content
-    )
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        MaterialTheme(
+            colorScheme = dynamicLightColorScheme(context), typography = typography, content = content
+        )
+    }
+    else {
+        MaterialTheme(
+            colorScheme = colorScheme.value, typography = typography, content = content
+        )
+    }
 }
 
 enum class AppTheme(val id: Int, val scheme: ColorScheme, @StringRes val nameRes: Int) {
