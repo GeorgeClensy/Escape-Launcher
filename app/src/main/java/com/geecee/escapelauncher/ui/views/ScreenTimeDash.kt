@@ -292,7 +292,7 @@ fun HigherRec(percent: Int, modifier: Modifier = Modifier) {
                     textAlign = TextAlign.Center,
                     fontWeight = FontWeight.SemiBold
                 ),
-                color = ContentColor
+                color = primaryContentColor
             )
         }
     }
@@ -339,7 +339,7 @@ fun DaySpent(percent: Int, modifier: Modifier = Modifier) {
                     textAlign = TextAlign.Center,
                     fontWeight = FontWeight.SemiBold
                 ),
-                color = ContentColor
+                color = primaryContentColor
             )
         }
     }
@@ -359,7 +359,7 @@ fun AppUsage(appName: String, increased: Boolean, time: String, modifier: Modifi
             text = if (appName.length > 12) appName.take(12) + "..." else appName,
             modifier = Modifier.align(Alignment.CenterStart),
             style = MaterialTheme.typography.bodyMedium,
-            color = ContentColor
+            color = primaryContentColor
         )
 
         Row(
@@ -389,7 +389,7 @@ fun AppUsage(appName: String, increased: Boolean, time: String, modifier: Modifi
                 text = time,
                 style = MaterialTheme.typography.bodyMedium,
                 modifier = modifier,
-                color = ContentColor,
+                color = primaryContentColor,
                 fontWeight = FontWeight.SemiBold
             )
         }
