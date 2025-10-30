@@ -14,7 +14,7 @@ import com.geecee.escapelauncher.utils.InstalledApp
 @Composable
 fun BulkAppManager(
     apps: List<InstalledApp>,
-    preSelectedApps: List<InstalledApp> = emptyList<InstalledApp>(),
+    preSelectedApps: List<InstalledApp> = emptyList(),
     title: String,
     onBackClicked: () -> Unit,
     onAppClicked: (app: InstalledApp, selected: Boolean) -> Unit
@@ -28,6 +28,29 @@ fun BulkAppManager(
     ) {
         item {
             SettingsHeader(goBack = { onBackClicked() }, title = title)
+        }
+
+        items(selectedState, key = { it.packageName }) { app ->
+            val isSelected = selectedState.contains(app)
+            SettingsButton(
+                label = app.displayName,
+                onClick = {
+                    if (isSelected) {
+                        selectedState.remove(app)
+                    } else {
+                        selectedState.add(app)
+                    }
+
+                    onAppClicked(app, isSelected)
+                },
+                isTopOfGroup = selectedState.firstOrNull() == app,
+                isBottomOfGroup = selectedState.lastOrNull() == app,
+                isDisabled = false
+            )
+        }
+
+        item {
+            SettingsSpacer()
         }
 
         items(
