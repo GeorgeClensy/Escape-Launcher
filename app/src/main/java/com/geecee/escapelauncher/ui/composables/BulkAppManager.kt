@@ -30,7 +30,9 @@ fun BulkAppManager(
             SettingsHeader(goBack = { onBackClicked() }, title = title)
         }
 
-        items(items = apps) { app ->
+        items(
+            items = apps.filter { it.packageName != "com.geecee.escapelauncher" }
+        ) { app ->
             val isSelected = selectedState.contains(app)
             SettingsButton(
                 label = app.displayName,

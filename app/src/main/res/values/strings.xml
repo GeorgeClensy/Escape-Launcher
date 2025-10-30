@@ -74,6 +74,7 @@
     <string name="twelve_hour_clock_setting">12 Hour Clock</string>
     <string name="hide_screen_time_page">Hide screen time page</string>
     <string name="show_hidden_apps_in_search">Show hidden apps in search</string>
+    <string name="manage_favourite_apps">Manage favourite apps</string>
 
     <!-- Apps challenge strings -->
     <string name="open_challenges">App Countdown</string>

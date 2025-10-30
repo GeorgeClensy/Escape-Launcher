@@ -236,6 +236,34 @@ fun Settings(
                     }
                 }
             }
+            composable(
+                "bulkFavouriteApps",
+                enterTransition = { fadeIn(tween(300)) },
+                exitTransition = { fadeOut(tween(300)) }) {
+                val preSelectedFavoriteApps =
+                    mainAppModel.favoriteAppsManager.getFavoriteApps()
+                        .mapNotNull { packageName ->
+                            AppUtils.getInstalledAppFromPackageName(
+                                mainAppModel.getContext(),
+                                packageName
+                            )
+                        }
+
+                BulkAppManager(
+                    apps = homeScreenModel.installedApps,
+                    preSelectedApps = preSelectedFavoriteApps,
+                    title = stringResource(R.string.manage_favourite_apps),
+                    onBackClicked = { navController.popBackStack() }
+                ) { app, selected ->
+                    if (selected) {
+                        mainAppModel.favoriteAppsManager.removeFavoriteApp(app.packageName)
+                        resetHome(homeScreenModel, true)
+                    } else {
+                        mainAppModel.favoriteAppsManager.addFavoriteApp(app.packageName)
+                        resetHome(homeScreenModel, true)
+                    }
+                }
+            }
         }
     }
 
@@ -305,10 +333,18 @@ fun MainSettingsPage(
         // Home options
         SettingsSubheading(stringResource(R.string.home_screen_options))
 
+        SettingsNavigationItem(
+            stringResource(R.string.manage_favourite_apps),
+            diagonalArrow = false,
+            isTopOfGroup = true,
+            onClick = {
+                navController.navigate("bulkFavouriteApps")
+            })
+
         SettingsSwitch(
             label = stringResource(id = R.string.show_clock), checked = getBooleanSetting(
                 mainAppModel.getContext(), stringResource(R.string.ShowClock), true
-            ), isTopOfGroup = true, onCheckedChange = {
+            ), onCheckedChange = {
                 toggleBooleanSetting(
                     mainAppModel.getContext(),
                     it,
