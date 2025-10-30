@@ -215,6 +215,7 @@ fun ScreenTimeDashboard(context: Context, mainAppModel: MainAppViewModel) {
         Spacer(Modifier.height(15.dp))
 
         SettingsSpacer()
+        SettingsSpacer()
 
     }
 }

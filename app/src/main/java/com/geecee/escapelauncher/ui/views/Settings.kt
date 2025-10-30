@@ -582,6 +582,7 @@ fun MainSettingsPage(
             })
 
         SettingsSpacer()
+        SettingsSpacer()
     }
 }
 
@@ -776,6 +777,9 @@ fun ThemeOptions(
                         currentSelectedTheme.intValue = theme
                     }
                 })
+        }
+        item {
+            SettingsSpacer()
         }
         item {
             SettingsSpacer()
@@ -975,6 +979,7 @@ fun WidgetOptions(context: Context, goBack: () -> Unit) {
         )
 
         SettingsSpacer()
+        SettingsSpacer()
     }
 }
 
@@ -1095,6 +1100,9 @@ fun HiddenApps(
         item {
             SettingsSpacer()
         }
+        item {
+            SettingsSpacer()
+        }
     }
 }
 
@@ -1163,6 +1171,9 @@ fun OpenChallenges(
         item {
             SettingsSpacer()
         }
+        item {
+            SettingsSpacer()
+        }
     }
 }
 
@@ -1213,6 +1224,7 @@ fun ChooseFont(context: Context, activity: Activity, goBack: () -> Unit) {
                 fontFamily = getTypographyFromFontName(fontName).bodyMedium.fontFamily
             )
         }
+        SettingsSpacer()
         SettingsSpacer()
     }
 }
@@ -1316,6 +1328,10 @@ fun PrivacyPolicyDialog(mainAppModel: MainAppModel, showPolicyDialog: MutableSta
                 ) {
                     Text("OK")
                 }
+
+                SettingsSpacer()
+                SettingsSpacer()
+                SettingsSpacer()
             }
         }
     }

@@ -261,6 +261,10 @@ class MainHomeScreen : ComponentActivity() {
         controller.hide(WindowInsetsCompat.Type.statusBars()) // hide status bar only
         controller.systemBarsBehavior =
             WindowInsetsControllerCompat.BEHAVIOR_DEFAULT
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            window.setNavigationBarContrastEnforced(false)
+        }
     }
 
     /**

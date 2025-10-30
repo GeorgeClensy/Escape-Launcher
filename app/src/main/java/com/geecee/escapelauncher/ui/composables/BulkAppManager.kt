@@ -97,6 +97,10 @@ fun BulkAppManager(
         item {
             SettingsSpacer()
         }
+
+        item {
+            SettingsSpacer()
+        }
     }
 }
 
