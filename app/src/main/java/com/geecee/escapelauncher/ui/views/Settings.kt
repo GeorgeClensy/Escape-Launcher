@@ -468,11 +468,22 @@ fun MainSettingsPage(
         SettingsSwitch(
             label = stringResource(id = R.string.auto_open), checked = getBooleanSetting(
                 mainAppModel.getContext(), stringResource(R.string.SearchAutoOpen)
-            ), isBottomOfGroup = true, onCheckedChange = {
+            ), isBottomOfGroup = false, onCheckedChange = {
                 toggleBooleanSetting(
                     mainAppModel.getContext(),
                     it,
                     mainAppModel.getContext().resources.getString(R.string.SearchAutoOpen)
+                )
+            })
+
+        SettingsSwitch(
+            label = stringResource(id = R.string.search_at_bottom), checked = getBooleanSetting(
+                mainAppModel.getContext(), stringResource(R.string.bottomSearch), false
+            ), isBottomOfGroup = true, onCheckedChange = {
+                toggleBooleanSetting(
+                    mainAppModel.getContext(),
+                    it,
+                    mainAppModel.getContext().resources.getString(R.string.bottomSearch)
                 )
             })
 

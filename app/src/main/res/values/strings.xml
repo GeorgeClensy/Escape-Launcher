@@ -75,6 +75,7 @@
     <string name="hide_screen_time_page">Hide screen time page</string>
     <string name="show_hidden_apps_in_search">Show hidden apps in search</string>
     <string name="manage_favourite_apps">Manage favourite apps</string>
+    <string name="search_at_bottom">Search at bottom</string>
 
     <!-- Apps challenge strings -->
     <string name="open_challenges">App Countdown</string>

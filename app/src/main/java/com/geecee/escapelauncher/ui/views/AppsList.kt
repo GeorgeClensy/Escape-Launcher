@@ -64,6 +64,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import com.geecee.escapelauncher.HomeScreenModel
 import com.geecee.escapelauncher.R
+import com.geecee.escapelauncher.ui.composables.SettingsSpacer
 import com.geecee.escapelauncher.ui.theme.BackgroundColor
 import com.geecee.escapelauncher.ui.theme.CardContainerColor
 import com.geecee.escapelauncher.ui.theme.CardContainerColorDisabled
@@ -98,6 +99,12 @@ fun AppsList(
 ) {
     val haptics = LocalHapticFeedback.current
 
+    val bottomSearch = getBooleanSetting(
+        mainAppModel.getContext(),
+        stringResource(R.string.bottomSearch),
+        false
+    )
+
     Box(
         Modifier
             .fillMaxSize(),
@@ -120,7 +127,7 @@ fun AppsList(
                         mainAppModel.getContext(),
                         stringResource(R.string.ShowSearchBox),
                         true
-                    )
+                    ) && !bottomSearch
                 ) {
                     Spacer(modifier = Modifier.height(15.dp))
 
@@ -153,15 +160,22 @@ fun AppsList(
 
                                 val appInfo = filteredApps.first()
 
-                                var shouldShowHiddenApps = !mainAppModel.hiddenAppsManager.isAppHidden(
-                                    appInfo.packageName
-                                )
+                                var shouldShowHiddenApps =
+                                    !mainAppModel.hiddenAppsManager.isAppHidden(
+                                        appInfo.packageName
+                                    )
 
-                                if(!homeScreenModel.searchText.value.isBlank() && getBooleanSetting(mainAppModel.getContext(), mainAppModel.getContext().getString(R.string.showHiddenAppsInSearch), false)) {
+                                if (!homeScreenModel.searchText.value.isBlank() && getBooleanSetting(
+                                        mainAppModel.getContext(),
+                                        mainAppModel.getContext()
+                                            .getString(R.string.showHiddenAppsInSearch),
+                                        false
+                                    )
+                                ) {
                                     shouldShowHiddenApps = true
                                 }
 
-                                if(shouldShowHiddenApps) {
+                                if (shouldShowHiddenApps) {
                                     homeScreenModel.updateSelectedApp(appInfo)
 
                                     AppUtils.openApp(
@@ -232,7 +246,12 @@ fun AppsList(
                     app.packageName
                 )
 
-                if(!homeScreenModel.searchText.value.isBlank() && getBooleanSetting(mainAppModel.getContext(), stringResource(R.string.showHiddenAppsInSearch), false)) {
+                if (!homeScreenModel.searchText.value.isBlank() && getBooleanSetting(
+                        mainAppModel.getContext(),
+                        stringResource(R.string.showHiddenAppsInSearch),
+                        false
+                    )
+                ) {
                     shouldShowHiddenApps = true
                 }
 
@@ -328,6 +347,10 @@ fun AppsList(
             item {
                 Spacer(modifier = Modifier.height(90.dp))
             }
+
+            item {
+                SettingsSpacer()
+            }
         }
 
         // Private space settings
@@ -341,6 +364,114 @@ fun AppsList(
                 homeScreenModel.interactionSource
             ) {
                 homeScreenModel.showPrivateSpaceSettings.value = false
+            }
+        }
+
+        Column(modifier = Modifier
+            .align(alignment = Alignment.BottomCenter)
+            .fillMaxWidth(),
+            horizontalAlignment = getAppsAlignment(mainAppModel.getContext())
+        ) {
+            if (getBooleanSetting(
+                    mainAppModel.getContext(),
+                    stringResource(R.string.ShowSearchBox),
+                    true
+                ) && bottomSearch
+            ) {
+                Spacer(modifier = Modifier.height(15.dp))
+
+                AnimatedPillSearchBar(
+                    textChange = { searchBoxText ->
+                        homeScreenModel.searchText.value =
+                            searchBoxText // Update text in search box
+
+                        // Get the list of installed apps with the results filtered using fuzzy matching
+                        var filteredApps = homeScreenModel.installedApps.filter { appInfo ->
+                            AppUtils.fuzzyMatch(
+                                appInfo.displayName,
+                                homeScreenModel.searchText.value
+                            )
+                        }
+
+                        // Remove  the launcher if present
+                        filteredApps = filteredApps.filter { appInfo ->
+                            !appInfo.packageName.contains("com.geecee.escapelauncher")
+                        }
+
+                        // If autoOpen is enabled then open the app like you would normally
+                        val autoOpen = getBooleanSetting(
+                            mainAppModel.getContext(),
+                            mainAppModel.getContext().resources.getString(R.string.SearchAutoOpen),
+                            false
+                        )
+
+                        if (autoOpen && filteredApps.size == 1) {
+
+                            val appInfo = filteredApps.first()
+
+                            var shouldShowHiddenApps =
+                                !mainAppModel.hiddenAppsManager.isAppHidden(
+                                    appInfo.packageName
+                                )
+
+                            if (!homeScreenModel.searchText.value.isBlank() && getBooleanSetting(
+                                    mainAppModel.getContext(),
+                                    mainAppModel.getContext()
+                                        .getString(R.string.showHiddenAppsInSearch),
+                                    false
+                                )
+                            ) {
+                                shouldShowHiddenApps = true
+                            }
+
+                            if (shouldShowHiddenApps) {
+                                homeScreenModel.updateSelectedApp(appInfo)
+
+                                AppUtils.openApp(
+                                    app = appInfo,
+                                    overrideOpenChallenge = false,
+                                    openChallengeShow = homeScreenModel.showOpenChallenge,
+                                    mainAppModel = mainAppModel,
+                                    homeScreenModel = homeScreenModel
+                                )
+
+                                resetHome(homeScreenModel)
+                            }
+                        }
+                    },
+                    keyboardDone = { _ ->
+                        // Get the list of installed apps with the results filtered using fuzzy matching
+                        var filteredApps = homeScreenModel.installedApps.filter { appInfo ->
+                            AppUtils.fuzzyMatch(
+                                appInfo.displayName,
+                                homeScreenModel.searchText.value
+                            )
+                        }
+
+                        // Remove the launcher if present
+                        filteredApps = filteredApps.filter { appInfo ->
+                            !appInfo.packageName.contains("com.geecee.escapelauncher")
+                        }
+
+                        if (filteredApps.isNotEmpty()) {
+                            val firstAppInfo = filteredApps.first()
+
+                            homeScreenModel.updateSelectedApp(firstAppInfo)
+
+                            AppUtils.openApp(
+                                app = firstAppInfo,
+                                overrideOpenChallenge = false,
+                                openChallengeShow = homeScreenModel.showOpenChallenge,
+                                mainAppModel = mainAppModel,
+                                homeScreenModel = homeScreenModel
+                            )
+
+                            resetHome(homeScreenModel)
+                        }
+                    },
+                    expanded = homeScreenModel.searchExpanded
+                )
+                SettingsSpacer()
             }
         }
     }

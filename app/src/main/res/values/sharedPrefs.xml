@@ -24,4 +24,5 @@
     <string name="twelve_hour_clock" translatable="false">TwelveHourClock</string>
     <string name="hideScreenTimePage" translatable="false">HideScreenTimePage</string>
     <string name="showHiddenAppsInSearch" translatable="false">ShowHiddenAppsInSearch</string>
+    <string name="bottomSearch" translatable="false">bottomSearch</string>
 </resources>
