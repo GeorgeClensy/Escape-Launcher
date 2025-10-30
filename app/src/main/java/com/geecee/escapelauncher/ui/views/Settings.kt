@@ -678,7 +678,7 @@ fun ThemeOptions(
         }
         item {
             SettingsButton(
-                stringResource(R.string.match_system_wallpaper), isBottomOfGroup = true, onClick = {
+                label = stringResource(R.string.match_system_wallpaper), isBottomOfGroup = true, onClick = {
                     AppUtils.setSolidColorWallpaperHomeScreen(
                         mainAppModel.getContext(), mainAppModel.appTheme.value.background
                     )
@@ -998,7 +998,7 @@ fun HiddenApps(
 
         item {
             SettingsButton(
-                stringResource(R.string.manage_hidden_apps),
+                label = stringResource(R.string.manage_hidden_apps),
                 isTopOfGroup = true,
                 onClick = {
                     goToManageHiddenApps()

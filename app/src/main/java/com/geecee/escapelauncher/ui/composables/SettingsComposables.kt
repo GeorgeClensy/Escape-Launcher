@@ -1,6 +1,9 @@
 package com.geecee.escapelauncher.ui.composables
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -360,6 +363,7 @@ fun SettingsNavigationItem(
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun SettingsButton(
+    modifier: Modifier = Modifier,
     label: String,
     onClick: () -> Unit,
     isTopOfGroup: Boolean = false,
@@ -371,13 +375,37 @@ fun SettingsButton(
     val groupEdgeCornerRadius = 24.dp
     val defaultCornerRadius = 8.dp
 
-    val topStartRadius = if (isTopOfGroup) groupEdgeCornerRadius else defaultCornerRadius
-    val topEndRadius = if (isTopOfGroup) groupEdgeCornerRadius else defaultCornerRadius
-    val bottomStartRadius = if (isBottomOfGroup) groupEdgeCornerRadius else defaultCornerRadius
-    val bottomEndRadius = if (isBottomOfGroup) groupEdgeCornerRadius else defaultCornerRadius
+    val topStartRadius by animateDpAsState(
+        targetValue = if (isTopOfGroup) groupEdgeCornerRadius else defaultCornerRadius,
+        label = "topStartRadius"
+    )
+    val topEndRadius by animateDpAsState(
+        targetValue = if (isTopOfGroup) groupEdgeCornerRadius else defaultCornerRadius,
+        label = "topEndRadius"
+    )
+    val bottomStartRadius by animateDpAsState(
+        targetValue = if (isBottomOfGroup) groupEdgeCornerRadius else defaultCornerRadius,
+        label = "bottomStartRadius"
+    )
+    val bottomEndRadius by animateDpAsState(
+        targetValue = if (isBottomOfGroup) groupEdgeCornerRadius else defaultCornerRadius,
+        label = "bottomEndRadius"
+    )
+
+    val animatedContainerColor by animateColorAsState(
+        targetValue = if (!isDisabled) CardContainerColor else CardContainerColorDisabled,
+        animationSpec = tween(durationMillis = 300),
+        label = "containerColor"
+    )
+
+    val animatedContentColor by animateColorAsState(
+        targetValue = if (!isDisabled) ContentColor else ContentColorDisabled,
+        animationSpec = tween(durationMillis = 300),
+        label = "contentColor"
+    )
 
     Card(
-        modifier = Modifier
+        modifier = modifier
             .padding(vertical = 1.dp)
             .combinedClickable(onClick = onClick),
         shape = RoundedCornerShape(
@@ -386,18 +414,10 @@ fun SettingsButton(
             bottomEnd = bottomEndRadius,
             bottomStart = bottomStartRadius
         ),
-        colors = if (!isDisabled) {
-            CardDefaults.cardColors(
-                containerColor = CardContainerColor,
-                contentColor = ContentColor
-            )
-        }
-        else {
-            CardDefaults.cardColors(
-                containerColor = CardContainerColorDisabled,
-                contentColor = ContentColorDisabled
-            )
-        }
+        colors = CardDefaults.cardColors(
+            containerColor = animatedContainerColor,
+            contentColor = animatedContentColor
+        )
     ) {
         Row(
             modifier = Modifier
