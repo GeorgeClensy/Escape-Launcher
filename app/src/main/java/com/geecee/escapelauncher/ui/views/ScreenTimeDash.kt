@@ -41,6 +41,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.geecee.escapelauncher.MainAppViewModel
 import com.geecee.escapelauncher.R
+import com.geecee.escapelauncher.ui.composables.SettingsSpacer
 import com.geecee.escapelauncher.ui.theme.CardContainerColor
 import com.geecee.escapelauncher.ui.theme.ContentColor
 import com.geecee.escapelauncher.ui.theme.escapeGreen
@@ -212,6 +213,9 @@ fun ScreenTimeDashboard(context: Context, mainAppModel: MainAppViewModel) {
         }
 
         Spacer(Modifier.height(15.dp))
+
+        SettingsSpacer()
+
     }
 }
 
