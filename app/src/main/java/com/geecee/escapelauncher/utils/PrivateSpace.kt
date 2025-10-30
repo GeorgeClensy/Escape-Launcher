@@ -257,7 +257,9 @@ fun PrivateSpaceSettings(
                     getBooleanSetting(context, settingKey, false),
                     onCheckedChange = { value ->
                         setBooleanSetting(context, settingKey, value)
-                    })
+                    },
+                    isTopOfGroup = true,
+                    isBottomOfGroup = true)
                 Button(
                     onClick = {
                         onDismiss()
