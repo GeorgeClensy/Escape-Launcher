@@ -46,6 +46,7 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -82,6 +83,7 @@ import com.geecee.escapelauncher.utils.doesPrivateSpaceExist
 import com.geecee.escapelauncher.utils.getAppsAlignment
 import com.geecee.escapelauncher.utils.getBooleanSetting
 import com.geecee.escapelauncher.utils.getPrivateSpaceApps
+import com.geecee.escapelauncher.utils.handleSearch
 import com.geecee.escapelauncher.utils.lockPrivateSpace
 import com.geecee.escapelauncher.utils.openPrivateSpaceApp
 import com.geecee.escapelauncher.utils.showPrivateSpaceAppInfo
@@ -135,60 +137,12 @@ fun AppsList(
                         textChange = { searchBoxText ->
                             homeScreenModel.searchText.value =
                                 searchBoxText // Update text in search box
-
-                            // Get the list of installed apps with the results filtered using fuzzy matching
-                            var filteredApps = homeScreenModel.installedApps.filter { appInfo ->
-                                AppUtils.fuzzyMatch(
-                                    appInfo.displayName,
-                                    homeScreenModel.searchText.value
-                                )
-                            }
-
-                            // Remove  the launcher if present
-                            filteredApps = filteredApps.filter { appInfo ->
-                                !appInfo.packageName.contains("com.geecee.escapelauncher")
-                            }
-
-                            // If autoOpen is enabled then open the app like you would normally
                             val autoOpen = getBooleanSetting(
                                 mainAppModel.getContext(),
                                 mainAppModel.getContext().resources.getString(R.string.SearchAutoOpen),
                                 false
                             )
-
-                            if (autoOpen && filteredApps.size == 1) {
-
-                                val appInfo = filteredApps.first()
-
-                                var shouldShowHiddenApps =
-                                    !mainAppModel.hiddenAppsManager.isAppHidden(
-                                        appInfo.packageName
-                                    )
-
-                                if (!homeScreenModel.searchText.value.isBlank() && getBooleanSetting(
-                                        mainAppModel.getContext(),
-                                        mainAppModel.getContext()
-                                            .getString(R.string.showHiddenAppsInSearch),
-                                        false
-                                    )
-                                ) {
-                                    shouldShowHiddenApps = true
-                                }
-
-                                if (shouldShowHiddenApps) {
-                                    homeScreenModel.updateSelectedApp(appInfo)
-
-                                    AppUtils.openApp(
-                                        app = appInfo,
-                                        overrideOpenChallenge = false,
-                                        openChallengeShow = homeScreenModel.showOpenChallenge,
-                                        mainAppModel = mainAppModel,
-                                        homeScreenModel = homeScreenModel
-                                    )
-
-                                    resetHome(homeScreenModel)
-                                }
-                            }
+                            handleSearch(mainAppModel, homeScreenModel, autoOpen)
                         },
                         keyboardDone = { _ ->
                             // Get the list of installed apps with the results filtered using fuzzy matching
@@ -261,8 +215,11 @@ fun AppsList(
                     val screenTime =
                         remember { mutableLongStateOf(mainAppModel.getCachedScreenTime(app.packageName)) }
 
-                    // Update screen time when app changes or shouldReloadScreenTime changes
-                    LaunchedEffect(app.packageName, mainAppModel.shouldReloadScreenTime.value) {
+                    // Collect the state value to use as a key for LaunchedEffect
+                    val reloadTrigger by mainAppModel.shouldReloadScreenTime.collectAsState()
+
+                    // Update screen time when app changes or the reloadTrigger changes
+                    LaunchedEffect(app.packageName, reloadTrigger) {
                         val time = mainAppModel.getScreenTimeAsync(app.packageName)
                         screenTime.longValue = time
                     }
@@ -384,60 +341,12 @@ fun AppsList(
                     textChange = { searchBoxText ->
                         homeScreenModel.searchText.value =
                             searchBoxText // Update text in search box
-
-                        // Get the list of installed apps with the results filtered using fuzzy matching
-                        var filteredApps = homeScreenModel.installedApps.filter { appInfo ->
-                            AppUtils.fuzzyMatch(
-                                appInfo.displayName,
-                                homeScreenModel.searchText.value
-                            )
-                        }
-
-                        // Remove  the launcher if present
-                        filteredApps = filteredApps.filter { appInfo ->
-                            !appInfo.packageName.contains("com.geecee.escapelauncher")
-                        }
-
-                        // If autoOpen is enabled then open the app like you would normally
                         val autoOpen = getBooleanSetting(
                             mainAppModel.getContext(),
                             mainAppModel.getContext().resources.getString(R.string.SearchAutoOpen),
                             false
                         )
-
-                        if (autoOpen && filteredApps.size == 1) {
-
-                            val appInfo = filteredApps.first()
-
-                            var shouldShowHiddenApps =
-                                !mainAppModel.hiddenAppsManager.isAppHidden(
-                                    appInfo.packageName
-                                )
-
-                            if (!homeScreenModel.searchText.value.isBlank() && getBooleanSetting(
-                                    mainAppModel.getContext(),
-                                    mainAppModel.getContext()
-                                        .getString(R.string.showHiddenAppsInSearch),
-                                    false
-                                )
-                            ) {
-                                shouldShowHiddenApps = true
-                            }
-
-                            if (shouldShowHiddenApps) {
-                                homeScreenModel.updateSelectedApp(appInfo)
-
-                                AppUtils.openApp(
-                                    app = appInfo,
-                                    overrideOpenChallenge = false,
-                                    openChallengeShow = homeScreenModel.showOpenChallenge,
-                                    mainAppModel = mainAppModel,
-                                    homeScreenModel = homeScreenModel
-                                )
-
-                                resetHome(homeScreenModel)
-                            }
-                        }
+                        handleSearch(mainAppModel, homeScreenModel, autoOpen)
                     },
                     keyboardDone = { _ ->
                         // Get the list of installed apps with the results filtered using fuzzy matching

@@ -27,6 +27,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
@@ -88,7 +89,7 @@ fun ScreenTimeDashboard(context: Context, mainAppModel: MainAppViewModel) {
     val yesterdayUsage = remember { mutableLongStateOf(0L) }
     val appUsageToday = remember { mutableStateListOf<AppUsageEntity>() }
     val appUsageYesterday = remember { mutableStateListOf<AppUsageEntity>() }
-    LaunchedEffect(mainAppModel.shouldReloadScreenTime.value) {
+    LaunchedEffect(mainAppModel.shouldReloadScreenTime.collectAsState()) {
         // Get total usage for today
         try {
             withContext(Dispatchers.IO) {
