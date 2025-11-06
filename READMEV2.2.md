@@ -11,7 +11,7 @@
 
 Join our discord! [Click Here!](https://discord.gg/9u5eVTFsyS)
 
-Escape is a minimalist android launcher for android. It has a modern, simple and customizable design with a list of apps on the home screen and optional clock with widgets coming soon, support for material ui colour schemes and features such as hidden apps.
+Escape is a minimalist home screen launcher replacement for android. It simple and customizable design with a list of apps on the home screen and features like an optional clock with and widgets various other things, support for material ui colour schemes (Android 12+) and features such as hidden apps. It is also one of the ONLY launchers to support Android 15's private space.
 
 <br>
 
