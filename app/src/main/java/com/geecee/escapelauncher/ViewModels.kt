@@ -8,7 +8,9 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.material3.ColorScheme
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
@@ -23,13 +25,10 @@ import com.geecee.escapelauncher.utils.managers.FavoriteAppsManager
 import com.geecee.escapelauncher.utils.managers.HiddenAppsManager
 import com.geecee.escapelauncher.utils.managers.getUsageForApp
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
-import java.util.concurrent.ConcurrentHashMap
 
 /**
  * Home Screen View Model
@@ -106,7 +105,7 @@ class HomeScreenModel(application: Application, private val mainAppViewModel: Ma
     }
 
     fun loadApps() {
-        coroutineScope.launch(Dispatchers.IO) {
+        coroutineScope.launch {
             installedApps.clear()
             installedApps.addAll(
                 AppUtils.getAllInstalledApps(mainAppViewModel.getContext()).sortedBy {
@@ -116,7 +115,7 @@ class HomeScreenModel(application: Application, private val mainAppViewModel: Ma
     }
 
     fun reloadFavouriteApps() {
-        coroutineScope.launch(Dispatchers.IO) {
+        coroutineScope.launch {
             val newFavoriteApps = mainAppViewModel.favoriteAppsManager.getFavoriteApps()
                 .mapNotNull { packageName ->
                     installedApps.find { it.packageName == packageName }
@@ -192,22 +191,28 @@ class MainAppViewModel(application: Application) : AndroidViewModel(application)
     } // Returns the current date
 
     val screenTimeCache =
-        ConcurrentHashMap<String, Long>() // Cache mapping package name to screen time
+        mutableStateMapOf<String, Long>() // Cache mapping package name to screen time
 
-    private val _shouldReloadScreenTime =
-        MutableStateFlow(0) // This exists because the screen time is retrieved in LaunchedEffects so it'll reload when the value of this is changed
-    val shouldReloadScreenTime = _shouldReloadScreenTime.asStateFlow()
+    val shouldReloadScreenTime: MutableState<Int> =
+        mutableIntStateOf(0) // This exists because the screen time is retrieved in LaunchedEffects so it'll reload when the value of this is changed
 
-    suspend fun updateAppScreenTime(packageName: String) {
-        val screenTime = getUsageForApp(packageName, getToday())
-        screenTimeCache[packageName] = screenTime
-        _shouldReloadScreenTime.value++
-    } // Function to update a single app's cached screen time and trigger recomposition
+    fun updateAppScreenTime(packageName: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val screenTime = getUsageForApp(packageName, getToday())
+            screenTimeCache[packageName] = screenTime
+        }
+    } // Function to update a single app's cached screen time
 
-    suspend fun updateAllAppsScreenTime(apps: List<InstalledApp>) {
-        apps.forEach { screenTimeCache[it.packageName] = getUsageForApp(it.packageName, getToday()) }
-        _shouldReloadScreenTime.value++
-    }
+    @Suppress("unused")
+    fun reloadScreenTimeCache(packageNames: List<String>) {
+        viewModelScope.launch(Dispatchers.IO) {
+            packageNames.forEach { packageName ->
+                val screenTime = getUsageForApp(packageName, getToday())
+                screenTimeCache[packageName] = screenTime
+            }
+            shouldReloadScreenTime.value++
+        }
+    } // Reloads the screen times
 
     suspend fun getScreenTimeAsync(packageName: String, forceRefresh: Boolean = false): Long {
         if (forceRefresh || !screenTimeCache.containsKey(packageName)) {

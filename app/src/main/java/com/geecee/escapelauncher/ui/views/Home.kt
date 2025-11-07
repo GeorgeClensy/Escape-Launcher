@@ -24,7 +24,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
@@ -103,11 +102,7 @@ fun HomeScreen(
                         false
                     ),
                     homeAlignment = getHomeAlignment(mainAppModel.getContext()),
-                    twelveHour = getBooleanSetting(
-                        mainAppModel.getContext(),
-                        stringResource(R.string.twelve_hour_clock),
-                        false
-                    )
+                    twelveHour = getBooleanSetting(mainAppModel.getContext(), stringResource(R.string.twelve_hour_clock), false)
                 )
             }
         }
@@ -132,9 +127,7 @@ fun HomeScreen(
                 )
             ) {
                 val todayUsage = remember { mutableLongStateOf(0L) }
-                val reloadTrigger by mainAppModel.shouldReloadScreenTime.collectAsState()
-
-                LaunchedEffect(reloadTrigger) {
+                LaunchedEffect(mainAppModel.shouldReloadScreenTime.value) {
                     withContext(Dispatchers.IO) {
                         val usage = getTotalUsageForDate(mainAppModel.getToday())
                         withContext(Dispatchers.Main) {
@@ -187,10 +180,8 @@ fun HomeScreen(
             val screenTime =
                 remember { mutableLongStateOf(mainAppModel.getCachedScreenTime(app.packageName)) }
 
-            val reloadTrigger by mainAppModel.shouldReloadScreenTime.collectAsState()
-
-            // Update screen time when app changes or the reloadTrigger changes
-            LaunchedEffect(app.packageName, reloadTrigger) {
+            // Update screen time when app changes or shouldReloadScreenTime changes
+            LaunchedEffect(app.packageName, mainAppModel.shouldReloadScreenTime.value) {
                 val time = mainAppModel.getScreenTimeAsync(app.packageName)
                 screenTime.longValue = time
             }
@@ -277,7 +268,7 @@ fun Clock(
                 // Ensure hours has two digits
                 val hourDigits = if (hours.length == 1) "0$hours" else hours
 
-                hourDigits.forEachIndexed { _, digit ->
+                hourDigits.forEachIndexed { index, digit ->
                     Box(
                         contentAlignment = Alignment.Center,
                         modifier = Modifier
@@ -300,7 +291,7 @@ fun Clock(
                 // Ensure minutes has two digits
                 val minuteDigits = if (minutes.length == 1) "0$minutes" else minutes
 
-                minuteDigits.forEachIndexed { _, digit ->
+                minuteDigits.forEachIndexed { index, digit ->
                     Box(
                         contentAlignment = Alignment.Center,
                         modifier = Modifier.width(40.dp)
@@ -390,7 +381,7 @@ fun HomeScreenScreenTime(
                 MaterialTheme.shapes.extraLarge
             )
             .background(CardContainerColor)
-            .padding(0.dp, (7.5).dp)
+            .padding(0.dp,(7.5).dp)
     ) {
         Text(
             text = screenTime,

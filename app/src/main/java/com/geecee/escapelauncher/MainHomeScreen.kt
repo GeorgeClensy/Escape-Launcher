@@ -54,6 +54,7 @@ import com.geecee.escapelauncher.utils.ScreenOffReceiver
 import com.geecee.escapelauncher.utils.getBooleanSetting
 import com.geecee.escapelauncher.utils.getIntSetting
 import com.geecee.escapelauncher.utils.managers.ScreenTimeManager
+import com.geecee.escapelauncher.utils.managers.getUsageForApp
 import com.geecee.escapelauncher.utils.managers.scheduleDailyCleanup
 import com.google.firebase.Firebase
 import com.google.firebase.messaging.messaging
@@ -102,8 +103,10 @@ class MainHomeScreen : ComponentActivity() {
         scheduleDailyCleanup(this)
         viewModel.viewModelScope.launch(Dispatchers.IO) {
             homeScreenModel.installedApps.forEach { app ->
-                viewModel.updateAllAppsScreenTime(homeScreenModel.installedApps)
+                val screenTime = getUsageForApp(app.packageName, viewModel.getToday())
+                viewModel.screenTimeCache[app.packageName] = screenTime
             }
+            viewModel.shouldReloadScreenTime.value++
         }
 
         // Set up the application content
@@ -132,6 +135,9 @@ class MainHomeScreen : ComponentActivity() {
 
                     // Update screen time for just this app in the cache
                     viewModel.updateAppScreenTime(packageName)
+
+                    // Trigger UI refresh
+                    viewModel.shouldReloadScreenTime.value++
 
                     Log.i(
                         "INFO",
@@ -209,6 +215,9 @@ class MainHomeScreen : ComponentActivity() {
                 // Update screen time for just this app in the cache
                 viewModel.updateAppScreenTime(packageName)
 
+                // Trigger UI refresh
+                viewModel.shouldReloadScreenTime.value++
+
                 // Reset state
                 homeScreenModel.currentSelectedApp =
                     mutableStateOf(InstalledApp("", "", ComponentName("", "")))
@@ -223,6 +232,8 @@ class MainHomeScreen : ComponentActivity() {
         } catch (ex: Exception) {
             Log.e("ERROR", ex.toString())
         }
+
+
     }
 
     override fun onDestroy() {
