@@ -180,19 +180,17 @@ fun HomeScreenPageManager(
                 }
             ),
             AppAction(
-                label = stringResource(if (homeScreenModel.isCurrentAppFavorite.value) R.string.rem_from_fav else R.string.add_to_fav),
+                label = stringResource(if (homeScreenModel.isCurrentAppFavorite) R.string.rem_from_fav else R.string.add_to_fav),
                 onClick = {
-                    if (homeScreenModel.isCurrentAppFavorite.value) {
+                    if (homeScreenModel.isCurrentAppFavorite) {
                         mainAppModel.favoriteAppsManager.removeFavoriteApp(
                             homeScreenModel.currentSelectedApp.value.packageName
                         )
-                        homeScreenModel.isCurrentAppFavorite.value = false
                         homeScreenModel.showBottomSheet.value = false
                     } else {
                         mainAppModel.favoriteAppsManager.addFavoriteApp(
                             homeScreenModel.currentSelectedApp.value.packageName
                         )
-                        homeScreenModel.isCurrentAppFavorite.value = true
                         homeScreenModel.showBottomSheet.value = false
                         homeScreenModel.coroutineScope.launch {
                             homeScreenModel.goToMainPage()
@@ -206,7 +204,7 @@ fun HomeScreenPageManager(
                 onClick = {
                     mainAppModel.hiddenAppsManager.addHiddenApp(homeScreenModel.currentSelectedApp.value.packageName)
                     homeScreenModel.showBottomSheet.value = false
-                    homeScreenModel.installedApps.remove(homeScreenModel.currentSelectedApp.value)
+                    mainAppModel.notifyHiddenAppsChanged()
                     resetHome(homeScreenModel, false)
                 }
             ),
@@ -225,7 +223,7 @@ fun HomeScreenPageManager(
             )
         )
 
-        if (!homeScreenModel.isCurrentAppChallenged.value) {
+        if (!homeScreenModel.isCurrentAppChallenged) {
             actions = actions +
                     AppAction(
                         label = stringResource(R.string.add_open_challenge),
@@ -234,7 +232,6 @@ fun HomeScreenPageManager(
                                 homeScreenModel.currentSelectedApp.value.packageName
                             )
                             homeScreenModel.showBottomSheet.value = false
-                            homeScreenModel.isCurrentAppChallenged.value = true
                         }
                     )
         }

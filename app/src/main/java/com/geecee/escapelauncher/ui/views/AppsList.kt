@@ -226,21 +226,7 @@ fun AppsList(
                 }
             }
 
-            items(
-                // All installed apps filtered with search term
-                homeScreenModel.installedApps.filter { appInfo ->
-                    val appName = appInfo.displayName
-                    if (homeScreenModel.searchExpanded.value) {
-                        if (homeScreenModel.searchText.value.isBlank()) {
-                            true
-                        } else {
-                            AppUtils.fuzzyMatch(appName, homeScreenModel.searchText.value)
-                        }
-                    } else {
-                        true
-                    }
-                }
-            )
+            items(homeScreenModel.filteredApps)
             { app ->
                 var shouldShowHiddenApps = !mainAppModel.hiddenAppsManager.isAppHidden(
                     app.packageName

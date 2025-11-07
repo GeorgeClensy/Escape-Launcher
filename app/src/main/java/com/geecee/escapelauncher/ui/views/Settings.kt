@@ -231,9 +231,9 @@ fun Settings(
                         mainAppModel.hiddenAppsManager.removeHiddenApp(app.packageName)
                     } else {
                         mainAppModel.hiddenAppsManager.addHiddenApp(app.packageName)
-                        homeScreenModel.installedApps.remove(homeScreenModel.currentSelectedApp.value)
                         resetHome(homeScreenModel, false)
                     }
+                    mainAppModel.notifyHiddenAppsChanged()
                 }
             }
             composable(
@@ -1030,7 +1030,7 @@ fun HiddenApps(
                     stringResource(R.string.showHiddenAppsInSearch),
                     false
                 ),
-                onCheckedChange = { it ->
+                onCheckedChange = {
                     toggleBooleanSetting(
                         mainAppModel.getContext(),
                         it,
@@ -1083,11 +1083,13 @@ fun HiddenApps(
                         // Trigger haptic feedback
                         haptics.performHapticFeedback(HapticFeedbackType.LongPress)
                         // Animate item out
+                        @Suppress("AssignedValueIsNeverRead") // For some reason android studio doesn't detect the use in the AnimatedVisibility
                         visible = false
                         // Remove from your list after a short delay to let animation run
                         coroutineScope.launch {
                             delay(500)
                             mainAppModel.hiddenAppsManager.removeHiddenApp(appPackageName)
+                            mainAppModel.notifyHiddenAppsChanged()
                             hiddenAppsList = mainAppModel.hiddenAppsManager.getHiddenApps()
                         }
                     },
@@ -1154,6 +1156,7 @@ fun OpenChallenges(
                         // Trigger haptic feedback
                         haptics.performHapticFeedback(HapticFeedbackType.LongPress)
                         // Animate item out
+                        @Suppress("AssignedValueIsNeverRead") // For some reason android studio doesn't detect the use in the AnimatedVisibility
                         visible = false
                         // Remove from your list after a short delay to let animation run
                         coroutineScope.launch {
@@ -1247,7 +1250,7 @@ fun DevOptions(mainAppModel: MainAppModel, context: Context, goBack: () -> Unit)
         SettingsSwitch(
             "First time",
             getBooleanSetting(context, "FirstTime", false),
-            onCheckedChange = { it ->
+            onCheckedChange = {
                 setBooleanSetting(context, "FirstTime", it)
             },
             isTopOfGroup = true

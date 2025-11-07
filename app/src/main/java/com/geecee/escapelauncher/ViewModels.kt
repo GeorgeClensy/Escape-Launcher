@@ -8,6 +8,8 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.material3.ColorScheme
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateMapOf
@@ -31,16 +33,19 @@ import java.util.Date
 import java.util.Locale
 
 /**
- * Home Screen View Model
+ * Home Screen View Model - Used for holding UI state for the home screen pages
  */
 class HomeScreenModel(application: Application, private val mainAppViewModel: MainAppViewModel) :
     AndroidViewModel(application) {
     var currentSelectedApp = mutableStateOf(InstalledApp("", "", ComponentName("", "")))
 
-    @Suppress("MemberVisibilityCanBePrivate")
-    var isCurrentAppHidden = mutableStateOf(false)
-    var isCurrentAppChallenged = mutableStateOf(false)
-    var isCurrentAppFavorite = mutableStateOf(false)
+    val isCurrentAppChallenged by derivedStateOf {
+        mainAppViewModel.challengesManager.doesAppHaveChallenge(currentSelectedApp.value.packageName)
+    }
+
+    val isCurrentAppFavorite by derivedStateOf {
+        favoriteApps.contains(currentSelectedApp.value)
+    }
 
     var showOpenChallenge = mutableStateOf(false)
     var showBottomSheet = mutableStateOf(false)
@@ -53,6 +58,30 @@ class HomeScreenModel(application: Application, private val mainAppViewModel: Ma
     val interactionSource = MutableInteractionSource()
 
     val installedApps = mutableStateListOf<InstalledApp>()
+
+    val filteredApps by derivedStateOf {
+        mainAppViewModel.hiddenAppsTrigger.intValue
+
+        val apps = installedApps.filter { !it.packageName.contains("com.geecee.escapelauncher") }
+
+        val showHiddenInSearch = getBooleanSetting(
+            mainAppViewModel.getContext(),
+            mainAppViewModel.getContext().resources.getString(R.string.showHiddenAppsInSearch),
+            false
+        )
+
+        val query = searchText.value
+        if (query.isBlank()) {
+            apps.filter { !mainAppViewModel.hiddenAppsManager.isAppHidden(it.packageName) }
+        } else {
+            apps.filter { app ->
+                val isHidden = mainAppViewModel.hiddenAppsManager.isAppHidden(app.packageName)
+                val matchesQuery = AppUtils.fuzzyMatch(app.displayName, query)
+                matchesQuery && (!isHidden || showHiddenInSearch)
+            }
+        }
+    }
+
     val favoriteApps = mutableStateListOf<InstalledApp>()
 
     val appsListScrollState = LazyListState()
@@ -130,11 +159,6 @@ class HomeScreenModel(application: Application, private val mainAppViewModel: Ma
 
     fun updateSelectedApp(app: InstalledApp) {
         currentSelectedApp.value = app
-        isCurrentAppFavorite.value = favoriteApps.contains(app)
-        isCurrentAppChallenged.value =
-            mainAppViewModel.challengesManager.doesAppHaveChallenge(app.packageName)
-        isCurrentAppHidden.value = mainAppViewModel.hiddenAppsManager.isAppHidden(app.packageName)
-
     }
 }
 
@@ -151,6 +175,9 @@ class HomeScreenModelFactory(
     }
 }
 
+/**
+ * Main App View Model - Used for data that needs to be passed around the app
+ */
 class MainAppViewModel(application: Application) : AndroidViewModel(application) {
     private val appContext: Context = application.applicationContext // The app context
 
@@ -167,6 +194,14 @@ class MainAppViewModel(application: Application) : AndroidViewModel(application)
 
     val challengesManager: ChallengesManager =
         ChallengesManager(application) // Manager for challenges
+
+    // Hidden Apps
+
+    val hiddenAppsTrigger = mutableIntStateOf(0)
+
+    fun notifyHiddenAppsChanged() {
+        hiddenAppsTrigger.intValue++
+    }
 
     // Other stuff
 

@@ -69,7 +69,7 @@ import com.geecee.escapelauncher.MainAppViewModel as MainAppModel
 /**
  * Parent main home screen composable
  */
-@Composable
+ @Composable
 fun HomeScreen(
     mainAppModel: MainAppModel, homeScreenModel: HomeScreenModel
 ) {
@@ -268,7 +268,7 @@ fun Clock(
                 // Ensure hours has two digits
                 val hourDigits = if (hours.length == 1) "0$hours" else hours
 
-                hourDigits.forEachIndexed { index, digit ->
+                hourDigits.forEachIndexed { _, digit ->
                     Box(
                         contentAlignment = Alignment.Center,
                         modifier = Modifier
@@ -291,7 +291,7 @@ fun Clock(
                 // Ensure minutes has two digits
                 val minuteDigits = if (minutes.length == 1) "0$minutes" else minutes
 
-                minuteDigits.forEachIndexed { index, digit ->
+                minuteDigits.forEachIndexed { _, digit ->
                     Box(
                         contentAlignment = Alignment.Center,
                         modifier = Modifier.width(40.dp)
