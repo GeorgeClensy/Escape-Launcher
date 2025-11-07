@@ -182,21 +182,19 @@ fun HomeScreenPageManager(
             AppAction(
                 label = stringResource(if (homeScreenModel.isCurrentAppFavorite) R.string.rem_from_fav else R.string.add_to_fav),
                 onClick = {
+                    val selectedApp = homeScreenModel.currentSelectedApp.value
                     if (homeScreenModel.isCurrentAppFavorite) {
-                        mainAppModel.favoriteAppsManager.removeFavoriteApp(
-                            homeScreenModel.currentSelectedApp.value.packageName
-                        )
-                        homeScreenModel.showBottomSheet.value = false
+                        mainAppModel.favoriteAppsManager.removeFavoriteApp(selectedApp.packageName)
+                        homeScreenModel.favoriteApps.remove(selectedApp)
                     } else {
-                        mainAppModel.favoriteAppsManager.addFavoriteApp(
-                            homeScreenModel.currentSelectedApp.value.packageName
-                        )
-                        homeScreenModel.showBottomSheet.value = false
+                        mainAppModel.favoriteAppsManager.addFavoriteApp(selectedApp.packageName)
+                        homeScreenModel.favoriteApps.add(selectedApp)
+
                         homeScreenModel.coroutineScope.launch {
                             homeScreenModel.goToMainPage()
                         }
                     }
-                    homeScreenModel.reloadFavouriteApps()
+                    homeScreenModel.showBottomSheet.value = false
                 }
             ),
             AppAction(
@@ -231,6 +229,7 @@ fun HomeScreenPageManager(
                             mainAppModel.challengesManager.addChallengeApp(
                                 homeScreenModel.currentSelectedApp.value.packageName
                             )
+                            mainAppModel.notifyChallengesChanged()
                             homeScreenModel.showBottomSheet.value = false
                         }
                     )

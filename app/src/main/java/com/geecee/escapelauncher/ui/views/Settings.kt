@@ -257,10 +257,10 @@ fun Settings(
                 ) { app, selected ->
                     if (selected) {
                         mainAppModel.favoriteAppsManager.removeFavoriteApp(app.packageName)
-                        resetHome(homeScreenModel, true)
+                        homeScreenModel.reloadFavouriteApps()
                     } else {
                         mainAppModel.favoriteAppsManager.addFavoriteApp(app.packageName)
-                        resetHome(homeScreenModel, true)
+                        homeScreenModel.reloadFavouriteApps()
                     }
                 }
             }
@@ -1162,6 +1162,7 @@ fun OpenChallenges(
                         coroutineScope.launch {
                             delay(500)
                             mainAppModel.challengesManager.removeChallengeApp(appPackageName)
+                            mainAppModel.notifyChallengesChanged()
                             challengeApps.value = mainAppModel.challengesManager.getChallengeApps()
                         }
                     },

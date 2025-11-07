@@ -40,6 +40,7 @@ class HomeScreenModel(application: Application, private val mainAppViewModel: Ma
     var currentSelectedApp = mutableStateOf(InstalledApp("", "", ComponentName("", "")))
 
     val isCurrentAppChallenged by derivedStateOf {
+        mainAppViewModel.challengesTrigger.intValue
         mainAppViewModel.challengesManager.doesAppHaveChallenge(currentSelectedApp.value.packageName)
     }
 
@@ -190,17 +191,25 @@ class MainAppViewModel(application: Application) : AndroidViewModel(application)
     val favoriteAppsManager: FavoriteAppsManager =
         FavoriteAppsManager(application) // Favorite apps manager
 
-    val hiddenAppsManager: HiddenAppsManager = HiddenAppsManager(application) // Hidden apps manager
-
-    val challengesManager: ChallengesManager =
-        ChallengesManager(application) // Manager for challenges
-
     // Hidden Apps
+
+    val hiddenAppsManager: HiddenAppsManager = HiddenAppsManager(application) // Hidden apps manager
 
     val hiddenAppsTrigger = mutableIntStateOf(0)
 
     fun notifyHiddenAppsChanged() {
         hiddenAppsTrigger.intValue++
+    }
+
+    // Open Countdown
+
+    val challengesManager: ChallengesManager =
+        ChallengesManager(application) // Manager for challenges
+
+    val challengesTrigger = mutableIntStateOf(0)
+
+    fun notifyChallengesChanged() {
+        challengesTrigger.intValue++
     }
 
     // Other stuff
