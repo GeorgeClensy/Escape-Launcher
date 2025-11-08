@@ -14,6 +14,7 @@ import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -29,6 +30,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -67,6 +69,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
@@ -935,4 +938,68 @@ fun SettingsSlider(
             )
         }
     }
+}
+
+@Composable
+fun SponsorBox(text: String, onSponsorClick: () -> Unit = {}, onBackgroundClick: () -> Unit = {}) {
+    Card(
+        modifier = Modifier
+            .padding(vertical = 1.dp)
+            .fillMaxWidth()
+            .clickable(onClick = {
+                onBackgroundClick()
+            }),
+        shape = RoundedCornerShape(24.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = CardContainerColor,
+            contentColor = ContentColor
+        )
+    ) {
+        Column(
+            Modifier.padding(vertical = 24.dp).fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Icon(
+                painterResource(R.drawable.outlineicon),
+                "Escape Launcher Icon",
+                Modifier
+                    .padding(3.dp),
+                tint = ContentColor
+            )
+
+            Spacer(
+                Modifier.height(10.dp)
+            )
+
+            AutoResizingText(
+                text = text,
+                modifier = Modifier,
+                color = ContentColor,
+            )
+
+            Spacer(Modifier.height(15.dp))
+
+            Button(
+                onClick = {
+                    onSponsorClick()
+                }, colors = ButtonDefaults.buttonColors(
+                    containerColor = com.geecee.escapelauncher.ui.theme.primaryContentColor,
+                    contentColor = CardContainerColor
+                )
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(Icons.Filled.Favorite, "", tint = CardContainerColor)
+                    Spacer(Modifier.width(5.dp))
+                    AutoResizingText(text = stringResource(R.string.sponsor), color = CardContainerColor)
+                }
+            }
+
+        }
+    }
+}
+
+@Preview
+@Composable
+fun SponsorBoxPreview() {
+    SponsorBox("Escape Launcher 2.2")
 }

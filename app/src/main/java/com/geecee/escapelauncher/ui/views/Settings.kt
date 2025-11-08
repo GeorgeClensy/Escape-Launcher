@@ -9,6 +9,8 @@ import android.appwidget.AppWidgetProviderInfo
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
+import android.net.Uri
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
@@ -76,6 +78,7 @@ import com.geecee.escapelauncher.ui.composables.SettingsSpacer
 import com.geecee.escapelauncher.ui.composables.SettingsSubheading
 import com.geecee.escapelauncher.ui.composables.SettingsSwipeableButton
 import com.geecee.escapelauncher.ui.composables.SettingsSwitch
+import com.geecee.escapelauncher.ui.composables.SponsorBox
 import com.geecee.escapelauncher.ui.composables.ThemeCard
 import com.geecee.escapelauncher.ui.theme.CardContainerColor
 import com.geecee.escapelauncher.ui.theme.ContentColor
@@ -116,7 +119,9 @@ import com.geecee.escapelauncher.utils.showLauncherSettingsMenu
 import com.geecee.escapelauncher.utils.toggleBooleanSetting
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlin.system.exitProcess
 import com.geecee.escapelauncher.MainAppViewModel as MainAppModel
+
 
 //
 // MENUS
@@ -603,7 +608,10 @@ fun MainSettingsPage(
             onClick = { showPolicyDialog() })
 
         SettingsNavigationItem(
-            label = stringResource(id = R.string.make_default_launcher), true, onClick = {
+            label = stringResource(id = R.string.make_default_launcher),
+            true,
+            isBottomOfGroup = true,
+            onClick = {
                 if (!isDefaultLauncher(activity)) {
                     activity.showLauncherSelector()
                 } else {
@@ -611,11 +619,18 @@ fun MainSettingsPage(
                 }
             })
 
-        SettingsNavigationItem(
+        SettingsSpacer()
+
+        SponsorBox(
             stringResource(id = R.string.escape_launcher) + " " + stringResource(id = R.string.app_version),
-            false,
-            isBottomOfGroup = true,
-            onClick = {
+            onSponsorClick = {
+                val url = "https://github.com/sponsors/GeorgeClensy"
+                val i = Intent(Intent.ACTION_VIEW)
+                i.setData(Uri.parse(url))
+                i.addFlags(FLAG_ACTIVITY_NEW_TASK)
+                mainAppModel.getContext().startActivity(i)
+            },
+            onBackgroundClick = {
                 navController.navigate("devOptions")
             })
 
@@ -1242,6 +1257,13 @@ fun DevOptions(mainAppModel: MainAppModel, context: Context, goBack: () -> Unit)
                 setBooleanSetting(context, "FirstTime", it)
             },
             isTopOfGroup = true
+        )
+
+        SettingsButton(
+            label = "Force Stop",
+            onClick = {
+                exitProcess(0)
+            }
         )
 
         SettingsButton(
