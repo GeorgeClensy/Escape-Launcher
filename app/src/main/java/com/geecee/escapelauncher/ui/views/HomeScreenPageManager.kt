@@ -110,21 +110,19 @@ fun HomeScreenPageManager(
                 },
                 indication = null, interactionSource = homeScreenModel.interactionSource,
                 onDoubleClick = {
-                    mainAppModel.blackOverlay.value = true
+                    val devicePolicyManager =
+                        mainAppModel.getContext().getSystemService(DevicePolicyManager::class.java)
+                    val compName = ComponentName(mainAppModel.getContext(), MyDeviceAdminReceiver::class.java)
 
-                    Handler(Looper.getMainLooper()).postDelayed({
-                        val devicePolicyManager =
-                            mainAppModel.getContext().getSystemService(DevicePolicyManager::class.java)
-                        val compName = ComponentName(mainAppModel.getContext(), MyDeviceAdminReceiver::class.java)
-
-                        if (devicePolicyManager.isAdminActive(compName)) {
+                    if (devicePolicyManager.isAdminActive(compName)) {
+                        mainAppModel.blackOverlay.value = true
+                        Handler(Looper.getMainLooper()).postDelayed({
                             devicePolicyManager.lockNow()
-                        } else {
-                            Toast.makeText(mainAppModel.getContext(), "Enable Device Admin first", Toast.LENGTH_SHORT).show()
-                        }
-
-                        mainAppModel.blackOverlay.value = false
-                    }, 300)
+                            mainAppModel.blackOverlay.value = false
+                        }, 300)
+                    } else {
+                        Toast.makeText(mainAppModel.getContext(), "Enable Device Admin first", Toast.LENGTH_SHORT).show()
+                    }
                 }
             )
     ) { page ->
