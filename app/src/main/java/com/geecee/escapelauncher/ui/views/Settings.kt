@@ -503,11 +503,25 @@ fun MainSettingsPage(
         SettingsSwitch(
             label = stringResource(id = R.string.search_at_bottom), checked = getBooleanSetting(
                 mainAppModel.getContext(), stringResource(R.string.bottomSearch), false
-            ), isBottomOfGroup = true, onCheckedChange = {
+            ), isBottomOfGroup = false, onCheckedChange = {
                 toggleBooleanSetting(
                     mainAppModel.getContext(),
                     it,
                     mainAppModel.getContext().resources.getString(R.string.bottomSearch)
+                )
+            })
+
+        SettingsSwitch(
+            label = stringResource(id = R.string.apps_list_auto_search),
+            checked = getBooleanSetting(
+                mainAppModel.getContext(), stringResource(R.string.appsListAutoSearch), false
+            ),
+            isBottomOfGroup = true,
+            onCheckedChange = {
+                toggleBooleanSetting(
+                    mainAppModel.getContext(),
+                    it,
+                    mainAppModel.getContext().resources.getString(R.string.appsListAutoSearch)
                 )
             })
 

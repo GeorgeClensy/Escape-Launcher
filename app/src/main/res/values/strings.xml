@@ -76,6 +76,7 @@
     <string name="show_hidden_apps_in_search">Show hidden apps in search</string>
     <string name="manage_favourite_apps">Manage favourite apps</string>
     <string name="search_at_bottom">Search at bottom</string>
+    <string name="apps_list_auto_search">Automatically Open Search</string>
 
     <!-- Apps challenge strings -->
     <string name="open_challenges">App Countdown</string>

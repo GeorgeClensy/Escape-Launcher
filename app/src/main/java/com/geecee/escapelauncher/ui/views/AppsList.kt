@@ -132,6 +132,7 @@ fun AppsList(
                     Spacer(modifier = Modifier.height(15.dp))
 
                     AnimatedPillSearchBar(
+                        mainAppModel = mainAppModel,
                         textChange = { searchBoxText ->
                             homeScreenModel.searchText.value =
                                 searchBoxText // Update text in search box
@@ -367,6 +368,7 @@ fun AppsList(
                 Spacer(modifier = Modifier.height(15.dp))
 
                 AnimatedPillSearchBar(
+                    mainAppModel = mainAppModel,
                     textChange = { searchBoxText ->
                         homeScreenModel.searchText.value =
                             searchBoxText // Update text in search box
@@ -481,6 +483,7 @@ fun AppsListHeader() {
  */
 @Composable
 fun AnimatedPillSearchBar(
+    mainAppModel: MainAppModel,
     textChange: (searchText: String) -> Unit,
     keyboardDone: (searchText: String) -> Unit,
     expanded: MutableState<Boolean>
@@ -498,8 +501,22 @@ fun AnimatedPillSearchBar(
     val focusRequester = remember { FocusRequester() }
     val keyboardController = LocalSoftwareKeyboardController.current
 
+    val appsListAutoSearchEnabled = getBooleanSetting(
+        mainAppModel.getContext(),
+        stringResource(R.string.appsListAutoSearch),
+        false
+    )
+
+    LaunchedEffect(Unit) { // Use Unit as key to run once when composable enters composition
+        if (appsListAutoSearchEnabled) {
+            expanded.value = true
+            focusRequester.requestFocus()
+            keyboardController?.show()
+        }
+    }
+
     LaunchedEffect(expanded.value) {
-        if (expanded.value) {
+        if (expanded.value && appsListAutoSearchEnabled) {
             focusRequester.requestFocus()
             keyboardController?.show()
         }
