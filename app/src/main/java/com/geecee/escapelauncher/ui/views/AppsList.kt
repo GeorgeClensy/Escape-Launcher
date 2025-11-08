@@ -516,7 +516,7 @@ fun AnimatedPillSearchBar(
     }
 
     LaunchedEffect(expanded.value) {
-        if (expanded.value && appsListAutoSearchEnabled) {
+        if (expanded.value) {
             focusRequester.requestFocus()
             keyboardController?.show()
         }
