@@ -175,9 +175,28 @@ fun Settings(
                 "openChallenges",
                 enterTransition = { fadeIn(tween(300)) },
                 exitTransition = { fadeOut(tween(300)) }) {
-                OpenChallenges(
-                    mainAppModel
-                ) { navController.popBackStack() }
+                val challengeApps =
+                    mainAppModel.challengesManager.getChallengeApps()
+                        .mapNotNull { packageName ->
+                            AppUtils.getInstalledAppFromPackageName(
+                                mainAppModel.getContext(),
+                                packageName
+                            )
+                        }
+
+                BulkAppManager(
+                    apps = homeScreenModel.installedApps,
+                    preSelectedApps = challengeApps,
+                    title = stringResource(R.string.manage_hidden_apps),
+                    onBackClicked = { navController.popBackStack() }
+                ) { app, selected ->
+                    if (selected) {
+                        mainAppModel.challengesManager.removeChallengeApp(app.packageName)
+                    } else {
+                        mainAppModel.challengesManager.addChallengeApp(app.packageName)
+                    }
+                    mainAppModel.notifyChallengesChanged()
+                }
             }
             composable(
                 "chooseFont",
@@ -1095,79 +1114,6 @@ fun HiddenApps(
                     },
                     isTopOfGroup = hiddenAppsList.firstOrNull() == appPackageName,
                     isBottomOfGroup = hiddenAppsList.lastOrNull() == appPackageName
-                )
-            }
-        }
-
-        item {
-            SettingsSpacer()
-        }
-        item {
-            SettingsSpacer()
-        }
-    }
-}
-
-/**
- * Page that lets you manage apps with open challenge
- *
- * @param mainAppModel Needed for context & open challenge apps manager
- * @param goBack Function run when back button is pressed
- *
- * @see Settings
- */
-@OptIn(ExperimentalFoundationApi::class)
-@Composable
-fun OpenChallenges(
-    mainAppModel: MainAppModel, goBack: () -> Unit
-) {
-    val challengeApps =
-        remember { mutableStateOf(mainAppModel.challengesManager.getChallengeApps()) }
-    val haptics = LocalHapticFeedback.current
-    val coroutineScope = rememberCoroutineScope()
-
-    LazyColumn(
-        verticalArrangement = Arrangement.Top,
-        horizontalAlignment = Alignment.Start,
-        modifier = Modifier.fillMaxSize()
-    ) {
-        item {
-            SettingsHeader(goBack, stringResource(R.string.open_challenges))
-        }
-
-        items(
-            items = challengeApps.value,
-            key = { it } // use package name as unique key
-        ) { appPackageName ->
-            // Animate the removal of the item
-            var visible by remember { mutableStateOf(true) }
-
-            AnimatedVisibility(
-                visible = visible,
-                exit = fadeOut(animationSpec = tween(500))
-            ) {
-                SettingsSwipeableButton(
-                    label = AppUtils.getAppNameFromPackageName(
-                        mainAppModel.getContext(),
-                        appPackageName
-                    ),
-                    onClick = {},
-                    onDeleteClick = {
-                        // Trigger haptic feedback
-                        haptics.performHapticFeedback(HapticFeedbackType.LongPress)
-                        // Animate item out
-                        @Suppress("AssignedValueIsNeverRead") // For some reason android studio doesn't detect the use in the AnimatedVisibility
-                        visible = false
-                        // Remove from your list after a short delay to let animation run
-                        coroutineScope.launch {
-                            delay(500)
-                            mainAppModel.challengesManager.removeChallengeApp(appPackageName)
-                            mainAppModel.notifyChallengesChanged()
-                            challengeApps.value = mainAppModel.challengesManager.getChallengeApps()
-                        }
-                    },
-                    isTopOfGroup = challengeApps.value.firstOrNull() == appPackageName,
-                    isBottomOfGroup = challengeApps.value.lastOrNull() == appPackageName
                 )
             }
         }
