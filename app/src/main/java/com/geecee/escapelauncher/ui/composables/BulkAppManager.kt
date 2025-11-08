@@ -6,15 +6,23 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDownward
+import androidx.compose.material.icons.filled.ArrowUpward
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.geecee.escapelauncher.utils.InstalledApp
+import com.geecee.escapelauncher.ui.theme.ContentColor
 
 @Composable
 fun BulkAppManager(
@@ -22,14 +30,16 @@ fun BulkAppManager(
     preSelectedApps: List<InstalledApp> = emptyList(),
     title: String,
     onBackClicked: () -> Unit,
-    onAppClicked: (app: InstalledApp, selected: Boolean) -> Unit
+    onAppClicked: (app: InstalledApp, selected: Boolean) -> Unit,
+    reorderable: Boolean = false,
+    onAppMoved: (fromIndex: Int, toIndex: Int) -> Unit = { _, _ -> }
 ) {
     val selectedState = remember { mutableStateListOf<InstalledApp>().apply { addAll(preSelectedApps) } }
 
     val availableApps = apps.filter { it.packageName != "com.geecee.escapelauncher" }
 
     // Create a combined list with a spacer marker
-    val combinedItems = remember(selectedState.size, availableApps.size) {
+    val combinedItems = remember(selectedState.toList(), availableApps.size) {
         buildList {
             addAll(selectedState.map { ListItem.App(it, isInSelectedSection = true) })
             if (selectedState.isNotEmpty()) {
@@ -60,29 +70,83 @@ fun BulkAppManager(
             when (item) {
                 is ListItem.App -> {
                     val isSelected = selectedState.contains(item.app)
-                    SettingsButton(
-                        label = item.app.displayName,
-                        onClick = {
-                            if (isSelected) {
-                                selectedState.remove(item.app)
-                            } else {
-                                selectedState.add(item.app)
+                    val isTopOfGroup = if (item.isInSelectedSection) {
+                        selectedState.firstOrNull() == item.app
+                    } else {
+                        availableApps.firstOrNull() == item.app
+                    }
+                    val isBottomOfGroup = if (item.isInSelectedSection) {
+                        selectedState.lastOrNull() == item.app
+                    } else {
+                        availableApps.lastOrNull() == item.app
+                    }
+
+                    if (item.isInSelectedSection && reorderable) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.fillMaxWidth().animateItem()
+                        ) {
+                            SettingsButton(
+                                label = item.app.displayName,
+                                onClick = {
+                                    if (isSelected) {
+                                        selectedState.remove(item.app)
+                                    } else {
+                                        selectedState.add(item.app)
+                                    }
+                                    onAppClicked(item.app, isSelected)
+                                },
+                                isTopOfGroup = isTopOfGroup,
+                                isBottomOfGroup = isBottomOfGroup,
+                                isDisabled = false, // Always enabled for selected and reorderable
+                                modifier = Modifier.weight(1f)
+                            )
+                            IconButton(
+                                onClick = {
+                                    val currentIndex = selectedState.indexOf(item.app)
+                                    if (currentIndex > 0) {
+                                        val newIndex = currentIndex - 1
+                                        val movedItem = selectedState.removeAt(currentIndex)
+                                        selectedState.add(newIndex, movedItem)
+                                        onAppMoved(currentIndex, newIndex)
+                                    }
+                                },
+                                enabled = selectedState.indexOf(item.app) > 0
+                            ) {
+                                Icon(Icons.Default.ArrowUpward, contentDescription = "Move Up", tint = ContentColor)
                             }
-                            onAppClicked(item.app, isSelected)
-                        },
-                        isTopOfGroup = if (item.isInSelectedSection) {
-                            selectedState.firstOrNull() == item.app
-                        } else {
-                            availableApps.firstOrNull() == item.app
-                        },
-                        isBottomOfGroup = if (item.isInSelectedSection) {
-                            selectedState.lastOrNull() == item.app
-                        } else {
-                            availableApps.lastOrNull() == item.app
-                        },
-                        isDisabled = !item.isInSelectedSection && isSelected,
-                        modifier = Modifier.animateItem()
-                    )
+                            IconButton(
+                                onClick = {
+                                    val currentIndex = selectedState.indexOf(item.app)
+                                    if (currentIndex < selectedState.size - 1) {
+                                        val newIndex = currentIndex + 1
+                                        val movedItem = selectedState.removeAt(currentIndex)
+                                        selectedState.add(newIndex, movedItem)
+                                        onAppMoved(currentIndex, newIndex)
+                                    }
+                                },
+                                enabled = selectedState.indexOf(item.app) < selectedState.size - 1
+                            ) {
+                                Icon(Icons.Default.ArrowDownward, contentDescription = "Move Down", tint = ContentColor)
+                            }
+                        }
+                    } else {
+                        SettingsButton(
+                            label = item.app.displayName,
+                            onClick = {
+                                if (isSelected) {
+                                    selectedState.remove(item.app)
+                                } else {
+                                    selectedState.add(item.app)
+                                }
+                                onAppClicked(item.app, isSelected)
+                            },
+                            isTopOfGroup = isTopOfGroup,
+                            isBottomOfGroup = isBottomOfGroup,
+                            isDisabled = !item.isInSelectedSection && isSelected,
+                            modifier = Modifier.animateItem()
+                        )
+                    }
                 }
                 ListItem.Spacer -> AnimatedVisibility(
                     visible = selectedState.isNotEmpty(),

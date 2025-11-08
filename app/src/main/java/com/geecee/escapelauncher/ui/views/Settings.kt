@@ -187,16 +187,16 @@ fun Settings(
                 BulkAppManager(
                     apps = homeScreenModel.installedApps,
                     preSelectedApps = challengeApps,
-                    title = stringResource(R.string.manage_hidden_apps),
-                    onBackClicked = { navController.popBackStack() }
-                ) { app, selected ->
-                    if (selected) {
-                        mainAppModel.challengesManager.removeChallengeApp(app.packageName)
-                    } else {
-                        mainAppModel.challengesManager.addChallengeApp(app.packageName)
-                    }
-                    mainAppModel.notifyChallengesChanged()
-                }
+                    title = stringResource(R.string.manage_open_challenges),
+                    onBackClicked = { navController.popBackStack() },
+                    onAppClicked = { app, selected ->
+                        if (selected) {
+                            mainAppModel.challengesManager.removeChallengeApp(app.packageName)
+                        } else {
+                            mainAppModel.challengesManager.addChallengeApp(app.packageName)
+                        }
+                        mainAppModel.notifyChallengesChanged()
+                    })
             }
             composable(
                 "chooseFont",
@@ -244,16 +244,16 @@ fun Settings(
                     apps = homeScreenModel.installedApps,
                     preSelectedApps = hiddenAppsList,
                     title = stringResource(R.string.manage_hidden_apps),
-                    onBackClicked = { navController.popBackStack() }
-                ) { app, selected ->
-                    if (selected) {
-                        mainAppModel.hiddenAppsManager.removeHiddenApp(app.packageName)
-                    } else {
-                        mainAppModel.hiddenAppsManager.addHiddenApp(app.packageName)
-                        resetHome(homeScreenModel, false)
-                    }
-                    mainAppModel.notifyHiddenAppsChanged()
-                }
+                    onBackClicked = { navController.popBackStack() },
+                    onAppClicked = { app, selected ->
+                        if (selected) {
+                            mainAppModel.hiddenAppsManager.removeHiddenApp(app.packageName)
+                        } else {
+                            mainAppModel.hiddenAppsManager.addHiddenApp(app.packageName)
+                            resetHome(homeScreenModel, false)
+                        }
+                        mainAppModel.notifyHiddenAppsChanged()
+                    })
             }
             composable(
                 "bulkFavouriteApps",
@@ -272,16 +272,21 @@ fun Settings(
                     apps = homeScreenModel.installedApps,
                     preSelectedApps = preSelectedFavoriteApps,
                     title = stringResource(R.string.manage_favourite_apps),
-                    onBackClicked = { navController.popBackStack() }
-                ) { app, selected ->
-                    if (selected) {
-                        mainAppModel.favoriteAppsManager.removeFavoriteApp(app.packageName)
+                    reorderable = true,
+                    onAppMoved = { fromIndex, toIndex ->
+                        mainAppModel.favoriteAppsManager.reorderFavoriteApps(fromIndex, toIndex)
                         homeScreenModel.reloadFavouriteApps()
-                    } else {
-                        mainAppModel.favoriteAppsManager.addFavoriteApp(app.packageName)
-                        homeScreenModel.reloadFavouriteApps()
-                    }
-                }
+                    },
+                    onBackClicked = { navController.popBackStack() },
+                    onAppClicked = { app, selected ->
+                        if (selected) {
+                            mainAppModel.favoriteAppsManager.removeFavoriteApp(app.packageName)
+                            homeScreenModel.reloadFavouriteApps()
+                        } else {
+                            mainAppModel.favoriteAppsManager.addFavoriteApp(app.packageName)
+                            homeScreenModel.reloadFavouriteApps()
+                        }
+                    })
             }
         }
     }
@@ -709,7 +714,9 @@ fun ThemeOptions(
         }
         item {
             SettingsButton(
-                label = stringResource(R.string.match_system_wallpaper), isBottomOfGroup = true, onClick = {
+                label = stringResource(R.string.match_system_wallpaper),
+                isBottomOfGroup = true,
+                onClick = {
                     AppUtils.setSolidColorWallpaperHomeScreen(
                         mainAppModel.getContext(), mainAppModel.appTheme.value.background
                     )
@@ -836,6 +843,26 @@ fun WidgetOptions(context: Context, goBack: () -> Unit) {
     ) { result ->
         if (result.resultCode != Activity.RESULT_OK) {
             widgetCouldNotBind("User denied widget bind permission")
+        } else {
+            // Re-attempt to bind the widget after permission is granted
+            val tempId = appWidgetHost.allocateAppWidgetId()
+            val dummyProviders = appWidgetManager.installedProviders
+            val testProvider = dummyProviders.firstOrNull()
+
+            if (testProvider != null) {
+                try {
+                    if (appWidgetManager.bindAppWidgetIdIfAllowed(tempId, testProvider.provider)) {
+                        // Widget bound, now proceed with setup if needed or just acknowledge
+                        // For now, we just acknowledge and let the user select a widget from the picker
+                    } else {
+                        widgetCouldNotBind("Widget binding still not allowed after permission grant.")
+                    }
+                } catch (e: Exception) {
+                    widgetCouldNotBind("Failed to re-bind widget after permission grant: ${e.message}")
+                }
+            } else {
+                widgetCouldNotBind("No available widget providers found after permission grant.")
+            }
         }
     }
 
