@@ -338,7 +338,6 @@ class MainHomeScreen : ComponentActivity() {
             modifier = Modifier
                 .fillMaxSize()
                 .background(color = BackgroundColor)
-                .imePadding()
                 .animateContentSize()
         ) {
             NavHost(navController, startDestination = startDestination) {
