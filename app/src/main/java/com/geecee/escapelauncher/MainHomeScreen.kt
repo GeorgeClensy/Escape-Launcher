@@ -346,6 +346,10 @@ class MainHomeScreen : ComponentActivity() {
                     "home",
                     enterTransition = { fadeIn(tween(300)) },
                     exitTransition = { fadeOut(tween(300)) }) {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                        pushNotificationPermissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+                    }
+
                     HomeScreenPageManager(
                         viewModel,
                         homeScreenModel
@@ -376,7 +380,6 @@ class MainHomeScreen : ComponentActivity() {
                     Onboarding(
                         navController,
                         viewModel,
-                        pushNotificationPermissionLauncher,
                         homeScreenModel,
                         this@MainHomeScreen
                     )

@@ -23,6 +23,7 @@ roomRuntime = "2.8.3"
 workRuntimeKtx = "2.11.0"
 uiTextGoogleFonts = "1.9.4"
 firebaseMessaging = "25.0.1"
+composeMaterial3 = "1.5.0-alpha08"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -51,7 +52,7 @@ androidx-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
 androidx-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
 androidx-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
 androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
-androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
+androidx-material3 = { group = "androidx.compose.material3", name = "material3", version.ref="composeMaterial3"}
 androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose" }
 androidx-compose-material = { group = "androidx.compose.material", name = "material", version.ref = "composeMaterial" }
 androidx-room-common = { group = "androidx.room", name = "room-common", version.ref = "roomCommon" }

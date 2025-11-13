@@ -21,8 +21,8 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import com.geecee.escapelauncher.utils.InstalledApp
 import com.geecee.escapelauncher.ui.theme.ContentColor
+import com.geecee.escapelauncher.utils.InstalledApp
 
 @Composable
 fun BulkAppManager(
@@ -32,6 +32,8 @@ fun BulkAppManager(
     onBackClicked: () -> Unit,
     onAppClicked: (app: InstalledApp, selected: Boolean) -> Unit,
     reorderable: Boolean = false,
+    hideTitle: Boolean = false,
+    hideBack: Boolean = false,
     onAppMoved: (fromIndex: Int, toIndex: Int) -> Unit = { _, _ -> }
 ) {
     val selectedState = remember { mutableStateListOf<InstalledApp>().apply { addAll(preSelectedApps) } }
@@ -54,8 +56,10 @@ fun BulkAppManager(
         horizontalAlignment = Alignment.Start,
         modifier = Modifier.fillMaxSize()
     ) {
-        item {
-            SettingsHeader(goBack = { onBackClicked() }, title = title)
+        if(!hideTitle) {
+            item {
+                SettingsHeader(goBack = { onBackClicked() }, title = title, hideBack = hideBack)
+            }
         }
 
         items(

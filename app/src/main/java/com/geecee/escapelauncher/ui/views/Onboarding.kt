@@ -4,9 +4,9 @@ import android.app.Activity
 import android.app.admin.DevicePolicyManager
 import android.content.ComponentName
 import android.content.Intent
-import android.os.Build
-import androidx.activity.result.ActivityResultLauncher
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -14,17 +14,18 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -36,12 +37,12 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -60,10 +61,16 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.geecee.escapelauncher.HomeScreenModel
 import com.geecee.escapelauncher.MainAppViewModel
 import com.geecee.escapelauncher.R
+import com.geecee.escapelauncher.ui.composables.BulkAppManager
+import com.geecee.escapelauncher.ui.composables.SettingsSpacer
+import com.geecee.escapelauncher.ui.theme.BackgroundColor
+import com.geecee.escapelauncher.ui.theme.CardContainerColor
+import com.geecee.escapelauncher.ui.theme.primaryContentColor
 import com.geecee.escapelauncher.utils.AppUtils
 import com.geecee.escapelauncher.utils.AppUtils.configureAnalytics
 import com.geecee.escapelauncher.utils.getBooleanSetting
@@ -77,11 +84,17 @@ import com.geecee.escapelauncher.MainAppViewModel as MainAppModel
 fun Onboarding(
     mainNavController: NavController,
     mainAppModel: MainAppViewModel,
-    pushNotificationPermissionLauncher: ActivityResultLauncher<String>,
     homeScreenModel: HomeScreenModel,
     activity: Activity
 ) {
+    val statusBarHeight = WindowInsets.statusBars
+        .asPaddingValues()
+        .calculateTopPadding()
+        .takeIf { it > 0.dp } ?: 50.dp
+
     val navController = rememberNavController()
+    val currentBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = currentBackStackEntry?.destination?.route
 
     var startDestination = "Page1"
 
@@ -94,54 +107,81 @@ fun Onboarding(
         startDestination = "Page4"
     }
 
-    NavHost(navController = navController, startDestination = startDestination) {
-        composable(
-            "Page1",
-            enterTransition = { fadeIn(tween(300)) },
-            exitTransition = { fadeOut(tween(300)) }) {
-            OnboardingPage1(navController)
-        }
-        composable(
-            "Page2",
-            enterTransition = { fadeIn(tween(300)) },
-            exitTransition = { fadeOut(tween(300)) }) {
-            OnboardingPage2(navController)
-        }
-        composable(
-            "Page3",
-            enterTransition = { fadeIn(tween(300)) },
-            exitTransition = { fadeOut(tween(300)) }) {
-            OnboardingPage3(navController, mainAppModel)
-        }
-        composable(
-            "Page4",
-            enterTransition = { fadeIn(tween(300)) },
-            exitTransition = { fadeOut(tween(300)) }) {
-            OnboardingPage4(navController, activity)
-        }
-        composable(
-            "Page5",
-            enterTransition = { fadeIn(tween(300)) },
-            exitTransition = { fadeOut(tween(300)) }) {
-            OnboardingPage5(navController, mainAppModel)
-        }
-        composable(
-            "Notifications",
-            enterTransition = { fadeIn(tween(300)) },
-            exitTransition = { fadeOut(tween(300)) }) {
-            Notifications(
-                navController,
-                pushNotificationPermissionLauncher,
-                homeScreenModel
-            )
-        }
-        composable(
-            "Admin",
-            enterTransition = { fadeIn(tween(300)) },
-            exitTransition = { fadeOut(tween(300)) }) {
-            DeviceAdmin(
-                mainNavController, mainAppModel
-            )
+    // Progress bar animation
+    val progressTarget = when (currentRoute) {
+        "Page1" -> 0.16f
+        "Page2" -> 0.32f
+        "Page3" -> 0.48f
+        "Page4" -> 0.64f
+        "Page5" -> 0.8f
+        "Page6" -> 1.0f
+        else -> 0f
+    }
+
+    // Animate progress smoothly
+    val animatedProgress by animateFloatAsState(
+        targetValue = progressTarget,
+        animationSpec = tween(durationMillis = 500, easing = FastOutSlowInEasing),
+        label = "progressAnim"
+    )
+
+    Column(Modifier
+        .fillMaxSize()
+        .padding(top = statusBarHeight, bottom = 15.dp)) {
+
+        LinearProgressIndicator(
+            progress = {animatedProgress},
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(32.dp)
+                .padding(start = 30.dp, end = 30.dp, top = 15.dp),
+            color = primaryContentColor,
+            trackColor = CardContainerColor
+        )
+
+        NavHost(
+            navController = navController,
+            startDestination = startDestination,
+            modifier = Modifier.fillMaxSize()
+        ) {
+            composable(
+                "Page1",
+                enterTransition = { fadeIn(tween(300)) },
+                exitTransition = { fadeOut(tween(300)) }) {
+                OnboardingPage1(navController)
+            }
+            composable(
+                "Page2",
+                enterTransition = { fadeIn(tween(300)) },
+                exitTransition = { fadeOut(tween(300)) }) {
+                OnboardingPage2(navController)
+            }
+            composable(
+                "Page3",
+                enterTransition = { fadeIn(tween(300)) },
+                exitTransition = { fadeOut(tween(300)) }) {
+                OnboardingPage3(navController, mainAppModel, homeScreenModel)
+            }
+            composable(
+                "Page4",
+                enterTransition = { fadeIn(tween(300)) },
+                exitTransition = { fadeOut(tween(300)) }) {
+                OnboardingPage4(navController, activity)
+            }
+            composable(
+                "Page5",
+                enterTransition = { fadeIn(tween(300)) },
+                exitTransition = { fadeOut(tween(300)) }) {
+                OnboardingPage5(navController, mainAppModel)
+            }
+            composable(
+                "Page6",
+                enterTransition = { fadeIn(tween(300)) },
+                exitTransition = { fadeOut(tween(300)) }) {
+                OnboardingPage6(
+                    mainNavController, mainAppModel
+                )
+            }
         }
     }
 }
@@ -161,13 +201,13 @@ fun OnboardingPage1(navController: NavController) {
                 Modifier
                     .padding(3.dp)
                     .align(Alignment.CenterHorizontally),
-                tint = MaterialTheme.colorScheme.onPrimaryContainer
+                tint = primaryContentColor
             )
             Spacer(Modifier.height(15.dp))
             Text(
                 stringResource(R.string.escape_launcher),
                 Modifier,
-                MaterialTheme.colorScheme.onPrimaryContainer,
+                primaryContentColor,
                 style = MaterialTheme.typography.titleSmall,
                 textAlign = TextAlign.Center
             )
@@ -177,10 +217,10 @@ fun OnboardingPage1(navController: NavController) {
             onClick = {
                 navController.navigate("Page2")
             }, modifier = Modifier.align(Alignment.BottomEnd), colors = ButtonColors(
-                MaterialTheme.colorScheme.onPrimaryContainer,
-                MaterialTheme.colorScheme.background,
-                MaterialTheme.colorScheme.onPrimaryContainer,
-                MaterialTheme.colorScheme.background
+                primaryContentColor,
+                BackgroundColor,
+                primaryContentColor,
+                BackgroundColor
             )
         ) {
             Row(
@@ -206,12 +246,13 @@ fun OnboardingPage2(navController: NavController) {
         Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
-            .padding(30.dp, 0.dp, 30.dp, 0.dp)
+            .padding(30.dp, 0.dp, 30.dp, 30.dp)
     ) {
         Column(
             Modifier.verticalScroll(rememberScrollState())
         ) {
-            Spacer(Modifier.height(120.dp))
+            SettingsSpacer()
+
             Text(
                 buildAnnotatedString {
                     append(stringResource(R.string.most_people_waste))
@@ -221,12 +262,12 @@ fun OnboardingPage2(navController: NavController) {
                     append(stringResource(R.string.hours_every_day))
                 },
                 Modifier,
-                MaterialTheme.colorScheme.onPrimaryContainer,
+                primaryContentColor,
                 style = MaterialTheme.typography.titleSmall,
                 textAlign = TextAlign.Start
             )
 
-            Spacer(Modifier.height(60.dp))
+            SettingsSpacer()
 
             Text(
                 buildAnnotatedString {
@@ -237,12 +278,12 @@ fun OnboardingPage2(navController: NavController) {
                     append(stringResource(R.string.every_week))
                 },
                 Modifier,
-                MaterialTheme.colorScheme.onPrimaryContainer,
+                primaryContentColor,
                 style = MaterialTheme.typography.titleSmall,
                 textAlign = TextAlign.End
             )
 
-            Spacer(Modifier.height(60.dp))
+            SettingsSpacer()
 
             Text(
                 buildAnnotatedString {
@@ -253,11 +294,10 @@ fun OnboardingPage2(navController: NavController) {
                     append(stringResource(R.string.years_straight))
                 },
                 Modifier,
-                MaterialTheme.colorScheme.onPrimaryContainer,
+                primaryContentColor,
                 style = MaterialTheme.typography.titleSmall,
                 textAlign = TextAlign.Start
             )
-            Spacer(Modifier.height(240.dp))
         }
 
         Button(
@@ -265,13 +305,12 @@ fun OnboardingPage2(navController: NavController) {
                 navController.navigate("Page3")
             },
             modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .padding(0.dp, 0.dp, 0.dp, 30.dp),
+                .align(Alignment.BottomEnd),
             colors = ButtonColors(
-                MaterialTheme.colorScheme.onPrimaryContainer,
-                MaterialTheme.colorScheme.background,
-                MaterialTheme.colorScheme.onPrimaryContainer,
-                MaterialTheme.colorScheme.background
+                primaryContentColor,
+                BackgroundColor,
+                primaryContentColor,
+                BackgroundColor
             )
         ) {
             Row(
@@ -293,120 +332,47 @@ fun OnboardingPage2(navController: NavController) {
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun OnboardingPage3(navController: NavController, mainAppModel: MainAppModel) {
-    val installedApps =
-        remember { mutableStateOf(AppUtils.getAllInstalledApps(mainAppModel.getContext())) }
-
-    val favoritesVersion =
-        remember { mutableIntStateOf(0) } // Add a state to track changes to favorites
-    val noRippleInteractionSource = remember { MutableInteractionSource() }
-
-    fun updateFavoriteStatus(packageName: String, isFavorite: Boolean) {
-        if (isFavorite) {
-            mainAppModel.favoriteAppsManager.addFavoriteApp(packageName)
-        } else {
-            mainAppModel.favoriteAppsManager.removeFavoriteApp(packageName)
-        }
-        installedApps.value = AppUtils.getAllInstalledApps(mainAppModel.getContext())
-        favoritesVersion.intValue++ // Increment the version to trigger recomposition
-    }
-
-    // Derive the filtered apps lists from state to ensure recomposition
-    val favoritedApps = remember(installedApps.value, favoritesVersion.intValue) {
-        installedApps.value.filter { appInfo ->
-            mainAppModel.favoriteAppsManager.isAppFavorite(appInfo.packageName)
-        }.sortedBy { appInfo ->
-            // Retrieve the index from the favoriteAppsManager
-            mainAppModel.favoriteAppsManager.getFavoriteIndex(appInfo.packageName)
-        }
-    }
-
-    val nonFavoritedApps = remember(installedApps.value, favoritesVersion.intValue) {
-        installedApps.value.filter { appInfo ->
-            !mainAppModel.favoriteAppsManager.isAppFavorite(appInfo.packageName) && !appInfo.packageName.contains(
-                "com.geecee.escapelauncher"
-            )
-        }.sortedBy { it.displayName }
-    }
-
+fun OnboardingPage3(
+    navController: NavController,
+    mainAppModel: MainAppModel,
+    homeScreenModel: HomeScreenModel
+) {
     Box(
         Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
             .padding(30.dp, 0.dp, 30.dp, 0.dp)
     ) {
-        Column(
-            Modifier.verticalScroll(rememberScrollState())
-        ) {
-            Spacer(Modifier.height(120.dp))
-
-            Text(
-                stringResource(R.string.choose_your_favourite_apps),
-                Modifier,
-                MaterialTheme.colorScheme.onPrimaryContainer,
-                style = MaterialTheme.typography.titleSmall,
-                textAlign = TextAlign.Start
-            )
-
-            Spacer(Modifier.height(5.dp))
-
-            Text(
-                stringResource(R.string.pinned_for_access),
-                Modifier,
-                MaterialTheme.colorScheme.onPrimaryContainer,
-                style = MaterialTheme.typography.bodyLarge,
-                textAlign = TextAlign.Start,
-                lineHeight = 32.sp
-            )
-
-            Spacer(Modifier.height(10.dp))
-
-            Column {
-                favoritedApps.forEach { appInfo ->
-                    Text(
-                        text = appInfo.displayName,
-                        modifier = Modifier
-                            .padding(vertical = 15.dp)
-                            .combinedClickable(
-                                interactionSource = noRippleInteractionSource,
-                                indication = null,
-                                onClick = {
-                                    updateFavoriteStatus(appInfo.packageName, false)
-                                }
-                            ),
-                        color = MaterialTheme.colorScheme.onPrimaryContainer,
-                        style = MaterialTheme.typography.bodyMedium
+        val preSelectedFavoriteApps =
+            mainAppModel.favoriteAppsManager.getFavoriteApps()
+                .mapNotNull { packageName ->
+                    AppUtils.getInstalledAppFromPackageName(
+                        mainAppModel.getContext(),
+                        packageName
                     )
                 }
-            }
 
-            HorizontalDivider(
-                Modifier
-                    .fillMaxWidth()
-                    .padding(0.dp, 15.dp)
-            )
-
-            Column {
-                nonFavoritedApps.forEach { appInfo ->
-                    Text(
-                        appInfo.displayName,
-                        modifier = Modifier
-                            .padding(0.dp, 15.dp)
-                            .combinedClickable(
-                                interactionSource = noRippleInteractionSource,
-                                indication = null,
-                                onClick = {
-                                    updateFavoriteStatus(appInfo.packageName, true)
-                                }
-                            ),
-                        color = MaterialTheme.colorScheme.onPrimaryContainer,
-                        style = MaterialTheme.typography.bodyMedium
-                    )
+        BulkAppManager(
+            apps = homeScreenModel.installedApps,
+            preSelectedApps = preSelectedFavoriteApps,
+            title = stringResource(R.string.choose_your_favourite_apps),
+            reorderable = true,
+            onAppMoved = { fromIndex, toIndex ->
+                mainAppModel.favoriteAppsManager.reorderFavoriteApps(fromIndex, toIndex)
+                homeScreenModel.reloadFavouriteApps()
+            },
+            onBackClicked = { navController.popBackStack() },
+            hideTitle = false,
+            hideBack = true,
+            onAppClicked = { app, selected ->
+                if (selected) {
+                    mainAppModel.favoriteAppsManager.removeFavoriteApp(app.packageName)
+                    homeScreenModel.reloadFavouriteApps()
+                } else {
+                    mainAppModel.favoriteAppsManager.addFavoriteApp(app.packageName)
+                    homeScreenModel.reloadFavouriteApps()
                 }
-            }
-
-            Spacer(Modifier.height(120.dp))
-        }
+            })
 
         Button(
             onClick = {
@@ -416,10 +382,10 @@ fun OnboardingPage3(navController: NavController, mainAppModel: MainAppModel) {
                 .align(Alignment.BottomEnd)
                 .padding(bottom = 30.dp),
             colors = ButtonColors(
-                MaterialTheme.colorScheme.onPrimaryContainer,
-                MaterialTheme.colorScheme.background,
-                MaterialTheme.colorScheme.onPrimaryContainer,
-                MaterialTheme.colorScheme.background
+                primaryContentColor,
+                BackgroundColor,
+                primaryContentColor,
+                BackgroundColor
             )
         ) {
             Row(
@@ -451,7 +417,7 @@ fun OnboardingPage4(navController: NavController, activity: Activity) {
             Text(
                 stringResource(R.string.set_escape),
                 Modifier,
-                MaterialTheme.colorScheme.onPrimaryContainer,
+                primaryContentColor,
                 style = MaterialTheme.typography.titleSmall,
                 textAlign = TextAlign.Start
             )
@@ -459,7 +425,7 @@ fun OnboardingPage4(navController: NavController, activity: Activity) {
             Text(
                 stringResource(R.string.stop_going_back),
                 Modifier,
-                MaterialTheme.colorScheme.onPrimaryContainer,
+                primaryContentColor,
                 style = MaterialTheme.typography.bodyLarge,
                 textAlign = TextAlign.Start,
                 lineHeight = 32.sp
@@ -477,10 +443,10 @@ fun OnboardingPage4(navController: NavController, activity: Activity) {
                     },
                     modifier = Modifier,
                     colors = ButtonColors(
-                        MaterialTheme.colorScheme.onPrimaryContainer,
-                        MaterialTheme.colorScheme.background,
-                        MaterialTheme.colorScheme.onPrimaryContainer,
-                        MaterialTheme.colorScheme.background
+                        primaryContentColor,
+                        BackgroundColor,
+                        primaryContentColor,
+                        BackgroundColor
                     )
                 ) {
                     Row(
@@ -496,14 +462,14 @@ fun OnboardingPage4(navController: NavController, activity: Activity) {
                     },
                     modifier = Modifier.border(
                         1.dp,
-                        MaterialTheme.colorScheme.onPrimaryContainer,
+                        primaryContentColor,
                         MaterialTheme.shapes.extraLarge
                     ),
                     colors = ButtonColors(
                         Color.Transparent,
-                        MaterialTheme.colorScheme.onPrimaryContainer,
+                        primaryContentColor,
                         Color.Transparent,
-                        MaterialTheme.colorScheme.onPrimaryContainer
+                        primaryContentColor
                     )
                 ) {
                     Row(
@@ -520,17 +486,12 @@ fun OnboardingPage4(navController: NavController, activity: Activity) {
 
         Button(
             onClick = {
-                setBooleanSetting(
-                    activity,
-                    activity.resources.getString(R.string.WasChangingLauncher),
-                    false
-                )
                 navController.navigate("Page5")
             }, modifier = Modifier.align(Alignment.BottomEnd), colors = ButtonColors(
-                MaterialTheme.colorScheme.onPrimaryContainer,
-                MaterialTheme.colorScheme.background,
-                MaterialTheme.colorScheme.onPrimaryContainer,
-                MaterialTheme.colorScheme.background
+                primaryContentColor,
+                BackgroundColor,
+                primaryContentColor,
+                BackgroundColor
             )
         ) {
             Row(
@@ -575,7 +536,7 @@ fun OnboardingPage5(
                 Text(
                     stringResource(R.string.analytics_and_data_collection),
                     Modifier,
-                    MaterialTheme.colorScheme.onPrimaryContainer,
+                    primaryContentColor,
                     style = MaterialTheme.typography.titleSmall,
                     textAlign = TextAlign.Start
                 )
@@ -586,7 +547,7 @@ fun OnboardingPage5(
                 Text(
                     stringResource(R.string.anonymous_data),
                     Modifier,
-                    MaterialTheme.colorScheme.onPrimaryContainer,
+                    primaryContentColor,
                     style = MaterialTheme.typography.bodyLarge,
                     textAlign = TextAlign.Start,
                     lineHeight = 32.sp
@@ -602,10 +563,10 @@ fun OnboardingPage5(
                     onClick = {
                         showPolicyDialog.value = true
                     }, modifier = Modifier, colors = ButtonColors(
-                        MaterialTheme.colorScheme.onPrimaryContainer,
-                        MaterialTheme.colorScheme.background,
-                        MaterialTheme.colorScheme.onPrimaryContainer,
-                        MaterialTheme.colorScheme.background
+                        primaryContentColor,
+                        BackgroundColor,
+                        primaryContentColor,
+                        BackgroundColor
                     )
                 ) {
                     Row(
@@ -625,7 +586,7 @@ fun OnboardingPage5(
         Row(modifier = Modifier.align(Alignment.BottomEnd)) {
             Button(
                 onClick = {
-                    navController.navigate("Admin")
+                    navController.navigate("Page6")
                     setBooleanSetting(
                         mainAppModel.getContext(),
                         mainAppModel.getContext().resources.getString(R.string.Analytics),
@@ -633,9 +594,9 @@ fun OnboardingPage5(
                     )
                     configureAnalytics(false)
                 }, modifier = Modifier, colors = ButtonDefaults.outlinedButtonColors(
-                    containerColor = MaterialTheme.colorScheme.background,
-                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                ), border = BorderStroke(1.dp, MaterialTheme.colorScheme.onPrimaryContainer)
+                    containerColor = BackgroundColor,
+                    contentColor = primaryContentColor
+                ), border = BorderStroke(1.dp, primaryContentColor)
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -652,7 +613,7 @@ fun OnboardingPage5(
 
             Button(
                 onClick = {
-                    navController.navigate("Admin")
+                    navController.navigate("Page6")
                     setBooleanSetting(
                         mainAppModel.getContext(),
                         mainAppModel.getContext().resources.getString(R.string.Analytics),
@@ -660,10 +621,10 @@ fun OnboardingPage5(
                     )
                     configureAnalytics(true)
                 }, modifier = Modifier, colors = ButtonColors(
-                    MaterialTheme.colorScheme.onPrimaryContainer,
-                    MaterialTheme.colorScheme.background,
-                    MaterialTheme.colorScheme.onPrimaryContainer,
-                    MaterialTheme.colorScheme.background
+                    primaryContentColor,
+                    BackgroundColor,
+                    primaryContentColor,
+                    BackgroundColor
                 )
             ) {
                 Row(
@@ -685,84 +646,7 @@ fun OnboardingPage5(
 }
 
 @Composable
-fun Notifications(
-    navController: NavController,
-    pushNotificationPermissionLauncher: ActivityResultLauncher<String>,
-    homeScreenModel: HomeScreenModel
-) {
-    val scrollState = rememberLazyListState()
-
-    Box(
-        Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-            .padding(30.dp, 0.dp, 30.dp, 30.dp)
-    ) {
-        LazyColumn(
-            state = scrollState
-        ) {
-            item {
-                Spacer(Modifier.height(120.dp))
-            }
-
-            item {
-                Text(
-                    stringResource(R.string.notifications),
-                    Modifier,
-                    MaterialTheme.colorScheme.onPrimaryContainer,
-                    style = MaterialTheme.typography.titleSmall,
-                    textAlign = TextAlign.Start
-                )
-            }
-
-            item {
-                Spacer(Modifier.height(5.dp))
-                Text(
-                    stringResource(R.string.please_allow_notifications),
-                    Modifier,
-                    MaterialTheme.colorScheme.onPrimaryContainer,
-                    style = MaterialTheme.typography.bodyLarge,
-                    textAlign = TextAlign.Start,
-                    lineHeight = 32.sp
-                )
-            }
-
-            item {
-                Spacer(Modifier.height(240.dp))
-            }
-        }
-
-        Row(modifier = Modifier.align(Alignment.BottomEnd)) {
-            Button(
-                onClick = {
-                    homeScreenModel.reloadFavouriteApps()
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                        pushNotificationPermissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
-                    }
-                    navController.navigate("Admin")
-                }, modifier = Modifier, colors = ButtonColors(
-                    MaterialTheme.colorScheme.onPrimaryContainer,
-                    MaterialTheme.colorScheme.background,
-                    MaterialTheme.colorScheme.onPrimaryContainer,
-                    MaterialTheme.colorScheme.background
-                )
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Text(
-                        text = stringResource(R.string.allow), maxLines = 1, // Prevent overflow
-                        overflow = TextOverflow.Ellipsis // Gracefully handle long text
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun DeviceAdmin(
+fun OnboardingPage6(
     mainNavController: NavController,
     mainAppModel: MainAppModel
 ) {
@@ -786,7 +670,7 @@ fun DeviceAdmin(
                 Text(
                     stringResource(R.string.admin_title),
                     Modifier,
-                    MaterialTheme.colorScheme.onPrimaryContainer,
+                    primaryContentColor,
                     style = MaterialTheme.typography.titleSmall,
                     textAlign = TextAlign.Start
                 )
@@ -797,7 +681,7 @@ fun DeviceAdmin(
                 Text(
                     stringResource(R.string.admin_description),
                     Modifier,
-                    MaterialTheme.colorScheme.onPrimaryContainer,
+                    primaryContentColor,
                     style = MaterialTheme.typography.bodyLarge,
                     textAlign = TextAlign.Start,
                     lineHeight = 32.sp
@@ -822,10 +706,10 @@ fun DeviceAdmin(
                         )
                         context.startActivity(intent)
                     }, modifier = Modifier, colors = ButtonColors(
-                        MaterialTheme.colorScheme.onPrimaryContainer,
-                        MaterialTheme.colorScheme.background,
-                        MaterialTheme.colorScheme.onPrimaryContainer,
-                        MaterialTheme.colorScheme.background
+                        primaryContentColor,
+                        BackgroundColor,
+                        primaryContentColor,
+                        BackgroundColor
                     )
                 ) {
                     Row(
@@ -856,11 +740,16 @@ fun DeviceAdmin(
                         mainAppModel.getContext().resources.getString(R.string.FirstTime),
                         false
                     )
+                    setBooleanSetting(
+                        mainAppModel.getContext(),
+                        mainAppModel.getContext().resources.getString(R.string.WasChangingLauncher),
+                        false
+                    )
                 }, modifier = Modifier, colors = ButtonColors(
-                    MaterialTheme.colorScheme.onPrimaryContainer,
-                    MaterialTheme.colorScheme.background,
-                    MaterialTheme.colorScheme.onPrimaryContainer,
-                    MaterialTheme.colorScheme.background
+                    primaryContentColor,
+                    BackgroundColor,
+                    primaryContentColor,
+                    BackgroundColor
                 )
             ) {
                 Row(
