@@ -1,5 +1,5 @@
 [versions]
-agp = "8.13.0"
+agp = "8.13.1"
 coreSplashscreen = "1.0.1"
 firebaseBom = "34.4.0"
 graphicsShapes = "1.1.0"

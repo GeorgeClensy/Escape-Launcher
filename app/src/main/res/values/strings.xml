@@ -5,9 +5,6 @@
     <string name="allow">Allow</string>
     <string name="deny">Deny</string>
     <string name="read_privacy_policy">Privacy Policy</string>
-    <string name="notifications">Notifications</string>
-    <string name="please_allow_notifications">We use notifications to let you know when a new version of Escape is available. Please tap \'Allow\' on the next dialog to enable notifications.</string>
-
     <!-- All Apps strings -->
     <string name="all_apps">All Apps</string>
     <string name="uninstall">Uninstall</string>
@@ -91,7 +88,6 @@
     <string name="adds_to">That adds to</string>
     <string name="years_straight">years straight</string>
     <string name="choose_your_favourite_apps">Choose your favourite apps</string>
-    <string name="pinned_for_access">These will be pinned to your home screen for quick access</string>
     <string name="set_launcher">Set as default launcher</string>
     <string name="already_default">Already Default</string>
     <string name="set_escape">Set Escape as default launcher</string>

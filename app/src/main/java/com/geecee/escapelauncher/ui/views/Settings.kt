@@ -121,6 +121,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.system.exitProcess
 import com.geecee.escapelauncher.MainAppViewModel as MainAppModel
+import androidx.core.net.toUri
 
 
 //
@@ -626,7 +627,7 @@ fun MainSettingsPage(
             onSponsorClick = {
                 val url = "https://github.com/sponsors/GeorgeClensy"
                 val i = Intent(Intent.ACTION_VIEW)
-                i.setData(Uri.parse(url))
+                i.setData(url.toUri())
                 i.addFlags(FLAG_ACTIVITY_NEW_TASK)
                 mainAppModel.getContext().startActivity(i)
             },
