@@ -18,3 +18,7 @@ google-services.json
 .vs
 /.idea/
 app/.idea/
+app/prod/release/app-prod-release.apk
+app/prod/release/output-metadata.json
+app/prod/release/baselineProfiles/0/app-prod-release.dm
+app/prod/release/baselineProfiles/1/app-prod-release.dm
