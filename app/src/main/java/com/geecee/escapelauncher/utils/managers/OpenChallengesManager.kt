@@ -105,7 +105,6 @@ fun OpenChallenge(haptics: HapticFeedback,openApp: () -> Unit, goBack: () -> Uni
 
     LaunchedEffect(Unit) {
         coroutineScope.launch {
-            while (true) {
                 delay(3000)
                 showText = false
 
@@ -147,7 +146,7 @@ fun OpenChallenge(haptics: HapticFeedback,openApp: () -> Unit, goBack: () -> Uni
 
                 delay(500)
                 openApp()
-            }
+
         }
     }
 

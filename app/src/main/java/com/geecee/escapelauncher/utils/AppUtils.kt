@@ -145,37 +145,37 @@ object AppUtils{
     }
 
     /**
-     * Returns a list of all installed apps on the device
+     * Returns a list of all installed apps on the device that have a launcher activity.
      *
      * @param context Context
      *
-     * @return InstalledApp list with all installed apps
+     * @return InstalledApp list with all installed apps that can be launched.
      */
     fun getAllInstalledApps(context: Context): List<InstalledApp> {
-        val launcherApps = context.getSystemService(Context.LAUNCHER_APPS_SERVICE) as? LauncherApps
-            ?: return emptyList()
-
         val packageManager = context.packageManager
-        val mainIntent = Intent(Intent.ACTION_MAIN)
-        mainIntent.addCategory(Intent.CATEGORY_LAUNCHER)
-        
-        val launchableActivities = packageManager.queryIntentActivities(mainIntent, 0).associate {
-            it.activityInfo.packageName to ComponentName(
-                it.activityInfo.packageName,
-                it.activityInfo.name
-            )
+        val mainIntent = Intent(Intent.ACTION_MAIN).apply {
+            addCategory(Intent.CATEGORY_LAUNCHER)
         }
 
-        return launcherApps.getActivityList(null, myUserHandle())
-            .filter { launchableActivities.containsKey(it.applicationInfo.packageName) }
-            .map {
-                val packageName = it.applicationInfo.packageName
-                InstalledApp(
-                    displayName = it.label?.toString() ?: "Unknown App",
-                    packageName = packageName,
-                    componentName = launchableActivities[packageName] ?: it.componentName
-                )
+        // Get all activities that can be launched from a launcher
+        val launchableActivities = packageManager.queryIntentActivities(mainIntent, 0)
+
+        return launchableActivities
+            .mapNotNull { resolveInfo ->
+                val packageName = resolveInfo.activityInfo.packageName
+                val launchIntent = packageManager.getLaunchIntentForPackage(packageName)
+
+                if (launchIntent != null && launchIntent.component != null) {
+                    InstalledApp(
+                        displayName = resolveInfo.loadLabel(packageManager).toString(),
+                        packageName = packageName,
+                        componentName = launchIntent.component!! // Use the component from the launch intent
+                    )
+                } else {
+                    null // Filter out apps that don't have a valid launch intent or component
+                }
             }
+            .distinctBy { it.packageName } // Ensure only one entry per package
     }
 
     /**
