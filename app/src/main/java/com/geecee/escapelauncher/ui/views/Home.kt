@@ -176,7 +176,7 @@ fun HomeScreen(
         }
 
         //Apps
-        items(homeScreenModel.favoriteApps) { app ->
+        items(homeScreenModel.favoriteApps, key = { app -> app.packageName }) { app ->
             val screenTime =
                 remember { mutableLongStateOf(mainAppModel.getCachedScreenTime(app.packageName)) }
 

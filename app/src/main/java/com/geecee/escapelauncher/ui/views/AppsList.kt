@@ -229,7 +229,7 @@ fun AppsList(
                 }
             }
 
-            items(homeScreenModel.filteredApps)
+            items(homeScreenModel.filteredApps, key = { app -> app.packageName })
             { app ->
                 var shouldShowHiddenApps = !mainAppModel.hiddenAppsManager.isAppHidden(
                     app.packageName
@@ -313,8 +313,7 @@ fun AppsList(
                             mainAppModel.getContext(),
                             stringResource(R.string.SearchHiddenPrivateSpace),
                             false
-                        ))
-                    ) {
+                        ))) {
                         Button({
                             unlockPrivateSpace(mainAppModel.getContext())
                         }) {

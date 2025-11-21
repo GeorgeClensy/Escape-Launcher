@@ -755,7 +755,7 @@ fun ThemeOptions(
         item {
             SettingsSpacer()
         }
-        itemsIndexed(themeIds) { index, themeId ->
+        itemsIndexed(themeIds, key = { _, themeId -> themeId }) { index, themeId ->
             val isSelected = remember(themeId, currentSelectedTheme.intValue) {
                 mutableStateOf(currentSelectedTheme.intValue == themeId)
             }
