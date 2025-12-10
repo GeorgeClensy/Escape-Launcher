@@ -18,17 +18,15 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.ColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.platform.LocalResources
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
@@ -59,6 +57,7 @@ import com.google.firebase.Firebase
 import com.google.firebase.messaging.messaging
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class MainHomeScreen : ComponentActivity() {
     private lateinit var privateSpaceReceiver: PrivateSpaceStateReceiver
@@ -270,29 +269,39 @@ class MainHomeScreen : ComponentActivity() {
      */
     @Composable
     private fun SetUpTheme(content: @Composable () -> Unit) {
-        val colorScheme: ColorScheme
-        var settingToChange = stringResource(R.string.Theme)
+        val context = LocalContext.current
+        val config = LocalConfiguration.current
+        val resources = LocalResources.current
 
-        if (getBooleanSetting(
-                this@MainHomeScreen,
-                stringResource(R.string.autoThemeSwitch),
-                false
-            )
-        ) {
-            settingToChange = if (isSystemInDarkTheme()) {
-                stringResource(R.string.dTheme)
-            } else {
-                stringResource(R.string.lTheme)
+        androidx.compose.runtime.LaunchedEffect(Unit) {
+            withContext(Dispatchers.IO) {
+                var settingToChange = resources.getString(R.string.Theme)
+
+                if (getBooleanSetting(
+                        context,
+                        resources.getString(R.string.autoThemeSwitch),
+                        false
+                    )
+                ) {
+                    val isDark = (config.uiMode and
+                            android.content.res.Configuration.UI_MODE_NIGHT_MASK) ==
+                            android.content.res.Configuration.UI_MODE_NIGHT_YES
+
+                    settingToChange = if (isDark) {
+                        resources.getString(R.string.dTheme)
+                    } else {
+                        resources.getString(R.string.lTheme)
+                    }
+                }
+
+                // Get theme ID
+                val themeId = getIntSetting(context, settingToChange, 11)
+                val scheme = AppTheme.fromId(themeId).scheme
+                
+                withContext(Dispatchers.Main) {
+                    viewModel.appTheme.value = scheme
+                }
             }
-        }
-
-        // Set theme
-        colorScheme =
-            AppTheme.fromId(getIntSetting(this@MainHomeScreen, settingToChange, 11)).scheme
-
-        // Set theme
-        viewModel.appTheme = remember {
-            mutableStateOf(colorScheme)
         }
 
         EscapeTheme(viewModel.appTheme) {

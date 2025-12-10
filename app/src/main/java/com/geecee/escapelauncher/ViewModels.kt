@@ -61,25 +61,30 @@ class HomeScreenModel(application: Application, private val mainAppViewModel: Ma
 
     val installedApps = mutableStateListOf<InstalledApp>()
 
-    val filteredApps by derivedStateOf {
-        mainAppViewModel.hiddenAppsTrigger.intValue
+    val filteredApps = mutableStateListOf<InstalledApp>()
 
-        val apps = installedApps.filter { !it.packageName.contains("com.geecee.escapelauncher") }
+    fun updateFilteredApps() {
+        coroutineScope.launch(Dispatchers.Default) {
+             val apps = installedApps.filter { !it.packageName.contains("com.geecee.escapelauncher") }
+             val showHiddenInSearch = getBooleanSetting(
+                mainAppViewModel.getContext(),
+                mainAppViewModel.getContext().resources.getString(R.string.showHiddenAppsInSearch),
+                false
+            )
 
-        val showHiddenInSearch = getBooleanSetting(
-            mainAppViewModel.getContext(),
-            mainAppViewModel.getContext().resources.getString(R.string.showHiddenAppsInSearch),
-            false
-        )
-
-        val query = searchText.value
-        if (query.isBlank()) {
-            apps.filter { !mainAppViewModel.hiddenAppsManager.isAppHidden(it.packageName) }
-        } else {
-            apps.filter { app ->
-                val isHidden = mainAppViewModel.hiddenAppsManager.isAppHidden(app.packageName)
-                val matchesQuery = AppUtils.fuzzyMatch(app.displayName, query)
-                matchesQuery && (!isHidden || showHiddenInSearch)
+            val query = searchText.value.trim()
+            val filtered = if (query.isBlank()) {
+                apps.filter { !mainAppViewModel.hiddenAppsManager.isAppHidden(it.packageName) }
+            } else {
+                apps.filter { app ->
+                     val isHidden = mainAppViewModel.hiddenAppsManager.isAppHidden(app.packageName)
+                     val matchesQuery = AppUtils.fuzzyMatch(app.displayName, query)
+                     matchesQuery && (!isHidden || showHiddenInSearch)
+                }
+            }
+            withContext(Dispatchers.Main) {
+                filteredApps.clear()
+                filteredApps.addAll(filtered)
             }
         }
     }
@@ -132,12 +137,19 @@ class HomeScreenModel(application: Application, private val mainAppViewModel: Ma
 
     init {
         loadApps()
+        coroutineScope.launch {
+            androidx.compose.runtime.snapshotFlow {
+                Triple(searchText.value, mainAppViewModel.hiddenAppsTrigger.intValue, Unit)
+            }.collect {
+                updateFilteredApps()
+            }
+        }
     }
 
     fun loadApps() {
         coroutineScope.launch {
             suspendLoadApps()
-            suspendReloadApps()
+            suspendReloadFavouriteApps()
         }
     }
 
@@ -150,16 +162,17 @@ class HomeScreenModel(application: Application, private val mainAppViewModel: Ma
         withContext(Dispatchers.Main) {
             installedApps.clear()
             installedApps.addAll(apps)
+            updateFilteredApps()
         }
     }
 
     fun reloadFavouriteApps() {
         coroutineScope.launch {
-            suspendReloadApps()
+            suspendReloadFavouriteApps()
         }
     }
 
-    private suspend fun suspendReloadApps() {
+    private suspend fun suspendReloadFavouriteApps() {
         val newFavoriteApps = withContext(Dispatchers.IO) {
             mainAppViewModel.favoriteAppsManager.getFavoriteApps()
                 .mapNotNull { packageName ->

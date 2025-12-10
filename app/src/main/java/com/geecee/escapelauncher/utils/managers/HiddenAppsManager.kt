@@ -15,7 +15,10 @@ class HiddenAppsManager(context: Context) {
         private const val FAVORITE_APPS_KEY = "HiddenApps"
     }
 
+    private var cache: List<String>? = null
+
     private fun saveHiddenApps(hiddenApps: List<String>) {
+        cache = hiddenApps
         val json = gson.toJson(hiddenApps)
         sharedPreferences.edit {
             putString(FAVORITE_APPS_KEY, json)
@@ -23,13 +26,17 @@ class HiddenAppsManager(context: Context) {
     }
 
     fun getHiddenApps(): List<String> {
+        if (cache != null) {
+            return cache!!
+        }
         val json = sharedPreferences.getString(FAVORITE_APPS_KEY, null)
-        return if (json != null) {
+        cache = if (json != null) {
             val type = object : TypeToken<List<String>>() {}.type
             gson.fromJson(json, type)
         } else {
             emptyList()
         }
+        return cache!!
     }
 
     fun addHiddenApp(packageName: String) {
@@ -48,8 +55,7 @@ class HiddenAppsManager(context: Context) {
     }
 
     fun isAppHidden(packageName: String): Boolean {
-        val hiddenApps = getHiddenApps()
-        return packageName in hiddenApps
+        return packageName in getHiddenApps()
     }
 }
 
