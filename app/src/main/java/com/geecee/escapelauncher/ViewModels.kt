@@ -28,6 +28,7 @@ import com.geecee.escapelauncher.utils.managers.HiddenAppsManager
 import com.geecee.escapelauncher.utils.managers.getUsageForApp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -131,30 +132,43 @@ class HomeScreenModel(application: Application, private val mainAppViewModel: Ma
 
     init {
         loadApps()
-        reloadFavouriteApps()
     }
 
     fun loadApps() {
         coroutineScope.launch {
+            suspendLoadApps()
+            suspendReloadApps()
+        }
+    }
+
+    private suspend fun suspendLoadApps() {
+        val apps = withContext(Dispatchers.IO) {
+            AppUtils.getAllInstalledApps(mainAppViewModel.getContext()).sortedBy {
+                it.displayName
+            }
+        }
+        withContext(Dispatchers.Main) {
             installedApps.clear()
-            installedApps.addAll(
-                AppUtils.getAllInstalledApps(mainAppViewModel.getContext()).sortedBy {
-                    it.displayName
-                })
+            installedApps.addAll(apps)
         }
     }
 
     fun reloadFavouriteApps() {
         coroutineScope.launch {
-            val newFavoriteApps = mainAppViewModel.favoriteAppsManager.getFavoriteApps()
+            suspendReloadApps()
+        }
+    }
+
+    private suspend fun suspendReloadApps() {
+        val newFavoriteApps = withContext(Dispatchers.IO) {
+            mainAppViewModel.favoriteAppsManager.getFavoriteApps()
                 .mapNotNull { packageName ->
                     installedApps.find { it.packageName == packageName }
                 }
-
-            favoriteApps.apply {
-                clear()
-                addAll(newFavoriteApps)
-            }
+        }
+        withContext(Dispatchers.Main) {
+            favoriteApps.clear()
+            favoriteApps.addAll(newFavoriteApps)
         }
     }
 

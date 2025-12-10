@@ -177,7 +177,6 @@ class MainHomeScreen : ComponentActivity() {
                         Log.i("INFO", "Package changed: ${intent.action}")
                         lifecycleScope.launch(Dispatchers.Default) {
                             homeScreenModel.loadApps()
-                            homeScreenModel.reloadFavouriteApps()
                         }
                     }
                 }
