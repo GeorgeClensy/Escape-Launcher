@@ -11,24 +11,37 @@ import android.content.pm.LauncherApps
 import android.content.pm.PackageManager
 import android.graphics.Paint
 import android.graphics.Rect
+import android.os.Build
 import android.os.Process.myUserHandle
+import android.view.Window
 import android.view.animation.AlphaAnimation
 import android.view.animation.Animation
 import android.view.animation.AnimationSet
 import android.view.animation.ScaleAnimation
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.ui.hapticfeedback.HapticFeedback
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
 import androidx.core.graphics.createBitmap
 import androidx.core.splashscreen.SplashScreen
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import com.geecee.escapelauncher.HomeScreenModel
 import com.geecee.escapelauncher.R
+import com.geecee.escapelauncher.ui.theme.AppTheme
+import com.geecee.escapelauncher.ui.theme.EscapeTheme
 import com.geecee.escapelauncher.utils.managers.ScreenTimeManager
 import com.google.firebase.Firebase
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.analytics.analytics
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.IOException
 import java.io.InputStream
 import java.text.SimpleDateFormat
@@ -449,4 +462,66 @@ object AppUtils{
             null
         }
     }
+
+    /**
+     * Puts the app into full screen
+     */
+    @Suppress("DEPRECATION")
+    fun configureFullScreenMode(window: Window) {
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+        val controller = WindowInsetsControllerCompat(window, window.decorView)
+        controller.hide(WindowInsetsCompat.Type.statusBars()) // hide status bar only
+        controller.systemBarsBehavior =
+            WindowInsetsControllerCompat.BEHAVIOR_DEFAULT
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            window.setNavigationBarContrastEnforced(false)
+        }
+    }
+
+    /**
+     * Sets up theme by retrieving theme that should be used and then passing it and the content into an EscapeTheme composable
+     */
+    @Composable
+    fun SetUpTheme(content: @Composable () -> Unit, viewModel: MainAppModel) {
+        val context = LocalContext.current
+        val config = LocalConfiguration.current
+        val resources = LocalResources.current
+
+        androidx.compose.runtime.LaunchedEffect(Unit) {
+            withContext(Dispatchers.IO) {
+                var settingToChange = resources.getString(R.string.Theme)
+
+                if (getBooleanSetting(
+                        context,
+                        resources.getString(R.string.autoThemeSwitch),
+                        false
+                    )
+                ) {
+                    val isDark = (config.uiMode and
+                            android.content.res.Configuration.UI_MODE_NIGHT_MASK) ==
+                            android.content.res.Configuration.UI_MODE_NIGHT_YES
+
+                    settingToChange = if (isDark) {
+                        resources.getString(R.string.dTheme)
+                    } else {
+                        resources.getString(R.string.lTheme)
+                    }
+                }
+
+                // Get theme ID
+                val themeId = getIntSetting(context, settingToChange, 11)
+                val scheme = AppTheme.fromId(themeId).scheme
+
+                withContext(Dispatchers.Main) {
+                    viewModel.appTheme.value = scheme
+                }
+            }
+        }
+
+        EscapeTheme(viewModel.appTheme) {
+            content()
+        }
+    }
 }
+

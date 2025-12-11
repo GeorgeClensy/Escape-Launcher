@@ -24,21 +24,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalResources
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
-import androidx.core.view.WindowCompat
-import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.geecee.escapelauncher.ui.theme.AppTheme
 import com.geecee.escapelauncher.ui.theme.BackgroundColor
-import com.geecee.escapelauncher.ui.theme.EscapeTheme
 import com.geecee.escapelauncher.ui.views.HomeScreenPageManager
 import com.geecee.escapelauncher.ui.views.Onboarding
 import com.geecee.escapelauncher.ui.views.Settings
@@ -49,7 +42,6 @@ import com.geecee.escapelauncher.utils.InstalledApp
 import com.geecee.escapelauncher.utils.PrivateSpaceStateReceiver
 import com.geecee.escapelauncher.utils.ScreenOffReceiver
 import com.geecee.escapelauncher.utils.getBooleanSetting
-import com.geecee.escapelauncher.utils.getIntSetting
 import com.geecee.escapelauncher.utils.managers.ScreenTimeManager
 import com.geecee.escapelauncher.utils.managers.getUsageForApp
 import com.geecee.escapelauncher.utils.managers.scheduleDailyCleanup
@@ -57,7 +49,6 @@ import com.google.firebase.Firebase
 import com.google.firebase.messaging.messaging
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 class MainHomeScreen : ComponentActivity() {
     private lateinit var privateSpaceReceiver: PrivateSpaceStateReceiver
@@ -94,7 +85,7 @@ class MainHomeScreen : ComponentActivity() {
 
         // Make full screen
         enableEdgeToEdge()
-        configureFullScreenMode()
+        AppUtils.configureFullScreenMode(window)
 
         // Set up the screen time tracking
         ScreenTimeManager.initialize(this)
@@ -109,9 +100,9 @@ class MainHomeScreen : ComponentActivity() {
 
         // Set up the application content
         setContent {
-            SetUpTheme {
+            AppUtils.SetUpTheme(viewModel = viewModel, content = {
                 SetupNavHost(determineStartDestination(LocalContext.current))
-            }
+            })
 
             // Black overlay, to make it seem smoother when turning screen off
             if (viewModel.blackOverlay.value) {
@@ -245,67 +236,6 @@ class MainHomeScreen : ComponentActivity() {
         }
         if (::packageChangeReceiver.isInitialized) {
             unregisterReceiver(packageChangeReceiver)
-        }
-    }
-
-    /**
-     * Puts the app into full screen
-     */
-    @Suppress("DEPRECATION")
-    private fun configureFullScreenMode() {
-        WindowCompat.setDecorFitsSystemWindows(window, false)
-        val controller = WindowInsetsControllerCompat(window, window.decorView)
-        controller.hide(WindowInsetsCompat.Type.statusBars()) // hide status bar only
-        controller.systemBarsBehavior =
-            WindowInsetsControllerCompat.BEHAVIOR_DEFAULT
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            window.setNavigationBarContrastEnforced(false)
-        }
-    }
-
-    /**
-     * Sets up theme by retrieving theme that should be used and then passing it and the content into an EscapeTheme composable
-     */
-    @Composable
-    private fun SetUpTheme(content: @Composable () -> Unit) {
-        val context = LocalContext.current
-        val config = LocalConfiguration.current
-        val resources = LocalResources.current
-
-        androidx.compose.runtime.LaunchedEffect(Unit) {
-            withContext(Dispatchers.IO) {
-                var settingToChange = resources.getString(R.string.Theme)
-
-                if (getBooleanSetting(
-                        context,
-                        resources.getString(R.string.autoThemeSwitch),
-                        false
-                    )
-                ) {
-                    val isDark = (config.uiMode and
-                            android.content.res.Configuration.UI_MODE_NIGHT_MASK) ==
-                            android.content.res.Configuration.UI_MODE_NIGHT_YES
-
-                    settingToChange = if (isDark) {
-                        resources.getString(R.string.dTheme)
-                    } else {
-                        resources.getString(R.string.lTheme)
-                    }
-                }
-
-                // Get theme ID
-                val themeId = getIntSetting(context, settingToChange, 11)
-                val scheme = AppTheme.fromId(themeId).scheme
-                
-                withContext(Dispatchers.Main) {
-                    viewModel.appTheme.value = scheme
-                }
-            }
-        }
-
-        EscapeTheme(viewModel.appTheme) {
-            content()
         }
     }
 
