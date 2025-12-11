@@ -39,12 +39,10 @@ import java.util.Locale
 class HomeScreenModel(application: Application, private val mainAppViewModel: MainAppViewModel) :
     AndroidViewModel(application) {
     var currentSelectedApp = mutableStateOf(InstalledApp("", "", ComponentName("", "")))
-
     val isCurrentAppChallenged by derivedStateOf {
         mainAppViewModel.challengesTrigger.intValue
         mainAppViewModel.challengesManager.doesAppHaveChallenge(currentSelectedApp.value.packageName)
     }
-
     val isCurrentAppFavorite by derivedStateOf {
         favoriteApps.contains(currentSelectedApp.value)
     }
