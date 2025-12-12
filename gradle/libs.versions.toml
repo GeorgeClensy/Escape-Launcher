@@ -1,7 +1,7 @@
 [versions]
-agp = "8.13.1"
+agp = "8.13.2"
 coreSplashscreen = "1.2.0"
-firebaseBom = "34.6.0"
+firebaseBom = "34.7.0"
 graphicsShapes = "1.1.0"
 gson = "2.13.2"
 kotlin = "2.2.21"
