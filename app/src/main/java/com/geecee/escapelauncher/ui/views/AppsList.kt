@@ -32,6 +32,7 @@ import com.geecee.escapelauncher.R
 import com.geecee.escapelauncher.ui.composables.AnimatedPillSearchBar
 import com.geecee.escapelauncher.ui.composables.AppsListHeader
 import com.geecee.escapelauncher.ui.composables.HomeScreenItem
+import com.geecee.escapelauncher.ui.composables.ListGradient
 import com.geecee.escapelauncher.ui.composables.PrivateSpace
 import com.geecee.escapelauncher.ui.composables.SettingsSpacer
 import com.geecee.escapelauncher.utils.AppUtils
@@ -59,7 +60,11 @@ fun AppsList(
         stringResource(R.string.bottomSearch),
         false
     )
-
+    val showSearch = getBooleanSetting(
+        mainAppModel.getContext(),
+        stringResource(R.string.ShowSearchBox),
+        true
+    )
 
     Box(
         Modifier
@@ -313,19 +318,28 @@ fun AppsList(
             }
         }
 
+        ListGradient(
+            Modifier
+                .fillMaxWidth()
+                .align(Alignment.BottomStart)
+                .height(
+                    if (showSearch && bottomSearch) {
+                        200.dp
+                    } else {
+                        40.dp
+                    }
+                )
+        )
+
         // Bottom search box
         Column(
             modifier = Modifier
                 .align(alignment = Alignment.BottomCenter)
-                .padding(30.dp, 10.dp)
+                .padding(30.dp, 25.dp)
                 .fillMaxWidth(),
             horizontalAlignment = getAppsAlignment(mainAppModel.getContext())
         ) {
-            if (getBooleanSetting(
-                    mainAppModel.getContext(),
-                    stringResource(R.string.ShowSearchBox),
-                    true
-                ) && bottomSearch
+            if (showSearch && bottomSearch
             ) {
                 Spacer(modifier = Modifier.height(15.dp))
 
@@ -425,5 +439,4 @@ fun AppsList(
             }
         }
     }
-
 }

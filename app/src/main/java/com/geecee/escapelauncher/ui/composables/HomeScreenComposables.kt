@@ -1,6 +1,7 @@
 package com.geecee.escapelauncher.ui.composables
 
 import android.content.ComponentName
+import android.graphics.Color
 import android.graphics.Rect
 import android.os.Build
 import androidx.annotation.RequiresApi
@@ -8,6 +9,7 @@ import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
@@ -53,6 +55,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.TextFieldValue
@@ -466,4 +469,19 @@ fun PrivateSpace(mainAppModel: MainAppViewModel, homeScreenModel: HomeScreenMode
             modifier = Modifier
         )
     }
+}
+
+@Composable
+fun ListGradient(modifier: Modifier = Modifier){
+    Box(
+        modifier = modifier
+            .background(
+                brush = Brush.verticalGradient(
+                    colors = listOf(
+                        BackgroundColor.copy(alpha = 0f),
+                        BackgroundColor
+                    )
+                )
+            )
+    )
 }
