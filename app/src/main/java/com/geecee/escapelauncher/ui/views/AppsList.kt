@@ -60,10 +60,11 @@ fun AppsList(
         false
     )
 
+
     Box(
         Modifier
             .fillMaxSize()
-            .imePadding(),
+            .imePadding()
     ) {
         LazyColumn(
             state = homeScreenModel.appsListScrollState,
@@ -424,4 +425,5 @@ fun AppsList(
             }
         }
     }
+
 }

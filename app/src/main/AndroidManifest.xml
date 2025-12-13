@@ -39,7 +39,7 @@
             android:name=".MainHomeScreen"
             android:exported="true"
             android:theme="@style/Theme.EscapeLauncher.Splash"
-            >
+            android:windowSoftInputMode="adjustResize">
 
             <!-- Disable Analytics collection initially -->
             <meta-data android:name="firebase_analytics_collection_enabled" android:value="false" />
