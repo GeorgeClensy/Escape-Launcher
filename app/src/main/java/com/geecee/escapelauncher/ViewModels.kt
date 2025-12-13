@@ -6,7 +6,6 @@ import android.content.Context
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.pager.PagerState
-import androidx.compose.material3.ColorScheme
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -18,7 +17,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.geecee.escapelauncher.ui.theme.offLightScheme
+import com.geecee.escapelauncher.ui.theme.AppTheme
 import com.geecee.escapelauncher.utils.AppUtils
 import com.geecee.escapelauncher.utils.InstalledApp
 import com.geecee.escapelauncher.utils.getBooleanSetting
@@ -209,7 +208,7 @@ class MainAppViewModel(application: Application) : AndroidViewModel(application)
 
     fun getContext(): Context = appContext // Returns the context
 
-    var appTheme: MutableState<ColorScheme> = mutableStateOf(offLightScheme) // App material theme
+    var appTheme: MutableState<AppTheme> = mutableStateOf(AppTheme.OFF_LIGHT) // App material theme
 
     // Managers
 

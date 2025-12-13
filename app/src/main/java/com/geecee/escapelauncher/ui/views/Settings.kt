@@ -10,7 +10,6 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
-import android.net.Uri
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
@@ -83,7 +82,6 @@ import com.geecee.escapelauncher.ui.composables.ThemeCard
 import com.geecee.escapelauncher.ui.theme.CardContainerColor
 import com.geecee.escapelauncher.ui.theme.ContentColor
 import com.geecee.escapelauncher.ui.theme.getTypographyFromFontName
-import com.geecee.escapelauncher.ui.theme.refreshTheme
 import com.geecee.escapelauncher.utils.AppUtils
 import com.geecee.escapelauncher.utils.AppUtils.loadTextFromAssets
 import com.geecee.escapelauncher.utils.AppUtils.resetHome
@@ -122,6 +120,8 @@ import kotlinx.coroutines.launch
 import kotlin.system.exitProcess
 import com.geecee.escapelauncher.MainAppViewModel as MainAppModel
 import androidx.core.net.toUri
+import com.geecee.escapelauncher.ui.theme.AppTheme
+import com.geecee.escapelauncher.ui.theme.resolveColorScheme
 
 
 //
@@ -658,7 +658,6 @@ fun ThemeOptions(
     val autoThemeChange = stringResource(R.string.autoThemeSwitch)
     val dSettingToChange = stringResource(R.string.dTheme)
     val lSettingToChange = stringResource(R.string.lTheme)
-    val isSystemDark = isSystemInDarkTheme()
 
     // Current highlighted theme card
     val currentHighlightedThemeCard = remember { mutableIntStateOf(-1) }
@@ -674,6 +673,8 @@ fun ThemeOptions(
         mutableIntStateOf(getIntSetting(context, lSettingToChange, -1))
     }
 
+    val isDark = isSystemInDarkTheme()
+
     // Initialize selection states based on settings
     if (!getBooleanSetting(context, autoThemeChange, false)) {
         currentSelectedDTheme.intValue = -1
@@ -684,7 +685,7 @@ fun ThemeOptions(
 
     val backgroundInteractionSource = remember { MutableInteractionSource() }
 
-    val themeIds = listOf(11, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
+    val themeIds = listOf(11, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12)
 
     LazyColumn(
         modifier = Modifier
@@ -726,29 +727,54 @@ fun ThemeOptions(
                     // Remove the light dark button
                     currentHighlightedThemeCard.intValue = -1
 
-                    setBooleanSetting(
-                        context, context.getString(R.string.autoThemeSwitch), switch
-                    )
+                    if (switch) {
+                        currentSelectedTheme.intValue = -1
 
-                    // Reload
-                    val newTheme = refreshTheme(
-                        context = context,
-                        settingToRetrieve = context.getString(R.string.theme),
-                        autoThemeRetrieve = context.getString(R.string.autoThemeSwitch),
-                        dSettingToRetrieve = context.getString(R.string.dTheme),
-                        lSettingToRetrieve = context.getString(R.string.lTheme),
-                        isSystemDarkTheme = isSystemDark
+                        currentSelectedDTheme.intValue =
+                            getIntSetting(context, dSettingToChange, -1)
+                        currentSelectedLTheme.intValue =
+                            getIntSetting(context, lSettingToChange, -1)
+
+
+                        val newThemeId = if (isDark) {
+                            currentSelectedDTheme.intValue
+                        } else {
+                            currentSelectedLTheme.intValue
+                        }
+
+                        if (newThemeId != -1) {
+                            mainAppModel.appTheme.value = AppTheme.fromId(newThemeId)
+                        }
+
+                    } else {
+                        currentSelectedTheme.intValue =
+                            getIntSetting(context, settingToChange, 11)
+
+                        currentSelectedDTheme.intValue = -1
+                        currentSelectedLTheme.intValue = -1
+
+                        if (currentSelectedTheme.intValue != -1) {
+                            mainAppModel.appTheme.value = AppTheme.fromId(currentSelectedTheme.intValue)
+                        }
+                    }
+
+                    currentHighlightedThemeCard.intValue = -1
+
+                    setBooleanSetting(
+                        context,
+                        context.getString(R.string.autoThemeSwitch),
+                        switch
                     )
-                    mainAppModel.appTheme.value = newTheme
                 })
         }
         item {
+            val backgroundColor = mainAppModel.appTheme.value.resolveColorScheme().background
             SettingsButton(
                 label = stringResource(R.string.match_system_wallpaper),
                 isBottomOfGroup = true,
                 onClick = {
                     AppUtils.setSolidColorWallpaperHomeScreen(
-                        mainAppModel.getContext(), mainAppModel.appTheme.value.background
+                        mainAppModel.getContext(), backgroundColor
                     )
                 })
         }
@@ -782,29 +808,13 @@ fun ThemeOptions(
                 isLSelected = isLSelected,
                 updateLTheme = { theme ->
                     setIntSetting(context, context.getString(R.string.lTheme), theme)
-                    val newTheme = refreshTheme(
-                        context = context,
-                        settingToRetrieve = context.getString(R.string.theme),
-                        autoThemeRetrieve = context.getString(R.string.autoThemeSwitch),
-                        dSettingToRetrieve = context.getString(R.string.dTheme),
-                        lSettingToRetrieve = context.getString(R.string.lTheme),
-                        isSystemDarkTheme = isSystemDark
-                    )
-                    mainAppModel.appTheme.value = newTheme
+                    mainAppModel.appTheme.value = AppTheme.fromId(themeId)
                     currentSelectedLTheme.intValue = theme
                     currentHighlightedThemeCard.intValue = -1
                 },
                 updateDTheme = { theme ->
                     setIntSetting(context, context.getString(R.string.dTheme), theme)
-                    val newTheme = refreshTheme(
-                        context = context,
-                        settingToRetrieve = context.getString(R.string.theme),
-                        autoThemeRetrieve = context.getString(R.string.autoThemeSwitch),
-                        dSettingToRetrieve = context.getString(R.string.dTheme),
-                        lSettingToRetrieve = context.getString(R.string.lTheme),
-                        isSystemDarkTheme = isSystemDark
-                    )
-                    mainAppModel.appTheme.value = newTheme
+                    mainAppModel.appTheme.value = AppTheme.fromId(themeId)
                     currentSelectedDTheme.intValue = theme
                     currentHighlightedThemeCard.intValue = -1
                 },
@@ -821,15 +831,7 @@ fun ThemeOptions(
                     } else {
                         // For single theme mode, just set the theme
                         setIntSetting(context, context.getString(R.string.theme), theme)
-                        val newTheme = refreshTheme(
-                            context = context,
-                            settingToRetrieve = context.getString(R.string.theme),
-                            autoThemeRetrieve = context.getString(R.string.autoThemeSwitch),
-                            dSettingToRetrieve = context.getString(R.string.dTheme),
-                            lSettingToRetrieve = context.getString(R.string.lTheme),
-                            isSystemDarkTheme = isSystemDark
-                        )
-                        mainAppModel.appTheme.value = newTheme
+                        mainAppModel.appTheme.value = AppTheme.fromId(themeId)
                         currentSelectedTheme.intValue = theme
                     }
                 })

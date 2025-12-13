@@ -1,14 +1,15 @@
 package com.geecee.escapelauncher.ui.theme
 
-import android.content.Context
+import android.os.Build
 import androidx.annotation.StringRes
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Typography
 import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.dynamicDarkColorScheme
+import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
@@ -21,8 +22,6 @@ import androidx.compose.ui.text.googlefonts.Font
 import androidx.compose.ui.text.googlefonts.GoogleFont
 import androidx.compose.ui.unit.sp
 import com.geecee.escapelauncher.R
-import com.geecee.escapelauncher.utils.getBooleanSetting
-import com.geecee.escapelauncher.utils.getIntSetting
 import com.geecee.escapelauncher.utils.getStringSetting
 
 val PitchDarkColorScheme = darkColorScheme(
@@ -488,12 +487,11 @@ val provider = GoogleFont.Provider(
 )
 
 fun getTypographyFromFontName(name: String): Typography {
-    val fontFamily =
-        FontFamily(
-            Font(
-                googleFont = GoogleFont(name), fontProvider = provider
-            )
+    val fontFamily = FontFamily(
+        Font(
+            googleFont = GoogleFont(name), fontProvider = provider
         )
+    )
 
     val typography = Typography(
         headlineLarge = TextStyle(
@@ -558,10 +556,12 @@ fun getTypographyFromFontName(name: String): Typography {
 
 @Composable
 fun EscapeTheme(
-    colorScheme: MutableState<ColorScheme>, content: @Composable (() -> Unit)
+    theme: AppTheme, content: @Composable (() -> Unit)
 ) {
     val context = LocalContext.current
     val resources = LocalResources.current
+
+    val colorScheme = theme.resolveColorScheme()
 
     // Make the typography
     val fontFamily = remember {
@@ -636,60 +636,77 @@ fun EscapeTheme(
         )
     )
 
-    MaterialTheme(
-            colorScheme = colorScheme.value, typography = typography, content = content
-        )
+    androidx.compose.material3.MaterialTheme(
+        colorScheme = colorScheme, typography = typography, content = content
+    )
 }
 
-enum class AppTheme(val id: Int, val scheme: ColorScheme, @StringRes val nameRes: Int) {
-    DARK(0, darkScheme, R.string.dark),
-    LIGHT(1, lightScheme, R.string.light),
-    PITCH_DARK(2, PitchDarkColorScheme, R.string.pitch_black),
-    LIGHT_RED(3, lightSchemeRed, R.string.light_red),
-    DARK_RED(4, darkSchemeRed, R.string.dark_red),
-    LIGHT_GREEN(5, lightSchemeGreen, R.string.light_green),
-    DARK_GREEN(6, darkSchemeGreen, R.string.dark_green),
-    LIGHT_BLUE(7, lightSchemeBlue, R.string.light_blue),
-    DARK_BLUE(8, darkSchemeBlue, R.string.dark_blue),
-    LIGHT_YELLOW(9, lightSchemeYellow, R.string.light_yellow),
-    DARK_YELLOW(10, darkSchemeYellow, R.string.dark_yellow),
-    OFF_LIGHT(11, offLightScheme, R.string.off_white);
+enum class AppTheme(
+    val id: Int,
+    @StringRes val nameRes: Int
+) {
+    DARK(0, R.string.dark),
+    LIGHT(1, R.string.light),
+    PITCH_DARK(2, R.string.pitch_black),
+
+    LIGHT_RED(3, R.string.light_red),
+    DARK_RED(4, R.string.dark_red),
+
+    LIGHT_GREEN(5, R.string.light_green),
+    DARK_GREEN(6, R.string.dark_green),
+
+    LIGHT_BLUE(7, R.string.light_blue),
+    DARK_BLUE(8, R.string.dark_blue),
+
+    LIGHT_YELLOW(9, R.string.light_yellow),
+    DARK_YELLOW(10, R.string.dark_yellow),
+
+    OFF_LIGHT(11, R.string.off_white),
+    SYSTEM(12, R.string.system);
 
     companion object {
-        fun fromId(id: Int): AppTheme {
-            return entries.find { it.id == id } ?: DARK
-        }
+        fun fromId(id: Int): AppTheme =
+            entries.find { it.id == id } ?: DARK
 
         @StringRes
-        fun nameResFromId(id: Int): Int {
-            return entries.find { it.id == id }?.nameRes ?: OFF_LIGHT.nameRes
-        }
+        fun nameResFromId(id: Int): Int =
+            fromId(id).nameRes
     }
 }
+@Composable
+fun AppTheme.resolveColorScheme(): ColorScheme {
+    val isDark = androidx.compose.foundation.isSystemInDarkTheme()
 
-fun refreshTheme(
-    context: Context,
-    settingToRetrieve: String,
-    autoThemeRetrieve: String,
-    dSettingToRetrieve: String,
-    lSettingToRetrieve: String,
-    isSystemDarkTheme: Boolean
-): ColorScheme {
-    val colorScheme: ColorScheme
-    var settingToRetrieve = settingToRetrieve
+    return when (this) {
+        AppTheme.DARK -> darkScheme
+        AppTheme.LIGHT -> lightScheme
+        AppTheme.PITCH_DARK -> PitchDarkColorScheme
 
-    if (getBooleanSetting(context, autoThemeRetrieve, false)) {
-        settingToRetrieve = if (isSystemDarkTheme) {
-            dSettingToRetrieve
-        } else {
-            lSettingToRetrieve
+        AppTheme.LIGHT_RED -> lightSchemeRed
+        AppTheme.DARK_RED -> darkSchemeRed
+
+        AppTheme.LIGHT_GREEN -> lightSchemeGreen
+        AppTheme.DARK_GREEN -> darkSchemeGreen
+
+        AppTheme.LIGHT_BLUE -> lightSchemeBlue
+        AppTheme.DARK_BLUE -> darkSchemeBlue
+
+        AppTheme.LIGHT_YELLOW -> lightSchemeYellow
+        AppTheme.DARK_YELLOW -> darkSchemeYellow
+
+        AppTheme.OFF_LIGHT -> offLightScheme
+
+        AppTheme.SYSTEM -> { if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                if (isDark) {
+                    dynamicDarkColorScheme(LocalContext.current)
+                } else {
+                    dynamicLightColorScheme(LocalContext.current)
+                }
+            } else {
+                if (isDark) darkColorScheme() else lightColorScheme()
+            }
         }
     }
-
-    // Set theme
-    colorScheme = AppTheme.fromId(getIntSetting(context, settingToRetrieve, 11)).scheme
-
-    return colorScheme
 }
 
 val CardContainerColor: Color @Composable get() = MaterialTheme.colorScheme.surfaceContainerHigh // Used for items on the background like the settings boxes
@@ -699,5 +716,5 @@ val ContentColorDisabled: Color @Composable get() = MaterialTheme.colorScheme.on
 val BackgroundColor: Color @Composable get() = MaterialTheme.colorScheme.surface // Main app background
 val ErrorContainerColor: Color @Composable get() = MaterialTheme.colorScheme.error
 val ErrorContentColor: Color @Composable get() = MaterialTheme.colorScheme.onError
-val primaryContentColor:  Color @Composable get() = MaterialTheme.colorScheme.primary // Primary content, search bar, home screen items, use sparingly
+val primaryContentColor: Color @Composable get() = MaterialTheme.colorScheme.primary // Primary content, search bar, home screen items, use sparingly
 val SecondaryCardContainerColor: Color @Composable get() = MaterialTheme.colorScheme.surfaceContainer // If there needs to be a box on top of another box, try to avoid

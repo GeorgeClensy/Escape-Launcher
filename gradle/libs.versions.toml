@@ -15,7 +15,6 @@ lifecycleRuntimeKtx = "2.10.0"
 activityCompose = "1.12.1"
 composeBom = "2025.12.00"
 navigationCompose = "2.9.6"
-composeMaterial = "1.10.0"
 roomCommon = "2.8.4"
 roomCompiler = "2.8.4"
 roomKtx = "2.8.4"
@@ -24,6 +23,7 @@ workRuntimeKtx = "2.11.0"
 uiTextGoogleFonts = "1.10.0"
 firebaseMessaging = "25.0.1"
 composeMaterial3 = "1.5.0-alpha10"
+material3 = "1.4.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -54,13 +54,13 @@ androidx-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-man
 androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
 androidx-material3 = { group = "androidx.compose.material3", name = "material3", version.ref="composeMaterial3"}
 androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose" }
-androidx-compose-material = { group = "androidx.compose.material", name = "material", version.ref = "composeMaterial" }
 androidx-room-common = { group = "androidx.room", name = "room-common", version.ref = "roomCommon" }
 androidx-room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "roomKtx" }
 androidx-ui-text-google-fonts = { group = "androidx.compose.ui", name = "ui-text-google-fonts", version.ref = "uiTextGoogleFonts" }
 firebase-messaging = { group = "com.google.firebase", name = "firebase-messaging", version.ref = "firebaseMessaging" }
 androidx-compose-material-icons-core = { group = "androidx.compose.material", name = "material-icons-core" }
 androidx-compose-material-icons-extended = { group = "androidx.compose.material", name = "material-icons-extended" }
+androidx-compose-material3 = { group = "androidx.compose.material3", name = "material3", version.ref = "material3" }
 
 
 [plugins]

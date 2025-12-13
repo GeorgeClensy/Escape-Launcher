@@ -1,7 +1,6 @@
 package com.geecee.escapelauncher.ui.composables
 
 import android.content.ComponentName
-import android.graphics.Color
 import android.graphics.Rect
 import android.os.Build
 import androidx.annotation.RequiresApi
@@ -59,7 +58,6 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.geecee.escapelauncher.HomeScreenModel
@@ -70,9 +68,7 @@ import com.geecee.escapelauncher.ui.theme.CardContainerColor
 import com.geecee.escapelauncher.ui.theme.CardContainerColorDisabled
 import com.geecee.escapelauncher.ui.theme.ContentColor
 import com.geecee.escapelauncher.ui.theme.ContentColorDisabled
-import com.geecee.escapelauncher.ui.theme.EscapeTheme
 import com.geecee.escapelauncher.ui.theme.SecondaryCardContainerColor
-import com.geecee.escapelauncher.ui.theme.offLightScheme
 import com.geecee.escapelauncher.ui.theme.primaryContentColor
 import com.geecee.escapelauncher.utils.AppUtils.formatScreenTime
 import com.geecee.escapelauncher.utils.AppUtils.resetHome
@@ -137,21 +133,6 @@ fun HomeScreenItem(
                 style = MaterialTheme.typography.bodySmall
             )
         }
-    }
-}
-
-@Preview
-@Composable
-fun HomeScreeItemPrev() {
-    EscapeTheme(remember { mutableStateOf(offLightScheme) }) {
-        HomeScreenItem(
-            modifier = Modifier,
-            appName = "App Name",
-            screenTime = 1000,
-            onAppClick = {},
-            onAppLongClick = {},
-            showScreenTime = false
-        )
     }
 }
 

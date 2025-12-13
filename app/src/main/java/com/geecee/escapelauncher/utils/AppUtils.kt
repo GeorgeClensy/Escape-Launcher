@@ -511,15 +511,14 @@ object AppUtils{
 
                 // Get theme ID
                 val themeId = getIntSetting(context, settingToChange, 11)
-                val scheme = AppTheme.fromId(themeId).scheme
 
                 withContext(Dispatchers.Main) {
-                    viewModel.appTheme.value = scheme
+                    viewModel.appTheme.value = AppTheme.fromId(themeId)
                 }
             }
         }
 
-        EscapeTheme(viewModel.appTheme) {
+        EscapeTheme(viewModel.appTheme.value) {
             content()
         }
     }

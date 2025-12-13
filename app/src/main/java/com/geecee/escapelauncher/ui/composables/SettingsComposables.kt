@@ -83,6 +83,7 @@ import com.geecee.escapelauncher.ui.theme.ContentColor
 import com.geecee.escapelauncher.ui.theme.ContentColorDisabled
 import com.geecee.escapelauncher.ui.theme.ErrorContainerColor
 import com.geecee.escapelauncher.ui.theme.ErrorContentColor
+import com.geecee.escapelauncher.ui.theme.resolveColorScheme
 import com.geecee.escapelauncher.ui.theme.transparentHalf
 
 @Composable
@@ -591,7 +592,7 @@ fun ThemeCard(
                 .clickable {
                     onClick(theme)
                 }
-                .background(AppTheme.fromId(theme).scheme.background)
+                .background(AppTheme.fromId(theme).resolveColorScheme().background)
                 .height(72.dp)) {
             AnimatedVisibility(
                 isSelected.value && !showLightDarkPicker.value && !showLightDarkPicker.value,
@@ -603,7 +604,7 @@ fun ThemeCard(
                         .fillMaxSize()
                         .border(
                             2.dp,
-                            AppTheme.fromId(theme).scheme.onPrimaryContainer,
+                            AppTheme.fromId(theme).resolveColorScheme().onPrimaryContainer,
                             RoundedCornerShape(
                                 topStart = topStartRadius,
                                 topEnd = topEndRadius,
@@ -620,7 +621,7 @@ fun ThemeCard(
                         Icon(
                             Icons.Default.CheckCircle,
                             "",
-                            tint = AppTheme.fromId(theme).scheme.onPrimaryContainer
+                            tint = AppTheme.fromId(theme).resolveColorScheme().onPrimaryContainer
                         )
                     }
                 }
@@ -634,7 +635,7 @@ fun ThemeCard(
                         .fillMaxSize()
                         .border(
                             2.dp,
-                            AppTheme.fromId(theme).scheme.onPrimaryContainer,
+                            AppTheme.fromId(theme).resolveColorScheme().onPrimaryContainer,
                             RoundedCornerShape(
                                 topStart = topStartRadius,
                                 topEnd = topEndRadius,
@@ -651,7 +652,7 @@ fun ThemeCard(
                         Icon(
                             Icons.Default.CheckCircle,
                             "",
-                            tint = AppTheme.fromId(theme).scheme.onPrimaryContainer
+                            tint = AppTheme.fromId(theme).resolveColorScheme().onPrimaryContainer
                         )
                     }
                 }
@@ -665,7 +666,7 @@ fun ThemeCard(
                         .fillMaxSize()
                         .border(
                             2.dp,
-                            AppTheme.fromId(theme).scheme.onPrimaryContainer,
+                            AppTheme.fromId(theme).resolveColorScheme().onPrimaryContainer,
                             RoundedCornerShape(
                                 topStart = topStartRadius,
                                 topEnd = topEndRadius,
@@ -682,7 +683,7 @@ fun ThemeCard(
                         Icon(
                             painterResource(R.drawable.dark_mode),
                             "",
-                            tint = AppTheme.fromId(theme).scheme.onPrimaryContainer
+                            tint = AppTheme.fromId(theme).resolveColorScheme().onPrimaryContainer
                         )
                     }
                 }
@@ -693,7 +694,7 @@ fun ThemeCard(
                 Modifier
                     .align(Alignment.Center)
                     .padding(horizontal = 24.dp, vertical = 12.dp),
-                AppTheme.fromId(theme).scheme.onPrimaryContainer,
+                AppTheme.fromId(theme).resolveColorScheme().onPrimaryContainer,
                 style = MaterialTheme.typography.bodyMedium,
                 textAlign = TextAlign.Center
             )
@@ -706,7 +707,7 @@ fun ThemeCard(
                         .fillMaxSize()
                         .border(
                             2.dp,
-                            AppTheme.fromId(theme).scheme.onPrimaryContainer,
+                            AppTheme.fromId(theme).resolveColorScheme().onPrimaryContainer,
                             RoundedCornerShape(
                                 topStart = topStartRadius,
                                 topEnd = topEndRadius,
@@ -723,7 +724,7 @@ fun ThemeCard(
                         Icon(
                             painterResource(R.drawable.light_mode),
                             "",
-                            tint = AppTheme.fromId(theme).scheme.onPrimaryContainer
+                            tint = AppTheme.fromId(theme).resolveColorScheme().onPrimaryContainer
                         )
                     }
                 }
@@ -744,8 +745,8 @@ fun ThemeCard(
                             .fillMaxHeight()
                             .padding(20.dp, 5.dp, 5.dp, 5.dp),
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = AppTheme.fromId(theme).scheme.primary,
-                            contentColor = AppTheme.fromId(theme).scheme.onPrimary
+                            containerColor = AppTheme.fromId(theme).resolveColorScheme().primary,
+                            contentColor = AppTheme.fromId(theme).resolveColorScheme().onPrimary
                         )
                     ) {
                         Text(stringResource(R.string.light))
@@ -760,8 +761,8 @@ fun ThemeCard(
                             .fillMaxHeight()
                             .padding(5.dp, 5.dp, 20.dp, 5.dp),
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = AppTheme.fromId(theme).scheme.primary,
-                            contentColor = AppTheme.fromId(theme).scheme.onPrimary
+                            containerColor = AppTheme.fromId(theme).resolveColorScheme().primary,
+                            contentColor = AppTheme.fromId(theme).resolveColorScheme().onPrimary
                         )
                     ) {
                         Text(stringResource(R.string.dark))

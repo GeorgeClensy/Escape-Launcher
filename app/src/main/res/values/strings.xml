@@ -114,4 +114,5 @@
     <string name="light_green">Light Green</string>
     <string name="dark_green">Dark Green</string>
     <string name="off_white">Off white</string>
+    <string name="system">System</string>
 </resources>
