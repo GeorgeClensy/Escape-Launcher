@@ -1,54 +1,37 @@
 package com.geecee.escapelauncher.ui.views
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.ArrowForward
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import com.geecee.escapelauncher.HomeScreenModel
 import com.geecee.escapelauncher.R
+import com.geecee.escapelauncher.ui.composables.Clock
+import com.geecee.escapelauncher.ui.composables.Date
+import com.geecee.escapelauncher.ui.composables.FirstTimeHelp
 import com.geecee.escapelauncher.ui.composables.HomeScreenItem
-import com.geecee.escapelauncher.ui.theme.CardContainerColor
-import com.geecee.escapelauncher.ui.theme.ContentColor
-import com.geecee.escapelauncher.ui.theme.primaryContentColor
+import com.geecee.escapelauncher.ui.composables.HomeScreenScreenTime
 import com.geecee.escapelauncher.utils.AppUtils
 import com.geecee.escapelauncher.utils.AppUtils.doHapticFeedBack
 import com.geecee.escapelauncher.utils.AppUtils.formatScreenTime
-import com.geecee.escapelauncher.utils.AppUtils.getCurrentTime
 import com.geecee.escapelauncher.utils.AppUtils.resetHome
 import com.geecee.escapelauncher.utils.WidgetsScreen
 import com.geecee.escapelauncher.utils.getBooleanSetting
@@ -60,11 +43,7 @@ import com.geecee.escapelauncher.utils.getWidgetOffset
 import com.geecee.escapelauncher.utils.getWidgetWidth
 import com.geecee.escapelauncher.utils.managers.getTotalUsageForDate
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
-import java.text.SimpleDateFormat
-import java.util.Calendar
-import java.util.Locale
 import com.geecee.escapelauncher.MainAppViewModel as MainAppModel
 
 /**
@@ -235,217 +214,6 @@ fun HomeScreen(
 
         item {
             Spacer(Modifier.height(90.dp))
-        }
-    }
-}
-
-/**
- * Clock to be shown on home screen
- */
-@Composable
-fun Clock(
-    bigClock: Boolean, homeAlignment: Alignment.Horizontal, twelveHour: Boolean
-) {
-    var time by remember { mutableStateOf(getCurrentTime(twelveHour)) }
-    val parts = time.split(":")
-    val hours = parts[0]
-    val minutes = parts[1]
-
-    LaunchedEffect(Unit) {
-        while (true) {
-            time = getCurrentTime(twelveHour)
-            delay(1000) // Update every second
-        }
-    }
-
-    if (bigClock) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier
-                .offset(0.dp, 15.dp)
-        ) {
-            // Hours row
-            Row {
-                // Ensure hours has two digits
-                val hourDigits = if (hours.length == 1) "0$hours" else hours
-
-                hourDigits.forEachIndexed { _, digit ->
-                    Box(
-                        contentAlignment = Alignment.Center,
-                        modifier = Modifier
-                            .width(40.dp)
-                            .offset(0.dp, 30.dp)
-                    ) {
-                        Text(
-                            text = digit.toString(),
-                            color = primaryContentColor,
-                            fontWeight = FontWeight.SemiBold,
-                            style = MaterialTheme.typography.headlineLarge,
-                            textAlign = TextAlign.Center
-                        )
-                    }
-                }
-            }
-
-            // Minutes row
-            Row {
-                // Ensure minutes has two digits
-                val minuteDigits = if (minutes.length == 1) "0$minutes" else minutes
-
-                minuteDigits.forEachIndexed { _, digit ->
-                    Box(
-                        contentAlignment = Alignment.Center,
-                        modifier = Modifier.width(40.dp)
-                    ) {
-                        Text(
-                            text = digit.toString(),
-                            color = primaryContentColor,
-                            fontWeight = FontWeight.SemiBold,
-                            style = MaterialTheme.typography.headlineLarge,
-                            textAlign = TextAlign.Center
-                        )
-                    }
-                }
-            }
-        }
-    } else {
-        Text(
-            text = time,
-            color = primaryContentColor,
-            style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.SemiBold,
-            modifier = Modifier
-                .fillMaxWidth(),
-            textAlign = when (homeAlignment) {
-                Alignment.Start -> TextAlign.Start
-                Alignment.End -> TextAlign.End
-                else -> TextAlign.Center
-            }
-        )
-    }
-}
-
-@Composable
-fun Date(
-    homeAlignment: Alignment.Horizontal
-) {
-    val dateFormat = SimpleDateFormat("EEE d MMM", Locale.getDefault())
-
-    fun getCurrentDate(): String {
-        return dateFormat.format(java.util.Date())
-    }
-
-    var date by remember { mutableStateOf(getCurrentDate()) }
-
-    LaunchedEffect(Unit) {
-        while (true) {
-            val calendar = Calendar.getInstance()
-            val now = calendar.timeInMillis
-            calendar.add(Calendar.DAY_OF_YEAR, 1)
-            calendar.set(Calendar.HOUR_OF_DAY, 0)
-            calendar.set(Calendar.MINUTE, 0)
-            calendar.set(Calendar.SECOND, 0)
-            calendar.set(Calendar.MILLISECOND, 0)
-            val delayMillis = calendar.timeInMillis - now
-            delay(delayMillis)
-            date = getCurrentDate()
-        }
-    }
-
-
-    Text(
-        text = date,
-        color = primaryContentColor,
-        style = MaterialTheme.typography.bodyLarge,
-        fontWeight = FontWeight.SemiBold,
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(0.dp, 0.dp, 0.dp, (7.5).dp),
-        textAlign = when (homeAlignment) {
-            Alignment.Start -> TextAlign.Start
-            Alignment.End -> TextAlign.End
-            else -> TextAlign.Center
-        }
-    )
-}
-
-/**
- * Screen time on home screen
- */
-@Composable
-fun HomeScreenScreenTime(
-    screenTime: String
-) {
-    Box(
-        Modifier
-            .clip(
-                MaterialTheme.shapes.extraLarge
-            )
-            .background(CardContainerColor)
-            .padding(0.dp,(7.5).dp)
-    ) {
-        Text(
-            text = screenTime,
-            color = primaryContentColor,
-            style = MaterialTheme.typography.bodyLarge,
-            fontWeight = FontWeight.SemiBold,
-            modifier = Modifier.padding(25.dp)
-        )
-    }
-}
-
-/**
- * Block with tips for first time users
- */
-@Composable
-fun FirstTimeHelp() {
-    Box(
-        Modifier.clip(
-            MaterialTheme.shapes.extraLarge
-        )
-    ) {
-        Column(
-            Modifier.background(CardContainerColor)
-        ) {
-            Row(
-                Modifier
-                    .padding(25.dp, 25.dp, 25.dp, 15.dp)
-                    .align(Alignment.CenterHorizontally)
-            ) {
-                Icon(
-                    Icons.AutoMirrored.Rounded.ArrowForward,
-                    "",
-                    Modifier.align(Alignment.CenterVertically),
-                    tint = ContentColor
-                )
-                Spacer(Modifier.width(5.dp))
-                Text(
-                    stringResource(R.string.swipe_for_all_apps),
-                    modifier = Modifier,
-                    color = ContentColor,
-                    style = MaterialTheme.typography.bodyMedium
-                )
-            }
-
-            Row(
-                Modifier
-                    .padding(25.dp, 0.dp, 25.dp, 25.dp)
-                    .align(Alignment.CenterHorizontally)
-            ) {
-                Icon(
-                    Icons.Default.Settings,
-                    "",
-                    Modifier.align(Alignment.CenterVertically),
-                    tint = ContentColor
-                )
-                Spacer(Modifier.width(5.dp))
-                Text(
-                    stringResource(R.string.hold_for_settings),
-                    modifier = Modifier,
-                    color = ContentColor,
-                    style = MaterialTheme.typography.bodyMedium
-                )
-            }
         }
     }
 }
