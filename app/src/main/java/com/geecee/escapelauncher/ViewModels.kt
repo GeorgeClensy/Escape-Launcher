@@ -170,13 +170,14 @@ class HomeScreenModel(application: Application, private val mainAppViewModel: Ma
     }
 
     private suspend fun suspendReloadFavouriteApps() {
-        val newFavoriteApps = withContext(Dispatchers.IO) {
+        val favoritePackageNames = withContext(Dispatchers.IO) {
             mainAppViewModel.favoriteAppsManager.getFavoriteApps()
-                .mapNotNull { packageName ->
-                    installedApps.find { it.packageName == packageName }
-                }
         }
+
         withContext(Dispatchers.Main) {
+            val newFavoriteApps = favoritePackageNames.mapNotNull { packageName ->
+                installedApps.find { it.packageName == packageName }
+            }
             favoriteApps.clear()
             favoriteApps.addAll(newFavoriteApps)
         }
