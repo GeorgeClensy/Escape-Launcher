@@ -71,7 +71,6 @@ import com.geecee.escapelauncher.ui.composables.SettingsSpacer
 import com.geecee.escapelauncher.ui.theme.BackgroundColor
 import com.geecee.escapelauncher.ui.theme.CardContainerColor
 import com.geecee.escapelauncher.ui.theme.primaryContentColor
-import com.geecee.escapelauncher.utils.AppUtils
 import com.geecee.escapelauncher.utils.AppUtils.configureAnalytics
 import com.geecee.escapelauncher.utils.getBooleanSetting
 import com.geecee.escapelauncher.utils.isDefaultLauncher
@@ -125,12 +124,14 @@ fun Onboarding(
         label = "progressAnim"
     )
 
-    Column(Modifier
-        .fillMaxSize()
-        .padding(top = statusBarHeight, bottom = 15.dp)) {
+    Column(
+        Modifier
+            .fillMaxSize()
+            .padding(top = statusBarHeight, bottom = 15.dp)
+    ) {
 
         LinearProgressIndicator(
-            progress = {animatedProgress},
+            progress = { animatedProgress },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(32.dp)
@@ -343,18 +344,9 @@ fun OnboardingPage3(
             .background(MaterialTheme.colorScheme.background)
             .padding(30.dp, 0.dp, 30.dp, 0.dp)
     ) {
-        val preSelectedFavoriteApps =
-            mainAppModel.favoriteAppsManager.getFavoriteApps()
-                .mapNotNull { packageName ->
-                    AppUtils.getInstalledAppFromPackageName(
-                        mainAppModel.getContext(),
-                        packageName
-                    )
-                }
-
         BulkAppManager(
             apps = homeScreenModel.installedApps,
-            preSelectedApps = preSelectedFavoriteApps,
+            preSelectedApps = homeScreenModel.favoriteApps,
             title = stringResource(R.string.choose_your_favourite_apps),
             reorderable = true,
             onAppMoved = { fromIndex, toIndex ->
