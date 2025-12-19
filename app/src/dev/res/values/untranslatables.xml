@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_version" translatable="false">Dev v2.2</string>
+    <string name="app_version" translatable="false">Dev v2.3</string>
     <string name="app_name" translatable="false">Escape Launcher Dev</string>
 </resources>
