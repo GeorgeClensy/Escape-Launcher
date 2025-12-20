@@ -3,4 +3,5 @@
     <string name="app_name" translatable="false">Escape Launcher</string>
     <string name="settings_pref_file_name" translatable="false">SettingsPref</string>
     <string name="app_version" translatable="false">v2.3</string>
+    <string name="app_flavour" translatable="false">Unknown Flavor</string>
 </resources>

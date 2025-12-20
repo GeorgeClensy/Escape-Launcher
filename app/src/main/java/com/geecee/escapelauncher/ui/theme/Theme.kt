@@ -1,5 +1,6 @@
 package com.geecee.escapelauncher.ui.theme
 
+// Import the flavor-specific font resolver
 import android.os.Build
 import androidx.annotation.StringRes
 import androidx.compose.material3.ColorScheme
@@ -16,10 +17,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.googlefonts.Font
-import androidx.compose.ui.text.googlefonts.GoogleFont
 import androidx.compose.ui.unit.sp
 import com.geecee.escapelauncher.R
 import com.geecee.escapelauncher.utils.getStringSetting
@@ -480,80 +478,6 @@ val darkSchemeYellow = darkColorScheme(
     surfaceContainerHighest = surfaceContainerHighestDarkYellow,
 )
 
-val provider = GoogleFont.Provider(
-    providerAuthority = "com.google.android.gms.fonts",
-    providerPackage = "com.google.android.gms",
-    certificates = R.array.com_google_android_gms_fonts_certs
-)
-
-fun getTypographyFromFontName(name: String): Typography {
-    val fontFamily = FontFamily(
-        Font(
-            googleFont = GoogleFont(name), fontProvider = provider
-        )
-    )
-
-    val typography = Typography(
-        headlineLarge = TextStyle(
-            fontFamily = fontFamily,
-            fontWeight = FontWeight.Light,
-            fontSize = 66.sp,
-            lineHeight = 53.sp,
-            letterSpacing = 0.6.sp
-        ), headlineMedium = TextStyle(
-            fontFamily = fontFamily,
-            fontWeight = FontWeight.Light,
-            fontSize = 62.sp,
-            lineHeight = 49.sp,
-            letterSpacing = 0.6.sp
-        ), headlineSmall = TextStyle(
-            fontFamily = fontFamily,
-            fontWeight = FontWeight.Light,
-            fontSize = 58.sp,
-            lineHeight = 45.sp,
-            letterSpacing = 0.6.sp
-        ), titleLarge = TextStyle(
-            fontFamily = fontFamily,
-            fontWeight = FontWeight.Light,
-            fontSize = 52.sp,
-            lineHeight = 53.sp,
-            letterSpacing = 0.6.sp
-        ), titleMedium = TextStyle(
-            fontFamily = fontFamily,
-            fontWeight = FontWeight.Light,
-            fontSize = 48.sp,
-            lineHeight = 49.sp,
-            letterSpacing = 0.6.sp
-        ), titleSmall = TextStyle(
-            fontFamily = fontFamily,
-            fontWeight = FontWeight.Light,
-            fontSize = 44.sp,
-            lineHeight = 45.sp,
-            letterSpacing = 0.6.sp
-        ), bodyLarge = TextStyle(
-            fontFamily = fontFamily,
-            fontWeight = FontWeight.Normal,
-            fontSize = 28.sp,
-            lineHeight = 29.sp,
-            letterSpacing = 0.6.sp
-        ), bodyMedium = TextStyle(
-            fontFamily = fontFamily,
-            fontWeight = FontWeight.Normal,
-            fontSize = 24.sp,
-            lineHeight = 25.sp,
-            letterSpacing = 0.6.sp
-        ), bodySmall = TextStyle(
-            fontFamily = fontFamily,
-            fontWeight = FontWeight.Normal,
-            fontSize = 20.sp,
-            lineHeight = 21.sp,
-            letterSpacing = 0.6.sp
-        )
-    )
-
-    return typography
-}
-
 @Composable
 fun EscapeTheme(
     theme: AppTheme, content: @Composable (() -> Unit)
@@ -563,17 +487,12 @@ fun EscapeTheme(
 
     val colorScheme = theme.resolveColorScheme()
 
-    // Make the typography
+    // Make the typography using flavor-specific font resolver
     val fontFamily = remember {
         mutableStateOf(
-            FontFamily(
-                Font(
-                    googleFont = GoogleFont(
-                        getStringSetting(
-                            context, resources.getString(R.string.Font), "Jost"
-                        ), true
-                    ), fontProvider = provider
-                )
+            getFontFamily(
+                context, 
+                getStringSetting(context, resources.getString(R.string.Font), "Jost")
             )
         )
     }

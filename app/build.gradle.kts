@@ -3,10 +3,8 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
-    id("com.google.gms.google-services")
     alias(libs.plugins.compose.compiler)
     id("com.google.devtools.ksp")
-    id("com.google.firebase.crashlytics")
 }
 
 android {
@@ -34,7 +32,8 @@ android {
             signingConfig = signingConfigs.getByName("debug")
         }
     }
-    flavorDimensions += "version"
+    
+    flavorDimensions += listOf("version", "distribution")
     productFlavors{
         create("dev"){
             applicationIdSuffix = ".dev"
@@ -45,16 +44,36 @@ android {
             dimension = "version"
             applicationIdSuffix = ""
         }
+        create("google") {
+            dimension = "distribution"
+        }
+        create("foss") {
+            dimension = "distribution"
+            versionNameSuffix = "-foss"
+        }
     }
+
+    sourceSets {
+        getByName("foss") {
+            res.srcDirs("src/foss/res")
+            java.srcDirs("src/foss/java")
+        }
+        getByName("google") {
+            res.srcDirs("src/google/res")
+            java.srcDirs("src/google/java")
+        }
+    }
+    
     androidComponents.beforeVariants { variantBuilder ->
-        val flavor = variantBuilder.productFlavors.firstOrNull()?.second
+        val flavorVersion = variantBuilder.productFlavors.find { it.first == "version" }?.second
         val buildType = variantBuilder.buildType
 
-        if ((flavor == "prod" && buildType == "debug") ||
-            (flavor == "dev" && buildType == "release")) {
+        if ((flavorVersion == "prod" && buildType == "debug") ||
+            (flavorVersion == "dev" && buildType == "release")) {
             variantBuilder.enable = false
         }
     }
+    
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
@@ -77,6 +96,16 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
+}
+
+// Apply Google Services and Crashlytics conditionally at the top level
+val taskNames = gradle.startParameter.taskNames
+val isGoogleVariant = taskNames.any { it.contains("google", ignoreCase = true) }
+val isIdeSync = System.getProperty("idea.sync.active") == "true"
+
+if (isGoogleVariant || isIdeSync) {
+    apply(plugin = "com.google.gms.google-services")
+    apply(plugin = "com.google.firebase.crashlytics")
 }
 
 dependencies {
@@ -108,21 +137,21 @@ dependencies {
     implementation(libs.androidx.room.common)
     implementation(libs.androidx.room.ktx)
     implementation(libs.androidx.room.runtime)
-    implementation(libs.firebase.messaging)
     ksp(libs.androidx.room.compiler)
 
     // WorkManager
     implementation(libs.androidx.work.runtime.ktx)
 
-    // Fonts
-    implementation(libs.androidx.ui.text.google.fonts)
+    // Google version use google fonts, otherwise bundle fonts
+    "googleImplementation"(libs.androidx.ui.text.google.fonts)
 
     // Firebase
-    implementation(platform(libs.firebase.bom))
-    implementation(libs.firebase.analytics)
-    implementation(libs.firebase.crashlytics)
-    implementation(libs.firebase.perf)
-    implementation(libs.google.firebase.messaging)
+    "googleImplementation"(platform(libs.firebase.bom))
+    "googleImplementation"(libs.firebase.analytics)
+    "googleImplementation"(libs.firebase.crashlytics)
+    "googleImplementation"(libs.firebase.perf)
+    "googleImplementation"(libs.google.firebase.messaging)
+    "googleImplementation"(libs.firebase.messaging)
 
 
     // JSON Parsing

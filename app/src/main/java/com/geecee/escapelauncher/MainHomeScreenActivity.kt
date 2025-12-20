@@ -45,12 +45,11 @@ import com.geecee.escapelauncher.utils.getBooleanSetting
 import com.geecee.escapelauncher.utils.managers.ScreenTimeManager
 import com.geecee.escapelauncher.utils.managers.getUsageForApp
 import com.geecee.escapelauncher.utils.managers.scheduleDailyCleanup
-import com.google.firebase.Firebase
-import com.google.firebase.messaging.messaging
+import com.geecee.escapelauncher.utils.messagingInitializer
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-class MainHomeScreen : ComponentActivity() {
+class MainHomeScreenActivity : ComponentActivity() {
     private lateinit var privateSpaceReceiver: PrivateSpaceStateReceiver
     private lateinit var screenOffReceiver: ScreenOffReceiver
     private lateinit var packageChangeReceiver: BroadcastReceiver
@@ -71,6 +70,7 @@ class MainHomeScreen : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         // Setup analytics
         configureAnalytics(
+            this,
             getBooleanSetting(
                 this,
                 this.resources.getString(R.string.Analytics),
@@ -180,15 +180,8 @@ class MainHomeScreen : ComponentActivity() {
         }
         registerReceiver(packageChangeReceiver, packageFilter)
 
-        // Subscribe to notifications this is done in a coroutine
-        lifecycleScope.launch(Dispatchers.IO) {
-            Firebase.messaging.subscribeToTopic("updates")
-                .addOnCompleteListener { task ->
-                    if (task.isSuccessful) {
-                        Log.i("INFO", "Subscribed to FCM topic: updates")
-                    }
-                }
-        }
+        // Subscribe to notifications via flavor-specific initializer
+        messagingInitializer.initialize(this)
     }
 
     override fun onResume() {
@@ -306,7 +299,7 @@ class MainHomeScreen : ComponentActivity() {
                                 launchSingleTop = true
                             }
                         },
-                        this@MainHomeScreen,
+                        this@MainHomeScreenActivity,
                     )
                 }
                 composable(
@@ -317,7 +310,7 @@ class MainHomeScreen : ComponentActivity() {
                         navController,
                         viewModel,
                         homeScreenModel,
-                        this@MainHomeScreen
+                        this@MainHomeScreenActivity
                     )
                 }
             }

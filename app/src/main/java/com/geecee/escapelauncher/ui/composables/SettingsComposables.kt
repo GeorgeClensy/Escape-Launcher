@@ -944,7 +944,7 @@ fun SettingsSlider(
 }
 
 @Composable
-fun SponsorBox(text: String, onSponsorClick: () -> Unit = {}, onBackgroundClick: () -> Unit = {}) {
+fun SponsorBox(text: String, secondText: String,onSponsorClick: () -> Unit = {}, onBackgroundClick: () -> Unit = {}) {
     Card(
         modifier = Modifier
             .padding(vertical = 1.dp)
@@ -980,6 +980,14 @@ fun SponsorBox(text: String, onSponsorClick: () -> Unit = {}, onBackgroundClick:
                 color = ContentColor,
             )
 
+            Spacer(Modifier.height(10.dp))
+
+            AutoResizingText(
+                text = secondText,
+                modifier = Modifier,
+                color = ContentColor,
+            )
+
             Spacer(Modifier.height(15.dp))
 
             Button(
@@ -1004,5 +1012,5 @@ fun SponsorBox(text: String, onSponsorClick: () -> Unit = {}, onBackgroundClick:
 @Preview
 @Composable
 fun SponsorBoxPreview() {
-    SponsorBox("Escape Launcher 2.2")
+    SponsorBox("Escape Launcher", "Testing")
 }

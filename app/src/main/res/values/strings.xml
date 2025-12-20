@@ -75,9 +75,7 @@
     <string name="search_at_bottom">Search at bottom</string>
     <string name="apps_list_auto_search">Automatically Open Search</string>
     <string name="sponsor">Sponsor</string>
-
-    <!-- Apps challenge strings -->
-    <string name="open_challenges">App Countdown</string>
+    <string name="font_licences">Font Licences</string>
 
     <!-- First time strings -->
     <string name="continue_str">Continue</string>

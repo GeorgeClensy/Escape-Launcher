@@ -584,7 +584,7 @@ fun OnboardingPage5(
                         mainAppModel.getContext().resources.getString(R.string.Analytics),
                         false
                     )
-                    configureAnalytics(false)
+                    configureAnalytics(mainAppModel.getContext(), false)
                 }, modifier = Modifier, colors = ButtonDefaults.outlinedButtonColors(
                     containerColor = BackgroundColor,
                     contentColor = primaryContentColor
@@ -611,7 +611,7 @@ fun OnboardingPage5(
                         mainAppModel.getContext().resources.getString(R.string.Analytics),
                         true
                     )
-                    configureAnalytics(true)
+                    configureAnalytics(mainAppModel.getContext(), true)
                 }, modifier = Modifier, colors = ButtonColors(
                     primaryContentColor,
                     BackgroundColor,

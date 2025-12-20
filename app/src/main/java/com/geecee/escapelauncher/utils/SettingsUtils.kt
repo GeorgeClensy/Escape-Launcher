@@ -10,7 +10,7 @@ import android.provider.Settings
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.ui.Alignment
 import androidx.core.content.edit
-import com.geecee.escapelauncher.MainHomeScreen
+import com.geecee.escapelauncher.MainHomeScreenActivity
 import com.geecee.escapelauncher.R
 
 /**
@@ -348,7 +348,7 @@ fun setBooleanSetting(context: Context, setting: String, value: Boolean) {
 }
 
 fun resetActivity(context: Context, activity: Activity) {
-    val intent = Intent(context, MainHomeScreen::class.java).apply {
+    val intent = Intent(context, MainHomeScreenActivity::class.java).apply {
         addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
     }
     val options = ActivityOptions.makeBasic()

@@ -81,7 +81,6 @@ import com.geecee.escapelauncher.ui.composables.SponsorBox
 import com.geecee.escapelauncher.ui.composables.ThemeCard
 import com.geecee.escapelauncher.ui.theme.CardContainerColor
 import com.geecee.escapelauncher.ui.theme.ContentColor
-import com.geecee.escapelauncher.ui.theme.getTypographyFromFontName
 import com.geecee.escapelauncher.utils.AppUtils
 import com.geecee.escapelauncher.utils.AppUtils.loadTextFromAssets
 import com.geecee.escapelauncher.utils.AppUtils.resetHome
@@ -121,6 +120,7 @@ import kotlin.system.exitProcess
 import com.geecee.escapelauncher.MainAppViewModel as MainAppModel
 import androidx.core.net.toUri
 import com.geecee.escapelauncher.ui.theme.AppTheme
+import com.geecee.escapelauncher.ui.theme.getFontFamily
 import com.geecee.escapelauncher.ui.theme.resolveColorScheme
 
 
@@ -293,6 +293,14 @@ fun Settings(
                             homeScreenModel.reloadFavouriteApps()
                         }
                     })
+            }
+            composable(
+                "fontLicences",
+                enterTransition = { fadeIn(tween(300)) },
+                exitTransition = { fadeOut(tween(300)) }) {
+                FontLicenceDialog(mainAppModel.getContext()) {
+                    navController.popBackStack()
+                }
             }
         }
     }
@@ -604,6 +612,13 @@ fun MainSettingsPage(
             })
 
         SettingsNavigationItem(
+            label = stringResource(R.string.font_licences),
+            diagonalArrow = false,
+            onClick = { navController.navigate("fontLicences") }
+        )
+
+
+        SettingsNavigationItem(
             label = stringResource(id = R.string.read_privacy_policy),
             false,
             onClick = { showPolicyDialog() })
@@ -624,6 +639,7 @@ fun MainSettingsPage(
 
         SponsorBox(
             stringResource(id = R.string.escape_launcher) + " " + stringResource(id = R.string.app_version),
+            secondText = stringResource(R.string.app_flavour),
             onSponsorClick = {
                 val url = "https://github.com/sponsors/GeorgeClensy"
                 val i = Intent(Intent.ACTION_VIEW)
@@ -754,7 +770,8 @@ fun ThemeOptions(
                         currentSelectedLTheme.intValue = -1
 
                         if (currentSelectedTheme.intValue != -1) {
-                            mainAppModel.appTheme.value = AppTheme.fromId(currentSelectedTheme.intValue)
+                            mainAppModel.appTheme.value =
+                                AppTheme.fromId(currentSelectedTheme.intValue)
                         }
                     }
 
@@ -1230,7 +1247,7 @@ fun ChooseFont(context: Context, activity: Activity, goBack: () -> Unit) {
                 },
                 isTopOfGroup = index == 0,
                 isBottomOfGroup = index == fontNames.lastIndex,
-                fontFamily = getTypographyFromFontName(fontName).bodyMedium.fontFamily
+                fontFamily = getFontFamily(context, fontName)
             )
         }
         SettingsSpacer()
@@ -1350,5 +1367,57 @@ fun PrivacyPolicyDialog(mainAppModel: MainAppModel, showPolicyDialog: MutableSta
                 SettingsSpacer()
             }
         }
+    }
+}
+
+/**
+ * Font licence dialog
+ *
+ * @param context Context
+ */
+@Composable
+fun FontLicenceDialog(context: Context, onOKClick: () -> Unit) {
+    val scrollState = rememberScrollState()
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(scrollState)  // Make the content scrollable
+            .padding(16.dp)
+    ) {
+        Spacer(modifier = Modifier.height(50.dp))
+
+        // Load text from the asset
+        loadTextFromAssets(context, "Font Licence.txt")?.let { text ->
+            BasicText(
+                text = text, style = TextStyle(
+                    color = ContentColor,
+                    textAlign = TextAlign.Start,
+                    fontWeight = FontWeight.Normal
+                ), modifier = Modifier.fillMaxWidth()
+            )
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // "OK" Button
+        Button(
+            onClick = { onOKClick() },
+            modifier = Modifier
+                .align(Alignment.CenterHorizontally)
+                .padding(bottom = 8.dp),
+            colors = ButtonColors(
+                CardContainerColor,
+                ContentColor,
+                CardContainerColor,
+                ContentColor
+            )
+        ) {
+            Text("OK")
+        }
+
+        SettingsSpacer()
+        SettingsSpacer()
+        SettingsSpacer()
     }
 }
