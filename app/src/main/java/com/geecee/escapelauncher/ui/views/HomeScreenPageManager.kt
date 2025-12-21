@@ -57,13 +57,30 @@ fun HomeScreenPageManager(
     val focusManager = LocalFocusManager.current
     val keyboardController = LocalSoftwareKeyboardController.current
 
-    // Add effect to hide keyboard on page change
+    val appsListPage = if (getBooleanSetting(
+            context = mainAppModel.getContext(),
+            setting = mainAppModel.getContext().resources.getString(R.string.hideScreenTimePage),
+            defaultValue = false
+        )
+    ) 1 else 2
+
+    // Add effect to hide keyboard on page change or open search if needed
     LaunchedEffect(homeScreenModel.pagerState.currentPage) {
-        if (homeScreenModel.pagerState.currentPage != 2) {
+        if (homeScreenModel.pagerState.currentPage != appsListPage) {
             focusManager.clearFocus()
             keyboardController?.hide()
             homeScreenModel.searchText.value = ""
             homeScreenModel.searchExpanded.value = false
+        } else {
+            // If we are on the apps list page and auto search is enabled, open it
+            if (getBooleanSetting(
+                    mainAppModel.getContext(),
+                    mainAppModel.getContext().getString(R.string.appsListAutoSearch),
+                    false
+                )
+            ) {
+                homeScreenModel.searchExpanded.value = true
+            }
         }
     }
 
