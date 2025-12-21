@@ -83,6 +83,7 @@ import com.geecee.escapelauncher.utils.AppUtils.getCurrentTime
 import com.geecee.escapelauncher.utils.AppUtils.resetHome
 import com.geecee.escapelauncher.utils.InstalledApp
 import com.geecee.escapelauncher.utils.PrivateAppItem
+import com.geecee.escapelauncher.utils.getBooleanSetting
 import com.geecee.escapelauncher.utils.getPrivateSpaceApps
 import com.geecee.escapelauncher.utils.lockPrivateSpace
 import com.geecee.escapelauncher.utils.openPrivateSpaceApp
@@ -245,11 +246,13 @@ fun Clock(
     }
 }
 
-
 @Composable
 fun Date(
-    homeAlignment: Alignment.Horizontal
+    homeAlignment: Alignment.Horizontal,
+    small: Boolean
 ) {
+    val context = LocalContext.current
+
     val dateFormat = SimpleDateFormat("EEE d MMM", Locale.getDefault())
 
     fun getCurrentDate(): String {
@@ -273,15 +276,25 @@ fun Date(
         }
     }
 
-
     Text(
         text = date,
         color = primaryContentColor,
-        style = MaterialTheme.typography.bodyLarge,
+        style = if (small) {
+            MaterialTheme.typography.bodyMedium
+        } else {
+            MaterialTheme.typography.bodyLarge
+        },
         fontWeight = FontWeight.SemiBold,
         modifier = Modifier
             .fillMaxWidth()
-            .padding(0.dp, 0.dp, 0.dp, (7.5).dp),
+            .padding(0.dp, 0.dp, 0.dp, (7.5).dp)
+            .clickable {
+                val intent = Intent(Intent.ACTION_MAIN).apply {
+                    addCategory(Intent.CATEGORY_APP_CALENDAR)
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                }
+                context.startActivity(intent)
+            },
         textAlign = when (homeAlignment) {
             Alignment.Start -> TextAlign.Start
             Alignment.End -> TextAlign.End

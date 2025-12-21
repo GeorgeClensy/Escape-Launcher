@@ -94,7 +94,8 @@ fun HomeScreen(
                 )
             ) {
                 Date(
-                    homeAlignment = getHomeAlignment(mainAppModel.getContext())
+                    homeAlignment = getHomeAlignment(mainAppModel.getContext()),
+                    getBooleanSetting(mainAppModel.getContext(), stringResource(R.string.SmallDate), false)
                 )
             }
         }

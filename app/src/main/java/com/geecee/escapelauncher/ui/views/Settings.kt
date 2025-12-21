@@ -417,6 +417,17 @@ fun MainSettingsPage(
             })
 
         SettingsSwitch(
+            label = stringResource(id = R.string.small_date), checked = getBooleanSetting(
+                mainAppModel.getContext(), stringResource(R.string.SmallDate), false
+            ), onCheckedChange = {
+                toggleBooleanSetting(
+                    mainAppModel.getContext(),
+                    it,
+                    mainAppModel.getContext().resources.getString(R.string.SmallDate)
+                )
+            })
+
+        SettingsSwitch(
             label = stringResource(id = R.string.big_clock), checked = getBooleanSetting(
                 mainAppModel.getContext(), stringResource(R.string.BigClock)
             ), onCheckedChange = {

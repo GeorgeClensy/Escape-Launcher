@@ -76,6 +76,7 @@
     <string name="apps_list_auto_search">Automatically Open Search</string>
     <string name="sponsor">Sponsor</string>
     <string name="font_licences">Font Licences</string>
+    <string name="small_date">Small Date</string>
 
     <!-- First time strings -->
     <string name="continue_str">Continue</string>
