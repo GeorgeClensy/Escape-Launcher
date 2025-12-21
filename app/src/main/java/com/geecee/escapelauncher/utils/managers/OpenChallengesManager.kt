@@ -21,9 +21,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -40,7 +40,6 @@ import com.geecee.escapelauncher.ui.theme.ContentColor
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 class ChallengesManager(context: Context) {
 
@@ -91,64 +90,37 @@ class ChallengesManager(context: Context) {
 }
 
 @Composable
-fun OpenChallenge(haptics: HapticFeedback,openApp: () -> Unit, goBack: () -> Unit) {
-    var currentText by remember { mutableStateOf("5") }
-    var showText by remember { mutableStateOf(true) }
-    var nextScreen by remember { mutableStateOf(false) }
-
-    val coroutineScope = rememberCoroutineScope()
-
-    val stringOne = "4"
-    val stringTwo = "3"
-    val stringThree = "2"
-    val stringFour = "1"
+fun OpenChallenge(haptics: HapticFeedback, openApp: () -> Unit, goBack: () -> Unit) {
+    val steps = listOf("5", "4", "3", "2", "1")
+    var stepIndex by rememberSaveable { mutableIntStateOf(0) }
+    var showText by rememberSaveable { mutableStateOf(true) }
+    var nextScreen by rememberSaveable { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
-        coroutineScope.launch {
+        if (nextScreen) return@LaunchedEffect
+
+        while (stepIndex < steps.size) {
+            if (showText) {
                 delay(3000)
                 showText = false
+            }
 
-                delay(1000)
-                currentText = stringOne
+            delay(1000)
+            stepIndex++
+
+            if (stepIndex < steps.size) {
                 showText = true
                 haptics.performHapticFeedback(HapticFeedbackType.LongPress)
-
-                delay(3000)
-                showText = false
-
-                delay(1000)
-                currentText = stringTwo
-                showText = true
-                haptics.performHapticFeedback(HapticFeedbackType.LongPress)
-
-                delay(3000)
-                showText = false
-
-                delay(1000)
-                currentText = stringThree
-                showText = true
-                haptics.performHapticFeedback(HapticFeedbackType.LongPress)
-
-                delay(3000)
-                showText = false
-
-                delay(1000)
-                currentText = stringFour
-                showText = true
-                haptics.performHapticFeedback(HapticFeedbackType.LongPress)
-
-                delay(3000)
-                showText = false
-
-                delay(1000)
+            } else {
                 nextScreen = true
                 haptics.performHapticFeedback(HapticFeedbackType.LongPress)
-
                 delay(500)
                 openApp()
-
+            }
         }
     }
+
+    val currentText = if (stepIndex < steps.size) steps[stepIndex] else ""
 
     if (!nextScreen) {
         Box(
@@ -157,8 +129,8 @@ fun OpenChallenge(haptics: HapticFeedback,openApp: () -> Unit, goBack: () -> Uni
                 .background(
                     brush = Brush.linearGradient(
                         colors = listOf(
-                            Color(0xFFFFAABB),
-                            Color(0xFFB19CD9)
+                            Color(0xFFB2D8D8),
+                            Color(0xFF004C4C)
                         ),
                         start = Offset(0f, 0f),
                         end = Offset(0f, Float.POSITIVE_INFINITY)
@@ -183,15 +155,18 @@ fun OpenChallenge(haptics: HapticFeedback,openApp: () -> Unit, goBack: () -> Uni
                         )
                 }
 
-                Button(onClick = {
-                    haptics.performHapticFeedback(HapticFeedbackType.LongPress)
-                    goBack()
-                }, Modifier.align(Alignment.CenterHorizontally), colors = ButtonColors(
-                    ContentColor,
-                    CardContainerColor,
-                    ContentColor,
-                    CardContainerColor
-                )
+                Button(
+                    onClick = {
+                        haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                        goBack()
+                    },
+                    Modifier.align(Alignment.CenterHorizontally),
+                    colors = ButtonColors(
+                        ContentColor,
+                        CardContainerColor,
+                        ContentColor,
+                        CardContainerColor
+                    )
                 ) {
                     Icon(
                         Icons.AutoMirrored.Default.ArrowBack,
@@ -201,16 +176,15 @@ fun OpenChallenge(haptics: HapticFeedback,openApp: () -> Unit, goBack: () -> Uni
                 }
             }
         }
-    }
-    else {
+    } else {
         Box(
             Modifier
                 .fillMaxSize()
                 .background(
                     brush = Brush.linearGradient(
                         colors = listOf(
-                            Color(0xFFFFAABB), // Peachy-pink color
-                            Color(0xFFB19CD9)  // Soft lavender color
+                            Color(0xFFB2D8D8),
+                            Color(0xFF004C4C)
                         ),
                         start = Offset(0f, 0f),  // Starting point (top-left corner)
                         end = Offset(0f, Float.POSITIVE_INFINITY) // Ending point (bottom-center)
@@ -237,8 +211,8 @@ fun OpenChallenge(haptics: HapticFeedback,openApp: () -> Unit, goBack: () -> Uni
                         .background(
                             brush = Brush.linearGradient(
                                 colors = listOf(
-                                    Color(0xFFFFAABB), // Peachy-pink color
-                                    Color(0xFFB19CD9)  // Soft lavender color
+                                    Color(0xFFB2D8D8), // Peachy-pink color
+                                    Color(0xFF004C4C)  // Soft lavender color
                                 ),
                                 start = Offset(0f, 0f),  // Starting point (top-left corner)
                                 end = Offset(
