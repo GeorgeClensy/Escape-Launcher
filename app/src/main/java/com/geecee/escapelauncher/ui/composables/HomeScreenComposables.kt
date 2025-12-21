@@ -1,8 +1,10 @@
 package com.geecee.escapelauncher.ui.composables
 
 import android.content.ComponentName
+import android.content.Intent
 import android.graphics.Rect
 import android.os.Build
+import android.provider.AlarmClock
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
@@ -57,6 +59,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -156,6 +159,7 @@ fun Clock(
     val parts = time.split(":")
     val hours = parts[0]
     val minutes = parts[1]
+    val context = LocalContext.current
 
     LaunchedEffect(Unit) {
         while (true) {
@@ -169,6 +173,11 @@ fun Clock(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
                 .offset(0.dp, 15.dp)
+                .clickable {
+                    val intent = Intent(AlarmClock.ACTION_SHOW_ALARMS)
+                    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                    context.startActivity(intent)
+                }
         ) {
             // Hours row
             Row {
@@ -221,7 +230,12 @@ fun Clock(
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.SemiBold,
             modifier = Modifier
-                .fillMaxWidth(),
+                .fillMaxWidth()
+                .clickable {
+                    val intent = Intent(AlarmClock.ACTION_SHOW_ALARMS)
+                    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                    context.startActivity(intent)
+                },
             textAlign = when (homeAlignment) {
                 Alignment.Start -> TextAlign.Start
                 Alignment.End -> TextAlign.End
