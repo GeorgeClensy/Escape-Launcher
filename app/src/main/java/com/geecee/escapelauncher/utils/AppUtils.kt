@@ -155,6 +155,25 @@ object AppUtils{
     }
 
     /**
+     * Sorts a list of apps by relevance to a search query.
+     * 1. Starts with query
+     * 2. Contains query
+     * 3. Fuzzy match
+     * Then alphabetical.
+     */
+    fun sortAppsByRelevance(apps: List<InstalledApp>, query: String): List<InstalledApp> {
+        val queryLower = query.lowercase()
+        return apps.sortedWith(compareBy<InstalledApp> { app ->
+            val nameLower = app.displayName.lowercase()
+            when {
+                nameLower.startsWith(queryLower) -> 0
+                nameLower.contains(queryLower) -> 1
+                else -> 2
+            }
+        }.thenBy { it.displayName.lowercase() })
+    }
+
+    /**
      * Returns a list of all installed apps on the device that have a launcher activity.
      *
      * @param context Context

@@ -4,7 +4,6 @@ import android.content.ComponentName
 import android.graphics.Rect
 import android.os.Build
 import androidx.annotation.RequiresApi
-import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -25,6 +24,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowForward
 import androidx.compose.material.icons.filled.Lock
@@ -45,7 +45,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -57,9 +56,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -79,7 +80,6 @@ import com.geecee.escapelauncher.utils.AppUtils.getCurrentTime
 import com.geecee.escapelauncher.utils.AppUtils.resetHome
 import com.geecee.escapelauncher.utils.InstalledApp
 import com.geecee.escapelauncher.utils.PrivateAppItem
-import com.geecee.escapelauncher.utils.getBooleanSetting
 import com.geecee.escapelauncher.utils.getPrivateSpaceApps
 import com.geecee.escapelauncher.utils.lockPrivateSpace
 import com.geecee.escapelauncher.utils.openPrivateSpaceApp
@@ -440,114 +440,87 @@ fun AppsListHeader() {
  */
 @Composable
 fun AnimatedPillSearchBar(
-    mainAppModel: MainAppViewModel,
-    textChange: (searchText: String) -> Unit,
-    keyboardDone: (searchText: String) -> Unit,
-    expanded: MutableState<Boolean>
+    isExpanded: Boolean,
+    onExpandedChange: (Boolean) -> Unit,
+    onSearchTextChanged: (String) -> Unit,
+    onSearchDone: (String) -> Unit,
+    modifier: Modifier = Modifier,
+    initialText: String = "",
+    autoFocus: Boolean = false
 ) {
-    var searchText by remember { mutableStateOf(TextFieldValue("")) }
+    var searchText by remember { mutableStateOf(TextFieldValue(initialText)) }
 
+    // Animation Specs
+    val width by animateDpAsState(
+        targetValue = if (isExpanded) 280.dp else 150.dp,
+        label = "widthAnimation"
+    )
+    val alpha by animateFloatAsState(
+        targetValue = if (isExpanded) 1f else 0f,
+        label = "alphaAnimation"
+    )
 
-    // Animate the width of the search bar
-    val width by animateDpAsState(targetValue = if (expanded.value) 280.dp else 150.dp, label = "")
-
-    // Animate the alpha of the text field content
-    val alpha by animateFloatAsState(targetValue = if (expanded.value) 1f else 0f, label = "")
-
-    // FocusRequester to request focus on the text field
     val focusRequester = remember { FocusRequester() }
     val keyboardController = LocalSoftwareKeyboardController.current
 
-    val appsListAutoSearchEnabled = getBooleanSetting(
-        mainAppModel.getContext(),
-        stringResource(R.string.appsListAutoSearch),
-        false
-    )
-
-    LaunchedEffect(Unit) { // Use Unit as key to run once when composable enters composition
-        if (appsListAutoSearchEnabled) {
-            expanded.value = true
+    // Handle Auto-focus and Expansion changes
+    LaunchedEffect(isExpanded, autoFocus) {
+        if (isExpanded) {
             focusRequester.requestFocus()
             keyboardController?.show()
-        }
-    }
-
-    LaunchedEffect(expanded.value) {
-        if (expanded.value) {
-            focusRequester.requestFocus()
-            keyboardController?.show()
-        }
-        if (!expanded.value) {
+        } else {
             keyboardController?.hide()
         }
     }
 
     Surface(
-        modifier = Modifier
+        modifier = modifier
             .width(width)
             .height(56.dp)
-            .clickable {
-                expanded.value = !expanded.value
-            }
-            .animateContentSize(),
+            .clickable { onExpandedChange(!isExpanded) },
         shape = RoundedCornerShape(28.dp),
-        color = primaryContentColor) {
+        color = primaryContentColor
+    ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier
-                .padding(horizontal = 8.dp)
-                .animateContentSize()
+            modifier = Modifier.padding(horizontal = 12.dp)
         ) {
             Icon(
                 imageVector = Icons.Default.Search,
-                contentDescription = "Search Icon",
+                contentDescription = "Search",
                 tint = BackgroundColor,
-                modifier = Modifier
-                    .padding(5.dp, 0.dp)
-                    .size(25.dp)
+                modifier = Modifier.size(24.dp)
             )
 
-            if (!expanded.value) {
+            if (!isExpanded) {
                 Text(
-                    stringResource(id = R.string.search),
-                    modifier = Modifier.animateContentSize(),
+                    text = stringResource(id = R.string.search),
                     color = BackgroundColor,
-                    style = MaterialTheme.typography.bodyMedium
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.padding(start = 8.dp)
                 )
-            }
-
-            if (expanded.value) {
-                Spacer(
-                    modifier = Modifier
-                        .width(8.dp)
-                        .animateContentSize()
-                )
-
+            } else {
                 BasicTextField(
                     value = searchText,
                     onValueChange = {
                         searchText = it
-                        textChange(searchText.text)
+                        onSearchTextChanged(it.text)
                     },
                     modifier = Modifier
-                        .alpha(alpha)
                         .weight(1f)
-                        .focusRequester(focusRequester)
-                        .animateContentSize(),
+                        .padding(start = 8.dp)
+                        .alpha(alpha)
+                        .focusRequester(focusRequester),
                     singleLine = true,
-                    decorationBox = { innerTextField ->
-                        if (alpha > 0) {
-                            innerTextField()
-                        }
-                    },
-                    maxLines = 1,
+                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
                     keyboardActions = KeyboardActions(onDone = {
                         keyboardController?.hide()
-                        keyboardDone(searchText.text)
+                        onSearchDone(searchText.text)
                     }),
                     textStyle = MaterialTheme.typography.bodyMedium.copy(
                         color = BackgroundColor
-                    )
+                    ),
+                    cursorBrush = SolidColor(BackgroundColor)
                 )
             }
         }
