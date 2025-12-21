@@ -62,8 +62,11 @@ class HomeScreenModel(application: Application, private val mainAppViewModel: Ma
 
     fun updateFilteredApps() {
         coroutineScope.launch(Dispatchers.Default) {
-             val apps = installedApps.filter { it.packageName != mainAppViewModel.getContext().packageName }
-             val showHiddenInSearch = getBooleanSetting(
+            val apps = installedApps.filter {
+                it.packageName != mainAppViewModel.getContext().packageName
+            }
+
+            val showHiddenInSearch = getBooleanSetting(
                 mainAppViewModel.getContext(),
                 mainAppViewModel.getContext().resources.getString(R.string.showHiddenAppsInSearch),
                 false
@@ -75,9 +78,9 @@ class HomeScreenModel(application: Application, private val mainAppViewModel: Ma
             } else {
                 val queryLower = query.lowercase()
                 apps.filter { app ->
-                     val isHidden = mainAppViewModel.hiddenAppsManager.isAppHidden(app.packageName)
-                     val matchesQuery = AppUtils.fuzzyMatch(app.displayName, query)
-                     matchesQuery && (!isHidden || showHiddenInSearch)
+                    val isHidden = mainAppViewModel.hiddenAppsManager.isAppHidden(app.packageName)
+                    val matchesQuery = AppUtils.fuzzyMatch(app.displayName, query)
+                    matchesQuery && (!isHidden || showHiddenInSearch)
                 }.sortedWith(compareBy<InstalledApp> { app ->
                     val nameLower = app.displayName.lowercase()
                     when {
@@ -161,7 +164,7 @@ class HomeScreenModel(application: Application, private val mainAppViewModel: Ma
     private suspend fun suspendLoadApps() {
         val apps = withContext(Dispatchers.IO) {
             AppUtils.getAllInstalledApps(mainAppViewModel.getContext()).sortedBy {
-                it.displayName
+                it.displayName.lowercase()
             }
         }
         withContext(Dispatchers.Main) {
