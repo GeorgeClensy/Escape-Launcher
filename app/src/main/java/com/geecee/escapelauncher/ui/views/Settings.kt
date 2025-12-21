@@ -10,6 +10,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
+import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
@@ -119,6 +120,7 @@ import kotlinx.coroutines.launch
 import kotlin.system.exitProcess
 import com.geecee.escapelauncher.MainAppViewModel as MainAppModel
 import androidx.core.net.toUri
+import com.geecee.escapelauncher.BuildConfig
 import com.geecee.escapelauncher.ui.theme.AppTheme
 import com.geecee.escapelauncher.ui.theme.getFontFamily
 import com.geecee.escapelauncher.ui.theme.resolveColorScheme
@@ -600,33 +602,10 @@ fun MainSettingsPage(
         //Other
         SettingsSubheading(stringResource(id = R.string.other))
 
-        SettingsSwitch(
-            label = stringResource(id = R.string.Analytics), checked = getBooleanSetting(
-                mainAppModel.getContext(), stringResource(R.string.Analytics), true
-            ), isTopOfGroup = true, onCheckedChange = {
-                toggleBooleanSetting(
-                    mainAppModel.getContext(),
-                    it,
-                    mainAppModel.getContext().resources.getString(R.string.Analytics)
-                )
-            })
-
-        SettingsNavigationItem(
-            label = stringResource(R.string.font_licences),
-            diagonalArrow = false,
-            onClick = { navController.navigate("fontLicences") }
-        )
-
-
-        SettingsNavigationItem(
-            label = stringResource(id = R.string.read_privacy_policy),
-            false,
-            onClick = { showPolicyDialog() })
-
         SettingsNavigationItem(
             label = stringResource(id = R.string.make_default_launcher),
             true,
-            isBottomOfGroup = true,
+            isTopOfGroup = true,
             onClick = {
                 if (!isDefaultLauncher(activity)) {
                     activity.showLauncherSelector()
@@ -635,10 +614,40 @@ fun MainSettingsPage(
                 }
             })
 
+        if (!BuildConfig.IS_FOSS) {
+            SettingsSwitch(
+                label = stringResource(id = R.string.Analytics), checked = getBooleanSetting(
+                    mainAppModel.getContext(), stringResource(R.string.Analytics), true
+                ), onCheckedChange = {
+                    toggleBooleanSetting(
+                        mainAppModel.getContext(),
+                        it,
+                        mainAppModel.getContext().resources.getString(R.string.Analytics)
+                    )
+                })
+        }
+
+        if (BuildConfig.IS_FOSS) {
+            SettingsNavigationItem(
+                label = stringResource(R.string.font_licences),
+                diagonalArrow = false,
+                isBottomOfGroup = BuildConfig.IS_FOSS,
+                onClick = { navController.navigate("fontLicences") }
+            )
+        }
+
+        if (!BuildConfig.IS_FOSS) {
+            SettingsNavigationItem(
+                label = stringResource(id = R.string.read_privacy_policy),
+                false,
+                isBottomOfGroup = true,
+                onClick = { showPolicyDialog() })
+        }
+
         SettingsSpacer()
 
         SponsorBox(
-            stringResource(id = R.string.escape_launcher) + " " + stringResource(id = R.string.app_version),
+            stringResource(id = R.string.app_name) + " " + stringResource(id = R.string.app_version),
             secondText = stringResource(R.string.app_flavour),
             onSponsorClick = {
                 val url = "https://github.com/sponsors/GeorgeClensy"

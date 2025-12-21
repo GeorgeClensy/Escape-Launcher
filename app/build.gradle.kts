@@ -46,10 +46,12 @@ android {
         }
         create("google") {
             dimension = "distribution"
+            buildConfigField("boolean", "IS_FOSS", "false")
         }
         create("foss") {
             dimension = "distribution"
             versionNameSuffix = "-foss"
+            buildConfigField("boolean", "IS_FOSS", "true")
         }
     }
 
@@ -86,6 +88,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
     @Suppress("UnstableApiUsage")
     composeOptions {
