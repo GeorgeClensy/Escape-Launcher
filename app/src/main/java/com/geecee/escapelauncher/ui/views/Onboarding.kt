@@ -63,6 +63,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.geecee.escapelauncher.BuildConfig
 import com.geecee.escapelauncher.HomeScreenModel
 import com.geecee.escapelauncher.MainAppViewModel
 import com.geecee.escapelauncher.R
@@ -78,6 +79,13 @@ import com.geecee.escapelauncher.utils.managers.MyDeviceAdminReceiver
 import com.geecee.escapelauncher.utils.setBooleanSetting
 import com.geecee.escapelauncher.utils.showLauncherSelector
 import com.geecee.escapelauncher.MainAppViewModel as MainAppModel
+
+private const val SCREEN_WELCOME = "welcome"
+private const val SCREEN_STATISTICS = "statistics"
+private const val SCREEN_FAVORITES = "favorites"
+private const val SCREEN_DEFAULT_LAUNCHER = "default_launcher"
+private const val SCREEN_ANALYTICS = "analytics"
+private const val SCREEN_ADMIN = "admin"
 
 @Composable
 fun Onboarding(
@@ -95,7 +103,19 @@ fun Onboarding(
     val currentBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = currentBackStackEntry?.destination?.route
 
-    var startDestination = "Page1"
+    // Define the sequence of pages, skipping analytics if it's a FOSS build
+    val onboardingPages = remember {
+        listOfNotNull(
+            SCREEN_WELCOME,
+            SCREEN_STATISTICS,
+            SCREEN_FAVORITES,
+            SCREEN_DEFAULT_LAUNCHER,
+            if (!BuildConfig.IS_FOSS) SCREEN_ANALYTICS else null,
+            SCREEN_ADMIN
+        )
+    }
+
+    var startDestination = SCREEN_WELCOME
 
     if (getBooleanSetting(
             mainAppModel.getContext(),
@@ -103,18 +123,13 @@ fun Onboarding(
             false
         )
     ) {
-        startDestination = "Page4"
+        startDestination = SCREEN_DEFAULT_LAUNCHER
     }
 
-    // Progress bar animation
-    val progressTarget = when (currentRoute) {
-        "Page1" -> 0.16f
-        "Page2" -> 0.32f
-        "Page3" -> 0.48f
-        "Page4" -> 0.64f
-        "Page5" -> 0.8f
-        "Page6" -> 1.0f
-        else -> 0f
+    // Progress bar animation based on current page index
+    val progressTarget = remember(currentRoute) {
+        val index = onboardingPages.indexOf(currentRoute).coerceAtLeast(0)
+        (index + 1).toFloat() / onboardingPages.size
     }
 
     // Animate progress smoothly
@@ -146,40 +161,42 @@ fun Onboarding(
             modifier = Modifier.fillMaxSize()
         ) {
             composable(
-                "Page1",
+                SCREEN_WELCOME,
                 enterTransition = { fadeIn(tween(300)) },
                 exitTransition = { fadeOut(tween(300)) }) {
-                OnboardingPage1(navController)
+                WelcomeScreen(navController)
             }
             composable(
-                "Page2",
+                SCREEN_STATISTICS,
                 enterTransition = { fadeIn(tween(300)) },
                 exitTransition = { fadeOut(tween(300)) }) {
-                OnboardingPage2(navController)
+                StatisticsScreen(navController)
             }
             composable(
-                "Page3",
+                SCREEN_FAVORITES,
                 enterTransition = { fadeIn(tween(300)) },
                 exitTransition = { fadeOut(tween(300)) }) {
-                OnboardingPage3(navController, mainAppModel, homeScreenModel)
+                FavoritesSelectionScreen(navController, mainAppModel, homeScreenModel)
             }
             composable(
-                "Page4",
+                SCREEN_DEFAULT_LAUNCHER,
                 enterTransition = { fadeIn(tween(300)) },
                 exitTransition = { fadeOut(tween(300)) }) {
-                OnboardingPage4(navController, activity)
+                DefaultLauncherSetupScreen(navController, activity)
+            }
+            if (!BuildConfig.IS_FOSS) {
+                composable(
+                    SCREEN_ANALYTICS,
+                    enterTransition = { fadeIn(tween(300)) },
+                    exitTransition = { fadeOut(tween(300)) }) {
+                    AnalyticsConsentScreen(navController, mainAppModel)
+                }
             }
             composable(
-                "Page5",
+                SCREEN_ADMIN,
                 enterTransition = { fadeIn(tween(300)) },
                 exitTransition = { fadeOut(tween(300)) }) {
-                OnboardingPage5(navController, mainAppModel)
-            }
-            composable(
-                "Page6",
-                enterTransition = { fadeIn(tween(300)) },
-                exitTransition = { fadeOut(tween(300)) }) {
-                OnboardingPage6(
+                DeviceAdminSetupScreen(
                     mainNavController, mainAppModel
                 )
             }
@@ -188,7 +205,7 @@ fun Onboarding(
 }
 
 @Composable
-fun OnboardingPage1(navController: NavController) {
+fun WelcomeScreen(navController: NavController) {
     Box(
         Modifier
             .fillMaxSize()
@@ -216,7 +233,7 @@ fun OnboardingPage1(navController: NavController) {
 
         Button(
             onClick = {
-                navController.navigate("Page2")
+                navController.navigate(SCREEN_STATISTICS)
             }, modifier = Modifier.align(Alignment.BottomEnd), colors = ButtonColors(
                 primaryContentColor,
                 BackgroundColor,
@@ -242,7 +259,7 @@ fun OnboardingPage1(navController: NavController) {
 }
 
 @Composable
-fun OnboardingPage2(navController: NavController) {
+fun StatisticsScreen(navController: NavController) {
     Box(
         Modifier
             .fillMaxSize()
@@ -303,7 +320,7 @@ fun OnboardingPage2(navController: NavController) {
 
         Button(
             onClick = {
-                navController.navigate("Page3")
+                navController.navigate(SCREEN_FAVORITES)
             },
             modifier = Modifier
                 .align(Alignment.BottomEnd),
@@ -333,7 +350,7 @@ fun OnboardingPage2(navController: NavController) {
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun OnboardingPage3(
+fun FavoritesSelectionScreen(
     navController: NavController,
     mainAppModel: MainAppModel,
     homeScreenModel: HomeScreenModel
@@ -368,7 +385,7 @@ fun OnboardingPage3(
 
         Button(
             onClick = {
-                navController.navigate("Page4")
+                navController.navigate(SCREEN_DEFAULT_LAUNCHER)
             },
             modifier = Modifier
                 .align(Alignment.BottomEnd)
@@ -398,7 +415,7 @@ fun OnboardingPage3(
 }
 
 @Composable
-fun OnboardingPage4(navController: NavController, activity: Activity) {
+fun DefaultLauncherSetupScreen(navController: NavController, activity: Activity) {
     Box(
         Modifier
             .fillMaxSize()
@@ -478,7 +495,8 @@ fun OnboardingPage4(navController: NavController, activity: Activity) {
 
         Button(
             onClick = {
-                navController.navigate("Page5")
+                val nextRoute = if (BuildConfig.IS_FOSS) SCREEN_ADMIN else SCREEN_ANALYTICS
+                navController.navigate(nextRoute)
             }, modifier = Modifier.align(Alignment.BottomEnd), colors = ButtonColors(
                 primaryContentColor,
                 BackgroundColor,
@@ -504,7 +522,7 @@ fun OnboardingPage4(navController: NavController, activity: Activity) {
 }
 
 @Composable
-fun OnboardingPage5(
+fun AnalyticsConsentScreen(
     navController: NavController,
     mainAppModel: MainAppModel
 ) {
@@ -578,7 +596,7 @@ fun OnboardingPage5(
         Row(modifier = Modifier.align(Alignment.BottomEnd)) {
             Button(
                 onClick = {
-                    navController.navigate("Page6")
+                    navController.navigate(SCREEN_ADMIN)
                     setBooleanSetting(
                         mainAppModel.getContext(),
                         mainAppModel.getContext().resources.getString(R.string.Analytics),
@@ -605,7 +623,7 @@ fun OnboardingPage5(
 
             Button(
                 onClick = {
-                    navController.navigate("Page6")
+                    navController.navigate(SCREEN_ADMIN)
                     setBooleanSetting(
                         mainAppModel.getContext(),
                         mainAppModel.getContext().resources.getString(R.string.Analytics),
@@ -638,7 +656,7 @@ fun OnboardingPage5(
 }
 
 @Composable
-fun OnboardingPage6(
+fun DeviceAdminSetupScreen(
     mainNavController: NavController,
     mainAppModel: MainAppModel
 ) {
