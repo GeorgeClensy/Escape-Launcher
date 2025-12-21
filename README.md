@@ -109,9 +109,7 @@ Escape is a minimalist home screen launcher replacement for android to help you 
   Building and running
 </h1>
 
-To build escape just clone the repo, open it in android studio and run with shift+f10
-
-To build the project you will need to create a local.properties in the project route with the sdk location in it. You will also need to add the google-services.json file or remove firebase manually.
+You can build Escape Launcher with default settings in Android Studio. You will not be able to build either of the Google variants without a firebase googe-services.json file but by default the project is set to build the devDebugFOSS variant which doesn't include Firebase.
 
 <br>
 
