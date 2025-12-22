@@ -102,11 +102,7 @@ fun HomeScreen(
                 ) {
                     Date(
                         homeAlignment = getHomeAlignment(mainAppModel.getContext()),
-                        getBooleanSetting(
-                            mainAppModel.getContext(),
-                            stringResource(R.string.SmallDate),
-                            false
-                        )
+                        small = true
                     )
                 }
 
@@ -138,11 +134,7 @@ fun HomeScreen(
 
                     HomeScreenScreenTime(
                         homeAlignment = getHomeAlignment(mainAppModel.getContext()),
-                        small = getBooleanSetting(
-                            mainAppModel.getContext(),
-                            stringResource(R.string.SmallDate),
-                            false
-                        ),
+                        small = true,
                         screenTime = formatScreenTime(todayUsage.longValue)
                     )
                 }
@@ -165,14 +157,14 @@ fun HomeScreen(
                     Weather(
                         homeAlignment = getHomeAlignment(mainAppModel.getContext()),
                         mainAppModel = mainAppModel,
-                        getBooleanSetting(
-                            mainAppModel.getContext(),
-                            stringResource(R.string.SmallDate),
-                            false
-                        )
+                        small = true
                     )
                 }
             }
+        }
+
+        item {
+            Spacer(Modifier.height(10.dp))
         }
 
         //Widgets

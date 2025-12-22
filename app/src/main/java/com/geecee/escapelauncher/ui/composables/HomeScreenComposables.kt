@@ -6,8 +6,11 @@ import android.graphics.Rect
 import android.os.Build
 import android.provider.AlarmClock
 import androidx.annotation.RequiresApi
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -32,6 +35,8 @@ import androidx.compose.material.icons.automirrored.rounded.ArrowForward
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Timer
+import androidx.compose.material.icons.filled.WbSunny
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardColors
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -285,12 +290,12 @@ fun Date(
         },
         fontWeight = FontWeight.W600,
         modifier = Modifier.clickable {
-                val intent = Intent(Intent.ACTION_MAIN).apply {
-                    addCategory(Intent.CATEGORY_APP_CALENDAR)
-                    flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                }
-                context.startActivity(intent)
-            },
+            val intent = Intent(Intent.ACTION_MAIN).apply {
+                addCategory(Intent.CATEGORY_APP_CALENDAR)
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK
+            }
+            context.startActivity(intent)
+        },
         textAlign = when (homeAlignment) {
             Alignment.Start -> TextAlign.Start
             Alignment.End -> TextAlign.End
@@ -310,24 +315,38 @@ fun Weather(
         mainAppModel.updateWeather()
     }
 
-    Text(
-        text = mainAppModel.weatherText.value,
-        color = primaryContentColor,
-        style = if (small) {
-            MaterialTheme.typography.bodyMedium
-        } else {
-            MaterialTheme.typography.bodyLarge
-        },
-        fontWeight = FontWeight.W600,
-        modifier = Modifier.clickable {
-                // Logic to open a weather app if needed
-            },
-        textAlign = when (homeAlignment) {
-            Alignment.Start -> TextAlign.Start
-            Alignment.End -> TextAlign.End
-            else -> TextAlign.Center
+    AnimatedVisibility(mainAppModel.weatherText.value != "", enter = fadeIn(), exit = fadeOut()) {
+        Row {
+            Icon(
+                Icons.Default.WbSunny,
+                "",
+                Modifier
+                    .align(Alignment.CenterVertically)
+                    .size(22.dp)
+                    .padding(end = 2.dp),
+                tint = primaryContentColor
+            )
+
+            Text(
+                text = mainAppModel.weatherText.value,
+                color = primaryContentColor,
+                style = if (small) {
+                    MaterialTheme.typography.bodyMedium
+                } else {
+                    MaterialTheme.typography.bodyLarge
+                },
+                fontWeight = FontWeight.W600,
+                modifier = Modifier.clickable {
+                    // Logic to open a weather app if needed
+                },
+                textAlign = when (homeAlignment) {
+                    Alignment.Start -> TextAlign.Start
+                    Alignment.End -> TextAlign.End
+                    else -> TextAlign.Center
+                }
+            )
         }
-    )
+    }
 }
 
 /**
@@ -339,24 +358,36 @@ fun HomeScreenScreenTime(
     small: Boolean,
     screenTime: String,
 ) {
-    Text(
-        text = screenTime,
-        color = primaryContentColor,
-        style = if (small) {
-            MaterialTheme.typography.bodyMedium
-        } else {
-            MaterialTheme.typography.bodyLarge
-        },
-        fontWeight = FontWeight.W600,
-        modifier = Modifier.clickable {
+    Row {
+        Icon(
+            Icons.Default.Timer,
+            "",
+            Modifier
+                .align(Alignment.CenterVertically)
+                .size(22.dp)
+                .padding(end = 2.dp),
+            tint = primaryContentColor
+        )
+
+        Text(
+            text = screenTime,
+            color = primaryContentColor,
+            style = if (small) {
+                MaterialTheme.typography.bodyMedium
+            } else {
+                MaterialTheme.typography.bodyLarge
+            },
+            fontWeight = FontWeight.W600,
+            modifier = Modifier.clickable {
                 // Logic to open a weather app if needed
             },
-        textAlign = when (homeAlignment) {
-            Alignment.Start -> TextAlign.Start
-            Alignment.End -> TextAlign.End
-            else -> TextAlign.Center
-        }
-    )
+            textAlign = when (homeAlignment) {
+                Alignment.Start -> TextAlign.Start
+                Alignment.End -> TextAlign.End
+                else -> TextAlign.Center
+            }
+        )
+    }
 }
 
 /**

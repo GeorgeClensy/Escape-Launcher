@@ -372,24 +372,20 @@ fun MainSettingsPage(
         // Home options
         SettingsSubheading(stringResource(R.string.home_screen_options))
 
-        SettingsNavigationItem(
-            stringResource(R.string.manage_favourite_apps),
-            diagonalArrow = false,
-            isTopOfGroup = true,
-            onClick = {
-                navController.navigate("bulkFavouriteApps")
-            })
-
         SettingsSwitch(
-            label = stringResource(id = R.string.show_clock), checked = getBooleanSetting(
+            label = stringResource(id = R.string.show_clock),
+            checked = getBooleanSetting(
                 mainAppModel.getContext(), stringResource(R.string.ShowClock), true
-            ), onCheckedChange = {
+            ),
+            onCheckedChange = {
                 toggleBooleanSetting(
                     mainAppModel.getContext(),
                     it,
                     mainAppModel.getContext().resources.getString(R.string.ShowClock)
                 )
-            })
+            },
+            isTopOfGroup = true
+        )
 
         SettingsSwitch(
             label = stringResource(id = R.string.twelve_hour_clock_setting),
@@ -405,28 +401,6 @@ fun MainSettingsPage(
             })
 
         SettingsSwitch(
-            label = stringResource(id = R.string.date), checked = getBooleanSetting(
-                mainAppModel.getContext(), stringResource(R.string.show_date), false
-            ), onCheckedChange = {
-                toggleBooleanSetting(
-                    mainAppModel.getContext(),
-                    it,
-                    mainAppModel.getContext().resources.getString(R.string.show_date)
-                )
-            })
-
-        SettingsSwitch(
-            label = stringResource(id = R.string.small_date), checked = getBooleanSetting(
-                mainAppModel.getContext(), stringResource(R.string.SmallDate), false
-            ), onCheckedChange = {
-                toggleBooleanSetting(
-                    mainAppModel.getContext(),
-                    it,
-                    mainAppModel.getContext().resources.getString(R.string.SmallDate)
-                )
-            })
-
-        SettingsSwitch(
             label = stringResource(id = R.string.big_clock), checked = getBooleanSetting(
                 mainAppModel.getContext(), stringResource(R.string.BigClock)
             ), onCheckedChange = {
@@ -434,6 +408,17 @@ fun MainSettingsPage(
                     mainAppModel.getContext(),
                     it,
                     mainAppModel.getContext().resources.getString(R.string.BigClock)
+                )
+            })
+
+        SettingsSwitch(
+            label = stringResource(id = R.string.date), checked = getBooleanSetting(
+                mainAppModel.getContext(), stringResource(R.string.show_date), false
+            ), onCheckedChange = {
+                toggleBooleanSetting(
+                    mainAppModel.getContext(),
+                    it,
+                    mainAppModel.getContext().resources.getString(R.string.show_date)
                 )
             })
 
@@ -451,8 +436,16 @@ fun MainSettingsPage(
         SettingsNavigationItem(
             label = stringResource(id = R.string.widget),
             false,
-            isBottomOfGroup = true,
             onClick = { navController.navigate("widget") })
+
+        SettingsNavigationItem(
+            stringResource(R.string.manage_favourite_apps),
+            diagonalArrow = false,
+            isBottomOfGroup = true,
+            onClick = {
+                navController.navigate("bulkFavouriteApps")
+            })
+
 
         //Alignment Options
         SettingsSubheading(stringResource(R.string.alignments))
