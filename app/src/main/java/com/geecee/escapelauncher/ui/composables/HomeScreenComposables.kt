@@ -194,7 +194,7 @@ fun Clock(
                         contentAlignment = Alignment.Center,
                         modifier = Modifier
                             .width(40.dp)
-                            .offset(0.dp, 30.dp)
+                            .offset(0.dp, 35.dp)
                     ) {
                         Text(
                             text = digit.toString(),
