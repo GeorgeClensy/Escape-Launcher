@@ -155,7 +155,8 @@ dependencies {
     "googleImplementation"(libs.firebase.perf)
     "googleImplementation"(libs.google.firebase.messaging)
     "googleImplementation"(libs.firebase.messaging)
-
+    "googleImplementation"(libs.play.services.location)
+    "googleImplementation"("com.squareup.okhttp3:okhttp:4.12.0")
 
     // JSON Parsing
     implementation(libs.gson)

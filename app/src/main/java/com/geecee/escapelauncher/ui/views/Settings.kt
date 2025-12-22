@@ -10,7 +10,6 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
-import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
@@ -435,6 +434,17 @@ fun MainSettingsPage(
                     mainAppModel.getContext(),
                     it,
                     mainAppModel.getContext().resources.getString(R.string.BigClock)
+                )
+            })
+
+        SettingsSwitch(
+            label = stringResource(id = R.string.show_weather), checked = getBooleanSetting(
+                mainAppModel.getContext(), stringResource(R.string.show_weather), false
+            ), onCheckedChange = {
+                toggleBooleanSetting(
+                    mainAppModel.getContext(),
+                    it,
+                    mainAppModel.getContext().resources.getString(R.string.show_weather)
                 )
             })
 

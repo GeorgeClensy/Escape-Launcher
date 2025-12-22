@@ -83,7 +83,6 @@ import com.geecee.escapelauncher.utils.AppUtils.getCurrentTime
 import com.geecee.escapelauncher.utils.AppUtils.resetHome
 import com.geecee.escapelauncher.utils.InstalledApp
 import com.geecee.escapelauncher.utils.PrivateAppItem
-import com.geecee.escapelauncher.utils.getBooleanSetting
 import com.geecee.escapelauncher.utils.getPrivateSpaceApps
 import com.geecee.escapelauncher.utils.lockPrivateSpace
 import com.geecee.escapelauncher.utils.openPrivateSpaceApp
@@ -113,7 +112,7 @@ fun HomeScreenItem(
     alignment: Alignment.Horizontal = Alignment.CenterHorizontally
 ) {
     Row(
-        verticalAlignment = Alignment.Bottom,
+        verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = when (alignment) {
             Alignment.Start -> Arrangement.Start
             Alignment.CenterHorizontally -> Arrangement.Center
@@ -143,7 +142,7 @@ fun HomeScreenItem(
                     .padding(vertical = 15.dp, horizontal = 5.dp)
                     .alpha(0.5f),
                 color = primaryContentColor,
-                style = MaterialTheme.typography.bodySmall
+                style = MaterialTheme.typography.bodyMedium
             )
         }
     }
@@ -230,9 +229,7 @@ fun Clock(
             color = primaryContentColor,
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.SemiBold,
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable {
+            modifier = Modifier.clickable {
                     val intent = Intent(AlarmClock.ACTION_SHOW_ALARMS)
                     intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
                     context.startActivity(intent)
@@ -284,16 +281,48 @@ fun Date(
         } else {
             MaterialTheme.typography.bodyLarge
         },
-        fontWeight = FontWeight.SemiBold,
+        fontWeight = FontWeight.W600,
         modifier = Modifier
-            .fillMaxWidth()
-            .padding(0.dp, 0.dp, 0.dp, (7.5).dp)
+            .padding(0.dp, 0.dp, 0.dp, 0.dp)
             .clickable {
                 val intent = Intent(Intent.ACTION_MAIN).apply {
                     addCategory(Intent.CATEGORY_APP_CALENDAR)
                     flags = Intent.FLAG_ACTIVITY_NEW_TASK
                 }
                 context.startActivity(intent)
+            },
+        textAlign = when (homeAlignment) {
+            Alignment.Start -> TextAlign.Start
+            Alignment.End -> TextAlign.End
+            else -> TextAlign.Center
+        }
+    )
+}
+
+/**
+ * Weather composable to be shown on home screen
+ */
+@Composable
+fun Weather(
+    homeAlignment: Alignment.Horizontal, mainAppModel: MainAppViewModel, small: Boolean
+) {
+    LaunchedEffect(Unit) {
+        mainAppModel.updateWeather()
+    }
+
+    Text(
+        text = mainAppModel.weatherText.value,
+        color = primaryContentColor,
+        style = if (small) {
+            MaterialTheme.typography.bodyMedium
+        } else {
+            MaterialTheme.typography.bodyLarge
+        },
+        fontWeight = FontWeight.W600,
+        modifier = Modifier
+            .padding(0.dp, 0.dp, 0.dp, 0.dp)
+            .clickable {
+                // Logic to open a weather app if needed
             },
         textAlign = when (homeAlignment) {
             Alignment.Start -> TextAlign.Start

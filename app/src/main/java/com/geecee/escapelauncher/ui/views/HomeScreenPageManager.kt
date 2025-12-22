@@ -85,7 +85,7 @@ fun HomeScreenPageManager(
     }
 
     // Home Screen Pages
-    HorizontalPager (
+    HorizontalPager(
         state = homeScreenModel.pagerState,
         modifier = Modifier
             .fillMaxSize()
@@ -104,7 +104,8 @@ fun HomeScreenPageManager(
                 onDoubleClick = {
                     val devicePolicyManager =
                         mainAppModel.getContext().getSystemService(DevicePolicyManager::class.java)
-                    val compName = ComponentName(mainAppModel.getContext(), MyDeviceAdminReceiver::class.java)
+                    val compName =
+                        ComponentName(mainAppModel.getContext(), MyDeviceAdminReceiver::class.java)
 
                     if (devicePolicyManager.isAdminActive(compName)) {
                         mainAppModel.blackOverlay.value = true
@@ -113,7 +114,11 @@ fun HomeScreenPageManager(
                             mainAppModel.blackOverlay.value = false
                         }, 300)
                     } else {
-                        Toast.makeText(mainAppModel.getContext(), "Enable Device Admin first", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(
+                            mainAppModel.getContext(),
+                            "Enable Device Admin first",
+                            Toast.LENGTH_SHORT
+                        ).show()
                     }
                 }
             )

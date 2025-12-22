@@ -25,6 +25,7 @@ import com.geecee.escapelauncher.utils.managers.ChallengesManager
 import com.geecee.escapelauncher.utils.managers.FavoriteAppsManager
 import com.geecee.escapelauncher.utils.managers.HiddenAppsManager
 import com.geecee.escapelauncher.utils.managers.getUsageForApp
+import com.geecee.escapelauncher.utils.weatherProxy
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -306,4 +307,28 @@ class MainAppViewModel(application: Application) : AndroidViewModel(application)
     fun getCachedScreenTime(packageName: String): Long {
         return screenTimeCache[packageName] ?: 0L
     } // Non-suspend function that just returns the cached value without fetching
+
+    // Weather
+
+    val weatherText = mutableStateOf("")
+    private var lastWeatherUpdate = 0L
+
+    fun updateWeather() {
+        val currentTime = System.currentTimeMillis()
+        // Update weather if it's been more than 30 minutes or if it's empty
+        if (currentTime - lastWeatherUpdate > 30 * 60 * 1000 || weatherText.value.isEmpty()) {
+            viewModelScope.launch(Dispatchers.IO) {
+                weatherProxy.getWeather(appContext) { result ->
+                    viewModelScope.launch(Dispatchers.Main) {
+                        weatherText.value = result
+                        // Only update the last update time if we got a valid-looking result
+                        if (!result.contains("error", ignoreCase = true) && 
+                            !result.contains("unavailable", ignoreCase = true)) {
+                            lastWeatherUpdate = System.currentTimeMillis()
+                        }
+                    }
+                }
+            }
+        }
+    }
 }

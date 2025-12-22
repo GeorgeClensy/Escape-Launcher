@@ -15,6 +15,7 @@ lifecycleRuntimeKtx = "2.10.0"
 activityCompose = "1.12.2"
 composeBom = "2025.12.01"
 navigationCompose = "2.9.6"
+playServicesLocation = "21.3.0"
 roomCommon = "2.8.4"
 roomCompiler = "2.8.4"
 roomKtx = "2.8.4"
@@ -59,6 +60,7 @@ firebase-messaging = { group = "com.google.firebase", name = "firebase-messaging
 androidx-compose-material-icons-core = { group = "androidx.compose.material", name = "material-icons-core" }
 androidx-compose-material-icons-extended = { group = "androidx.compose.material", name = "material-icons-extended" }
 androidx-compose-material3 = { group = "androidx.compose.material3", name = "material3", version.ref = "material3" }
+play-services-location = { module = "com.google.android.gms:play-services-location", version.ref = "playServicesLocation" }
 
 
 [plugins]

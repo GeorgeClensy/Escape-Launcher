@@ -1,10 +1,13 @@
 package com.geecee.escapelauncher
 
+import android.Manifest
+import android.app.Activity
 import android.content.BroadcastReceiver
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -25,6 +28,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewModelScope
@@ -62,6 +67,20 @@ class MainHomeScreenActivity : ComponentActivity() {
     private val pushNotificationPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { _ ->
+    }
+
+    fun requestLocationPermission(context: Context, activity: Activity) {
+        if (ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            ActivityCompat.requestPermissions(
+                activity,
+                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+                1001
+            )
+        }
     }
 
     /**
@@ -276,8 +295,13 @@ class MainHomeScreenActivity : ComponentActivity() {
                     enterTransition = { fadeIn(tween(300)) },
                     exitTransition = { fadeOut(tween(300)) }) {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                        pushNotificationPermissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+                        pushNotificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
                     }
+
+                    requestLocationPermission(
+                        this@MainHomeScreenActivity,
+                        this@MainHomeScreenActivity
+                    )
 
                     HomeScreenPageManager(
                         viewModel,

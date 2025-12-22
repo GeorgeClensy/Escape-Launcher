@@ -1,12 +1,14 @@
 package com.geecee.escapelauncher.ui.views
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -29,6 +31,7 @@ import com.geecee.escapelauncher.ui.composables.Date
 import com.geecee.escapelauncher.ui.composables.FirstTimeHelp
 import com.geecee.escapelauncher.ui.composables.HomeScreenItem
 import com.geecee.escapelauncher.ui.composables.HomeScreenScreenTime
+import com.geecee.escapelauncher.ui.composables.Weather
 import com.geecee.escapelauncher.utils.AppUtils
 import com.geecee.escapelauncher.utils.AppUtils.doHapticFeedBack
 import com.geecee.escapelauncher.utils.AppUtils.formatScreenTime
@@ -49,7 +52,7 @@ import com.geecee.escapelauncher.MainAppViewModel as MainAppModel
 /**
  * Parent main home screen composable
  */
- @Composable
+@Composable
 fun HomeScreen(
     mainAppModel: MainAppModel, homeScreenModel: HomeScreenModel
 ) {
@@ -82,21 +85,57 @@ fun HomeScreen(
                         false
                     ),
                     homeAlignment = getHomeAlignment(mainAppModel.getContext()),
-                    twelveHour = getBooleanSetting(mainAppModel.getContext(), stringResource(R.string.twelve_hour_clock), false)
+                    twelveHour = getBooleanSetting(
+                        mainAppModel.getContext(),
+                        stringResource(R.string.twelve_hour_clock),
+                        false
+                    )
                 )
             }
         }
 
         //Date
         item {
-            if (getBooleanSetting(
-                    mainAppModel.getContext(), stringResource(R.string.show_date), false
-                )
-            ) {
-                Date(
-                    homeAlignment = getHomeAlignment(mainAppModel.getContext()),
-                    getBooleanSetting(mainAppModel.getContext(), stringResource(R.string.SmallDate), false)
-                )
+            Row {
+                if (getBooleanSetting(
+                        mainAppModel.getContext(), stringResource(R.string.show_date), false
+                    )
+                ) {
+                    Date(
+                        homeAlignment = getHomeAlignment(mainAppModel.getContext()),
+                        getBooleanSetting(
+                            mainAppModel.getContext(),
+                            stringResource(R.string.SmallDate),
+                            false
+                        )
+                    )
+                }
+
+                if (getBooleanSetting(
+                        mainAppModel.getContext(), stringResource(R.string.show_weather), false
+                    ) && getBooleanSetting(
+                        mainAppModel.getContext(), stringResource(R.string.show_date), false
+                    )
+                ) {
+                    Spacer(
+                        Modifier.width(10.dp)
+                    )
+                }
+
+                if (getBooleanSetting(
+                        mainAppModel.getContext(), stringResource(R.string.show_weather), false
+                    )
+                ) {
+                    Weather(
+                        homeAlignment = getHomeAlignment(mainAppModel.getContext()),
+                        mainAppModel = mainAppModel,
+                        getBooleanSetting(
+                            mainAppModel.getContext(),
+                            stringResource(R.string.SmallDate),
+                            false
+                        )
+                    )
+                }
             }
         }
 
