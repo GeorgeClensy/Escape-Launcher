@@ -61,10 +61,12 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.core.net.toUri
 import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.geecee.escapelauncher.BuildConfig
 import com.geecee.escapelauncher.HomeScreenModel
 import com.geecee.escapelauncher.R
 import com.geecee.escapelauncher.ui.composables.BulkAppManager
@@ -79,8 +81,12 @@ import com.geecee.escapelauncher.ui.composables.SettingsSwipeableButton
 import com.geecee.escapelauncher.ui.composables.SettingsSwitch
 import com.geecee.escapelauncher.ui.composables.SponsorBox
 import com.geecee.escapelauncher.ui.composables.ThemeCard
+import com.geecee.escapelauncher.ui.composables.WeatherAppPicker
+import com.geecee.escapelauncher.ui.theme.AppTheme
 import com.geecee.escapelauncher.ui.theme.CardContainerColor
 import com.geecee.escapelauncher.ui.theme.ContentColor
+import com.geecee.escapelauncher.ui.theme.getFontFamily
+import com.geecee.escapelauncher.ui.theme.resolveColorScheme
 import com.geecee.escapelauncher.utils.AppUtils
 import com.geecee.escapelauncher.utils.AppUtils.loadTextFromAssets
 import com.geecee.escapelauncher.utils.AppUtils.resetHome
@@ -118,11 +124,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.system.exitProcess
 import com.geecee.escapelauncher.MainAppViewModel as MainAppModel
-import androidx.core.net.toUri
-import com.geecee.escapelauncher.BuildConfig
-import com.geecee.escapelauncher.ui.theme.AppTheme
-import com.geecee.escapelauncher.ui.theme.getFontFamily
-import com.geecee.escapelauncher.ui.theme.resolveColorScheme
 
 
 //
@@ -163,7 +164,8 @@ fun Settings(
                     { showPolicyDialog.value = true },
                     navController,
                     mainAppModel,
-                    activity
+                    activity,
+                    homeScreenModel
                 )
             }
             composable(
@@ -328,8 +330,11 @@ fun MainSettingsPage(
     showPolicyDialog: () -> Unit,
     navController: NavController,
     mainAppModel: MainAppModel,
-    activity: Activity
+    activity: Activity,
+    homeScreenModel: HomeScreenModel
 ) {
+    var showWeatherAppPicker by remember { mutableStateOf(false) }
+
     Column(
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.Start,
@@ -432,6 +437,12 @@ fun MainSettingsPage(
                     mainAppModel.getContext().resources.getString(R.string.show_weather)
                 )
             })
+
+        SettingsNavigationItem(
+            label = stringResource(id = R.string.choose_weather_app),
+            false,
+            onClick = { showWeatherAppPicker = true }
+        )
 
         SettingsNavigationItem(
             label = stringResource(id = R.string.widget),
@@ -592,7 +603,7 @@ fun MainSettingsPage(
                 toggleBooleanSetting(
                     mainAppModel.getContext(),
                     it,
-                    mainAppModel.getContext().resources.getString(R.string.ScreenTimeOnHome)
+                    mainAppModel.getContext().resources.getString(R.string.screen_time_on_home_screen)
                 )
             })
 
@@ -676,6 +687,21 @@ fun MainSettingsPage(
 
         SettingsSpacer()
         SettingsSpacer()
+    }
+
+    if (showWeatherAppPicker) {
+        WeatherAppPicker(
+            apps = homeScreenModel.installedApps,
+            onAppSelected = { app ->
+                setStringSetting(
+                    mainAppModel.getContext(),
+                    mainAppModel.getContext().getString(R.string.weather_app_package),
+                    app.packageName
+                )
+                showWeatherAppPicker = false
+            },
+            onDismiss = { showWeatherAppPicker = false }
+        )
     }
 }
 
@@ -1306,6 +1332,14 @@ fun DevOptions(mainAppModel: MainAppModel, context: Context, goBack: () -> Unit)
             label = "Force Stop",
             onClick = {
                 exitProcess(0)
+            }
+        )
+
+        SettingsButton(
+            label = "Clear weather app",
+            onClick = {
+                setStringSetting(context, context.getString(R.string.weather_app_package), "")
+                Toast.makeText(context, "Weather app cleared", Toast.LENGTH_SHORT).show()
             }
         )
 

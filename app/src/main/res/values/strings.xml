@@ -78,6 +78,8 @@
     <string name="font_licences">Font Licences</string>
     <string name="small_date">Small Date</string>
     <string name="show_weather">Show Weather</string>
+    <string name="choose_weather_app">Choose weather app</string>
+    <string name="set_weather_app_in_settings">Set weather app in settings</string>
 
     <!-- First time strings -->
     <string name="continue_str">Continue</string>

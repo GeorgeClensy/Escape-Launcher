@@ -27,4 +27,5 @@
     <string name="bottomSearch" translatable="false">bottomSearch</string>
     <string name="appsListAutoSearch" translatable="false">AppsListAutoSearch</string>
     <string name="SmallDate" translatable="false">SmallDate</string>
+    <string name="weather_app_package">weather_app_package</string>
 </resources>

@@ -24,6 +24,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -39,10 +41,12 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Slider
+import androidx.compose.material3.Surface
 import androidx.compose.material3.SwipeToDismissBox
 import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Switch
@@ -83,8 +87,10 @@ import com.geecee.escapelauncher.ui.theme.ContentColor
 import com.geecee.escapelauncher.ui.theme.ContentColorDisabled
 import com.geecee.escapelauncher.ui.theme.ErrorContainerColor
 import com.geecee.escapelauncher.ui.theme.ErrorContentColor
+import com.geecee.escapelauncher.ui.theme.primaryContentColor
 import com.geecee.escapelauncher.ui.theme.resolveColorScheme
 import com.geecee.escapelauncher.ui.theme.transparentHalf
+import com.geecee.escapelauncher.utils.InstalledApp
 
 @Composable
 fun AutoResizingText(
@@ -1013,4 +1019,48 @@ fun SponsorBox(text: String, secondText: String,onSponsorClick: () -> Unit = {},
 @Composable
 fun SponsorBoxPreview() {
     SponsorBox("Escape Launcher", "Testing")
+}
+
+/**
+ * Weather app picker
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun WeatherAppPicker(
+    apps: List<InstalledApp>,
+    onAppSelected: (InstalledApp) -> Unit,
+    onDismiss: () -> Unit
+) {
+    ModalBottomSheet(
+        onDismissRequest = onDismiss
+    ) {
+        Surface(
+            modifier = Modifier
+                .fillMaxWidth()
+                .fillMaxHeight(0.8f),
+            shape = MaterialTheme.shapes.extraLarge
+        ) {
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = androidx.compose.foundation.layout.PaddingValues(16.dp)
+            ) {
+                items(apps.sortedBy { it.displayName }) { app ->
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .combinedClickable(onClick = { onAppSelected(app) })
+                            .padding(vertical = 12.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Spacer(modifier = Modifier.width(16.dp))
+                        Text(
+                            text = app.displayName,
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = primaryContentColor
+                        )
+                    }
+                }
+            }
+        }
+    }
 }

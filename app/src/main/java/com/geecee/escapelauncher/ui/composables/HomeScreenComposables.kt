@@ -5,6 +5,7 @@ import android.content.Intent
 import android.graphics.Rect
 import android.os.Build
 import android.provider.AlarmClock
+import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateDpAsState
@@ -89,6 +90,7 @@ import com.geecee.escapelauncher.utils.AppUtils.resetHome
 import com.geecee.escapelauncher.utils.InstalledApp
 import com.geecee.escapelauncher.utils.PrivateAppItem
 import com.geecee.escapelauncher.utils.getPrivateSpaceApps
+import com.geecee.escapelauncher.utils.getStringSetting
 import com.geecee.escapelauncher.utils.lockPrivateSpace
 import com.geecee.escapelauncher.utils.openPrivateSpaceApp
 import com.geecee.escapelauncher.utils.showPrivateSpaceAppInfo
@@ -311,6 +313,7 @@ fun Date(
 fun Weather(
     homeAlignment: Alignment.Horizontal, mainAppModel: MainAppViewModel, small: Boolean
 ) {
+    val context = LocalContext.current
     LaunchedEffect(Unit) {
         mainAppModel.updateWeather()
     }
@@ -337,7 +340,22 @@ fun Weather(
                 },
                 fontWeight = FontWeight.W600,
                 modifier = Modifier.clickable {
-
+                    val weatherAppPackage = getStringSetting(
+                        context,
+                        context.getString(R.string.weather_app_package),
+                        ""
+                    )
+                    if (weatherAppPackage.isNotEmpty()) {
+                        val launchIntent =
+                            context.packageManager.getLaunchIntentForPackage(weatherAppPackage)
+                        launchIntent?.let {
+                            it.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                            context.startActivity(it)
+                        }
+                    }
+                    else {
+                        Toast.makeText(context, context.getString(R.string.set_weather_app_in_settings), Toast.LENGTH_SHORT).show()
+                    }
                 },
                 textAlign = when (homeAlignment) {
                     Alignment.Start -> TextAlign.Start
