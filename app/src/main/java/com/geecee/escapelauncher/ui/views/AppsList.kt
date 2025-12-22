@@ -281,7 +281,6 @@ fun AppsList(
             }
         }
 
-
         // Private space settings
         AnimatedVisibility(
             visible = homeScreenModel.showPrivateSpaceSettings.value && mainAppModel.isPrivateSpaceUnlocked.value,
@@ -296,18 +295,24 @@ fun AppsList(
             }
         }
 
-        ListGradient(
-            Modifier
-                .fillMaxWidth()
-                .align(Alignment.BottomStart)
-                .height(
-                    if (showSearch && bottomSearch) {
-                        200.dp
-                    } else {
-                        40.dp
-                    }
-                )
-        )
+        AnimatedVisibility(
+            visible = !homeScreenModel.showPrivateSpaceSettings.value && !mainAppModel.isPrivateSpaceUnlocked.value,
+            enter = fadeIn(),
+            exit = fadeOut()
+        ) {
+            ListGradient(
+                Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.BottomStart)
+                    .height(
+                        if (showSearch && bottomSearch) {
+                            200.dp
+                        } else {
+                            40.dp
+                        }
+                    )
+            )
+        }
 
         // Bottom search box
         Column(
