@@ -48,7 +48,7 @@ import java.util.Locale
  * This function works out if the screen time is over the recommended and if it is finds out how many percent over it is
  */
 fun calculateOveragePercentage(screenTime: Long): Int {
-    val recommendedTime: Long = 2 * 60 * 60 * 1000 // 2 hours in milliseconds
+    val recommendedTime: Double = 0.5 * 60 * 60 * 1000 // 1 hours in milliseconds
 
     // If screen time is less than or equal to the recommended time, return 0%
     if (screenTime <= recommendedTime) {

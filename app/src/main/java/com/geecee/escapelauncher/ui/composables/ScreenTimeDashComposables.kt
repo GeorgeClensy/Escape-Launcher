@@ -13,11 +13,15 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.toShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -74,11 +78,12 @@ fun ScreenTime(time: String, increased: Boolean, modifier: Modifier) {
 /**
  * Square shaped composable showing how many percent higher screen time is than recommended using [calculateOveragePercentage] function
  */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun HigherRec(percent: Int, modifier: Modifier = Modifier) {
     BoxWithConstraints (
         modifier = modifier
-            .clip(MaterialTheme.shapes.extraLarge)
+            .clip(MaterialShapes.Circle.toShape())
             .aspectRatio(1f)
             .background(CardContainerColor)
     ) {
@@ -121,12 +126,13 @@ fun HigherRec(percent: Int, modifier: Modifier = Modifier) {
 /**
  * Circular composable showing what percent of your day was spent on your phone
  */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun DaySpent(percent: Int, modifier: Modifier = Modifier) {
     BoxWithConstraints(
         modifier = modifier
             .aspectRatio(1f)
-            .clip(CircleShape)
+            .clip(RoundedCornerShape(48.dp))
             .background(CardContainerColor)
     ) {
         val boxWithConstraintsScope = this
@@ -173,7 +179,7 @@ fun AppUsage(appName: String, increased: Boolean, time: String, modifier: Modifi
     Box(
         modifier
             .fillMaxWidth()
-            .padding(0.dp, 5.dp)
+            .padding(5.dp, 5.dp)
     ) {
         Text(
             text = if (appName.length > 12) appName.take(12) + "..." else appName,
@@ -224,7 +230,7 @@ fun AppUsages(modifier: Modifier, content: @Composable () -> Unit) {
     Box(
         modifier
             .fillMaxSize()
-            .clip(MaterialTheme.shapes.extraLarge)
+            .clip(RoundedCornerShape(48.dp))
             .background(CardContainerColor)
     ) {
         Column(
