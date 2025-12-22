@@ -2,6 +2,7 @@ package com.geecee.escapelauncher.utils
 
 import android.Manifest
 import android.content.Context
+import android.util.Log
 import androidx.annotation.RequiresPermission
 import com.google.android.gms.location.LocationServices
 import okhttp3.Call
@@ -19,6 +20,8 @@ class WeatherImpl : WeatherProxy {
             LocationServices.getFusedLocationProviderClient(context)
 
         fusedLocationClient.lastLocation.addOnSuccessListener { location ->
+            Log.d("Weather","Retrieved Weather")
+
 
             if (location == null) {
                 callback("Location unavailable")

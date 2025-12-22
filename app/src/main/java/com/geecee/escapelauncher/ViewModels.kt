@@ -309,8 +309,8 @@ class MainAppViewModel(application: Application) : AndroidViewModel(application)
     } // Non-suspend function that just returns the cached value without fetching
 
     // Weather
-
     val weatherText = mutableStateOf("")
+
     private var lastWeatherUpdate = 0L
 
     fun updateWeather() {

@@ -337,7 +337,7 @@ fun Weather(
                 },
                 fontWeight = FontWeight.W600,
                 modifier = Modifier.clickable {
-                    // Logic to open a weather app if needed
+
                 },
                 textAlign = when (homeAlignment) {
                     Alignment.Start -> TextAlign.Start
