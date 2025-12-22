@@ -1,6 +1,5 @@
 package com.geecee.escapelauncher.ui.views
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -94,7 +93,7 @@ fun HomeScreen(
             }
         }
 
-        //Date
+        //Date and weather and screen time
         item {
             Row {
                 if (getBooleanSetting(
@@ -108,6 +107,43 @@ fun HomeScreen(
                             stringResource(R.string.SmallDate),
                             false
                         )
+                    )
+                }
+
+                if (getBooleanSetting(
+                        mainAppModel.getContext(), stringResource(R.string.ScreenTimeOnHome), false
+                    ) && getBooleanSetting(
+                        mainAppModel.getContext(), stringResource(R.string.show_date), false
+                    )
+                ) {
+                    Spacer(
+                        Modifier.width(10.dp)
+                    )
+                }
+
+                if (
+                    getBooleanSetting(
+                        mainAppModel.getContext(), stringResource(R.string.ScreenTimeOnHome), false
+                    )
+                ) {
+                    val todayUsage = remember { mutableLongStateOf(0L) }
+                    LaunchedEffect(mainAppModel.shouldReloadScreenTime.value) {
+                        withContext(Dispatchers.IO) {
+                            val usage = getTotalUsageForDate(mainAppModel.getToday())
+                            withContext(Dispatchers.Main) {
+                                todayUsage.longValue = usage
+                            }
+                        }
+                    }
+
+                    HomeScreenScreenTime(
+                        homeAlignment = getHomeAlignment(mainAppModel.getContext()),
+                        small = getBooleanSetting(
+                            mainAppModel.getContext(),
+                            stringResource(R.string.SmallDate),
+                            false
+                        ),
+                        screenTime = formatScreenTime(todayUsage.longValue)
                     )
                 }
 
@@ -136,27 +172,6 @@ fun HomeScreen(
                         )
                     )
                 }
-            }
-        }
-
-        //Screen time
-        item {
-            AnimatedVisibility(
-                getBooleanSetting(
-                    mainAppModel.getContext(), stringResource(R.string.ScreenTimeOnHome), false
-                )
-            ) {
-                val todayUsage = remember { mutableLongStateOf(0L) }
-                LaunchedEffect(mainAppModel.shouldReloadScreenTime.value) {
-                    withContext(Dispatchers.IO) {
-                        val usage = getTotalUsageForDate(mainAppModel.getToday())
-                        withContext(Dispatchers.Main) {
-                            todayUsage.longValue = usage
-                        }
-                    }
-                }
-
-                HomeScreenScreenTime(formatScreenTime(todayUsage.longValue))
             }
         }
 
@@ -192,7 +207,7 @@ fun HomeScreen(
                         (getWidgetWidth(mainAppModel.getContext())).dp,
                         (getWidgetHeight(mainAppModel.getContext())).dp
                     )
-                    .padding(0.dp, (7.5).dp))
+                    .padding(0.dp, 0.dp))
         }
 
         //Apps

@@ -229,11 +229,13 @@ fun Clock(
             color = primaryContentColor,
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.SemiBold,
-            modifier = Modifier.clickable {
+            modifier = Modifier
+                .clickable {
                     val intent = Intent(AlarmClock.ACTION_SHOW_ALARMS)
                     intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
                     context.startActivity(intent)
-                },
+                }
+                .offset((-2).dp, 5.dp),
             textAlign = when (homeAlignment) {
                 Alignment.Start -> TextAlign.Start
                 Alignment.End -> TextAlign.End
@@ -282,9 +284,7 @@ fun Date(
             MaterialTheme.typography.bodyLarge
         },
         fontWeight = FontWeight.W600,
-        modifier = Modifier
-            .padding(0.dp, 0.dp, 0.dp, 0.dp)
-            .clickable {
+        modifier = Modifier.clickable {
                 val intent = Intent(Intent.ACTION_MAIN).apply {
                     addCategory(Intent.CATEGORY_APP_CALENDAR)
                     flags = Intent.FLAG_ACTIVITY_NEW_TASK
@@ -319,9 +319,7 @@ fun Weather(
             MaterialTheme.typography.bodyLarge
         },
         fontWeight = FontWeight.W600,
-        modifier = Modifier
-            .padding(0.dp, 0.dp, 0.dp, 0.dp)
-            .clickable {
+        modifier = Modifier.clickable {
                 // Logic to open a weather app if needed
             },
         textAlign = when (homeAlignment) {
@@ -337,24 +335,28 @@ fun Weather(
  */
 @Composable
 fun HomeScreenScreenTime(
-    screenTime: String
+    homeAlignment: Alignment.Horizontal,
+    small: Boolean,
+    screenTime: String,
 ) {
-    Box(
-        Modifier
-            .clip(
-                MaterialTheme.shapes.extraLarge
-            )
-            .background(CardContainerColor)
-            .padding(0.dp, (7.5).dp)
-    ) {
-        Text(
-            text = screenTime,
-            color = primaryContentColor,
-            style = MaterialTheme.typography.bodyLarge,
-            fontWeight = FontWeight.SemiBold,
-            modifier = Modifier.padding(25.dp)
-        )
-    }
+    Text(
+        text = screenTime,
+        color = primaryContentColor,
+        style = if (small) {
+            MaterialTheme.typography.bodyMedium
+        } else {
+            MaterialTheme.typography.bodyLarge
+        },
+        fontWeight = FontWeight.W600,
+        modifier = Modifier.clickable {
+                // Logic to open a weather app if needed
+            },
+        textAlign = when (homeAlignment) {
+            Alignment.Start -> TextAlign.Start
+            Alignment.End -> TextAlign.End
+            else -> TextAlign.Center
+        }
+    )
 }
 
 /**
