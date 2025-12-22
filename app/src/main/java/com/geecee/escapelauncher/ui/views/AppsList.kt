@@ -296,22 +296,21 @@ fun AppsList(
         }
 
         AnimatedVisibility(
-            visible = !homeScreenModel.showPrivateSpaceSettings.value && !mainAppModel.isPrivateSpaceUnlocked.value,
+            visible = !homeScreenModel.showPrivateSpaceSettings.value,
             enter = fadeIn(),
-            exit = fadeOut()
+            exit = fadeOut(),
+            modifier =  Modifier
+                .fillMaxWidth()
+                .align(Alignment.BottomStart)
+                .height(
+                    if (showSearch && bottomSearch) {
+                        200.dp
+                    } else {
+                        40.dp
+                    }
+                )
         ) {
-            ListGradient(
-                Modifier
-                    .fillMaxWidth()
-                    .align(Alignment.BottomStart)
-                    .height(
-                        if (showSearch && bottomSearch) {
-                            200.dp
-                        } else {
-                            40.dp
-                        }
-                    )
-            )
+            ListGradient()
         }
 
         // Bottom search box
