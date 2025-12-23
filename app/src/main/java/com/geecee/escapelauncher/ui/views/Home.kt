@@ -232,7 +232,7 @@ fun HomeScreen(
                 onAppLongClick = {
                     homeScreenModel.showBottomSheet.value = true
                     homeScreenModel.updateSelectedApp(app)
-                    doHapticFeedBack(mainAppModel.getContext(), hapticFeedback = haptics)
+                    doHapticFeedBack(hapticFeedback = haptics)
                 },
                 showScreenTime = getBooleanSetting(
                     context = mainAppModel.getContext(),

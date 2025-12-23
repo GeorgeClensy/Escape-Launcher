@@ -214,7 +214,7 @@ fun AppsList(
                     onAppLongClick = {
                         homeScreenModel.showBottomSheet.value = true
                         homeScreenModel.updateSelectedApp(app)
-                        doHapticFeedBack(mainAppModel.getContext(), haptics)
+                        doHapticFeedBack( haptics)
                     },
                     showScreenTime = getBooleanSetting(
                         context = mainAppModel.getContext(),
