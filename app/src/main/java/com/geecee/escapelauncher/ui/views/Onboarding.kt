@@ -1,9 +1,8 @@
 package com.geecee.escapelauncher.ui.views
 
 import android.app.Activity
-import android.app.admin.DevicePolicyManager
-import android.content.ComponentName
 import android.content.Intent
+import android.provider.Settings
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
@@ -75,7 +74,6 @@ import com.geecee.escapelauncher.ui.theme.primaryContentColor
 import com.geecee.escapelauncher.utils.AppUtils.configureAnalytics
 import com.geecee.escapelauncher.utils.getBooleanSetting
 import com.geecee.escapelauncher.utils.isDefaultLauncher
-import com.geecee.escapelauncher.utils.managers.MyDeviceAdminReceiver
 import com.geecee.escapelauncher.utils.setBooleanSetting
 import com.geecee.escapelauncher.utils.showLauncherSelector
 import com.geecee.escapelauncher.MainAppViewModel as MainAppModel
@@ -85,7 +83,7 @@ private const val SCREEN_STATISTICS = "statistics"
 private const val SCREEN_FAVORITES = "favorites"
 private const val SCREEN_DEFAULT_LAUNCHER = "default_launcher"
 private const val SCREEN_ANALYTICS = "analytics"
-private const val SCREEN_ADMIN = "admin"
+private const val SCREEN_ACCESSIBILITY = "accessibility"
 
 @Composable
 fun Onboarding(
@@ -111,7 +109,7 @@ fun Onboarding(
             SCREEN_FAVORITES,
             SCREEN_DEFAULT_LAUNCHER,
             if (!BuildConfig.IS_FOSS) SCREEN_ANALYTICS else null,
-            SCREEN_ADMIN
+            SCREEN_ACCESSIBILITY
         )
     }
 
@@ -193,10 +191,10 @@ fun Onboarding(
                 }
             }
             composable(
-                SCREEN_ADMIN,
+                SCREEN_ACCESSIBILITY,
                 enterTransition = { fadeIn(tween(300)) },
                 exitTransition = { fadeOut(tween(300)) }) {
-                DeviceAdminSetupScreen(
+                AccessibilitySetupScreen(
                     mainNavController, mainAppModel
                 )
             }
@@ -495,7 +493,7 @@ fun DefaultLauncherSetupScreen(navController: NavController, activity: Activity)
 
         Button(
             onClick = {
-                val nextRoute = if (BuildConfig.IS_FOSS) SCREEN_ADMIN else SCREEN_ANALYTICS
+                val nextRoute = if (BuildConfig.IS_FOSS) SCREEN_ACCESSIBILITY else SCREEN_ANALYTICS
                 navController.navigate(nextRoute)
             }, modifier = Modifier.align(Alignment.BottomEnd), colors = ButtonColors(
                 primaryContentColor,
@@ -596,7 +594,7 @@ fun AnalyticsConsentScreen(
         Row(modifier = Modifier.align(Alignment.BottomEnd)) {
             Button(
                 onClick = {
-                    navController.navigate(SCREEN_ADMIN)
+                    navController.navigate(SCREEN_ACCESSIBILITY)
                     setBooleanSetting(
                         mainAppModel.getContext(),
                         mainAppModel.getContext().resources.getString(R.string.Analytics),
@@ -623,7 +621,7 @@ fun AnalyticsConsentScreen(
 
             Button(
                 onClick = {
-                    navController.navigate(SCREEN_ADMIN)
+                    navController.navigate(SCREEN_ACCESSIBILITY)
                     setBooleanSetting(
                         mainAppModel.getContext(),
                         mainAppModel.getContext().resources.getString(R.string.Analytics),
@@ -656,7 +654,7 @@ fun AnalyticsConsentScreen(
 }
 
 @Composable
-fun DeviceAdminSetupScreen(
+fun AccessibilitySetupScreen(
     mainNavController: NavController,
     mainAppModel: MainAppModel
 ) {
@@ -678,7 +676,7 @@ fun DeviceAdminSetupScreen(
 
             item {
                 Text(
-                    stringResource(R.string.admin_title),
+                    stringResource(R.string.accessibility_title),
                     Modifier,
                     primaryContentColor,
                     style = MaterialTheme.typography.titleSmall,
@@ -689,7 +687,7 @@ fun DeviceAdminSetupScreen(
             item {
                 Spacer(Modifier.height(5.dp))
                 Text(
-                    stringResource(R.string.admin_description),
+                    stringResource(R.string.accessibility_description),
                     Modifier,
                     primaryContentColor,
                     style = MaterialTheme.typography.bodyLarge,
@@ -705,15 +703,7 @@ fun DeviceAdminSetupScreen(
             item {
                 Button(
                     onClick = {
-                        val intent = Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN)
-                        intent.putExtra(
-                            DevicePolicyManager.EXTRA_DEVICE_ADMIN,
-                            ComponentName(context, MyDeviceAdminReceiver::class.java)
-                        )
-                        intent.putExtra(
-                            DevicePolicyManager.EXTRA_ADD_EXPLANATION,
-                            "Grant permission to control the screen."
-                        )
+                        val intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
                         context.startActivity(intent)
                     }, modifier = Modifier, colors = ButtonColors(
                         primaryContentColor,
@@ -726,7 +716,7 @@ fun DeviceAdminSetupScreen(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        Text(text = stringResource(R.string.grant_admin))
+                        Text(text = stringResource(R.string.grant_accessibility))
                     }
                 }
             }

@@ -80,6 +80,9 @@
     <string name="show_weather">Show Weather</string>
     <string name="choose_weather_app">Choose weather app</string>
     <string name="set_weather_app_in_settings">Set weather app in settings</string>
+    <string name="double_tap_to_lock">Double tap to lock</string>
+    <string name="enable_accessibility">Grant Accessibility Permission</string>
+    <string name="accessibility_not_granted_msg">Please grant accessibility permission in settings</string>
 
     <!-- First time strings -->
     <string name="continue_str">Continue</string>
@@ -96,9 +99,9 @@
     <string name="stop_going_back">This will stop you going back to your default home screen</string>
     <string name="swipe_for_all_apps">Swipe for all apps</string>
     <string name="hold_for_settings">Hold for settings</string>
-    <string name="admin_title">Device Admin Permissions</string>
-    <string name="admin_description">By giving Escape Launcher device admin permissions you enable the double tap to lock feature. You can skip this permission if you do not wont double tap to lock permissions or if you prefer not to grant this permission. We will never use this permission for any other reason.</string>
-    <string name="grant_admin">Grant permission</string>
+    <string name="accessibility_title">Accessibility Permission</string>
+    <string name="accessibility_description">By giving Escape Launcher accessibility permissions you enable the double tap to lock feature. You can skip this permission if you do not want double tap to lock or if you prefer not to grant this permission. We will never use this permission for any other reason.</string>
+    <string name="grant_accessibility">Grant permission</string>
     <string name="next">Next</string>
 
     <!-- Screen time dashboard -->
@@ -117,4 +120,5 @@
     <string name="dark_green">Dark Green</string>
     <string name="off_white">Off white</string>
     <string name="system">System</string>
+    <string name="accessibility_service_description">Allows the app to turn off the screen.</string>
 </resources>

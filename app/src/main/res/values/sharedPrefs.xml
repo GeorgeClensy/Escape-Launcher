@@ -28,4 +28,5 @@
     <string name="appsListAutoSearch" translatable="false">AppsListAutoSearch</string>
     <string name="SmallDate" translatable="false">SmallDate</string>
     <string name="weather_app_package">weather_app_package</string>
+    <string name="DoubleTapToLock">DoubleTapToLock</string>
 </resources>

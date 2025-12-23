@@ -26,7 +26,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -122,15 +121,6 @@ class MainHomeScreenActivity : ComponentActivity() {
             AppUtils.SetUpTheme(viewModel = viewModel, content = {
                 SetupNavHost(determineStartDestination(LocalContext.current))
             })
-
-            // Black overlay, to make it seem smoother when turning screen off
-            if (viewModel.blackOverlay.value) {
-                Box(
-                    Modifier
-                        .fillMaxSize()
-                        .background(Color.Black)
-                )
-            }
         }
 
         // Register screen off receiver

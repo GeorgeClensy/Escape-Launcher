@@ -1,22 +1,20 @@
 package com.geecee.escapelauncher.ui.views
 
 import android.app.Activity
-import android.app.admin.DevicePolicyManager
 import android.appwidget.AppWidgetHost
 import android.appwidget.AppWidgetHostView
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProviderInfo
-import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
 import android.os.Handler
 import android.os.Looper
+import android.provider.Settings
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.activity.result.launch
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -92,6 +90,7 @@ import com.geecee.escapelauncher.utils.AppUtils
 import com.geecee.escapelauncher.utils.AppUtils.loadTextFromAssets
 import com.geecee.escapelauncher.utils.AppUtils.resetHome
 import com.geecee.escapelauncher.utils.CustomWidgetPicker
+import com.geecee.escapelauncher.utils.EscapeAccessibilityService
 import com.geecee.escapelauncher.utils.WIDGET_HOST_ID
 import com.geecee.escapelauncher.utils.changeAppsAlignment
 import com.geecee.escapelauncher.utils.changeHomeAlignment
@@ -108,7 +107,6 @@ import com.geecee.escapelauncher.utils.getWidgetWidth
 import com.geecee.escapelauncher.utils.isDefaultLauncher
 import com.geecee.escapelauncher.utils.isWidgetConfigurable
 import com.geecee.escapelauncher.utils.launchWidgetConfiguration
-import com.geecee.escapelauncher.utils.managers.MyDeviceAdminReceiver
 import com.geecee.escapelauncher.utils.removeWidget
 import com.geecee.escapelauncher.utils.resetActivity
 import com.geecee.escapelauncher.utils.saveWidgetId
@@ -458,10 +456,40 @@ fun MainSettingsPage(
             SettingsNavigationItem(
                 stringResource(R.string.manage_favourite_apps),
                 diagonalArrow = false,
-                isBottomOfGroup = true,
                 onClick = {
                     navController.navigate("bulkFavouriteApps")
                 })
+        }
+
+        item {
+            SettingsSwitch(
+                label = stringResource(id = R.string.double_tap_to_lock),
+                checked = getBooleanSetting(
+                    mainAppModel.getContext(), stringResource(R.string.DoubleTapToLock), false
+                ),
+                onCheckedChange = {
+                    setBooleanSetting(
+                        mainAppModel.getContext(),
+                        mainAppModel.getContext().resources.getString(R.string.DoubleTapToLock),
+                        it
+                    )
+                },
+                isBottomOfGroup = EscapeAccessibilityService.instance != null
+            )
+        }
+
+        if (EscapeAccessibilityService.instance == null) {
+            item {
+                SettingsButton(
+                    label = stringResource(R.string.enable_accessibility),
+                    isBottomOfGroup = true,
+                    onClick = {
+                        val intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
+                        intent.addFlags(FLAG_ACTIVITY_NEW_TASK)
+                        mainAppModel.getContext().startActivity(intent)
+                    }
+                )
+            }
         }
 
 
@@ -1341,7 +1369,6 @@ fun ChooseFont(context: Context, activity: Activity, goBack: () -> Unit) {
  */
 @Composable
 fun DevOptions(mainAppModel: MainAppModel, context: Context, goBack: () -> Unit) {
-
     LazyColumn(
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.Start,
@@ -1384,27 +1411,28 @@ fun DevOptions(mainAppModel: MainAppModel, context: Context, goBack: () -> Unit)
                 label = "Test Screen Off",
                 isBottomOfGroup = true,
                 onClick = {
-                    mainAppModel.blackOverlay.value = true
-
-                    Handler(Looper.getMainLooper()).postDelayed({
-                        val devicePolicyManager =
-                            context.getSystemService(DevicePolicyManager::class.java)
-                        val compName = ComponentName(context, MyDeviceAdminReceiver::class.java)
-
-                        if (devicePolicyManager.isAdminActive(compName)) {
-                            devicePolicyManager.lockNow()
+                    val context = mainAppModel.getContext()
+                    val doubleTapEnabled = getBooleanSetting(
+                        context,
+                        context.getString(R.string.DoubleTapToLock),
+                        false
+                    )
+                    if (doubleTapEnabled) {
+                        val service = EscapeAccessibilityService.instance
+                        if (service != null) {
+                            service.lockScreen()
                         } else {
-                            Toast.makeText(context, "Enable Device Admin first", Toast.LENGTH_SHORT)
-                                .show()
+                            Toast.makeText(
+                                context,
+                                context.getString(R.string.accessibility_not_granted_msg),
+                                Toast.LENGTH_LONG
+                            ).show()
                         }
-
-                        mainAppModel.blackOverlay.value = false
-                    }, 300)
+                    }
                 }
             )
         }
     }
-
 }
 
 /**

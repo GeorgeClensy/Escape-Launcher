@@ -260,8 +260,6 @@ class MainAppViewModel(application: Application) : AndroidViewModel(application)
     val shouldGoHomeOnResume: MutableState<Boolean> =
         mutableStateOf(false) // This is to check whether to go back to the first page of the home screen the next time onResume is called, It is only ever used once in AllApps when you come back from signing into private space
 
-    var blackOverlay = mutableStateOf(false)
-
     // Screen time related things
 
     private val dateFormat =

@@ -1,10 +1,6 @@
 package com.geecee.escapelauncher.ui.views
 
-import android.app.admin.DevicePolicyManager
-import android.content.ComponentName
 import android.content.Intent
-import android.os.Handler
-import android.os.Looper
 import android.provider.Settings
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
@@ -30,8 +26,8 @@ import com.geecee.escapelauncher.ui.composables.AppAction
 import com.geecee.escapelauncher.ui.composables.HomeScreenBottomSheet
 import com.geecee.escapelauncher.utils.AppUtils
 import com.geecee.escapelauncher.utils.AppUtils.resetHome
+import com.geecee.escapelauncher.utils.EscapeAccessibilityService
 import com.geecee.escapelauncher.utils.getBooleanSetting
-import com.geecee.escapelauncher.utils.managers.MyDeviceAdminReceiver
 import com.geecee.escapelauncher.utils.managers.OpenChallenge
 import com.geecee.escapelauncher.utils.setBooleanSetting
 import kotlinx.coroutines.delay
@@ -99,23 +95,23 @@ fun HomeScreenPageManager(
                 },
                 indication = null, interactionSource = homeScreenModel.interactionSource,
                 onDoubleClick = {
-                    val devicePolicyManager =
-                        mainAppModel.getContext().getSystemService(DevicePolicyManager::class.java)
-                    val compName =
-                        ComponentName(mainAppModel.getContext(), MyDeviceAdminReceiver::class.java)
-
-                    if (devicePolicyManager.isAdminActive(compName)) {
-                        mainAppModel.blackOverlay.value = true
-                        Handler(Looper.getMainLooper()).postDelayed({
-                            devicePolicyManager.lockNow()
-                            mainAppModel.blackOverlay.value = false
-                        }, 300)
-                    } else {
-                        Toast.makeText(
-                            mainAppModel.getContext(),
-                            "Enable Device Admin first",
-                            Toast.LENGTH_SHORT
-                        ).show()
+                    val context = mainAppModel.getContext()
+                    val doubleTapEnabled = getBooleanSetting(
+                        context,
+                        context.getString(R.string.DoubleTapToLock),
+                        false
+                    )
+                    if (doubleTapEnabled) {
+                        val service = EscapeAccessibilityService.instance
+                        if (service != null) {
+                            service.lockScreen()
+                        } else {
+                            Toast.makeText(
+                                context,
+                                context.getString(R.string.accessibility_not_granted_msg),
+                                Toast.LENGTH_LONG
+                            ).show()
+                        }
                     }
                 }
             )
