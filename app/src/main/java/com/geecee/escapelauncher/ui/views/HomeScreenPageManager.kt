@@ -29,7 +29,6 @@ import com.geecee.escapelauncher.R
 import com.geecee.escapelauncher.ui.composables.AppAction
 import com.geecee.escapelauncher.ui.composables.HomeScreenBottomSheet
 import com.geecee.escapelauncher.utils.AppUtils
-import com.geecee.escapelauncher.utils.AppUtils.doHapticFeedBack
 import com.geecee.escapelauncher.utils.AppUtils.resetHome
 import com.geecee.escapelauncher.utils.getBooleanSetting
 import com.geecee.escapelauncher.utils.managers.MyDeviceAdminReceiver
@@ -53,7 +52,6 @@ fun HomeScreenPageManager(
     homeScreenModel: HomeScreenModel,
     onOpenSettings: () -> Unit
 ) {
-    val hapticFeedback = LocalHapticFeedback.current
     val focusManager = LocalFocusManager.current
     val keyboardController = LocalSoftwareKeyboardController.current
 
@@ -92,7 +90,6 @@ fun HomeScreenPageManager(
             .combinedClickable(
                 onClick = {}, onLongClickLabel = {}.toString(),
                 onLongClick = {
-                    doHapticFeedBack(mainAppModel.getContext(), hapticFeedback)
                     onOpenSettings()
                     setBooleanSetting(
                         mainAppModel.getContext(),

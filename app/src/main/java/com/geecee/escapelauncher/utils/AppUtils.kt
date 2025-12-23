@@ -78,7 +78,7 @@ data class InstalledApp(
  *
  * @author George Clensy
  */
-object AppUtils{
+object AppUtils {
     /**
      * Function to open app.
      * [openChallengeShow] will be set to true if the app has a challenge in the challenge manager. This is so you can use the OpenChallenge function with this, if you do not want to use open challenges set this to null and [overrideOpenChallenge] to true
@@ -268,7 +268,7 @@ object AppUtils{
     fun getCurrentTime(twelveHour: Boolean): String {
         val now = LocalTime.now()
         var formatter = DateTimeFormatter.ofPattern("HH:mm") // Format as hours:minutes:seconds
-        if(twelveHour){
+        if (twelveHour) {
             formatter = DateTimeFormatter.ofPattern("hh:mm")
         }
         return now.format(formatter)
@@ -345,15 +345,8 @@ object AppUtils{
     /**
      * Performs haptic feedback
      */
-    fun doHapticFeedBack(context: Context, hapticFeedback: HapticFeedback) {
-        if (getBooleanSetting(
-                context,
-                context.resources.getString(R.string.Haptic),
-                true
-            )
-        ) {
-            hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
-        }
+    fun doHapticFeedBack(hapticFeedback: HapticFeedback) {
+        hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
     }
 
     /**

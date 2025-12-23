@@ -54,8 +54,8 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -334,6 +334,8 @@ fun MainSettingsPage(
     homeScreenModel: HomeScreenModel
 ) {
     var showWeatherAppPicker by remember { mutableStateOf(false) }
+    val view = LocalView.current
+
 
     Column(
         verticalArrangement = Arrangement.Top,
@@ -363,15 +365,9 @@ fun MainSettingsPage(
         SettingsSwitch(
             label = stringResource(id = R.string.haptic_feedback),
             isBottomOfGroup = true,
-            checked = getBooleanSetting(
-                mainAppModel.getContext(), stringResource(R.string.Haptic), true
-            ),
+            checked = view.isHapticFeedbackEnabled,
             onCheckedChange = {
-                toggleBooleanSetting(
-                    mainAppModel.getContext(),
-                    it,
-                    mainAppModel.getContext().resources.getString(R.string.Haptic)
-                )
+                view.isHapticFeedbackEnabled = it
             })
 
         // Home options
@@ -603,7 +599,7 @@ fun MainSettingsPage(
                 toggleBooleanSetting(
                     mainAppModel.getContext(),
                     it,
-                    mainAppModel.getContext().resources.getString(R.string.screen_time_on_home_screen)
+                    mainAppModel.getContext().resources.getString(R.string.ScreenTimeOnHome)
                 )
             })
 
@@ -1225,7 +1221,7 @@ fun HiddenApps(
                     },
                     onDeleteClick = {
                         // Trigger haptic feedback
-                        haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                        AppUtils.doHapticFeedBack(haptics)
                         // Animate item out
                         @Suppress("AssignedValueIsNeverRead") // For some reason android studio doesn't detect the use in the AnimatedVisibility
                         visible = false
