@@ -12,16 +12,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.toShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -83,7 +80,7 @@ fun ScreenTime(time: String, increased: Boolean, modifier: Modifier) {
 fun HigherRec(percent: Int, modifier: Modifier = Modifier) {
     BoxWithConstraints (
         modifier = modifier
-            .clip(MaterialShapes.Circle.toShape())
+            .clip(RoundedCornerShape(48.dp))
             .aspectRatio(1f)
             .background(CardContainerColor)
     ) {

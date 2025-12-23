@@ -88,7 +88,7 @@ fun HomeScreenPageManager(
         modifier = Modifier
             .fillMaxSize()
             .combinedClickable(
-                onClick = {}, onLongClickLabel = {}.toString(),
+                onClick = {}, onLongClickLabel = "",
                 onLongClick = {
                     onOpenSettings()
                     setBooleanSetting(

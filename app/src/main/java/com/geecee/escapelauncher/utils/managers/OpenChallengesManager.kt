@@ -6,7 +6,6 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -32,6 +31,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedback
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.content.edit
@@ -136,7 +136,7 @@ fun OpenChallenge(haptics: HapticFeedback, openApp: () -> Unit, goBack: () -> Un
                         end = Offset(0f, Float.POSITIVE_INFINITY)
                     )
                 )
-                .clickable(enabled = true) {},
+                .pointerInput(Unit) {},
             contentAlignment = Alignment.Center
         ) {
             Column {
@@ -190,7 +190,7 @@ fun OpenChallenge(haptics: HapticFeedback, openApp: () -> Unit, goBack: () -> Un
                         end = Offset(0f, Float.POSITIVE_INFINITY) // Ending point (bottom-center)
                     )
                 )
-                .clickable(enabled = true) {},
+                .pointerInput(Unit) {},
             contentAlignment = Alignment.Center
         ) {
 
