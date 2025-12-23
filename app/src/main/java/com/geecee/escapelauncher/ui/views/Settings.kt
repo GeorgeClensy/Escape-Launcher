@@ -16,6 +16,7 @@ import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.result.launch
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -184,14 +185,10 @@ fun Settings(
                 "openChallenges",
                 enterTransition = { fadeIn(tween(300)) },
                 exitTransition = { fadeOut(tween(300)) }) {
-                val challengeApps =
-                    mainAppModel.challengesManager.getChallengeApps()
-                        .mapNotNull { packageName ->
-                            AppUtils.getInstalledAppFromPackageName(
-                                mainAppModel.getContext(),
-                                packageName
-                            )
-                        }
+                val challengeApps = remember(mainAppModel.challengesTrigger.intValue) {
+                    val currentChallenges = mainAppModel.challengesManager.getChallengeApps()
+                    homeScreenModel.installedApps.filter { it.packageName in currentChallenges }
+                }
 
                 BulkAppManager(
                     apps = homeScreenModel.installedApps,
@@ -240,14 +237,10 @@ fun Settings(
                 "bulkHiddenApps",
                 enterTransition = { fadeIn(tween(300)) },
                 exitTransition = { fadeOut(tween(300)) }) {
-                val hiddenAppsList =
-                    mainAppModel.hiddenAppsManager.getHiddenApps()
-                        .mapNotNull { packageName ->
-                            AppUtils.getInstalledAppFromPackageName(
-                                mainAppModel.getContext(),
-                                packageName
-                            )
-                        }
+                val hiddenAppsList = remember(mainAppModel.hiddenAppsTrigger.intValue) {
+                    val currentHidden = mainAppModel.hiddenAppsManager.getHiddenApps()
+                    homeScreenModel.installedApps.filter { it.packageName in currentHidden }
+                }
 
                 BulkAppManager(
                     apps = homeScreenModel.installedApps,
@@ -268,14 +261,10 @@ fun Settings(
                 "bulkFavouriteApps",
                 enterTransition = { fadeIn(tween(300)) },
                 exitTransition = { fadeOut(tween(300)) }) {
-                val preSelectedFavoriteApps =
-                    mainAppModel.favoriteAppsManager.getFavoriteApps()
-                        .mapNotNull { packageName ->
-                            AppUtils.getInstalledAppFromPackageName(
-                                mainAppModel.getContext(),
-                                packageName
-                            )
-                        }
+                val preSelectedFavoriteApps = remember(homeScreenModel.favoriteApps.size) {
+                    val favoritePackages = mainAppModel.favoriteAppsManager.getFavoriteApps()
+                    favoritePackages.mapNotNull { pkg -> homeScreenModel.installedApps.find { it.packageName == pkg } }
+                }
 
                 BulkAppManager(
                     apps = homeScreenModel.installedApps,
@@ -337,352 +326,404 @@ fun MainSettingsPage(
     val view = LocalView.current
 
 
-    Column(
+    LazyColumn(
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.Start,
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
+        modifier = Modifier.fillMaxSize()
     ) {
-        SettingsHeader(
-            goBack, stringResource(R.string.settings)
-        )
+        item {
+            SettingsHeader(
+                goBack, stringResource(R.string.settings)
+            )
+        }
 
         //General
-        SettingsSubheading(stringResource(id = R.string.general))
+        item { SettingsSubheading(stringResource(id = R.string.general)) }
 
-        SettingsNavigationItem(
-            label = stringResource(id = R.string.theme),
-            false,
-            isTopOfGroup = true,
-            onClick = { navController.navigate("theme") })
+        item {
+            SettingsNavigationItem(
+                label = stringResource(id = R.string.theme),
+                false,
+                isTopOfGroup = true,
+                onClick = { navController.navigate("theme") })
+        }
 
-        SettingsNavigationItem(
-            label = stringResource(id = R.string.choose_font),
-            false,
-            onClick = { navController.navigate("chooseFont") })
+        item {
+            SettingsNavigationItem(
+                label = stringResource(id = R.string.choose_font),
+                false,
+                onClick = { navController.navigate("chooseFont") })
+        }
 
-        SettingsSwitch(
-            label = stringResource(id = R.string.haptic_feedback),
-            isBottomOfGroup = true,
-            checked = view.isHapticFeedbackEnabled,
-            onCheckedChange = {
-                view.isHapticFeedbackEnabled = it
-            })
+        item {
+            SettingsSwitch(
+                label = stringResource(id = R.string.haptic_feedback),
+                isBottomOfGroup = true,
+                checked = view.isHapticFeedbackEnabled,
+                onCheckedChange = {
+                    view.isHapticFeedbackEnabled = it
+                })
+        }
 
         // Home options
-        SettingsSubheading(stringResource(R.string.home_screen_options))
+        item { SettingsSubheading(stringResource(R.string.home_screen_options)) }
 
-        SettingsSwitch(
-            label = stringResource(id = R.string.show_clock),
-            checked = getBooleanSetting(
-                mainAppModel.getContext(), stringResource(R.string.ShowClock), true
-            ),
-            onCheckedChange = {
-                toggleBooleanSetting(
-                    mainAppModel.getContext(),
-                    it,
-                    mainAppModel.getContext().resources.getString(R.string.ShowClock)
-                )
-            },
-            isTopOfGroup = true
-        )
-
-        SettingsSwitch(
-            label = stringResource(id = R.string.twelve_hour_clock_setting),
-            checked = getBooleanSetting(
-                mainAppModel.getContext(), stringResource(R.string.twelve_hour_clock), false
-            ),
-            onCheckedChange = {
-                toggleBooleanSetting(
-                    mainAppModel.getContext(),
-                    it,
-                    mainAppModel.getContext().resources.getString(R.string.twelve_hour_clock)
-                )
-            })
-
-        SettingsSwitch(
-            label = stringResource(id = R.string.big_clock), checked = getBooleanSetting(
-                mainAppModel.getContext(), stringResource(R.string.BigClock)
-            ), onCheckedChange = {
-                toggleBooleanSetting(
-                    mainAppModel.getContext(),
-                    it,
-                    mainAppModel.getContext().resources.getString(R.string.BigClock)
-                )
-            })
-
-        SettingsSwitch(
-            label = stringResource(id = R.string.date), checked = getBooleanSetting(
-                mainAppModel.getContext(), stringResource(R.string.show_date), false
-            ), onCheckedChange = {
-                toggleBooleanSetting(
-                    mainAppModel.getContext(),
-                    it,
-                    mainAppModel.getContext().resources.getString(R.string.show_date)
-                )
-            })
-
-        SettingsSwitch(
-            label = stringResource(id = R.string.show_weather), checked = getBooleanSetting(
-                mainAppModel.getContext(), stringResource(R.string.show_weather), false
-            ), onCheckedChange = {
-                toggleBooleanSetting(
-                    mainAppModel.getContext(),
-                    it,
-                    mainAppModel.getContext().resources.getString(R.string.show_weather)
-                )
-            })
-
-        SettingsNavigationItem(
-            label = stringResource(id = R.string.choose_weather_app),
-            false,
-            onClick = { showWeatherAppPicker = true }
-        )
-
-        SettingsNavigationItem(
-            label = stringResource(id = R.string.widget),
-            false,
-            onClick = { navController.navigate("widget") })
-
-        SettingsNavigationItem(
-            stringResource(R.string.manage_favourite_apps),
-            diagonalArrow = false,
-            isBottomOfGroup = true,
-            onClick = {
-                navController.navigate("bulkFavouriteApps")
-            })
-
-
-        //Alignment Options
-        SettingsSubheading(stringResource(R.string.alignments))
-
-        val homeHorizontalOptions = listOf(
-            stringResource(R.string.left),
-            stringResource(R.string.center),
-            stringResource(R.string.right)
-        )
-        var selectedHomeHorizontalIndex by remember {
-            mutableIntStateOf(getHomeAlignmentAsInt(mainAppModel.getContext()))
-        }
-        SettingsSingleChoiceSegmentedButtons(
-            label = stringResource(id = R.string.home),
-            options = homeHorizontalOptions,
-            selectedIndex = selectedHomeHorizontalIndex,
-            onSelectedIndexChange = { newIndex ->
-                selectedHomeHorizontalIndex = newIndex
-                changeHomeAlignment(mainAppModel.getContext(), newIndex)
-            },
-            isTopOfGroup = true // First item in this section
-        )
-
-        val homeVerticalOptions = listOf(
-            stringResource(R.string.top),
-            stringResource(R.string.center),
-            stringResource(R.string.bottom)
-        )
-        var selectedHomeVerticalIndex by remember {
-            mutableIntStateOf(getHomeVAlignmentAsInt(mainAppModel.getContext()))
-        }
-        SettingsSingleChoiceSegmentedButtons(
-            label = "",
-            options = homeVerticalOptions,
-            selectedIndex = selectedHomeVerticalIndex,
-            onSelectedIndexChange = { newIndex ->
-                selectedHomeVerticalIndex = newIndex
-                changeHomeVAlignment(mainAppModel.getContext(), newIndex)
-            })
-
-        val appsAlignmentOptions = listOf(
-            stringResource(R.string.left),
-            stringResource(R.string.center),
-            stringResource(R.string.right)
-        )
-        var selectedAppsAlignmentIndex by remember {
-            mutableIntStateOf(getAppsAlignmentAsInt(mainAppModel.getContext()))
-        }
-        SettingsSingleChoiceSegmentedButtons(
-            label = stringResource(id = R.string.apps),
-            options = appsAlignmentOptions,
-            selectedIndex = selectedAppsAlignmentIndex,
-            onSelectedIndexChange = { newIndex ->
-                selectedAppsAlignmentIndex = newIndex
-                changeAppsAlignment(mainAppModel.getContext(), newIndex)
-            },
-            isBottomOfGroup = true // Last item in this section before any potential new sections
-        )
-
-        // Search settings
-        SettingsSubheading(stringResource(R.string.search))
-
-        SettingsSwitch(
-            label = stringResource(id = R.string.search_box), checked = getBooleanSetting(
-                mainAppModel.getContext(), stringResource(R.string.ShowSearchBox), true
-            ), isTopOfGroup = true, onCheckedChange = {
-                toggleBooleanSetting(
-                    mainAppModel.getContext(),
-                    it,
-                    mainAppModel.getContext().resources.getString(R.string.ShowSearchBox)
-                )
-            })
-
-        SettingsSwitch(
-            label = stringResource(id = R.string.auto_open), checked = getBooleanSetting(
-                mainAppModel.getContext(), stringResource(R.string.SearchAutoOpen)
-            ), isBottomOfGroup = false, onCheckedChange = {
-                toggleBooleanSetting(
-                    mainAppModel.getContext(),
-                    it,
-                    mainAppModel.getContext().resources.getString(R.string.SearchAutoOpen)
-                )
-            })
-
-        SettingsSwitch(
-            label = stringResource(id = R.string.search_at_bottom), checked = getBooleanSetting(
-                mainAppModel.getContext(), stringResource(R.string.bottomSearch), false
-            ), isBottomOfGroup = false, onCheckedChange = {
-                toggleBooleanSetting(
-                    mainAppModel.getContext(),
-                    it,
-                    mainAppModel.getContext().resources.getString(R.string.bottomSearch)
-                )
-            })
-
-        SettingsSwitch(
-            label = stringResource(id = R.string.apps_list_auto_search),
-            checked = getBooleanSetting(
-                mainAppModel.getContext(), stringResource(R.string.appsListAutoSearch), false
-            ),
-            isBottomOfGroup = true,
-            onCheckedChange = {
-                toggleBooleanSetting(
-                    mainAppModel.getContext(),
-                    it,
-                    mainAppModel.getContext().resources.getString(R.string.appsListAutoSearch)
-                )
-            })
-
-        //Screen time
-        SettingsSubheading(stringResource(R.string.screen_time))
-
-        SettingsSwitch(
-            label = stringResource(id = R.string.screen_time_on_app), checked = getBooleanSetting(
-                mainAppModel.getContext(), stringResource(R.string.ScreenTimeOnApp)
-            ), isTopOfGroup = true, onCheckedChange = {
-                toggleBooleanSetting(
-                    mainAppModel.getContext(),
-                    it,
-                    mainAppModel.getContext().resources.getString(R.string.ScreenTimeOnApp)
-                )
-            })
-
-        SettingsSwitch(
-            label = stringResource(id = R.string.hide_screen_time_page),
-            checked = getBooleanSetting(
-                mainAppModel.getContext(), stringResource(R.string.hideScreenTimePage)
-            ),
-            onCheckedChange = {
-                toggleBooleanSetting(
-                    mainAppModel.getContext(),
-                    it,
-                    mainAppModel.getContext().resources.getString(R.string.hideScreenTimePage)
-                )
-            })
-
-        SettingsSwitch(
-            label = stringResource(id = R.string.screen_time_on_home_screen),
-            checked = getBooleanSetting(
-                mainAppModel.getContext(), stringResource(R.string.ScreenTimeOnHome)
-            ),
-            isBottomOfGroup = true,
-            onCheckedChange = {
-                toggleBooleanSetting(
-                    mainAppModel.getContext(),
-                    it,
-                    mainAppModel.getContext().resources.getString(R.string.ScreenTimeOnHome)
-                )
-            })
-
-        //Apps
-        SettingsSubheading(
-            stringResource(R.string.apps)
-        )
-
-        SettingsNavigationItem(
-            label = stringResource(id = R.string.manage_hidden_apps),
-            false,
-            isTopOfGroup = true,
-            onClick = { navController.navigate("hiddenApps") })
-
-        SettingsNavigationItem(
-            label = stringResource(id = R.string.manage_open_challenges),
-            false,
-            isBottomOfGroup = true,
-            onClick = { navController.navigate("openChallenges") })
-
-        //Other
-        SettingsSubheading(stringResource(id = R.string.other))
-
-        SettingsNavigationItem(
-            label = stringResource(id = R.string.make_default_launcher),
-            true,
-            isTopOfGroup = true,
-            onClick = {
-                if (!isDefaultLauncher(activity)) {
-                    activity.showLauncherSelector()
-                } else {
-                    showLauncherSettingsMenu(activity)
-                }
-            })
-
-        if (!BuildConfig.IS_FOSS) {
+        item {
             SettingsSwitch(
-                label = stringResource(id = R.string.Analytics), checked = getBooleanSetting(
-                    mainAppModel.getContext(), stringResource(R.string.Analytics), true
-                ), onCheckedChange = {
+                label = stringResource(id = R.string.show_clock),
+                checked = getBooleanSetting(
+                    mainAppModel.getContext(), stringResource(R.string.ShowClock), true
+                ),
+                onCheckedChange = {
                     toggleBooleanSetting(
                         mainAppModel.getContext(),
                         it,
-                        mainAppModel.getContext().resources.getString(R.string.Analytics)
+                        mainAppModel.getContext().resources.getString(R.string.ShowClock)
+                    )
+                },
+                isTopOfGroup = true
+            )
+        }
+
+        item {
+            SettingsSwitch(
+                label = stringResource(id = R.string.twelve_hour_clock_setting),
+                checked = getBooleanSetting(
+                    mainAppModel.getContext(), stringResource(R.string.twelve_hour_clock), false
+                ),
+                onCheckedChange = {
+                    toggleBooleanSetting(
+                        mainAppModel.getContext(),
+                        it,
+                        mainAppModel.getContext().resources.getString(R.string.twelve_hour_clock)
                     )
                 })
         }
 
-        if (BuildConfig.IS_FOSS) {
+        item {
+            SettingsSwitch(
+                label = stringResource(id = R.string.big_clock), checked = getBooleanSetting(
+                    mainAppModel.getContext(), stringResource(R.string.BigClock)
+                ), onCheckedChange = {
+                    toggleBooleanSetting(
+                        mainAppModel.getContext(),
+                        it,
+                        mainAppModel.getContext().resources.getString(R.string.BigClock)
+                    )
+                })
+        }
+
+        item {
+            SettingsSwitch(
+                label = stringResource(id = R.string.date), checked = getBooleanSetting(
+                    mainAppModel.getContext(), stringResource(R.string.show_date), false
+                ), onCheckedChange = {
+                    toggleBooleanSetting(
+                        mainAppModel.getContext(),
+                        it,
+                        mainAppModel.getContext().resources.getString(R.string.show_date)
+                    )
+                })
+        }
+
+        item {
+            SettingsSwitch(
+                label = stringResource(id = R.string.show_weather), checked = getBooleanSetting(
+                    mainAppModel.getContext(), stringResource(R.string.show_weather), false
+                ), onCheckedChange = {
+                    toggleBooleanSetting(
+                        mainAppModel.getContext(),
+                        it,
+                        mainAppModel.getContext().resources.getString(R.string.show_weather)
+                    )
+                })
+        }
+
+        item {
             SettingsNavigationItem(
-                label = stringResource(R.string.font_licences),
-                diagonalArrow = false,
-                isBottomOfGroup = BuildConfig.IS_FOSS,
-                onClick = { navController.navigate("fontLicences") }
+                label = stringResource(id = R.string.choose_weather_app),
+                false,
+                onClick = { showWeatherAppPicker = true }
             )
         }
 
-        if (!BuildConfig.IS_FOSS) {
+        item {
             SettingsNavigationItem(
-                label = stringResource(id = R.string.read_privacy_policy),
+                label = stringResource(id = R.string.widget),
                 false,
-                isBottomOfGroup = true,
-                onClick = { showPolicyDialog() })
+                onClick = { navController.navigate("widget") })
         }
 
-        SettingsSpacer()
+        item {
+            SettingsNavigationItem(
+                stringResource(R.string.manage_favourite_apps),
+                diagonalArrow = false,
+                isBottomOfGroup = true,
+                onClick = {
+                    navController.navigate("bulkFavouriteApps")
+                })
+        }
 
-        SponsorBox(
-            stringResource(id = R.string.app_name) + " " + stringResource(id = R.string.app_version),
-            secondText = stringResource(R.string.app_flavour),
-            onSponsorClick = {
-                val url = "https://github.com/sponsors/GeorgeClensy"
-                val i = Intent(Intent.ACTION_VIEW)
-                i.setData(url.toUri())
-                i.addFlags(FLAG_ACTIVITY_NEW_TASK)
-                mainAppModel.getContext().startActivity(i)
-            },
-            onBackgroundClick = {
-                navController.navigate("devOptions")
-            })
 
-        SettingsSpacer()
-        SettingsSpacer()
+        //Alignment Options
+        item { SettingsSubheading(stringResource(R.string.alignments)) }
+
+        item {
+            val homeHorizontalOptions = listOf(
+                stringResource(R.string.left),
+                stringResource(R.string.center),
+                stringResource(R.string.right)
+            )
+            val selectedHomeHorizontalIndex = getHomeAlignmentAsInt(mainAppModel.getContext())
+
+            SettingsSingleChoiceSegmentedButtons(
+                label = stringResource(id = R.string.home),
+                options = homeHorizontalOptions,
+                selectedIndex = selectedHomeHorizontalIndex,
+                onSelectedIndexChange = { newIndex ->
+                    changeHomeAlignment(mainAppModel.getContext(), newIndex)
+                },
+                isTopOfGroup = true // First item in this section
+            )
+        }
+
+        item {
+            val homeVerticalOptions = listOf(
+                stringResource(R.string.top),
+                stringResource(R.string.center),
+                stringResource(R.string.bottom)
+            )
+            val selectedHomeVerticalIndex = getHomeVAlignmentAsInt(mainAppModel.getContext())
+
+            SettingsSingleChoiceSegmentedButtons(
+                label = "",
+                options = homeVerticalOptions,
+                selectedIndex = selectedHomeVerticalIndex,
+                onSelectedIndexChange = { newIndex ->
+                    changeHomeVAlignment(mainAppModel.getContext(), newIndex)
+                })
+        }
+
+        item {
+            val appsAlignmentOptions = listOf(
+                stringResource(R.string.left),
+                stringResource(R.string.center),
+                stringResource(R.string.right)
+            )
+            val selectedAppsAlignmentIndex = getAppsAlignmentAsInt(mainAppModel.getContext())
+
+            SettingsSingleChoiceSegmentedButtons(
+                label = stringResource(id = R.string.apps),
+                options = appsAlignmentOptions,
+                selectedIndex = selectedAppsAlignmentIndex,
+                onSelectedIndexChange = { newIndex ->
+                    changeAppsAlignment(mainAppModel.getContext(), newIndex)
+                },
+                isBottomOfGroup = true // Last item in this section before any potential new sections
+            )
+        }
+
+        // Search settings
+        item { SettingsSubheading(stringResource(R.string.search)) }
+
+        item {
+            SettingsSwitch(
+                label = stringResource(id = R.string.search_box), checked = getBooleanSetting(
+                    mainAppModel.getContext(), stringResource(R.string.ShowSearchBox), true
+                ), isTopOfGroup = true, onCheckedChange = {
+                    toggleBooleanSetting(
+                        mainAppModel.getContext(),
+                        it,
+                        mainAppModel.getContext().resources.getString(R.string.ShowSearchBox)
+                    )
+                })
+        }
+
+        item {
+            SettingsSwitch(
+                label = stringResource(id = R.string.auto_open), checked = getBooleanSetting(
+                    mainAppModel.getContext(), stringResource(R.string.SearchAutoOpen)
+                ), isBottomOfGroup = false, onCheckedChange = {
+                    toggleBooleanSetting(
+                        mainAppModel.getContext(),
+                        it,
+                        mainAppModel.getContext().resources.getString(R.string.SearchAutoOpen)
+                    )
+                })
+        }
+
+        item {
+            SettingsSwitch(
+                label = stringResource(id = R.string.search_at_bottom), checked = getBooleanSetting(
+                    mainAppModel.getContext(), stringResource(R.string.bottomSearch), false
+                ), isBottomOfGroup = false, onCheckedChange = {
+                    toggleBooleanSetting(
+                        mainAppModel.getContext(),
+                        it,
+                        mainAppModel.getContext().resources.getString(R.string.bottomSearch)
+                    )
+                })
+        }
+
+        item {
+            SettingsSwitch(
+                label = stringResource(id = R.string.apps_list_auto_search),
+                checked = getBooleanSetting(
+                    mainAppModel.getContext(), stringResource(R.string.appsListAutoSearch), false
+                ),
+                isBottomOfGroup = true,
+                onCheckedChange = {
+                    toggleBooleanSetting(
+                        mainAppModel.getContext(),
+                        it,
+                        mainAppModel.getContext().resources.getString(R.string.appsListAutoSearch)
+                    )
+                })
+        }
+
+        //Screen time
+        item { SettingsSubheading(stringResource(R.string.screen_time)) }
+
+        item {
+            SettingsSwitch(
+                label = stringResource(id = R.string.screen_time_on_app), checked = getBooleanSetting(
+                    mainAppModel.getContext(), stringResource(R.string.ScreenTimeOnApp)
+                ), isTopOfGroup = true, onCheckedChange = {
+                    toggleBooleanSetting(
+                        mainAppModel.getContext(),
+                        it,
+                        mainAppModel.getContext().resources.getString(R.string.ScreenTimeOnApp)
+                    )
+                })
+        }
+
+        item {
+            SettingsSwitch(
+                label = stringResource(id = R.string.hide_screen_time_page),
+                checked = getBooleanSetting(
+                    mainAppModel.getContext(), stringResource(R.string.hideScreenTimePage)
+                ),
+                onCheckedChange = {
+                    toggleBooleanSetting(
+                        mainAppModel.getContext(),
+                        it,
+                        mainAppModel.getContext().resources.getString(R.string.hideScreenTimePage)
+                    )
+                })
+        }
+
+        item {
+            SettingsSwitch(
+                label = stringResource(id = R.string.screen_time_on_home_screen),
+                checked = getBooleanSetting(
+                    mainAppModel.getContext(), stringResource(R.string.ScreenTimeOnHome)
+                ),
+                isBottomOfGroup = true,
+                onCheckedChange = {
+                    toggleBooleanSetting(
+                        mainAppModel.getContext(),
+                        it,
+                        mainAppModel.getContext().resources.getString(R.string.ScreenTimeOnHome)
+                    )
+                })
+        }
+
+        //Apps
+        item {
+            SettingsSubheading(
+                stringResource(R.string.apps)
+            )
+        }
+
+        item {
+            SettingsNavigationItem(
+                label = stringResource(id = R.string.manage_hidden_apps),
+                false,
+                isTopOfGroup = true,
+                onClick = { navController.navigate("hiddenApps") })
+        }
+
+        item {
+            SettingsNavigationItem(
+                label = stringResource(id = R.string.manage_open_challenges),
+                false,
+                isBottomOfGroup = true,
+                onClick = { navController.navigate("openChallenges") })
+        }
+
+        //Other
+        item { SettingsSubheading(stringResource(id = R.string.other)) }
+
+        item {
+            SettingsNavigationItem(
+                label = stringResource(id = R.string.make_default_launcher),
+                true,
+                isTopOfGroup = true,
+                onClick = {
+                    if (!isDefaultLauncher(activity)) {
+                        activity.showLauncherSelector()
+                    } else {
+                        showLauncherSettingsMenu(activity)
+                    }
+                })
+        }
+
+        if (!BuildConfig.IS_FOSS) {
+            item {
+                SettingsSwitch(
+                    label = stringResource(id = R.string.Analytics), checked = getBooleanSetting(
+                        mainAppModel.getContext(), stringResource(R.string.Analytics), true
+                    ), onCheckedChange = {
+                        toggleBooleanSetting(
+                            mainAppModel.getContext(),
+                            it,
+                            mainAppModel.getContext().resources.getString(R.string.Analytics)
+                        )
+                    })
+            }
+        }
+
+        if (BuildConfig.IS_FOSS) {
+            item {
+                SettingsNavigationItem(
+                    label = stringResource(R.string.font_licences),
+                    diagonalArrow = false,
+                    isBottomOfGroup = BuildConfig.IS_FOSS,
+                    onClick = { navController.navigate("fontLicences") }
+                )
+            }
+        }
+
+        if (!BuildConfig.IS_FOSS) {
+            item {
+                SettingsNavigationItem(
+                    label = stringResource(id = R.string.read_privacy_policy),
+                    false,
+                    isBottomOfGroup = true,
+                    onClick = { showPolicyDialog() })
+            }
+        }
+
+        item { SettingsSpacer() }
+
+        item {
+            SponsorBox(
+                stringResource(id = R.string.app_name) + " " + stringResource(id = R.string.app_version),
+                secondText = stringResource(R.string.app_flavour),
+                onSponsorClick = {
+                    val url = "https://github.com/sponsors/GeorgeClensy"
+                    val i = Intent(Intent.ACTION_VIEW)
+                    i.setData(url.toUri())
+                    i.addFlags(FLAG_ACTIVITY_NEW_TASK)
+                    mainAppModel.getContext().startActivity(i)
+                },
+                onBackgroundClick = {
+                    navController.navigate("devOptions")
+                })
+        }
+
+        item { SettingsSpacer() }
+        item { SettingsSpacer() }
     }
 
     if (showWeatherAppPicker) {
@@ -721,27 +762,29 @@ fun ThemeOptions(
     val lSettingToChange = stringResource(R.string.lTheme)
 
     // Current highlighted theme card
-    val currentHighlightedThemeCard = remember { mutableIntStateOf(-1) }
+    var currentHighlightedThemeCard by remember { mutableIntStateOf(-1) }
 
     // Current selected themes
-    val currentSelectedTheme = remember {
+    var currentSelectedTheme by remember {
         mutableIntStateOf(getIntSetting(context, settingToChange, -1))
     }
-    val currentSelectedDTheme = remember {
+    var currentSelectedDTheme by remember {
         mutableIntStateOf(getIntSetting(context, dSettingToChange, -1))
     }
-    val currentSelectedLTheme = remember {
+    var currentSelectedLTheme by remember {
         mutableIntStateOf(getIntSetting(context, lSettingToChange, -1))
     }
 
     val isDark = isSystemInDarkTheme()
 
     // Initialize selection states based on settings
-    if (!getBooleanSetting(context, autoThemeChange, false)) {
-        currentSelectedDTheme.intValue = -1
-        currentSelectedLTheme.intValue = -1
-    } else {
-        currentSelectedTheme.intValue = -1
+    LaunchedEffect(Unit) {
+        if (!getBooleanSetting(context, autoThemeChange, false)) {
+            currentSelectedDTheme = -1
+            currentSelectedLTheme = -1
+        } else {
+            currentSelectedTheme = -1
+        }
     }
 
     val backgroundInteractionSource = remember { MutableInteractionSource() }
@@ -753,7 +796,7 @@ fun ThemeOptions(
             .fillMaxSize()
             .combinedClickable(
                 onClick = {
-                    currentHighlightedThemeCard.intValue = -1
+                    currentHighlightedThemeCard = -1
                 },
                 indication = null,
                 onLongClick = {},
@@ -770,37 +813,37 @@ fun ThemeOptions(
                 ), isTopOfGroup = true, onCheckedChange = { switch ->
                     // Disable normal selection box or set it correctly
                     if (switch) {
-                        currentSelectedTheme.intValue = -1
+                        currentSelectedTheme = -1
                     } else {
-                        currentSelectedTheme.intValue = getIntSetting(context, settingToChange, 11)
+                        currentSelectedTheme = getIntSetting(context, settingToChange, 11)
                     }
 
                     if (switch) {
-                        currentSelectedDTheme.intValue =
+                        currentSelectedDTheme =
                             getIntSetting(context, dSettingToChange, -1)
-                        currentSelectedLTheme.intValue =
+                        currentSelectedLTheme =
                             getIntSetting(context, lSettingToChange, -1)
                     } else {
-                        currentSelectedDTheme.intValue = -1
-                        currentSelectedLTheme.intValue = -1
+                        currentSelectedDTheme = -1
+                        currentSelectedLTheme = -1
                     }
 
                     // Remove the light dark button
-                    currentHighlightedThemeCard.intValue = -1
+                    currentHighlightedThemeCard = -1
 
                     if (switch) {
-                        currentSelectedTheme.intValue = -1
+                        currentSelectedTheme = -1
 
-                        currentSelectedDTheme.intValue =
+                        currentSelectedDTheme =
                             getIntSetting(context, dSettingToChange, -1)
-                        currentSelectedLTheme.intValue =
+                        currentSelectedLTheme =
                             getIntSetting(context, lSettingToChange, -1)
 
 
                         val newThemeId = if (isDark) {
-                            currentSelectedDTheme.intValue
+                            currentSelectedDTheme
                         } else {
-                            currentSelectedLTheme.intValue
+                            currentSelectedLTheme
                         }
 
                         if (newThemeId != -1) {
@@ -808,19 +851,19 @@ fun ThemeOptions(
                         }
 
                     } else {
-                        currentSelectedTheme.intValue =
+                        currentSelectedTheme =
                             getIntSetting(context, settingToChange, 11)
 
-                        currentSelectedDTheme.intValue = -1
-                        currentSelectedLTheme.intValue = -1
+                        currentSelectedDTheme = -1
+                        currentSelectedLTheme = -1
 
-                        if (currentSelectedTheme.intValue != -1) {
+                        if (currentSelectedTheme != -1) {
                             mainAppModel.appTheme.value =
-                                AppTheme.fromId(currentSelectedTheme.intValue)
+                                AppTheme.fromId(currentSelectedTheme)
                         }
                     }
 
-                    currentHighlightedThemeCard.intValue = -1
+                    currentHighlightedThemeCard = -1
 
                     setBooleanSetting(
                         context,
@@ -844,41 +887,28 @@ fun ThemeOptions(
             SettingsSpacer()
         }
         itemsIndexed(themeIds, key = { _, themeId -> themeId }) { index, themeId ->
-            val isSelected = remember(themeId, currentSelectedTheme.intValue) {
-                mutableStateOf(currentSelectedTheme.intValue == themeId)
-            }
-            val isDSelected = remember(themeId, currentSelectedDTheme.intValue) {
-                mutableStateOf(currentSelectedDTheme.intValue == themeId)
-            }
-            val isLSelected = remember(themeId, currentSelectedLTheme.intValue) {
-                mutableStateOf(currentSelectedLTheme.intValue == themeId)
-            }
-            val showLightDarkPicker = remember(
-                themeId,
-                currentSelectedDTheme.intValue,
-                currentSelectedLTheme.intValue,
-                currentHighlightedThemeCard.intValue
-            ) {
-                mutableStateOf(currentHighlightedThemeCard.intValue == themeId)
-            }
+            val isSelected = currentSelectedTheme == themeId
+            val isDSelected = currentSelectedDTheme == themeId
+            val isLSelected = currentSelectedLTheme == themeId
+            val showLightDarkPicker = currentHighlightedThemeCard == themeId
 
             ThemeCard(
                 theme = themeId,
-                showLightDarkPicker = showLightDarkPicker,
-                isSelected = isSelected,
-                isDSelected = isDSelected,
-                isLSelected = isLSelected,
+                showLightDarkPicker = remember(showLightDarkPicker) { mutableStateOf(showLightDarkPicker) },
+                isSelected = remember(isSelected) { mutableStateOf(isSelected) },
+                isDSelected = remember(isDSelected) { mutableStateOf(isDSelected) },
+                isLSelected = remember(isLSelected) { mutableStateOf(isLSelected) },
                 updateLTheme = { theme ->
                     setIntSetting(context, context.getString(R.string.lTheme), theme)
                     mainAppModel.appTheme.value = AppTheme.fromId(themeId)
-                    currentSelectedLTheme.intValue = theme
-                    currentHighlightedThemeCard.intValue = -1
+                    currentSelectedLTheme = theme
+                    currentHighlightedThemeCard = -1
                 },
                 updateDTheme = { theme ->
                     setIntSetting(context, context.getString(R.string.dTheme), theme)
                     mainAppModel.appTheme.value = AppTheme.fromId(themeId)
-                    currentSelectedDTheme.intValue = theme
-                    currentHighlightedThemeCard.intValue = -1
+                    currentSelectedDTheme = theme
+                    currentHighlightedThemeCard = -1
                 },
                 modifier = Modifier.fillMaxWidth(),
                 isTopOfGroup = index == 0,
@@ -889,12 +919,12 @@ fun ThemeOptions(
                         )
                     ) {
                         // For auto theme mode, show light/dark picker
-                        currentHighlightedThemeCard.intValue = theme
+                        currentHighlightedThemeCard = theme
                     } else {
                         // For single theme mode, just set the theme
                         setIntSetting(context, context.getString(R.string.theme), theme)
                         mainAppModel.appTheme.value = AppTheme.fromId(themeId)
-                        currentSelectedTheme.intValue = theme
+                        currentSelectedTheme = theme
                     }
                 })
         }
@@ -1037,89 +1067,97 @@ fun WidgetOptions(context: Context, goBack: () -> Unit) {
     }
 
 
-    Column(
+    LazyColumn(
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.Start,
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
+        modifier = Modifier.fillMaxSize()
     )
     {
-        SettingsHeader(goBack, stringResource(R.string.widget))
+        item { SettingsHeader(goBack, stringResource(R.string.widget)) }
 
-        SettingsButton(
-            label = stringResource(R.string.remove_widget),
-            isTopOfGroup = true,
-            onClick = {
-                removeWidget(context)
-                appWidgetHostView = null
-                appWidgetId = -1
-            }
-        )
+        item {
+            SettingsButton(
+                label = stringResource(R.string.remove_widget),
+                isTopOfGroup = true,
+                onClick = {
+                    removeWidget(context)
+                    appWidgetHostView = null
+                    appWidgetId = -1
+                }
+            )
+        }
 
-        SettingsButton(
-            label = stringResource(R.string.select_widget),
-            isBottomOfGroup = true,
-            onClick = { showCustomPicker = true }
-        )
+        item {
+            SettingsButton(
+                label = stringResource(R.string.select_widget),
+                isBottomOfGroup = true,
+                onClick = { showCustomPicker = true }
+            )
+        }
 
-        SettingsSpacer()
+        item { SettingsSpacer() }
 
         // Offset slider
-        var offset by remember { mutableFloatStateOf(getWidgetOffset(context)) }
-        SettingsSlider(
-            label = stringResource(R.string.offset),
-            value = offset,
-            onValueChange = {
-                offset = it
-                setWidgetOffset(context, offset)
-            },
-            valueRange = -20f..20f,
-            steps = 19,
-            onReset = {
-                offset = 0f
-                setWidgetOffset(context, offset)
-            },
-            isTopOfGroup = true
-        )
+        item {
+            var offset by remember { mutableFloatStateOf(getWidgetOffset(context)) }
+            SettingsSlider(
+                label = stringResource(R.string.offset),
+                value = offset,
+                onValueChange = {
+                    offset = it
+                    setWidgetOffset(context, offset)
+                },
+                valueRange = -20f..20f,
+                steps = 19,
+                onReset = {
+                    offset = 0f
+                    setWidgetOffset(context, offset)
+                },
+                isTopOfGroup = true
+            )
+        }
 
         // Height slider
-        var height by remember { mutableFloatStateOf(getWidgetHeight(context)) }
-        SettingsSlider(
-            label = stringResource(R.string.height),
-            value = height,
-            onValueChange = {
-                height = it
-                setWidgetHeight(context, height)
-            },
-            valueRange = 100f..400f,
-            steps = 9,
-            onReset = {
-                height = 125f
-                setWidgetHeight(context, height)
-            }
-        )
+        item {
+            var height by remember { mutableFloatStateOf(getWidgetHeight(context)) }
+            SettingsSlider(
+                label = stringResource(R.string.height),
+                value = height,
+                onValueChange = {
+                    height = it
+                    setWidgetHeight(context, height)
+                },
+                valueRange = 100f..400f,
+                steps = 9,
+                onReset = {
+                    height = 125f
+                    setWidgetHeight(context, height)
+                }
+            )
+        }
 
         // Width slider
-        var width by remember { mutableFloatStateOf(getWidgetWidth(context)) }
-        SettingsSlider(
-            label = stringResource(R.string.width),
-            value = width,
-            onValueChange = {
-                width = it
-                setWidgetWidth(context, width)
-            },
-            valueRange = 100f..400f,
-            steps = 9,
-            onReset = {
-                width = 250f
-                setWidgetWidth(context, width)
-            },
-            isBottomOfGroup = true
-        )
+        item {
+            var width by remember { mutableFloatStateOf(getWidgetWidth(context)) }
+            SettingsSlider(
+                label = stringResource(R.string.width),
+                value = width,
+                onValueChange = {
+                    width = it
+                    setWidgetWidth(context, width)
+                },
+                valueRange = 100f..400f,
+                steps = 9,
+                onReset = {
+                    width = 250f
+                    setWidgetWidth(context, width)
+                },
+                isBottomOfGroup = true
+            )
+        }
 
-        SettingsSpacer()
-        SettingsSpacer()
+        item { SettingsSpacer() }
+        item { SettingsSpacer() }
     }
 }
 
@@ -1202,10 +1240,11 @@ fun HiddenApps(
                         appPackageName
                     ),
                     onClick = {
-                        val app = AppUtils.getInstalledAppFromPackageName(
-                            mainAppModel.getContext(),
-                            appPackageName
-                        )
+                        val app = homeScreenModel.installedApps.find { it.packageName == appPackageName }
+                            ?: AppUtils.getInstalledAppFromPackageName(
+                                mainAppModel.getContext(),
+                                appPackageName
+                            )
 
                         app?.let {
                             AppUtils.openApp(
@@ -1223,7 +1262,6 @@ fun HiddenApps(
                         // Trigger haptic feedback
                         AppUtils.doHapticFeedBack(haptics)
                         // Animate item out
-                        @Suppress("AssignedValueIsNeverRead") // For some reason android studio doesn't detect the use in the AnimatedVisibility
                         visible = false
                         // Remove from your list after a short delay to let animation run
                         coroutineScope.launch {
@@ -1274,16 +1312,14 @@ fun ChooseFont(context: Context, activity: Activity, goBack: () -> Unit) {
         "IBM Plex Serif"
     )
 
-    Column(
+    LazyColumn(
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.Start,
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
+        modifier = Modifier.fillMaxSize()
     ) {
-        SettingsHeader(goBack, stringResource(R.string.font))
+        item { SettingsHeader(goBack, stringResource(R.string.font)) }
 
-        fontNames.forEachIndexed { index, fontName ->
+        itemsIndexed(fontNames) { index, fontName ->
             SettingsButton(
                 label = fontName,
                 onClick = {
@@ -1295,8 +1331,8 @@ fun ChooseFont(context: Context, activity: Activity, goBack: () -> Unit) {
                 fontFamily = getFontFamily(context, fontName)
             )
         }
-        SettingsSpacer()
-        SettingsSpacer()
+        item { SettingsSpacer() }
+        item { SettingsSpacer() }
     }
 }
 
@@ -1306,61 +1342,67 @@ fun ChooseFont(context: Context, activity: Activity, goBack: () -> Unit) {
 @Composable
 fun DevOptions(mainAppModel: MainAppModel, context: Context, goBack: () -> Unit) {
 
-    Column(
+    LazyColumn(
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.Start,
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
+        modifier = Modifier.fillMaxSize()
     ) {
-        SettingsHeader(goBack, "Developer Options")
+        item { SettingsHeader(goBack, "Developer Options") }
 
-        SettingsSwitch(
-            "First time",
-            getBooleanSetting(context, "FirstTime", false),
-            onCheckedChange = {
-                setBooleanSetting(context, "FirstTime", it)
-            },
-            isTopOfGroup = true
-        )
+        item {
+            SettingsSwitch(
+                "First time",
+                getBooleanSetting(context, "FirstTime", false),
+                onCheckedChange = {
+                    setBooleanSetting(context, "FirstTime", it)
+                },
+                isTopOfGroup = true
+            )
+        }
 
-        SettingsButton(
-            label = "Force Stop",
-            onClick = {
-                exitProcess(0)
-            }
-        )
+        item {
+            SettingsButton(
+                label = "Force Stop",
+                onClick = {
+                    exitProcess(0)
+                }
+            )
+        }
 
-        SettingsButton(
-            label = "Clear weather app",
-            onClick = {
-                setStringSetting(context, context.getString(R.string.weather_app_package), "")
-                Toast.makeText(context, "Weather app cleared", Toast.LENGTH_SHORT).show()
-            }
-        )
+        item {
+            SettingsButton(
+                label = "Clear weather app",
+                onClick = {
+                    setStringSetting(context, context.getString(R.string.weather_app_package), "")
+                    Toast.makeText(context, "Weather app cleared", Toast.LENGTH_SHORT).show()
+                }
+            )
+        }
 
-        SettingsButton(
-            label = "Test Screen Off",
-            isBottomOfGroup = true,
-            onClick = {
-                mainAppModel.blackOverlay.value = true
+        item {
+            SettingsButton(
+                label = "Test Screen Off",
+                isBottomOfGroup = true,
+                onClick = {
+                    mainAppModel.blackOverlay.value = true
 
-                Handler(Looper.getMainLooper()).postDelayed({
-                    val devicePolicyManager =
-                        context.getSystemService(DevicePolicyManager::class.java)
-                    val compName = ComponentName(context, MyDeviceAdminReceiver::class.java)
+                    Handler(Looper.getMainLooper()).postDelayed({
+                        val devicePolicyManager =
+                            context.getSystemService(DevicePolicyManager::class.java)
+                        val compName = ComponentName(context, MyDeviceAdminReceiver::class.java)
 
-                    if (devicePolicyManager.isAdminActive(compName)) {
-                        devicePolicyManager.lockNow()
-                    } else {
-                        Toast.makeText(context, "Enable Device Admin first", Toast.LENGTH_SHORT)
-                            .show()
-                    }
+                        if (devicePolicyManager.isAdminActive(compName)) {
+                            devicePolicyManager.lockNow()
+                        } else {
+                            Toast.makeText(context, "Enable Device Admin first", Toast.LENGTH_SHORT)
+                                .show()
+                        }
 
-                    mainAppModel.blackOverlay.value = false
-                }, 300)
-            }
-        )
+                        mainAppModel.blackOverlay.value = false
+                    }, 300)
+                }
+            )
+        }
     }
 
 }
