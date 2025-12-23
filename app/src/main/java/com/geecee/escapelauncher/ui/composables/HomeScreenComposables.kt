@@ -604,7 +604,7 @@ fun AnimatedPillSearchBar(
                     text = stringResource(id = R.string.search),
                     color = BackgroundColor,
                     style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier.padding(start = 8.dp)
+                    modifier = Modifier.padding(start = 4.dp)
                 )
             } else {
                 BasicTextField(
@@ -615,7 +615,7 @@ fun AnimatedPillSearchBar(
                     },
                     modifier = Modifier
                         .weight(1f)
-                        .padding(start = 8.dp)
+                        .padding(start = 4.dp)
                         .alpha(alpha)
                         .focusRequester(focusRequester),
                     singleLine = true,

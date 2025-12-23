@@ -310,7 +310,7 @@ fun AppsList(
                     }
                 )
         ) {
-            ListGradient()
+           ListGradient()
         }
 
         // Bottom search box
