@@ -320,8 +320,9 @@ class MainAppViewModel(application: Application) : AndroidViewModel(application)
                     viewModelScope.launch(Dispatchers.Main) {
                         weatherText.value = result
                         // Only update the last update time if we got a valid-looking result
-                        if (!result.contains("error", ignoreCase = true) && 
-                            !result.contains("unavailable", ignoreCase = true)) {
+                        if (!result.contains("error", ignoreCase = true) &&
+                            !result.contains("unavailable", ignoreCase = true)
+                        ) {
                             lastWeatherUpdate = System.currentTimeMillis()
                         }
                     }

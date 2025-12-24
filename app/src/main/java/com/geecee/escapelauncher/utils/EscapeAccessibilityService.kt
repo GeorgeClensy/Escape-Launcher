@@ -1,8 +1,11 @@
 package com.geecee.escapelauncher.utils
 
 import android.accessibilityservice.AccessibilityService
+import android.annotation.SuppressLint
+import android.os.Build
 import android.view.accessibility.AccessibilityEvent
 
+@SuppressLint("AccessibilityPolicy")
 class EscapeAccessibilityService : AccessibilityService() {
     companion object {
         var instance: EscapeAccessibilityService? = null
@@ -17,6 +20,8 @@ class EscapeAccessibilityService : AccessibilityService() {
     override fun onInterrupt() {}
 
     fun lockScreen() {
-        performGlobalAction(GLOBAL_ACTION_LOCK_SCREEN)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            performGlobalAction(GLOBAL_ACTION_LOCK_SCREEN)
+        }
     }
 }

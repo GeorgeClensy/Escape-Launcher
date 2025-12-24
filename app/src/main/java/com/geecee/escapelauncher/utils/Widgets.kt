@@ -174,7 +174,6 @@ class ConfigureAppWidgetActivity : Activity() {
     }
 
 
-
     /**
      * Finishes the activity
      *
@@ -219,7 +218,10 @@ class ConfigureAppWidgetActivity : Activity() {
             putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, widgetId)
             val providerInfo: AppWidgetProviderInfo? =
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                    intent.getParcelableExtra(EXTRA_APP_WIDGET_PROVIDER_INFO, AppWidgetProviderInfo::class.java)
+                    intent.getParcelableExtra(
+                        EXTRA_APP_WIDGET_PROVIDER_INFO,
+                        AppWidgetProviderInfo::class.java
+                    )
                 } else {
                     @Suppress("DEPRECATION")
                     intent.getParcelableExtra(EXTRA_APP_WIDGET_PROVIDER_INFO)
@@ -320,7 +322,9 @@ fun CustomWidgetPicker(
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = PaddingValues(bottom = 16.dp)
             ) {
-                items(sortedWidgetEntries.size, key = { index -> sortedWidgetEntries[index].key.packageName }) { index ->
+                items(
+                    sortedWidgetEntries.size,
+                    key = { index -> sortedWidgetEntries[index].key.packageName }) { index ->
                     val (appInfo, widgets) = sortedWidgetEntries[index] // Use the sorted list
                     WidgetAppItem(
                         widgetAppData = appInfo,
@@ -567,7 +571,10 @@ fun launchWidgetConfiguration(
 ): Boolean {
     return try {
         val intent = Intent(context, ConfigureAppWidgetActivity::class.java).apply {
-            putExtra(ConfigureAppWidgetActivity.EXTRA_APP_WIDGET_PROVIDER_INFO, appWidgetProviderInfo)
+            putExtra(
+                ConfigureAppWidgetActivity.EXTRA_APP_WIDGET_PROVIDER_INFO,
+                appWidgetProviderInfo
+            )
             putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         }

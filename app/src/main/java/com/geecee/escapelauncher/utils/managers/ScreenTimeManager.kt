@@ -181,7 +181,8 @@ suspend fun getScreenTimeListSorted(date: String): List<AppUsageEntity> {
 
 
 // Clear redundant data
-class ClearOldDataWorker(appContext: Context, workerParams: WorkerParameters) : CoroutineWorker(appContext, workerParams) {
+class ClearOldDataWorker(appContext: Context, workerParams: WorkerParameters) :
+    CoroutineWorker(appContext, workerParams) {
     override suspend fun doWork(): Result {
         return try {
             ScreenTimeManager.clearOldData()

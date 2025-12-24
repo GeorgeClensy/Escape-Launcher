@@ -1,6 +1,7 @@
 package com.geecee.escapelauncher.ui.views
 
 import android.content.Intent
+import android.os.Build
 import android.provider.Settings
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
@@ -95,22 +96,24 @@ fun HomeScreenPageManager(
                 },
                 indication = null, interactionSource = homeScreenModel.interactionSource,
                 onDoubleClick = {
-                    val context = mainAppModel.getContext()
-                    val doubleTapEnabled = getBooleanSetting(
-                        context,
-                        context.getString(R.string.DoubleTapToLock),
-                        false
-                    )
-                    if (doubleTapEnabled) {
-                        val service = EscapeAccessibilityService.instance
-                        if (service != null) {
-                            service.lockScreen()
-                        } else {
-                            Toast.makeText(
-                                context,
-                                context.getString(R.string.accessibility_not_granted_msg),
-                                Toast.LENGTH_LONG
-                            ).show()
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                        val context = mainAppModel.getContext()
+                        val doubleTapEnabled = getBooleanSetting(
+                            context,
+                            context.getString(R.string.DoubleTapToLock),
+                            false
+                        )
+                        if (doubleTapEnabled) {
+                            val service = EscapeAccessibilityService.instance
+                            if (service != null) {
+                                service.lockScreen()
+                            } else {
+                                Toast.makeText(
+                                    context,
+                                    context.getString(R.string.accessibility_not_granted_msg),
+                                    Toast.LENGTH_LONG
+                                ).show()
+                            }
                         }
                     }
                 }

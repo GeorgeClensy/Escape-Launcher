@@ -188,7 +188,7 @@ fun SettingsHeader(goBack: () -> Unit, title: String, hideBack: Boolean = false)
             .padding(0.dp, 120.dp, 0.dp, 8.dp)
             .height(70.dp) // Set a fixed height for the header
     ) {
-        if(!hideBack) {
+        if (!hideBack) {
             Icon(
                 Icons.AutoMirrored.Default.ArrowBack,
                 contentDescription = "Go Back",
@@ -950,7 +950,12 @@ fun SettingsSlider(
 }
 
 @Composable
-fun SponsorBox(text: String, secondText: String,onSponsorClick: () -> Unit = {}, onBackgroundClick: () -> Unit = {}) {
+fun SponsorBox(
+    text: String,
+    secondText: String,
+    onSponsorClick: () -> Unit = {},
+    onBackgroundClick: () -> Unit = {}
+) {
     Card(
         modifier = Modifier
             .padding(vertical = 1.dp)
@@ -965,7 +970,9 @@ fun SponsorBox(text: String, secondText: String,onSponsorClick: () -> Unit = {},
         )
     ) {
         Column(
-            Modifier.padding(vertical = 24.dp).fillMaxSize(),
+            Modifier
+                .padding(vertical = 24.dp)
+                .fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Icon(
@@ -1000,14 +1007,17 @@ fun SponsorBox(text: String, secondText: String,onSponsorClick: () -> Unit = {},
                 onClick = {
                     onSponsorClick()
                 }, colors = ButtonDefaults.buttonColors(
-                    containerColor = com.geecee.escapelauncher.ui.theme.primaryContentColor,
+                    containerColor = primaryContentColor,
                     contentColor = CardContainerColor
                 )
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(Icons.Filled.Favorite, "", tint = CardContainerColor)
                     Spacer(Modifier.width(5.dp))
-                    AutoResizingText(text = stringResource(R.string.sponsor), color = CardContainerColor)
+                    AutoResizingText(
+                        text = stringResource(R.string.sponsor),
+                        color = CardContainerColor
+                    )
                 }
             }
 

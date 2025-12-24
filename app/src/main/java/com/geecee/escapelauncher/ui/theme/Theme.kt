@@ -491,7 +491,7 @@ fun EscapeTheme(
     val fontFamily = remember {
         mutableStateOf(
             getFontFamily(
-                context, 
+                context,
                 getStringSetting(context, resources.getString(R.string.Font), "Jost")
             )
         )
@@ -592,6 +592,7 @@ enum class AppTheme(
             fromId(id).nameRes
     }
 }
+
 @Composable
 fun AppTheme.resolveColorScheme(): ColorScheme {
     val isDark = androidx.compose.foundation.isSystemInDarkTheme()
@@ -615,7 +616,8 @@ fun AppTheme.resolveColorScheme(): ColorScheme {
 
         AppTheme.OFF_LIGHT -> offLightScheme
 
-        AppTheme.SYSTEM -> { if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        AppTheme.SYSTEM -> {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                 if (isDark) {
                     dynamicDarkColorScheme(LocalContext.current)
                 } else {

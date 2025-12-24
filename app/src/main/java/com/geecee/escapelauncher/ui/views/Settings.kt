@@ -1,3 +1,5 @@
+@file:Suppress("KotlinConstantConditions")
+
 package com.geecee.escapelauncher.ui.views
 
 import android.app.Activity
@@ -8,8 +10,7 @@ import android.appwidget.AppWidgetProviderInfo
 import android.content.Context
 import android.content.Intent
 import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
-import android.os.Handler
-import android.os.Looper
+import android.os.Build
 import android.provider.Settings
 import android.util.Log
 import android.widget.Toast
@@ -310,6 +311,7 @@ fun Settings(
  *
  * @see Settings
  */
+@Suppress("AssignedValueIsNeverRead")
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun MainSettingsPage(
@@ -461,34 +463,36 @@ fun MainSettingsPage(
                 })
         }
 
-        item {
-            SettingsSwitch(
-                label = stringResource(id = R.string.double_tap_to_lock),
-                checked = getBooleanSetting(
-                    mainAppModel.getContext(), stringResource(R.string.DoubleTapToLock), false
-                ),
-                onCheckedChange = {
-                    setBooleanSetting(
-                        mainAppModel.getContext(),
-                        mainAppModel.getContext().resources.getString(R.string.DoubleTapToLock),
-                        it
-                    )
-                },
-                isBottomOfGroup = EscapeAccessibilityService.instance != null
-            )
-        }
-
-        if (EscapeAccessibilityService.instance == null) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             item {
-                SettingsButton(
-                    label = stringResource(R.string.enable_accessibility),
-                    isBottomOfGroup = true,
-                    onClick = {
-                        val intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
-                        intent.addFlags(FLAG_ACTIVITY_NEW_TASK)
-                        mainAppModel.getContext().startActivity(intent)
-                    }
+                SettingsSwitch(
+                    label = stringResource(id = R.string.double_tap_to_lock),
+                    checked = getBooleanSetting(
+                        mainAppModel.getContext(), stringResource(R.string.DoubleTapToLock), false
+                    ),
+                    onCheckedChange = {
+                        setBooleanSetting(
+                            mainAppModel.getContext(),
+                            mainAppModel.getContext().resources.getString(R.string.DoubleTapToLock),
+                            it
+                        )
+                    },
+                    isBottomOfGroup = EscapeAccessibilityService.instance != null
                 )
+            }
+
+            if (EscapeAccessibilityService.instance == null) {
+                item {
+                    SettingsButton(
+                        label = stringResource(R.string.enable_accessibility),
+                        isBottomOfGroup = true,
+                        onClick = {
+                            val intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
+                            intent.addFlags(FLAG_ACTIVITY_NEW_TASK)
+                            mainAppModel.getContext().startActivity(intent)
+                        }
+                    )
+                }
             }
         }
 
@@ -614,9 +618,12 @@ fun MainSettingsPage(
 
         item {
             SettingsSwitch(
-                label = stringResource(id = R.string.screen_time_on_app), checked = getBooleanSetting(
+                label = stringResource(id = R.string.screen_time_on_app),
+                checked = getBooleanSetting(
                     mainAppModel.getContext(), stringResource(R.string.ScreenTimeOnApp)
-                ), isTopOfGroup = true, onCheckedChange = {
+                ),
+                isTopOfGroup = true,
+                onCheckedChange = {
                     toggleBooleanSetting(
                         mainAppModel.getContext(),
                         it,
@@ -780,6 +787,7 @@ fun MainSettingsPage(
  * @see Settings
  */
 @OptIn(ExperimentalFoundationApi::class)
+@Suppress("AssignedValueIsNeverRead")
 @Composable
 fun ThemeOptions(
     mainAppModel: MainAppModel, context: Context, goBack: () -> Unit
@@ -840,10 +848,10 @@ fun ThemeOptions(
                     context, context.getString(R.string.autoThemeSwitch), false
                 ), isTopOfGroup = true, onCheckedChange = { switch ->
                     // Disable normal selection box or set it correctly
-                    if (switch) {
-                        currentSelectedTheme = -1
+                    currentSelectedTheme = if (switch) {
+                        -1
                     } else {
-                        currentSelectedTheme = getIntSetting(context, settingToChange, 11)
+                        getIntSetting(context, settingToChange, 11)
                     }
 
                     if (switch) {
@@ -922,7 +930,11 @@ fun ThemeOptions(
 
             ThemeCard(
                 theme = themeId,
-                showLightDarkPicker = remember(showLightDarkPicker) { mutableStateOf(showLightDarkPicker) },
+                showLightDarkPicker = remember(showLightDarkPicker) {
+                    mutableStateOf(
+                        showLightDarkPicker
+                    )
+                },
                 isSelected = remember(isSelected) { mutableStateOf(isSelected) },
                 isDSelected = remember(isDSelected) { mutableStateOf(isDSelected) },
                 isLSelected = remember(isLSelected) { mutableStateOf(isLSelected) },
@@ -1198,6 +1210,7 @@ fun WidgetOptions(context: Context, goBack: () -> Unit) {
  * @see Settings
  */
 @OptIn(ExperimentalFoundationApi::class)
+@Suppress("AssignedValueIsNeverRead")
 @Composable
 fun HiddenApps(
     mainAppModel: MainAppModel,
@@ -1268,11 +1281,12 @@ fun HiddenApps(
                         appPackageName
                     ),
                     onClick = {
-                        val app = homeScreenModel.installedApps.find { it.packageName == appPackageName }
-                            ?: AppUtils.getInstalledAppFromPackageName(
-                                mainAppModel.getContext(),
-                                appPackageName
-                            )
+                        val app =
+                            homeScreenModel.installedApps.find { it.packageName == appPackageName }
+                                ?: AppUtils.getInstalledAppFromPackageName(
+                                    mainAppModel.getContext(),
+                                    appPackageName
+                                )
 
                         app?.let {
                             AppUtils.openApp(

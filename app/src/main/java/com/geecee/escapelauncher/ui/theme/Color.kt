@@ -1,12 +1,18 @@
 @file:Suppress("unused")
 
 package com.geecee.escapelauncher.ui.theme
+
 import androidx.compose.ui.graphics.Color
 
-val pitchBlackBackground = Color(0,0,0)
-val transparentHalf = Color(0, 0, 0,150) // Used in the private space settings dialog to differ it from the background
-val escapeRed = Color(172,43,43)
-val escapeGreen = Color(43,172,61)
+val pitchBlackBackground = Color(0, 0, 0)
+val transparentHalf = Color(
+    0,
+    0,
+    0,
+    150
+) // Used in the private space settings dialog to differ it from the background
+val escapeRed = Color(172, 43, 43)
+val escapeGreen = Color(43, 172, 61)
 
 val primaryLight = Color(0xFF070808)
 val onPrimaryLight = Color(0xFFFFFFFF)

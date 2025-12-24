@@ -78,7 +78,7 @@ fun ScreenTime(time: String, increased: Boolean, modifier: Modifier) {
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun HigherRec(percent: Int, modifier: Modifier = Modifier) {
-    BoxWithConstraints (
+    BoxWithConstraints(
         modifier = modifier
             .clip(RoundedCornerShape(48.dp))
             .aspectRatio(1f)

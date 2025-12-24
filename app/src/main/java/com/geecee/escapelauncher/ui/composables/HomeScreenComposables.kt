@@ -342,7 +342,7 @@ fun Weather(
                 modifier = Modifier.clickable {
                     val weatherAppPackage = getStringSetting(
                         context,
-                        context.getString(R.string.weather_app_package),
+                        mainAppModel.getContext().getString(R.string.weather_app_package),
                         ""
                     )
                     if (weatherAppPackage.isNotEmpty()) {
@@ -352,9 +352,12 @@ fun Weather(
                             it.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                             context.startActivity(it)
                         }
-                    }
-                    else {
-                        Toast.makeText(context, context.getString(R.string.set_weather_app_in_settings), Toast.LENGTH_SHORT).show()
+                    } else {
+                        Toast.makeText(
+                            context,
+                            mainAppModel.getContext().getString(R.string.set_weather_app_in_settings),
+                            Toast.LENGTH_SHORT
+                        ).show()
                     }
                 },
                 textAlign = when (homeAlignment) {

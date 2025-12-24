@@ -36,7 +36,8 @@ fun BulkAppManager(
     hideBack: Boolean = false,
     onAppMoved: (fromIndex: Int, toIndex: Int) -> Unit = { _, _ -> }
 ) {
-    val selectedState = remember { mutableStateListOf<InstalledApp>().apply { addAll(preSelectedApps) } }
+    val selectedState =
+        remember { mutableStateListOf<InstalledApp>().apply { addAll(preSelectedApps) } }
 
     val availableApps = apps.filter { it.packageName != "com.geecee.escapelauncher" }
 
@@ -56,7 +57,7 @@ fun BulkAppManager(
         horizontalAlignment = Alignment.Start,
         modifier = Modifier.fillMaxSize()
     ) {
-        if(!hideTitle) {
+        if (!hideTitle) {
             item {
                 SettingsHeader(goBack = { onBackClicked() }, title = title, hideBack = hideBack)
             }
@@ -88,7 +89,9 @@ fun BulkAppManager(
                     if (item.isInSelectedSection && reorderable) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.fillMaxWidth().animateItem()
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .animateItem()
                         ) {
                             SettingsButton(
                                 label = item.app.displayName,
@@ -117,7 +120,11 @@ fun BulkAppManager(
                                 },
                                 enabled = selectedState.indexOf(item.app) > 0
                             ) {
-                                Icon(Icons.Default.ArrowUpward, contentDescription = "Move Up", tint = ContentColor)
+                                Icon(
+                                    Icons.Default.ArrowUpward,
+                                    contentDescription = "Move Up",
+                                    tint = ContentColor
+                                )
                             }
                             IconButton(
                                 onClick = {
@@ -131,7 +138,11 @@ fun BulkAppManager(
                                 },
                                 enabled = selectedState.indexOf(item.app) < selectedState.size - 1
                             ) {
-                                Icon(Icons.Default.ArrowDownward, contentDescription = "Move Down", tint = ContentColor)
+                                Icon(
+                                    Icons.Default.ArrowDownward,
+                                    contentDescription = "Move Down",
+                                    tint = ContentColor
+                                )
                             }
                         }
                     } else {
@@ -152,6 +163,7 @@ fun BulkAppManager(
                         )
                     }
                 }
+
                 ListItem.Spacer -> AnimatedVisibility(
                     visible = selectedState.isNotEmpty(),
                     enter = expandVertically() + fadeIn(),

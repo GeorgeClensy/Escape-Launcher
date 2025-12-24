@@ -214,7 +214,7 @@ fun AppsList(
                     onAppLongClick = {
                         homeScreenModel.showBottomSheet.value = true
                         homeScreenModel.updateSelectedApp(app)
-                        doHapticFeedBack( haptics)
+                        doHapticFeedBack(haptics)
                     },
                     showScreenTime = getBooleanSetting(
                         context = mainAppModel.getContext(),
@@ -299,7 +299,7 @@ fun AppsList(
             visible = !homeScreenModel.showPrivateSpaceSettings.value,
             enter = fadeIn(),
             exit = fadeOut(),
-            modifier =  Modifier
+            modifier = Modifier
                 .fillMaxWidth()
                 .align(Alignment.BottomStart)
                 .height(
@@ -310,7 +310,7 @@ fun AppsList(
                     }
                 )
         ) {
-           ListGradient()
+            ListGradient()
         }
 
         // Bottom search box
