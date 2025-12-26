@@ -427,16 +427,18 @@ fun MainSettingsPage(
         }
 
         item {
-            SettingsSwitch(
-                label = stringResource(id = R.string.show_weather), checked = getBooleanSetting(
-                    mainAppModel.getContext(), stringResource(R.string.show_weather), false
-                ), onCheckedChange = {
-                    toggleBooleanSetting(
-                        mainAppModel.getContext(),
-                        it,
-                        mainAppModel.getContext().resources.getString(R.string.show_weather)
-                    )
-                })
+            if (!BuildConfig.IS_FOSS) {
+                SettingsSwitch(
+                    label = stringResource(id = R.string.show_weather), checked = getBooleanSetting(
+                        mainAppModel.getContext(), stringResource(R.string.show_weather), false
+                    ), onCheckedChange = {
+                        toggleBooleanSetting(
+                            mainAppModel.getContext(),
+                            it,
+                            mainAppModel.getContext().resources.getString(R.string.show_weather)
+                        )
+                    })
+            }
         }
 
         item {
@@ -458,6 +460,7 @@ fun MainSettingsPage(
             SettingsNavigationItem(
                 stringResource(R.string.manage_favourite_apps),
                 diagonalArrow = false,
+                isBottomOfGroup = Build.VERSION.SDK_INT < Build.VERSION_CODES.P,
                 onClick = {
                     navController.navigate("bulkFavouriteApps")
                 })
