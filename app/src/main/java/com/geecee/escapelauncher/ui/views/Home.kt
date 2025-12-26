@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -106,17 +105,6 @@ fun HomeScreen(
                     )
                 }
 
-                if (getBooleanSetting(
-                        mainAppModel.getContext(), stringResource(R.string.ScreenTimeOnHome), false
-                    ) && getBooleanSetting(
-                        mainAppModel.getContext(), stringResource(R.string.show_date), false
-                    )
-                ) {
-                    Spacer(
-                        Modifier.width(10.dp)
-                    )
-                }
-
                 if (
                     getBooleanSetting(
                         mainAppModel.getContext(), stringResource(R.string.ScreenTimeOnHome), false
@@ -136,17 +124,6 @@ fun HomeScreen(
                         homeAlignment = getHomeAlignment(mainAppModel.getContext()),
                         small = true,
                         screenTime = formatScreenTime(todayUsage.longValue)
-                    )
-                }
-
-                if (getBooleanSetting(
-                        mainAppModel.getContext(), stringResource(R.string.show_weather), false
-                    ) && getBooleanSetting(
-                        mainAppModel.getContext(), stringResource(R.string.show_date), false
-                    )
-                ) {
-                    Spacer(
-                        Modifier.width(10.dp)
                     )
                 }
 

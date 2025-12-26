@@ -1396,6 +1396,11 @@ fun DevOptions(mainAppModel: MainAppModel, context: Context, goBack: () -> Unit)
                 getBooleanSetting(context, "FirstTime", false),
                 onCheckedChange = {
                     setBooleanSetting(context, "FirstTime", it)
+                    setBooleanSetting(
+                        context,
+                        mainAppModel.getContext().resources.getString(R.string.FirstTimeAppDrawHelp),
+                        it
+                    )
                 },
                 isTopOfGroup = true
             )

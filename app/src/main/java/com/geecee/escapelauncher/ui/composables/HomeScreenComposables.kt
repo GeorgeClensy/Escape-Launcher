@@ -291,7 +291,7 @@ fun Date(
             MaterialTheme.typography.bodyLarge
         },
         fontWeight = FontWeight.W600,
-        modifier = Modifier.clickable {
+        modifier = Modifier.padding(end = 10.dp).clickable {
             val intent = Intent(Intent.ACTION_MAIN).apply {
                 addCategory(Intent.CATEGORY_APP_CALENDAR)
                 flags = Intent.FLAG_ACTIVITY_NEW_TASK
@@ -319,7 +319,7 @@ fun Weather(
     }
 
     AnimatedVisibility(mainAppModel.weatherText.value != "", enter = fadeIn(), exit = fadeOut()) {
-        Row {
+        Row(Modifier.padding(end = 10.dp)) {
             Icon(
                 Icons.Default.WbSunny,
                 "",
@@ -379,7 +379,7 @@ fun HomeScreenScreenTime(
     small: Boolean,
     screenTime: String,
 ) {
-    Row {
+    Row(Modifier.padding(end = 10.dp)) {
         Icon(
             Icons.Default.Timer,
             "",

@@ -21,6 +21,7 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import com.geecee.escapelauncher.ui.theme.ContentColor
 import com.geecee.escapelauncher.utils.InstalledApp
 
@@ -34,6 +35,8 @@ fun BulkAppManager(
     reorderable: Boolean = false,
     hideTitle: Boolean = false,
     hideBack: Boolean = false,
+    titleColor: Color = ContentColor,
+    topPadding: Boolean = true,
     onAppMoved: (fromIndex: Int, toIndex: Int) -> Unit = { _, _ -> }
 ) {
     val selectedState =
@@ -59,7 +62,7 @@ fun BulkAppManager(
     ) {
         if (!hideTitle) {
             item {
-                SettingsHeader(goBack = { onBackClicked() }, title = title, hideBack = hideBack)
+                SettingsHeader(goBack = { onBackClicked() }, title = title, hideBack = hideBack, color = titleColor, padding = topPadding)
             }
         }
 

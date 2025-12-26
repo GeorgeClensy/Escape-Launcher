@@ -31,11 +31,14 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.automirrored.rounded.ArrowBack
+import androidx.compose.material.icons.automirrored.rounded.ArrowForward
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonColors
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -77,8 +80,7 @@ import com.geecee.escapelauncher.utils.setBooleanSetting
 import com.geecee.escapelauncher.utils.showLauncherSelector
 
 data class OnboardingPage(
-    val route: String,
-    val content: @Composable (onNext: () -> Unit) -> Unit
+    val route: String, val content: @Composable (onNext: () -> Unit, onPrev: () -> Unit) -> Unit
 )
 
 @Composable
@@ -90,57 +92,88 @@ fun Onboarding(
 ) {
     val navController = rememberNavController()
 
-    @Suppress("KotlinConstantConditions") val pages = listOfNotNull(
-        OnboardingPage("welcome") { onNext ->
-            WelcomeScreen {
-                onNext()
-            }
-        },
-        OnboardingPage("stats") { onNext ->
-            StatisticsScreen {
-                onNext()
-            }
-        },
-        OnboardingPage("favorites") { onNext ->
-            FavoritesSelectionScreen(
-                mainAppViewModel,
-                homeScreenModel,
-            ) {
-                onNext()
-            }
-        },
-        OnboardingPage("default_launcher") { onNext ->
-            DefaultLauncherScreen(activity) {
-                onNext()
-            }
-        },
-        if (!BuildConfig.IS_FOSS) {
-            OnboardingPage("analytics") { onNext ->
-                AnalyticsConsentScreen(mainAppViewModel) {
-                    onNext()
+    @Suppress("KotlinConstantConditions") val pages =
+        listOfNotNull(
+            OnboardingPage("welcome") { onNext, onPrev ->
+                WelcomeScreen(
+                    onPrev = {
+                        onPrev()
+                    },
+                    onNext = {
+                        onNext()
+                    }
+                )
+            },
+            OnboardingPage("stats") { onNext, onPrev ->
+                StatisticsScreen(
+                    onPrev = {
+                        onPrev()
+                    },
+                    onNext = {
+                        onNext()
+                    }
+                )
+            },
+            OnboardingPage("favorites") { onNext, onPrev ->
+                FavoritesSelectionScreen(
+                    mainAppViewModel,
+                    homeScreenModel,
+                    onPrev = {
+                        onPrev()
+                    },
+                    onNext = {
+                        onNext()
+                    }
+                )
+            },
+            OnboardingPage("default_launcher") { onNext, onPrev ->
+                DefaultLauncherScreen(
+                    activity,
+                    onPrev = {
+                        onPrev()
+                    },
+                    onNext = {
+                        onNext()
+                    }
+                )
+            },
+            if (!BuildConfig.IS_FOSS) {
+                OnboardingPage("analytics") { onNext, onPrev ->
+                    AnalyticsConsentScreen(
+                        mainAppViewModel,
+                        onPrev = {
+                            onPrev()
+                        },
+                        onNext = {
+                            onNext()
+                        }
+                    )
                 }
-            }
-        } else {
-            null
-        },
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            OnboardingPage("accessibility") { onNext ->
-                AccessibilitySetupScreen(mainAppViewModel) {
-                    onNext()
+            } else {
+                null
+            },
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                OnboardingPage("accessibility") { onNext, onPrev ->
+                    AccessibilitySetupScreen(
+                        mainAppViewModel,
+                        onPrev = {
+                            onPrev()
+                        },
+                        onNext = {
+                            onNext()
+                        }
+                    )
                 }
+            } else {
+                null
             }
-        } else {
-            null
-        }
-    )
+        )
 
     // Work out progress for progress bar
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
-    val currentIndex = pages.indexOfFirst { it.route == currentRoute }
-        .coerceAtLeast(0)
-    val progress =
-        if (pages.size > 1) currentIndex / (pages.size - 1f) else 0f
+    val currentIndex = pages.indexOfFirst { it.route == currentRoute }.coerceAtLeast(0)
+    val progress = if (pages.size > 1) currentIndex / (pages.size - 1f) else 0f
     val animatedProgress by animateFloatAsState(
         targetValue = progress,
         animationSpec = tween(durationMillis = 500, easing = FastOutSlowInEasing),
@@ -150,9 +183,7 @@ fun Onboarding(
     // Go to the launcher page if you're coming back from that:
     var startDestination = pages[0].route
     if (getBooleanSetting(
-            mainAppViewModel.getContext(),
-            stringResource(R.string.WasChangingLauncher),
-            false
+            mainAppViewModel.getContext(), stringResource(R.string.WasChangingLauncher), false
         )
     ) {
         startDestination = "default_launcher"
@@ -162,20 +193,24 @@ fun Onboarding(
         modifier = Modifier
             .fillMaxSize()
             .windowInsetsPadding(WindowInsets.displayCutout)
-            .padding(30.dp)
+            .padding(start = 30.dp, end = 30.dp, top = 30.dp)
     ) {
-        LinearProgressIndicator(
-            progress = { animatedProgress },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(32.dp),
-            color = primaryContentColor,
-            trackColor = CardContainerColor
-        )
+        AnimatedVisibility(navBackStackEntry?.destination?.route != "welcome") {
+            Column {
+                LinearProgressIndicator(
+                    progress = { animatedProgress },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(32.dp),
+                    color = primaryContentColor,
+                    trackColor = CardContainerColor
+                )
 
-        Spacer(
-            Modifier.height(30.dp)
-        )
+                Spacer(
+                    Modifier.height(30.dp)
+                )
+            }
+        }
 
         NavHost(
             navController = navController,
@@ -184,7 +219,7 @@ fun Onboarding(
         ) {
             pages.forEachIndexed { index, page ->
                 composable(page.route) {
-                    page.content { // (OnNext ->)
+                    page.content({ // onNext
                         if (index < pages.lastIndex) {
                             navController.navigate(pages[index + 1].route)
                         } else {
@@ -209,10 +244,36 @@ fun Onboarding(
                                 AppUtils.configureFullScreenMode(window = window)
                             }
                         }
-                    }
+                    }, {
+                        // onPrev
+                        if (index > 0) {
+                            navController.navigate(pages[index - 1].route)
+                        }
+                    })
                 }
             }
         }
+    }
+}
+
+@Composable
+fun PrevButton(
+    modifier: Modifier = Modifier,
+    onPrev: () -> Unit,
+) {
+    IconButton(
+        onClick = {
+            onPrev()
+        }, modifier = modifier, colors = IconButtonColors(
+            containerColor = primaryContentColor,
+            contentColor = BackgroundColor,
+            disabledContainerColor = primaryContentColor,
+            disabledContentColor = BackgroundColor
+        )
+    ) {
+        Icon(
+            Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = stringResource(R.string.back)
+        )
     }
 }
 
@@ -245,7 +306,7 @@ fun NextButton(
                 overflow = TextOverflow.Ellipsis // Gracefully handle long text
             )
             Icon(
-                imageVector = Icons.AutoMirrored.Default.ArrowForward,
+                imageVector = Icons.AutoMirrored.Rounded.ArrowForward,
                 contentDescription = "Continue"
             )
         }
@@ -253,8 +314,12 @@ fun NextButton(
 }
 
 @Composable
-fun WelcomeScreen(onNext: () -> Unit) {
-    Box(Modifier.fillMaxSize()) {
+fun WelcomeScreen(onNext: () -> Unit, @Suppress("unused") onPrev: () -> Unit) {
+    Box(
+        Modifier
+            .fillMaxSize()
+            .padding(bottom = 30.dp)
+    ) {
         Column(Modifier.align(Alignment.Center)) {
             Icon(
                 painterResource(R.drawable.outlineicon),
@@ -281,7 +346,7 @@ fun WelcomeScreen(onNext: () -> Unit) {
 }
 
 @Composable
-fun StatisticsScreen(onNext: () -> Unit) {
+fun StatisticsScreen(onNext: () -> Unit, onPrev: () -> Unit) {
     Box(Modifier.fillMaxSize()) {
         Column(
             Modifier.verticalScroll(rememberScrollState())
@@ -335,7 +400,19 @@ fun StatisticsScreen(onNext: () -> Unit) {
             )
         }
 
-        NextButton(Modifier.align(Alignment.BottomEnd)) {
+        PrevButton(
+            Modifier
+                .align(Alignment.BottomStart)
+                .padding(bottom = 30.dp)
+        ) {
+            onPrev()
+        }
+
+        NextButton(
+            Modifier
+                .align(Alignment.BottomEnd)
+                .padding(bottom = 30.dp)
+        ) {
             onNext()
         }
     }
@@ -347,6 +424,7 @@ fun FavoritesSelectionScreen(
     mainAppModel: MainAppViewModel,
     homeScreenModel: HomeScreenModel,
     onNext: () -> Unit,
+    onPrev: () -> Unit
 ) {
     Box(Modifier.fillMaxSize()) {
         BulkAppManager(
@@ -373,14 +451,28 @@ fun FavoritesSelectionScreen(
                 }
             })
 
-        NextButton(Modifier.align(Alignment.BottomEnd)) {
+        PrevButton(
+            Modifier
+                .align(Alignment.BottomStart)
+                .padding(bottom = 30.dp)
+        ) {
+            onPrev()
+        }
+
+        NextButton(
+            Modifier
+                .align(Alignment.BottomEnd)
+                .padding(bottom = 30.dp)
+        ) {
             onNext()
         }
     }
 }
 
 @Composable
-fun DefaultLauncherScreen(activity: Activity, onNext: () -> Unit) {
+fun DefaultLauncherScreen(
+    activity: Activity, onNext: () -> Unit, onPrev: () -> Unit
+) {
     Box(Modifier.fillMaxSize()) {
         Column {
             Text(
@@ -409,13 +501,8 @@ fun DefaultLauncherScreen(activity: Activity, onNext: () -> Unit) {
                             true
                         )
                         activity.showLauncherSelector()
-                    },
-                    modifier = Modifier,
-                    colors = ButtonColors(
-                        primaryContentColor,
-                        BackgroundColor,
-                        primaryContentColor,
-                        BackgroundColor
+                    }, modifier = Modifier, colors = ButtonColors(
+                        primaryContentColor, BackgroundColor, primaryContentColor, BackgroundColor
                     )
                 ) {
                     Row(
@@ -427,14 +514,9 @@ fun DefaultLauncherScreen(activity: Activity, onNext: () -> Unit) {
                 }
             } else {
                 Button(
-                    onClick = {
-                    },
-                    modifier = Modifier.border(
-                        1.dp,
-                        primaryContentColor,
-                        MaterialTheme.shapes.extraLarge
-                    ),
-                    colors = ButtonColors(
+                    onClick = {}, modifier = Modifier.border(
+                        1.dp, primaryContentColor, MaterialTheme.shapes.extraLarge
+                    ), colors = ButtonColors(
                         Color.Transparent,
                         primaryContentColor,
                         Color.Transparent,
@@ -453,7 +535,19 @@ fun DefaultLauncherScreen(activity: Activity, onNext: () -> Unit) {
             Spacer(Modifier.height(240.dp))
         }
 
-        NextButton(Modifier.align(Alignment.BottomEnd)) {
+        PrevButton(
+            Modifier
+                .align(Alignment.BottomStart)
+                .padding(bottom = 30.dp)
+        ) {
+            onPrev()
+        }
+
+        NextButton(
+            Modifier
+                .align(Alignment.BottomEnd)
+                .padding(bottom = 30.dp)
+        ) {
             onNext()
         }
     }
@@ -461,8 +555,7 @@ fun DefaultLauncherScreen(activity: Activity, onNext: () -> Unit) {
 
 @Composable
 fun AnalyticsConsentScreen(
-    mainAppModel: MainAppViewModel,
-    onNext: () -> Unit
+    mainAppModel: MainAppViewModel, onNext: () -> Unit, onPrev: () -> Unit
 ) {
     val showPolicyDialog = remember { mutableStateOf(false) }
     val scrollState = rememberLazyListState()
@@ -505,10 +598,7 @@ fun AnalyticsConsentScreen(
                     onClick = {
                         showPolicyDialog.value = true
                     }, modifier = Modifier, colors = ButtonColors(
-                        primaryContentColor,
-                        BackgroundColor,
-                        primaryContentColor,
-                        BackgroundColor
+                        primaryContentColor, BackgroundColor, primaryContentColor, BackgroundColor
                     )
                 ) {
                     Row(
@@ -525,10 +615,21 @@ fun AnalyticsConsentScreen(
             }
         }
 
-        Row(modifier = Modifier.align(Alignment.BottomEnd)) {
+        PrevButton(
+            Modifier
+                .align(Alignment.BottomStart)
+                .padding(bottom = 30.dp)
+        ) {
+            onPrev()
+        }
+
+        Row(
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(bottom = 30.dp)
+        ) {
             NextButton(
-                text = stringResource(R.string.deny),
-                outline = true
+                text = stringResource(R.string.deny), outline = true
             ) {
                 setBooleanSetting(
                     mainAppModel.getContext(),
@@ -554,14 +655,15 @@ fun AnalyticsConsentScreen(
     }
 
     AnimatedVisibility(showPolicyDialog.value, enter = fadeIn(), exit = fadeOut()) {
-        PrivacyPolicyDialog(mainAppModel, showPolicyDialog)
+        Box(Modifier.padding(bottom = 30.dp)) {
+            PrivacyPolicyDialog(mainAppModel, showPolicyDialog)
+        }
     }
 }
 
 @Composable
 fun AccessibilitySetupScreen(
-    mainAppModel: MainAppViewModel,
-    onNext: () -> Unit
+    mainAppModel: MainAppViewModel, onNext: () -> Unit, onPrev: () -> Unit
 ) {
     val scrollState = rememberLazyListState()
     val context = mainAppModel.getContext()
@@ -606,10 +708,7 @@ fun AccessibilitySetupScreen(
                         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                         context.startActivity(intent)
                     }, modifier = Modifier, colors = ButtonColors(
-                        primaryContentColor,
-                        BackgroundColor,
-                        primaryContentColor,
-                        BackgroundColor
+                        primaryContentColor, BackgroundColor, primaryContentColor, BackgroundColor
                     )
                 ) {
                     Row(
@@ -626,7 +725,19 @@ fun AccessibilitySetupScreen(
             }
         }
 
-        Row(modifier = Modifier.align(Alignment.BottomEnd)) {
+        PrevButton(
+            Modifier
+                .align(Alignment.BottomStart)
+                .padding(bottom = 30.dp)
+        ) {
+            onPrev()
+        }
+
+        Row(
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(bottom = 30.dp)
+        ) {
             NextButton {
                 onNext()
             }

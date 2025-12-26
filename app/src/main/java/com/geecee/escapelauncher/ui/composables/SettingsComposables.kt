@@ -181,18 +181,33 @@ fun AutoResizingText(
  */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun SettingsHeader(goBack: () -> Unit, title: String, hideBack: Boolean = false) {
+fun SettingsHeader(
+    goBack: () -> Unit,
+    title: String,
+    hideBack: Boolean = false,
+    color: Color = ContentColor,
+    padding: Boolean = true
+) {
     Row(
         modifier = Modifier
             .combinedClickable(onClick = { goBack() })
-            .padding(0.dp, 120.dp, 0.dp, 8.dp)
+            .padding(
+                0.dp,
+                if (padding) {
+                    120.dp
+                } else {
+                    0.dp
+                },
+                0.dp,
+                8.dp
+            )
             .height(70.dp) // Set a fixed height for the header
     ) {
         if (!hideBack) {
             Icon(
                 Icons.AutoMirrored.Default.ArrowBack,
                 contentDescription = "Go Back",
-                tint = ContentColor,
+                tint = color,
                 modifier = Modifier
                     .size(48.dp)
                     .align(Alignment.CenterVertically)
@@ -202,6 +217,7 @@ fun SettingsHeader(goBack: () -> Unit, title: String, hideBack: Boolean = false)
         AutoResizingText(
             text = title,
             style = MaterialTheme.typography.titleMedium,
+            color = color,
             modifier = Modifier.align(Alignment.CenterVertically)
         )
     }
