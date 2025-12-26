@@ -20,6 +20,14 @@
     <string name="private_space_settings">Private Space Settings</string>
     <string name="private_space_search_term">pri</string>
 
+    <!-- Work Profile strings -->
+    <string name="work_profile">Work Profile</string>
+    <string name="unlock_work_profile">Unlock Work Profile</string>
+    <string name="lock_work_profile">Lock Work Profile</string>
+    <string name="work_profile_settings">Work Profile Settings</string>
+    <string name="hide_work_profile_in_search">Hide work profile in search</string>
+    <string name="SearchHiddenWorkProfile">SearchHiddenWorkProfile</string>
+
     <!-- Hidden Apps strings-->
     <string name="hidden_apps">Hidden Apps</string>
     <string name="swipe_to_show_app">Swipe to unhide app</string>
@@ -57,6 +65,7 @@
     <string name="screen_time_on_app">Screen Time On Apps</string>
     <string name="screen_time_on_home_screen">Home Screen Time</string>
     <string name="hide_private_space_in_search">Hidden private space</string>
+    <string name="SearchHiddenPrivateSpace">SearchHiddenPrivateSpace</string>
     <string name="haptic_feedback">Haptic feedback</string>
     <string name="done">Done</string>
     <string name="syncLightDark">Sync with system light/dark</string>
