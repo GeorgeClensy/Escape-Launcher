@@ -19,8 +19,6 @@
 
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.DISABLE_KEYGUARD" />
-    <uses-permission android:name="android.permission.BIND_DEVICE_ADMIN"
-        tools:ignore="ProtectedPermissions" />
 
 
     <application
@@ -53,17 +51,6 @@
         </activity>
 
         <activity android:name=".utils.ConfigureAppWidgetActivity" />
-
-        <receiver android:name=".utils.managers.MyDeviceAdminReceiver"
-            android:exported="true"
-            android:permission="android.permission.BIND_DEVICE_ADMIN">
-            <meta-data
-                android:name="android.app.device_admin"
-                android:resource="@xml/device_admin_receiver" />
-            <intent-filter>
-                <action android:name="android.app.action.DEVICE_ADMIN_ENABLED" />
-            </intent-filter>
-        </receiver>
 
         <service
             android:name=".utils.EscapeAccessibilityService"

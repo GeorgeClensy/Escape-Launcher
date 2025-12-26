@@ -65,7 +65,6 @@
     <string name="screen_time_on_app">Screen Time On Apps</string>
     <string name="screen_time_on_home_screen">Home Screen Time</string>
     <string name="hide_private_space_in_search">Hidden private space</string>
-    <string name="SearchHiddenPrivateSpace">SearchHiddenPrivateSpace</string>
     <string name="haptic_feedback">Haptic feedback</string>
     <string name="done">Done</string>
     <string name="syncLightDark">Sync with system light/dark</string>
