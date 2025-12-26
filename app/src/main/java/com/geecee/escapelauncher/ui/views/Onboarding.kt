@@ -351,8 +351,6 @@ fun StatisticsScreen(onNext: () -> Unit, onPrev: () -> Unit) {
         Column(
             Modifier.verticalScroll(rememberScrollState())
         ) {
-            SettingsSpacer()
-
             Text(
                 buildAnnotatedString {
                     append(stringResource(R.string.most_people_waste))
