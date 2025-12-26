@@ -123,6 +123,9 @@ class MainHomeScreenActivity : ComponentActivity() {
             })
         }
 
+        // Assign window
+        viewModel.setWindow(window)
+
         // Register screen off receiver
         screenOffReceiver = ScreenOffReceiver {
             // Screen turned off
@@ -297,6 +300,8 @@ class MainHomeScreenActivity : ComponentActivity() {
                         viewModel,
                         homeScreenModel
                     ) { navController.navigate("settings") }
+
+                    AppUtils.configureFullScreenMode(window)
                 }
                 composable(
                     "settings",
@@ -315,16 +320,20 @@ class MainHomeScreenActivity : ComponentActivity() {
                         },
                         this@MainHomeScreenActivity,
                     )
+
+                    AppUtils.configureFullScreenMode(window)
                 }
                 composable(
                     "onboarding",
                     enterTransition = { fadeIn(tween(900)) },
                     exitTransition = { fadeOut(tween(300)) }) {
+                    AppUtils.configureOnboardingFullScreen(window)
+
                     Onboarding(
-                        navController,
-                        viewModel,
-                        homeScreenModel,
-                        this@MainHomeScreenActivity
+                        mainAppNavController = navController,
+                        mainAppViewModel = viewModel,
+                        homeScreenModel = homeScreenModel,
+                        activity = this@MainHomeScreenActivity
                     )
                 }
             }

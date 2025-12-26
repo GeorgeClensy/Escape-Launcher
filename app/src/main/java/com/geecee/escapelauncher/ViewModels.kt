@@ -3,6 +3,7 @@ package com.geecee.escapelauncher
 import android.app.Application
 import android.content.ComponentName
 import android.content.Context
+import android.view.Window
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.pager.PagerState
@@ -220,6 +221,14 @@ class MainAppViewModel(application: Application) : AndroidViewModel(application)
     private val appContext: Context = application.applicationContext // The app context
 
     fun getContext(): Context = appContext // Returns the context
+
+    private var window: Window? = null
+
+    fun setWindow(window: Window) {
+        this.window = window
+    }
+
+    fun getWindow(): Window? = window
 
     var appTheme: MutableState<AppTheme> = mutableStateOf(AppTheme.OFF_LIGHT) // App material theme
 

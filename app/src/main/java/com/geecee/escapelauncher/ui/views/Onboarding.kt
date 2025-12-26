@@ -2,6 +2,7 @@ package com.geecee.escapelauncher.ui.views
 
 import android.app.Activity
 import android.content.Intent
+import android.os.Build
 import android.provider.Settings
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.FastOutSlowInEasing
@@ -11,7 +12,6 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -19,13 +19,13 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
@@ -35,7 +35,6 @@ import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -47,7 +46,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
@@ -57,7 +55,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -71,145 +69,192 @@ import com.geecee.escapelauncher.ui.composables.SettingsSpacer
 import com.geecee.escapelauncher.ui.theme.BackgroundColor
 import com.geecee.escapelauncher.ui.theme.CardContainerColor
 import com.geecee.escapelauncher.ui.theme.primaryContentColor
+import com.geecee.escapelauncher.utils.AppUtils
 import com.geecee.escapelauncher.utils.AppUtils.configureAnalytics
 import com.geecee.escapelauncher.utils.getBooleanSetting
 import com.geecee.escapelauncher.utils.isDefaultLauncher
 import com.geecee.escapelauncher.utils.setBooleanSetting
 import com.geecee.escapelauncher.utils.showLauncherSelector
-import com.geecee.escapelauncher.MainAppViewModel as MainAppModel
 
-private const val SCREEN_WELCOME = "welcome"
-private const val SCREEN_STATISTICS = "statistics"
-private const val SCREEN_FAVORITES = "favorites"
-private const val SCREEN_DEFAULT_LAUNCHER = "default_launcher"
-private const val SCREEN_ANALYTICS = "analytics"
-private const val SCREEN_ACCESSIBILITY = "accessibility"
+data class OnboardingPage(
+    val route: String,
+    val content: @Composable (onNext: () -> Unit) -> Unit
+)
 
 @Composable
 fun Onboarding(
-    mainNavController: NavController,
-    mainAppModel: MainAppViewModel,
+    mainAppNavController: NavHostController,
+    mainAppViewModel: MainAppViewModel,
     homeScreenModel: HomeScreenModel,
     activity: Activity
 ) {
-    val statusBarHeight = WindowInsets.statusBars
-        .asPaddingValues()
-        .calculateTopPadding()
-        .takeIf { it > 0.dp } ?: 50.dp
-
     val navController = rememberNavController()
-    val currentBackStackEntry by navController.currentBackStackEntryAsState()
-    val currentRoute = currentBackStackEntry?.destination?.route
 
-    // Define the sequence of pages, skipping analytics if it's a FOSS build
-    val onboardingPages = remember {
-        listOfNotNull(
-            SCREEN_WELCOME,
-            SCREEN_STATISTICS,
-            SCREEN_FAVORITES,
-            SCREEN_DEFAULT_LAUNCHER,
-            if (!BuildConfig.IS_FOSS) SCREEN_ANALYTICS else null,
-            SCREEN_ACCESSIBILITY
-        )
-    }
+    @Suppress("KotlinConstantConditions") val pages = listOfNotNull(
+        OnboardingPage("welcome") { onNext ->
+            WelcomeScreen {
+                onNext()
+            }
+        },
+        OnboardingPage("stats") { onNext ->
+            StatisticsScreen {
+                onNext()
+            }
+        },
+        OnboardingPage("favorites") { onNext ->
+            FavoritesSelectionScreen(
+                mainAppViewModel,
+                homeScreenModel,
+            ) {
+                onNext()
+            }
+        },
+        OnboardingPage("default_launcher") { onNext ->
+            DefaultLauncherScreen(activity) {
+                onNext()
+            }
+        },
+        if (!BuildConfig.IS_FOSS) {
+            OnboardingPage("analytics") { onNext ->
+                AnalyticsConsentScreen(mainAppViewModel) {
+                    onNext()
+                }
+            }
+        } else {
+            null
+        },
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            OnboardingPage("accessibility") { onNext ->
+                AccessibilitySetupScreen(mainAppViewModel) {
+                    onNext()
+                }
+            }
+        } else {
+            null
+        }
+    )
 
-    var startDestination = SCREEN_WELCOME
-
-    if (getBooleanSetting(
-            mainAppModel.getContext(),
-            stringResource(R.string.WasChangingLauncher),
-            false
-        )
-    ) {
-        startDestination = SCREEN_DEFAULT_LAUNCHER
-    }
-
-    // Progress bar animation based on current page index
-    val progressTarget = remember(currentRoute) {
-        val index = onboardingPages.indexOf(currentRoute).coerceAtLeast(0)
-        (index + 1).toFloat() / onboardingPages.size
-    }
-
-    // Animate progress smoothly
+    // Work out progress for progress bar
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route
+    val currentIndex = pages.indexOfFirst { it.route == currentRoute }
+        .coerceAtLeast(0)
+    val progress =
+        if (pages.size > 1) currentIndex / (pages.size - 1f) else 0f
     val animatedProgress by animateFloatAsState(
-        targetValue = progressTarget,
+        targetValue = progress,
         animationSpec = tween(durationMillis = 500, easing = FastOutSlowInEasing),
         label = "progressAnim"
     )
 
-    Column(
-        Modifier
-            .fillMaxSize()
-            .padding(top = statusBarHeight, bottom = 15.dp)
+    // Go to the launcher page if you're coming back from that:
+    var startDestination = pages[0].route
+    if (getBooleanSetting(
+            mainAppViewModel.getContext(),
+            stringResource(R.string.WasChangingLauncher),
+            false
+        )
     ) {
+        startDestination = "default_launcher"
+    }
 
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .windowInsetsPadding(WindowInsets.displayCutout)
+            .padding(30.dp)
+    ) {
         LinearProgressIndicator(
             progress = { animatedProgress },
             modifier = Modifier
                 .fillMaxWidth()
-                .height(32.dp)
-                .padding(start = 30.dp, end = 30.dp, top = 15.dp),
+                .height(32.dp),
             color = primaryContentColor,
             trackColor = CardContainerColor
+        )
+
+        Spacer(
+            Modifier.height(30.dp)
         )
 
         NavHost(
             navController = navController,
             startDestination = startDestination,
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier.weight(1f)
         ) {
-            composable(
-                SCREEN_WELCOME,
-                enterTransition = { fadeIn(tween(300)) },
-                exitTransition = { fadeOut(tween(300)) }) {
-                WelcomeScreen(navController)
-            }
-            composable(
-                SCREEN_STATISTICS,
-                enterTransition = { fadeIn(tween(300)) },
-                exitTransition = { fadeOut(tween(300)) }) {
-                StatisticsScreen(navController)
-            }
-            composable(
-                SCREEN_FAVORITES,
-                enterTransition = { fadeIn(tween(300)) },
-                exitTransition = { fadeOut(tween(300)) }) {
-                FavoritesSelectionScreen(navController, mainAppModel, homeScreenModel)
-            }
-            composable(
-                SCREEN_DEFAULT_LAUNCHER,
-                enterTransition = { fadeIn(tween(300)) },
-                exitTransition = { fadeOut(tween(300)) }) {
-                DefaultLauncherSetupScreen(navController, activity)
-            }
-            if (!BuildConfig.IS_FOSS) {
-                composable(
-                    SCREEN_ANALYTICS,
-                    enterTransition = { fadeIn(tween(300)) },
-                    exitTransition = { fadeOut(tween(300)) }) {
-                    AnalyticsConsentScreen(navController, mainAppModel)
+            pages.forEachIndexed { index, page ->
+                composable(page.route) {
+                    page.content { // (OnNext ->)
+                        if (index < pages.lastIndex) {
+                            navController.navigate(pages[index + 1].route)
+                        } else {
+                            // Finished onboarding
+                            mainAppNavController.navigate("home") {
+                                popUpTo("onboarding") {
+                                    inclusive = true
+                                }
+                                launchSingleTop = true
+                            }
+                            setBooleanSetting(
+                                mainAppViewModel.getContext(),
+                                mainAppViewModel.getContext().resources.getString(R.string.FirstTime),
+                                false
+                            )
+                            setBooleanSetting(
+                                mainAppViewModel.getContext(),
+                                mainAppViewModel.getContext().resources.getString(R.string.WasChangingLauncher),
+                                false
+                            )
+                            mainAppViewModel.getWindow()?.let { window ->
+                                AppUtils.configureFullScreenMode(window = window)
+                            }
+                        }
+                    }
                 }
-            }
-            composable(
-                SCREEN_ACCESSIBILITY,
-                enterTransition = { fadeIn(tween(300)) },
-                exitTransition = { fadeOut(tween(300)) }) {
-                AccessibilitySetupScreen(
-                    mainNavController, mainAppModel
-                )
             }
         }
     }
 }
 
 @Composable
-fun WelcomeScreen(navController: NavController) {
-    Box(
-        Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-            .padding(30.dp, 0.dp, 30.dp, 30.dp)
+fun NextButton(
+    modifier: Modifier = Modifier,
+    text: String = stringResource(R.string.continue_str),
+    outline: Boolean = false,
+    onNext: () -> Unit
+) {
+    Button(
+        onClick = {
+            onNext()
+        },
+        modifier = modifier,
+        border = if (outline) BorderStroke(1.dp, primaryContentColor) else null,
+        colors = ButtonColors(
+            containerColor = if (outline) Color.Transparent else primaryContentColor,
+            contentColor = if (outline) primaryContentColor else BackgroundColor,
+            disabledContainerColor = if (outline) Color.Transparent else primaryContentColor,
+            disabledContentColor = if (outline) primaryContentColor else BackgroundColor
+        )
     ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Text(
+                text = text, maxLines = 1, // Prevent overflow
+                overflow = TextOverflow.Ellipsis // Gracefully handle long text
+            )
+            Icon(
+                imageVector = Icons.AutoMirrored.Default.ArrowForward,
+                contentDescription = "Continue"
+            )
+        }
+    }
+}
+
+@Composable
+fun WelcomeScreen(onNext: () -> Unit) {
+    Box(Modifier.fillMaxSize()) {
         Column(Modifier.align(Alignment.Center)) {
             Icon(
                 painterResource(R.drawable.outlineicon),
@@ -229,41 +274,15 @@ fun WelcomeScreen(navController: NavController) {
             )
         }
 
-        Button(
-            onClick = {
-                navController.navigate(SCREEN_STATISTICS)
-            }, modifier = Modifier.align(Alignment.BottomEnd), colors = ButtonColors(
-                primaryContentColor,
-                BackgroundColor,
-                primaryContentColor,
-                BackgroundColor
-            )
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                Text(
-                    text = stringResource(R.string.continue_str), maxLines = 1, // Prevent overflow
-                    overflow = TextOverflow.Ellipsis // Gracefully handle long text
-                )
-                Icon(
-                    imageVector = Icons.AutoMirrored.Default.ArrowForward,
-                    contentDescription = "Continue"
-                )
-            }
+        NextButton(Modifier.align(Alignment.BottomEnd)) {
+            onNext()
         }
     }
 }
 
 @Composable
-fun StatisticsScreen(navController: NavController) {
-    Box(
-        Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-            .padding(30.dp, 0.dp, 30.dp, 30.dp)
-    ) {
+fun StatisticsScreen(onNext: () -> Unit) {
+    Box(Modifier.fillMaxSize()) {
         Column(
             Modifier.verticalScroll(rememberScrollState())
         ) {
@@ -316,32 +335,8 @@ fun StatisticsScreen(navController: NavController) {
             )
         }
 
-        Button(
-            onClick = {
-                navController.navigate(SCREEN_FAVORITES)
-            },
-            modifier = Modifier
-                .align(Alignment.BottomEnd),
-            colors = ButtonColors(
-                primaryContentColor,
-                BackgroundColor,
-                primaryContentColor,
-                BackgroundColor
-            )
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                Text(
-                    text = stringResource(R.string.continue_str), maxLines = 1, // Prevent overflow
-                    overflow = TextOverflow.Ellipsis // Gracefully handle long text
-                )
-                Icon(
-                    imageVector = Icons.AutoMirrored.Default.ArrowForward,
-                    contentDescription = "Continue"
-                )
-            }
+        NextButton(Modifier.align(Alignment.BottomEnd)) {
+            onNext()
         }
     }
 }
@@ -349,16 +344,11 @@ fun StatisticsScreen(navController: NavController) {
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun FavoritesSelectionScreen(
-    navController: NavController,
-    mainAppModel: MainAppModel,
-    homeScreenModel: HomeScreenModel
+    mainAppModel: MainAppViewModel,
+    homeScreenModel: HomeScreenModel,
+    onNext: () -> Unit,
 ) {
-    Box(
-        Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-            .padding(30.dp, 0.dp, 30.dp, 0.dp)
-    ) {
+    Box(Modifier.fillMaxSize()) {
         BulkAppManager(
             apps = homeScreenModel.installedApps,
             preSelectedApps = homeScreenModel.favoriteApps,
@@ -368,9 +358,11 @@ fun FavoritesSelectionScreen(
                 mainAppModel.favoriteAppsManager.reorderFavoriteApps(fromIndex, toIndex)
                 homeScreenModel.reloadFavouriteApps()
             },
-            onBackClicked = { navController.popBackStack() },
+            onBackClicked = { },
             hideTitle = false,
             hideBack = true,
+            topPadding = false,
+            titleColor = primaryContentColor,
             onAppClicked = { app, selected ->
                 if (selected) {
                     mainAppModel.favoriteAppsManager.removeFavoriteApp(app.packageName)
@@ -381,45 +373,15 @@ fun FavoritesSelectionScreen(
                 }
             })
 
-        Button(
-            onClick = {
-                navController.navigate(SCREEN_DEFAULT_LAUNCHER)
-            },
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .padding(bottom = 30.dp),
-            colors = ButtonColors(
-                primaryContentColor,
-                BackgroundColor,
-                primaryContentColor,
-                BackgroundColor
-            )
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                Text(
-                    text = stringResource(R.string.continue_str), maxLines = 1, // Prevent overflow
-                    overflow = TextOverflow.Ellipsis // Gracefully handle long text
-                )
-                Icon(
-                    imageVector = Icons.AutoMirrored.Default.ArrowForward,
-                    contentDescription = "Continue"
-                )
-            }
+        NextButton(Modifier.align(Alignment.BottomEnd)) {
+            onNext()
         }
     }
 }
 
 @Composable
-fun DefaultLauncherSetupScreen(navController: NavController, activity: Activity) {
-    Box(
-        Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-            .padding(30.dp, 120.dp, 30.dp, 30.dp)
-    ) {
+fun DefaultLauncherScreen(activity: Activity, onNext: () -> Unit) {
+    Box(Modifier.fillMaxSize()) {
         Column {
             Text(
                 stringResource(R.string.set_escape),
@@ -491,55 +453,24 @@ fun DefaultLauncherSetupScreen(navController: NavController, activity: Activity)
             Spacer(Modifier.height(240.dp))
         }
 
-        Button(
-            onClick = {
-                val nextRoute = if (BuildConfig.IS_FOSS) SCREEN_ACCESSIBILITY else SCREEN_ANALYTICS
-                navController.navigate(nextRoute)
-            }, modifier = Modifier.align(Alignment.BottomEnd), colors = ButtonColors(
-                primaryContentColor,
-                BackgroundColor,
-                primaryContentColor,
-                BackgroundColor
-            )
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                Text(
-                    text = stringResource(R.string.continue_str), maxLines = 1, // Prevent overflow
-                    overflow = TextOverflow.Ellipsis // Gracefully handle long text
-                )
-                Icon(
-                    imageVector = Icons.AutoMirrored.Default.ArrowForward,
-                    contentDescription = "Continue"
-                )
-            }
+        NextButton(Modifier.align(Alignment.BottomEnd)) {
+            onNext()
         }
     }
 }
 
 @Composable
 fun AnalyticsConsentScreen(
-    navController: NavController,
-    mainAppModel: MainAppModel
+    mainAppModel: MainAppViewModel,
+    onNext: () -> Unit
 ) {
     val showPolicyDialog = remember { mutableStateOf(false) }
     val scrollState = rememberLazyListState()
 
-    Box(
-        Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-            .padding(30.dp, 0.dp, 30.dp, 30.dp)
-    ) {
+    Box(Modifier.fillMaxSize()) {
         LazyColumn(
             state = scrollState
         ) {
-            item {
-                Spacer(Modifier.height(120.dp))
-            }
-
             item {
                 Text(
                     stringResource(R.string.analytics_and_data_collection),
@@ -551,7 +482,10 @@ fun AnalyticsConsentScreen(
             }
 
             item {
-                Spacer(Modifier.height(5.dp))
+                Spacer(Modifier.height(10.dp))
+            }
+
+            item {
                 Text(
                     stringResource(R.string.anonymous_data),
                     Modifier,
@@ -592,58 +526,29 @@ fun AnalyticsConsentScreen(
         }
 
         Row(modifier = Modifier.align(Alignment.BottomEnd)) {
-            Button(
-                onClick = {
-                    navController.navigate(SCREEN_ACCESSIBILITY)
-                    setBooleanSetting(
-                        mainAppModel.getContext(),
-                        mainAppModel.getContext().resources.getString(R.string.Analytics),
-                        false
-                    )
-                    configureAnalytics(mainAppModel.getContext(), false)
-                }, modifier = Modifier, colors = ButtonDefaults.outlinedButtonColors(
-                    containerColor = BackgroundColor,
-                    contentColor = primaryContentColor
-                ), border = BorderStroke(1.dp, primaryContentColor)
+            NextButton(
+                text = stringResource(R.string.deny),
+                outline = true
             ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Text(
-                        text = stringResource(R.string.deny), maxLines = 1, // Prevent overflow
-                        overflow = TextOverflow.Ellipsis // Gracefully handle long text
-                    )
-                }
+                setBooleanSetting(
+                    mainAppModel.getContext(),
+                    mainAppModel.getContext().resources.getString(R.string.Analytics),
+                    false
+                )
+                configureAnalytics(mainAppModel.getContext(), false)
+                onNext()
             }
 
             Spacer(Modifier.width(15.dp))
 
-            Button(
-                onClick = {
-                    navController.navigate(SCREEN_ACCESSIBILITY)
-                    setBooleanSetting(
-                        mainAppModel.getContext(),
-                        mainAppModel.getContext().resources.getString(R.string.Analytics),
-                        true
-                    )
-                    configureAnalytics(mainAppModel.getContext(), true)
-                }, modifier = Modifier, colors = ButtonColors(
-                    primaryContentColor,
-                    BackgroundColor,
-                    primaryContentColor,
-                    BackgroundColor
+            NextButton(text = stringResource(R.string.allow)) {
+                setBooleanSetting(
+                    mainAppModel.getContext(),
+                    mainAppModel.getContext().resources.getString(R.string.Analytics),
+                    true
                 )
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Text(
-                        text = stringResource(R.string.allow), maxLines = 1, // Prevent overflow
-                        overflow = TextOverflow.Ellipsis // Gracefully handle long text
-                    )
-                }
+                configureAnalytics(mainAppModel.getContext(), true)
+                onNext()
             }
         }
     }
@@ -655,25 +560,16 @@ fun AnalyticsConsentScreen(
 
 @Composable
 fun AccessibilitySetupScreen(
-    mainNavController: NavController,
-    mainAppModel: MainAppModel
+    mainAppModel: MainAppViewModel,
+    onNext: () -> Unit
 ) {
     val scrollState = rememberLazyListState()
-    val context = LocalContext.current
+    val context = mainAppModel.getContext()
 
-    Box(
-        Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-            .padding(30.dp, 0.dp, 30.dp, 30.dp)
-    ) {
+    Box(Modifier.fillMaxSize()) {
         LazyColumn(
             state = scrollState
         ) {
-            item {
-                Spacer(Modifier.height(120.dp))
-            }
-
             item {
                 Text(
                     stringResource(R.string.accessibility_title),
@@ -685,7 +581,10 @@ fun AccessibilitySetupScreen(
             }
 
             item {
-                Spacer(Modifier.height(5.dp))
+                Spacer(Modifier.height(10.dp))
+            }
+
+            item {
                 Text(
                     stringResource(R.string.accessibility_description),
                     Modifier,
@@ -704,6 +603,7 @@ fun AccessibilitySetupScreen(
                 Button(
                     onClick = {
                         val intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
+                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                         context.startActivity(intent)
                     }, modifier = Modifier, colors = ButtonColors(
                         primaryContentColor,
@@ -727,40 +627,8 @@ fun AccessibilitySetupScreen(
         }
 
         Row(modifier = Modifier.align(Alignment.BottomEnd)) {
-            Button(
-                onClick = {
-                    mainNavController.navigate("home") {
-                        popUpTo("onboarding") {
-                            inclusive = true
-                        }
-                        launchSingleTop = true
-                    }
-                    setBooleanSetting(
-                        mainAppModel.getContext(),
-                        mainAppModel.getContext().resources.getString(R.string.FirstTime),
-                        false
-                    )
-                    setBooleanSetting(
-                        mainAppModel.getContext(),
-                        mainAppModel.getContext().resources.getString(R.string.WasChangingLauncher),
-                        false
-                    )
-                }, modifier = Modifier, colors = ButtonColors(
-                    primaryContentColor,
-                    BackgroundColor,
-                    primaryContentColor,
-                    BackgroundColor
-                )
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Text(
-                        text = stringResource(R.string.next), maxLines = 1, // Prevent overflow
-                        overflow = TextOverflow.Ellipsis // Gracefully handle long text
-                    )
-                }
+            NextButton {
+                onNext()
             }
         }
     }

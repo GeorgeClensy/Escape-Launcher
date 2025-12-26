@@ -471,6 +471,7 @@ object AppUtils {
     fun configureFullScreenMode(window: Window) {
         WindowCompat.setDecorFitsSystemWindows(window, false)
         val controller = WindowInsetsControllerCompat(window, window.decorView)
+        controller.show(WindowInsetsCompat.Type.navigationBars()) // Show navigation bars
         controller.hide(WindowInsetsCompat.Type.statusBars()) // hide status bar only
         controller.systemBarsBehavior =
             WindowInsetsControllerCompat.BEHAVIOR_DEFAULT
@@ -478,6 +479,16 @@ object AppUtils {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             window.setNavigationBarContrastEnforced(false)
         }
+    }
+
+    fun configureOnboardingFullScreen(window: Window) {
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+
+        val controller = WindowCompat.getInsetsController(window, window.decorView)
+        controller.systemBarsBehavior =
+            WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+
+        controller.hide(WindowInsetsCompat.Type.systemBars())
     }
 
     /**
