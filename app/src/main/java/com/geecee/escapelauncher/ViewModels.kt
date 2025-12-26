@@ -26,6 +26,7 @@ import com.geecee.escapelauncher.utils.managers.ChallengesManager
 import com.geecee.escapelauncher.utils.managers.FavoriteAppsManager
 import com.geecee.escapelauncher.utils.managers.HiddenAppsManager
 import com.geecee.escapelauncher.utils.managers.getUsageForApp
+import com.geecee.escapelauncher.utils.managers.getScreenTimeListSorted
 import com.geecee.escapelauncher.utils.weatherProxy
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -294,13 +295,16 @@ class MainAppViewModel(application: Application) : AndroidViewModel(application)
     @Suppress("unused")
     fun reloadScreenTimeCache(packageNames: List<String>) {
         viewModelScope.launch(Dispatchers.IO) {
-            packageNames.forEach { packageName ->
-                val screenTime = getUsageForApp(packageName, getToday())
-                screenTimeCache[packageName] = screenTime
+            val usageList = getScreenTimeListSorted(getToday())
+            val usageMap = usageList.associate { it.packageName to it.totalTime }
+            
+            withContext(Dispatchers.Main) {
+                screenTimeCache.clear()
+                screenTimeCache.putAll(usageMap)
+                shouldReloadScreenTime.value++
             }
-            shouldReloadScreenTime.value++
         }
-    } // Reloads the screen times
+    } // Reloads the screen times efficiently
 
     suspend fun getScreenTimeAsync(packageName: String, forceRefresh: Boolean = false): Long {
         if (forceRefresh || !screenTimeCache.containsKey(packageName)) {

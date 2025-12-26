@@ -14,6 +14,8 @@ import okio.IOException
 import org.json.JSONObject
 
 class WeatherImpl : WeatherProxy {
+    private val client = OkHttpClient()
+
     @RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION])
     override fun getWeather(context: Context, callback: (String) -> Unit) {
         val fusedLocationClient =
@@ -36,7 +38,6 @@ class WeatherImpl : WeatherProxy {
                         "latitude=$lat&longitude=$lon&current_weather=true"
 
             val request = Request.Builder().url(url).build()
-            val client = OkHttpClient()
 
             client.newCall(request).enqueue(object : Callback {
                 override fun onFailure(call: Call, e: IOException) {

@@ -130,6 +130,12 @@ interface AppUsageDao {
 
     @Query("SELECT * FROM app_usage")
     suspend fun getAllUsage(): List<AppUsageEntity>
+
+    @Query("SELECT SUM(totalTime) FROM app_usage WHERE packageName LIKE :dateSuffix")
+    suspend fun getTotalUsageForDate(dateSuffix: String): Long?
+
+    @Query("SELECT * FROM app_usage WHERE packageName LIKE :dateSuffix")
+    suspend fun getUsageListForDate(dateSuffix: String): List<AppUsageEntity>
 }
 
 
@@ -150,12 +156,7 @@ private fun calculateMidnightDelay(): Long {
 // Utility functions
 suspend fun getTotalUsageForDate(date: String): Long {
     val dao = ScreenTimeManager.database.appUsageDao()
-    val allUsage = dao.getAllUsage() // Fetch all app usage data
-
-    // Sum the total time for packageNames that end with the specified date
-    return allUsage.filter {
-        it.packageName.endsWith("-$date") // Check if packageName ends with "-yyyy-MM-dd"
-    }.sumOf { it.totalTime } // Sum the totalTime
+    return dao.getTotalUsageForDate("%-$date") ?: 0L
 }
 
 suspend fun getUsageForApp(packageName: String, date: String): Long {
@@ -165,12 +166,10 @@ suspend fun getUsageForApp(packageName: String, date: String): Long {
 
 suspend fun getScreenTimeListSorted(date: String): List<AppUsageEntity> {
     val dao = ScreenTimeManager.database.appUsageDao()
-    val allUsage = dao.getAllUsage() // Fetch all app usage data
+    val usageList = dao.getUsageListForDate("%-$date")
 
-    // Filter and transform to strip date and dash from packageName
-    return allUsage.filter {
-        it.packageName.endsWith("-$date") // Check if packageName ends with "-yyyy-MM-dd"
-    }.map { usage ->
+    // Transform to strip date and dash from packageName
+    return usageList.map { usage ->
         // Create a new AppUsageEntity with the packageName stripped of the date and dash
         AppUsageEntity(
             packageName = usage.packageName.substringBeforeLast("-$date"),

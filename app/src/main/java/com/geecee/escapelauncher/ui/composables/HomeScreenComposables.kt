@@ -170,8 +170,10 @@ fun Clock(
 
     LaunchedEffect(Unit) {
         while (true) {
+            val now = Calendar.getInstance()
+            val secondsToNextMinute = 60 - now.get(Calendar.SECOND)
+            delay(secondsToNextMinute * 1000L)
             time = getCurrentTime(twelveHour)
-            delay(1000) // Update every second
         }
     }
 
