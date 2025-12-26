@@ -1430,6 +1430,15 @@ fun DevOptions(mainAppModel: MainAppModel, context: Context, goBack: () -> Unit)
 
         item {
             SettingsButton(
+                label = "Force crash",
+                onClick = {
+                    throw RuntimeException("Test Crash")
+                }
+            )
+        }
+
+        item {
+            SettingsButton(
                 label = "Test Screen Off",
                 isBottomOfGroup = true,
                 onClick = {

@@ -4,6 +4,8 @@ import android.content.Context
 
 interface AnalyticsProxy {
     fun configureAnalytics(context: Context, enabled: Boolean)
+
+    fun logCustomKey(key: String, value: String)
 }
 
 // Global accessor that will be provided by the flavor-specific implementations

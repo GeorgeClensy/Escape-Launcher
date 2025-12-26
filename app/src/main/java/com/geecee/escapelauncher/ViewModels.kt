@@ -25,8 +25,8 @@ import com.geecee.escapelauncher.utils.getBooleanSetting
 import com.geecee.escapelauncher.utils.managers.ChallengesManager
 import com.geecee.escapelauncher.utils.managers.FavoriteAppsManager
 import com.geecee.escapelauncher.utils.managers.HiddenAppsManager
-import com.geecee.escapelauncher.utils.managers.getUsageForApp
 import com.geecee.escapelauncher.utils.managers.getScreenTimeListSorted
+import com.geecee.escapelauncher.utils.managers.getUsageForApp
 import com.geecee.escapelauncher.utils.weatherProxy
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -64,24 +64,29 @@ class HomeScreenModel(application: Application, private val mainAppViewModel: Ma
     val filteredApps = mutableStateListOf<InstalledApp>()
 
     fun updateFilteredApps() {
+        // Take a snapshot of the list and other state on the main thread to avoid ConcurrentModificationException
+        // when iterating on Dispatchers.Default while the original list is being modified.
+        val appsSnapshot = installedApps.toList()
+        val query = searchText.value.trim()
+        val context = mainAppViewModel.getContext()
+        val showHiddenInSearch = getBooleanSetting(
+            context,
+            context.resources.getString(R.string.showHiddenAppsInSearch),
+            false
+        )
+
         coroutineScope.launch(Dispatchers.Default) {
-            val apps = installedApps.filter {
-                it.packageName != mainAppViewModel.getContext().packageName
+            val apps = appsSnapshot.filter {
+                it.packageName != context.packageName
             }
 
-            val showHiddenInSearch = getBooleanSetting(
-                mainAppViewModel.getContext(),
-                mainAppViewModel.getContext().resources.getString(R.string.showHiddenAppsInSearch),
-                false
-            )
-
-            val query = searchText.value.trim()
             val filtered = if (query.isBlank()) {
                 apps.filter { !mainAppViewModel.hiddenAppsManager.isAppHidden(it.packageName) }
             } else {
                 val queryLower = query.lowercase()
                 apps.filter { app ->
-                    val isHidden = mainAppViewModel.hiddenAppsManager.isAppHidden(app.packageName)
+                    val isHidden =
+                        mainAppViewModel.hiddenAppsManager.isAppHidden(app.packageName)
                     val matchesQuery = AppUtils.fuzzyMatch(app.displayName, query)
                     matchesQuery && (!isHidden || showHiddenInSearch)
                 }.sortedWith(compareBy<InstalledApp> { app ->
