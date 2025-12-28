@@ -1,6 +1,6 @@
 package com.geecee.escapelauncher.ui.views
 
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
@@ -94,7 +94,7 @@ fun HomeScreen(
 
         //Date and weather and screen time
         item {
-            Row {
+            FlowRow {
                 if (getBooleanSetting(
                         mainAppModel.getContext(), stringResource(R.string.show_date), false
                     )
