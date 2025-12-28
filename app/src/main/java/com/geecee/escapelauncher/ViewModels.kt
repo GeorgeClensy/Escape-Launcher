@@ -3,6 +3,7 @@ package com.geecee.escapelauncher
 import android.app.Application
 import android.content.ComponentName
 import android.content.Context
+import android.util.Log
 import android.view.Window
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.lazy.LazyListState
@@ -163,6 +164,7 @@ class HomeScreenModel(application: Application, private val mainAppViewModel: Ma
     }
 
     fun loadApps() {
+        Log.d("Loading", "LoadApps started")
         coroutineScope.launch {
             suspendLoadApps()
             suspendReloadFavouriteApps()
@@ -170,6 +172,7 @@ class HomeScreenModel(application: Application, private val mainAppViewModel: Ma
     }
 
     private suspend fun suspendLoadApps() {
+        Log.d("Loading", "SuspendLoadApps started")
         val apps = withContext(Dispatchers.IO) {
             AppUtils.getAllInstalledApps(mainAppViewModel.getContext()).sortedBy {
                 it.displayName.lowercase()
@@ -179,6 +182,7 @@ class HomeScreenModel(application: Application, private val mainAppViewModel: Ma
             installedApps.clear()
             installedApps.addAll(apps)
             updateFilteredApps()
+            mainAppViewModel.isAppsLoaded.value = true
         }
     }
 
@@ -189,6 +193,8 @@ class HomeScreenModel(application: Application, private val mainAppViewModel: Ma
     }
 
     private suspend fun suspendReloadFavouriteApps() {
+        Log.d("Loading", "SuspendReloadFavouriteApps started")
+
         val favoritePackageNames = withContext(Dispatchers.IO) {
             mainAppViewModel.favoriteAppsManager.getFavoriteApps()
         }
@@ -199,6 +205,7 @@ class HomeScreenModel(application: Application, private val mainAppViewModel: Ma
             }
             favoriteApps.clear()
             favoriteApps.addAll(newFavoriteApps)
+            mainAppViewModel.isFavoritesLoaded.value = true
         }
     }
 
@@ -237,6 +244,16 @@ class MainAppViewModel(application: Application) : AndroidViewModel(application)
     fun getWindow(): Window? = window
 
     var appTheme: MutableState<AppTheme> = mutableStateOf(AppTheme.OFF_LIGHT) // App material theme
+
+    // Loading states for splash screen
+    val isAppsLoaded = mutableStateOf(false)
+    val isFavoritesLoaded = mutableStateOf(false)
+    val isThemeLoaded = mutableStateOf(false)
+    val isScreenTimeLoaded = mutableStateOf(false)
+
+    val isReady by derivedStateOf {
+        isAppsLoaded.value && isFavoritesLoaded.value && isThemeLoaded.value && isScreenTimeLoaded.value
+    }
 
     // Managers
 
@@ -297,16 +314,18 @@ class MainAppViewModel(application: Application) : AndroidViewModel(application)
         }
     } // Function to update a single app's cached screen time
 
-    @Suppress("unused")
     fun reloadScreenTimeCache(packageNames: List<String>) {
+        Log.d("Loading", "ReloadScreenTimeCache started")
+
         viewModelScope.launch(Dispatchers.IO) {
             val usageList = getScreenTimeListSorted(getToday())
             val usageMap = usageList.associate { it.packageName to it.totalTime }
-            
+
             withContext(Dispatchers.Main) {
                 screenTimeCache.clear()
                 screenTimeCache.putAll(usageMap)
                 shouldReloadScreenTime.value++
+                isScreenTimeLoaded.value = true
             }
         }
     } // Reloads the screen times efficiently

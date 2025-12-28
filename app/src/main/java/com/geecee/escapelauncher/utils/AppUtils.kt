@@ -13,11 +13,8 @@ import android.graphics.Paint
 import android.graphics.Rect
 import android.os.Build
 import android.os.Process.myUserHandle
+import android.util.Log
 import android.view.Window
-import android.view.animation.AlphaAnimation
-import android.view.animation.Animation
-import android.view.animation.AnimationSet
-import android.view.animation.ScaleAnimation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.ui.hapticfeedback.HapticFeedback
@@ -26,7 +23,6 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalResources
 import androidx.core.graphics.createBitmap
-import androidx.core.splashscreen.SplashScreen
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
@@ -350,53 +346,6 @@ object AppUtils {
     }
 
     /**
-     * Splash screen zoom animation
-     *
-     * @param splashScreen The splash screen to run the animation on
-     */
-    fun animateSplashScreen(splashScreen: SplashScreen) {
-        splashScreen.setOnExitAnimationListener { splashScreenViewProvider ->
-            // Create a scale animation (zoom effect)
-            val scaleAnimation = ScaleAnimation(
-                1f, 100f, // From normal size to 5x size
-                1f, 100f,
-                Animation.RELATIVE_TO_SELF, 0.5f, // Pivot at the center
-                Animation.RELATIVE_TO_SELF, 0.5f
-            ).apply {
-                duration = 1200 // Duration of the zoom animation in ms
-                fillAfter = true // Retain the final state
-            }
-
-            // Create a fade-out animation
-            val fadeOutAnimation = AlphaAnimation(1f, 0f).apply {
-                duration = 300 // Duration of the fade-out in ms
-                startOffset = 500 // Delay to start after zoom finishes
-                fillAfter = true // Retain the final state
-            }
-
-            // Combine the animations
-            val animationSet = AnimationSet(true).apply {
-                addAnimation(scaleAnimation)
-                addAnimation(fadeOutAnimation)
-            }
-
-            // Start the combined animation
-            splashScreenViewProvider.view.startAnimation(animationSet)
-
-            // Remove the splash screen view after the animation ends
-            animationSet.setAnimationListener(object : Animation.AnimationListener {
-                override fun onAnimationStart(animation: Animation?) {}
-
-                override fun onAnimationEnd(animation: Animation?) {
-                    splashScreenViewProvider.remove()
-                }
-
-                override fun onAnimationRepeat(animation: Animation?) {}
-            })
-        }
-    }
-
-    /**
      * Disable or enable analytics,
      *
      * @param enabled Pass as true to enable analytics
@@ -502,6 +451,8 @@ object AppUtils {
 
         androidx.compose.runtime.LaunchedEffect(Unit) {
             withContext(Dispatchers.IO) {
+                Log.d("Loading","Theme loading started")
+
                 var settingToChange = resources.getString(R.string.Theme)
 
                 if (getBooleanSetting(
@@ -526,6 +477,7 @@ object AppUtils {
 
                 withContext(Dispatchers.Main) {
                     viewModel.appTheme.value = AppTheme.fromId(themeId)
+                    viewModel.isThemeLoaded.value = true
                 }
             }
         }

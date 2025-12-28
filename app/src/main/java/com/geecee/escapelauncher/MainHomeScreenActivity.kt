@@ -31,7 +31,6 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.viewModelScope
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -40,14 +39,12 @@ import com.geecee.escapelauncher.ui.views.HomeScreenPageManager
 import com.geecee.escapelauncher.ui.views.Onboarding
 import com.geecee.escapelauncher.ui.views.Settings
 import com.geecee.escapelauncher.utils.AppUtils
-import com.geecee.escapelauncher.utils.AppUtils.animateSplashScreen
 import com.geecee.escapelauncher.utils.AppUtils.configureAnalytics
 import com.geecee.escapelauncher.utils.InstalledApp
 import com.geecee.escapelauncher.utils.PrivateSpaceStateReceiver
 import com.geecee.escapelauncher.utils.ScreenOffReceiver
 import com.geecee.escapelauncher.utils.getBooleanSetting
 import com.geecee.escapelauncher.utils.managers.ScreenTimeManager
-import com.geecee.escapelauncher.utils.managers.getUsageForApp
 import com.geecee.escapelauncher.utils.managers.scheduleDailyCleanup
 import com.geecee.escapelauncher.utils.messagingInitializer
 import kotlinx.coroutines.Dispatchers
@@ -99,7 +96,9 @@ class MainHomeScreenActivity : ComponentActivity() {
         // Setup Splashscreen
         val splashScreen = installSplashScreen()
         super.onCreate(savedInstanceState)
-        animateSplashScreen(splashScreen)
+        splashScreen.setKeepOnScreenCondition {
+            !viewModel.isReady
+        }
 
         // Make full screen
         enableEdgeToEdge()
@@ -108,13 +107,9 @@ class MainHomeScreenActivity : ComponentActivity() {
         // Set up the screen time tracking
         ScreenTimeManager.initialize(this)
         scheduleDailyCleanup(this)
-        viewModel.viewModelScope.launch(Dispatchers.IO) {
-            homeScreenModel.installedApps.forEach { app ->
-                val screenTime = getUsageForApp(app.packageName, viewModel.getToday())
-                viewModel.screenTimeCache[app.packageName] = screenTime
-            }
-            viewModel.shouldReloadScreenTime.value++
-        }
+        
+        // Efficient bulk load of screen time
+        viewModel.reloadScreenTimeCache(emptyList())
 
         // Set up the application content
         setContent {
