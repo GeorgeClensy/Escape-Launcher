@@ -5,9 +5,7 @@ import android.content.Intent
 import android.os.Build
 import android.provider.Settings
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -30,6 +28,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -45,12 +45,15 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
@@ -61,10 +64,6 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.currentBackStackEntryAsState
-import androidx.navigation.compose.rememberNavController
 import com.geecee.escapelauncher.BuildConfig
 import com.geecee.escapelauncher.HomeScreenModel
 import com.geecee.escapelauncher.MainAppViewModel
@@ -81,6 +80,7 @@ import com.geecee.escapelauncher.utils.getBooleanSetting
 import com.geecee.escapelauncher.utils.isDefaultLauncher
 import com.geecee.escapelauncher.utils.setBooleanSetting
 import com.geecee.escapelauncher.utils.showLauncherSelector
+import kotlinx.coroutines.launch
 
 data class OnboardingPage(
     val route: String, val content: @Composable (onNext: () -> Unit, onPrev: () -> Unit) -> Unit
@@ -93,8 +93,6 @@ fun Onboarding(
     homeScreenModel: HomeScreenModel,
     activity: Activity
 ) {
-    val navController = rememberNavController()
-
     @Suppress("KotlinConstantConditions") val pages =
         listOfNotNull(
             OnboardingPage("welcome") { onNext, onPrev ->
@@ -172,99 +170,129 @@ fun Onboarding(
             }
         )
 
-    // Work out progress for progress bar
-    val navBackStackEntry by navController.currentBackStackEntryAsState()
-    val currentRoute = navBackStackEntry?.destination?.route
-    val currentIndex = pages.indexOfFirst { it.route == currentRoute }.coerceAtLeast(0)
-    val progress = if (pages.size > 1) currentIndex / (pages.size - 1f) else 0f
-    val animatedProgress by animateFloatAsState(
-        targetValue = progress,
-        animationSpec = tween(durationMillis = 500, easing = FastOutSlowInEasing),
-        label = "progressAnim"
+    val coroutineScope = rememberCoroutineScope()
+
+    // So you go back to the right bit after changing launcher
+    val startIndex = remember {
+        if (
+            getBooleanSetting(
+                mainAppViewModel.getContext(),
+                mainAppViewModel.getContext().getString(R.string.WasChangingLauncher),
+                false
+            )
+        ) {
+            pages.indexOfFirst { it.route == "default_launcher" }.coerceAtLeast(0)
+        } else 0
+    }
+
+    val pagerState = rememberPagerState (
+        initialPage = startIndex,
+        pageCount = { pages.size }
     )
 
-    // Go to the launcher page if you're coming back from that:
-    var startDestination = pages[0].route
-    if (getBooleanSetting(
-            mainAppViewModel.getContext(), stringResource(R.string.WasChangingLauncher), false
-        )
-    ) {
-        startDestination = "default_launcher"
+    // Progress follows pager motion
+    val progress by remember {
+        derivedStateOf {
+            if (pages.size <= 1) 0f
+            else {
+                (
+                        pagerState.currentPage +
+                                pagerState.currentPageOffsetFraction
+                        ).coerceIn(0f, pages.lastIndex.toFloat()) /
+                        pages.lastIndex
+            }
+        }
     }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .windowInsetsPadding(WindowInsets.displayCutout)
-            .padding(start = 30.dp, end = 30.dp, top = 30.dp)
+            .padding(start = 0.dp, end = 0.dp, top = 30.dp)
     ) {
-        val showProgress = navBackStackEntry?.destination?.route != "welcome"
-
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(62.dp)
+                .padding(start = 30.dp, end = 30.dp)
         ) {
-            androidx.compose.animation.AnimatedVisibility(
-                visible = showProgress,
+            androidx.compose.animation.AnimatedVisibility (
+                pagerState.currentPage != 0,
                 enter = fadeIn(),
-                exit = ExitTransition.None
+                exit = fadeOut()
             ) {
-                Column {
-                    LinearProgressIndicator(
-                        progress = { animatedProgress },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(32.dp),
-                        color = primaryContentColor,
-                        trackColor = CardContainerColor
-                    )
-
-                    Spacer(Modifier.height(30.dp))
-                }
+                LinearProgressIndicator(
+                    progress = { progress },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(32.dp),
+                    color = primaryContentColor,
+                    trackColor = CardContainerColor
+                )
             }
         }
 
-        NavHost(
-            navController = navController,
-            startDestination = startDestination,
-            modifier = Modifier.weight(1f),
-        ) {
-            pages.forEachIndexed { index, page ->
-                composable(page.route) {
-                    page.content({ // onNext
-                        if (index < pages.lastIndex) {
-                            navController.navigate(pages[index + 1].route)
-                        } else {
-                            // Finished onboarding
-                            mainAppNavController.navigate("home") {
-                                popUpTo("onboarding") {
-                                    inclusive = true
-                                }
-                                launchSingleTop = true
-                            }
-                            setBooleanSetting(
-                                mainAppViewModel.getContext(),
-                                mainAppViewModel.getContext().resources.getString(R.string.FirstTime),
-                                false
+        // Pager content
+        HorizontalPager (
+            state = pagerState,
+            modifier = Modifier.weight(1f).graphicsLayer(),
+            userScrollEnabled = false,
+            beyondViewportPageCount = 1
+        ) { pageIndex ->
+
+            val page = pages[pageIndex]
+
+            page.content(
+                {
+                    if (pageIndex < pages.lastIndex) {
+                        coroutineScope.launch {
+                            pagerState.animateScrollToPage(
+                                pageIndex + 1,
+                                animationSpec = tween(
+                                    durationMillis = 500,
+                                    easing = FastOutSlowInEasing
+                                )
                             )
-                            setBooleanSetting(
-                                mainAppViewModel.getContext(),
-                                mainAppViewModel.getContext().resources.getString(R.string.WasChangingLauncher),
-                                false
+                        }
+                    } else {
+                        // Finished onboarding
+                        mainAppNavController.navigate("home") {
+                            popUpTo("onboarding") { inclusive = true }
+                            launchSingleTop = true
+                        }
+
+                        setBooleanSetting(
+                            mainAppViewModel.getContext(),
+                            mainAppViewModel.getContext()
+                                .resources.getString(R.string.FirstTime),
+                            false
+                        )
+                        setBooleanSetting(
+                            mainAppViewModel.getContext(),
+                            mainAppViewModel.getContext()
+                                .resources.getString(R.string.WasChangingLauncher),
+                            false
+                        )
+
+                        mainAppViewModel.getWindow()?.let {
+                            AppUtils.configureFullScreenMode(it)
+                        }
+                    }
+                },
+                {
+                    if (pageIndex > 0) {
+                        coroutineScope.launch {
+                            pagerState.animateScrollToPage(
+                                pageIndex - 1,
+                                animationSpec = tween(
+                                    durationMillis = 500,
+                                    easing = FastOutSlowInEasing
+                                )
                             )
-                            mainAppViewModel.getWindow()?.let { window ->
-                                AppUtils.configureFullScreenMode(window = window)
-                            }
                         }
-                    }, {
-                        // onPrev
-                        if (index > 0) {
-                            navController.navigate(pages[index - 1].route)
-                        }
-                    })
+                    }
                 }
-            }
+            )
         }
     }
 }
@@ -277,7 +305,7 @@ fun PrevButton(
     IconButton(
         onClick = {
             onPrev()
-        }, modifier = modifier, colors = IconButtonColors(
+        }, modifier = modifier.padding(bottom = 30.dp).offset(x = (-4).dp), colors = IconButtonColors(
             containerColor = primaryContentColor,
             contentColor = BackgroundColor,
             disabledContainerColor = primaryContentColor,
@@ -301,7 +329,7 @@ fun NextButton(
         onClick = {
             onNext()
         },
-        modifier = modifier,
+        modifier = modifier.padding(bottom = 30.dp),
         border = if (outline) BorderStroke(1.dp, primaryContentColor) else null,
         colors = ButtonColors(
             containerColor = if (outline) Color.Transparent else primaryContentColor,
@@ -331,7 +359,7 @@ fun WelcomeScreen(onNext: () -> Unit, @Suppress("unused") onPrev: () -> Unit) {
     Box(
         Modifier
             .fillMaxSize()
-            .padding(bottom = 30.dp)
+            .padding(start = 30.dp, end = 30.dp)
     ) {
         Column(
             Modifier
@@ -365,7 +393,7 @@ fun WelcomeScreen(onNext: () -> Unit, @Suppress("unused") onPrev: () -> Unit) {
 
 @Composable
 fun StatisticsScreen(onNext: () -> Unit, onPrev: () -> Unit) {
-    Box(Modifier.fillMaxSize()) {
+    Box(Modifier.fillMaxSize().padding(start = 30.dp, end = 30.dp)) {
         Column(
             Modifier.verticalScroll(rememberScrollState())
         ) {
@@ -419,7 +447,6 @@ fun StatisticsScreen(onNext: () -> Unit, onPrev: () -> Unit) {
         PrevButton(
             Modifier
                 .align(Alignment.BottomStart)
-                .padding(bottom = 30.dp)
         ) {
             onPrev()
         }
@@ -427,7 +454,6 @@ fun StatisticsScreen(onNext: () -> Unit, onPrev: () -> Unit) {
         NextButton(
             Modifier
                 .align(Alignment.BottomEnd)
-                .padding(bottom = 30.dp)
         ) {
             onNext()
         }
@@ -442,7 +468,7 @@ fun FavoritesSelectionScreen(
     onNext: () -> Unit,
     onPrev: () -> Unit
 ) {
-    Box(Modifier.fillMaxSize()) {
+    Box(Modifier.fillMaxSize().padding(start = 30.dp, end = 30.dp)) {
         BulkAppManager(
             apps = homeScreenModel.installedApps,
             preSelectedApps = homeScreenModel.favoriteApps,
@@ -470,7 +496,6 @@ fun FavoritesSelectionScreen(
         PrevButton(
             Modifier
                 .align(Alignment.BottomStart)
-                .padding(bottom = 30.dp)
         ) {
             onPrev()
         }
@@ -478,7 +503,6 @@ fun FavoritesSelectionScreen(
         NextButton(
             Modifier
                 .align(Alignment.BottomEnd)
-                .padding(bottom = 30.dp)
         ) {
             onNext()
         }
@@ -489,7 +513,7 @@ fun FavoritesSelectionScreen(
 fun DefaultLauncherScreen(
     activity: Activity, onNext: () -> Unit, onPrev: () -> Unit
 ) {
-    Box(Modifier.fillMaxSize()) {
+    Box(Modifier.fillMaxSize().padding(start = 30.dp, end = 30.dp)) {
         Column {
             Text(
                 stringResource(R.string.set_escape),
@@ -554,7 +578,6 @@ fun DefaultLauncherScreen(
         PrevButton(
             Modifier
                 .align(Alignment.BottomStart)
-                .padding(bottom = 30.dp)
         ) {
             onPrev()
         }
@@ -562,7 +585,6 @@ fun DefaultLauncherScreen(
         NextButton(
             Modifier
                 .align(Alignment.BottomEnd)
-                .padding(bottom = 30.dp)
         ) {
             onNext()
         }
@@ -576,7 +598,7 @@ fun AnalyticsConsentScreen(
     val showPolicyDialog = remember { mutableStateOf(false) }
     val scrollState = rememberLazyListState()
 
-    Box(Modifier.fillMaxSize()) {
+    Box(Modifier.fillMaxSize().padding(start = 30.dp, end = 30.dp)) {
         LazyColumn(
             state = scrollState
         ) {
@@ -634,7 +656,6 @@ fun AnalyticsConsentScreen(
         PrevButton(
             Modifier
                 .align(Alignment.BottomStart)
-                .padding(bottom = 30.dp)
         ) {
             onPrev()
         }
@@ -642,7 +663,6 @@ fun AnalyticsConsentScreen(
         Row(
             modifier = Modifier
                 .align(Alignment.BottomEnd)
-                .padding(bottom = 30.dp)
         ) {
             NextButton(
                 text = stringResource(R.string.deny), outline = true
@@ -684,7 +704,7 @@ fun AccessibilitySetupScreen(
     val scrollState = rememberLazyListState()
     val context = mainAppModel.getContext()
 
-    Box(Modifier.fillMaxSize()) {
+    Box(Modifier.fillMaxSize().padding(start = 30.dp, end = 30.dp)) {
         LazyColumn(
             state = scrollState
         ) {
@@ -744,7 +764,6 @@ fun AccessibilitySetupScreen(
         PrevButton(
             Modifier
                 .align(Alignment.BottomStart)
-                .padding(bottom = 30.dp)
         ) {
             onPrev()
         }
@@ -752,7 +771,6 @@ fun AccessibilitySetupScreen(
         Row(
             modifier = Modifier
                 .align(Alignment.BottomEnd)
-                .padding(bottom = 30.dp)
         ) {
             NextButton {
                 onNext()
