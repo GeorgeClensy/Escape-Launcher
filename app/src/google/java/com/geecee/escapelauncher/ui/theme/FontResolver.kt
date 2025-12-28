@@ -12,8 +12,17 @@ private val provider = GoogleFont.Provider(
     certificates = R.array.com_google_android_gms_fonts_certs
 )
 
+@Suppress("DiscouragedApi")
 fun getFontFamily(context: Context, fontName: String): FontFamily {
-    return FontFamily(
+    val resourceId = context.resources.getIdentifier(
+        fontName.lowercase().replace(" ", "_"),
+        "font",
+        context.packageName
+    )
+
+    return if (resourceId != 0) {
+        FontFamily(androidx.compose.ui.text.font.Font(resourceId))
+    } else FontFamily(
         Font(
             googleFont = GoogleFont(fontName),
             fontProvider = provider

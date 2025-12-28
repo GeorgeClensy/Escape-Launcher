@@ -721,15 +721,13 @@ fun MainSettingsPage(
             }
         }
 
-        if (BuildConfig.IS_FOSS) {
-            item {
-                SettingsNavigationItem(
-                    label = stringResource(R.string.font_licences),
-                    diagonalArrow = false,
-                    isBottomOfGroup = BuildConfig.IS_FOSS,
-                    onClick = { navController.navigate("fontLicences") }
-                )
-            }
+        item {
+            SettingsNavigationItem(
+                label = stringResource(R.string.font_licences),
+                diagonalArrow = false,
+                isBottomOfGroup = BuildConfig.IS_FOSS,
+                onClick = { navController.navigate("fontLicences") }
+            )
         }
 
         if (!BuildConfig.IS_FOSS) {
