@@ -17,6 +17,8 @@ import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -42,16 +44,25 @@ fun BulkAppManager(
     val selectedState =
         remember { mutableStateListOf<InstalledApp>().apply { addAll(preSelectedApps) } }
 
-    val availableApps = apps.filter { it.packageName != "com.geecee.escapelauncher" }
+    val availableApps = remember(apps) {
+        apps.filter { it.packageName != "com.geecee.escapelauncher" }
+    }
+
+    // Move this outside the LazyColumn so it's only computed once when selectedState changes
+    val selectedPackageNames by remember {
+        derivedStateOf { selectedState.map { it.packageName }.toSet() }
+    }
 
     // Create a combined list with a spacer marker
-    val combinedItems = remember(selectedState.toList(), availableApps.size) {
-        buildList {
-            addAll(selectedState.map { ListItem.App(it, isInSelectedSection = true) })
-            if (selectedState.isNotEmpty()) {
-                add(ListItem.Spacer)
+    val combinedItems by remember(apps) {
+        derivedStateOf {
+            buildList {
+                addAll(selectedState.map { ListItem.App(it, isInSelectedSection = true) })
+                if (selectedState.isNotEmpty()) {
+                    add(ListItem.Spacer)
+                }
+                addAll(availableApps.map { ListItem.App(it, isInSelectedSection = false) })
             }
-            addAll(availableApps.map { ListItem.App(it, isInSelectedSection = false) })
         }
     }
 
@@ -77,7 +88,8 @@ fun BulkAppManager(
         ) { item ->
             when (item) {
                 is ListItem.App -> {
-                    val isSelected = selectedState.contains(item.app)
+                    val isSelected = selectedPackageNames.contains(item.app.packageName)
+                    
                     val isTopOfGroup = if (item.isInSelectedSection) {
                         selectedState.firstOrNull() == item.app
                     } else {

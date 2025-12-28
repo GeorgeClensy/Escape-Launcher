@@ -45,11 +45,13 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -80,6 +82,7 @@ import com.geecee.escapelauncher.utils.getBooleanSetting
 import com.geecee.escapelauncher.utils.isDefaultLauncher
 import com.geecee.escapelauncher.utils.setBooleanSetting
 import com.geecee.escapelauncher.utils.showLauncherSelector
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 data class OnboardingPage(
@@ -468,30 +471,39 @@ fun FavoritesSelectionScreen(
     onNext: () -> Unit,
     onPrev: () -> Unit
 ) {
+    // Add a small delay before rendering the full list to prevent jank during page transition
+    var showList by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) {
+        delay(300)
+        showList = true
+    }
+
     Box(Modifier.fillMaxSize().padding(start = 30.dp, end = 30.dp)) {
-        BulkAppManager(
-            apps = homeScreenModel.installedApps,
-            preSelectedApps = homeScreenModel.favoriteApps,
-            title = stringResource(R.string.choose_your_favourite_apps),
-            reorderable = true,
-            onAppMoved = { fromIndex, toIndex ->
-                mainAppModel.favoriteAppsManager.reorderFavoriteApps(fromIndex, toIndex)
-                homeScreenModel.reloadFavouriteApps()
-            },
-            onBackClicked = { },
-            hideTitle = false,
-            hideBack = true,
-            topPadding = false,
-            titleColor = primaryContentColor,
-            onAppClicked = { app, selected ->
-                if (selected) {
-                    mainAppModel.favoriteAppsManager.removeFavoriteApp(app.packageName)
+        if (showList) {
+            BulkAppManager(
+                apps = homeScreenModel.installedApps,
+                preSelectedApps = homeScreenModel.favoriteApps,
+                title = stringResource(R.string.choose_your_favourite_apps),
+                reorderable = true,
+                onAppMoved = { fromIndex, toIndex ->
+                    mainAppModel.favoriteAppsManager.reorderFavoriteApps(fromIndex, toIndex)
                     homeScreenModel.reloadFavouriteApps()
-                } else {
-                    mainAppModel.favoriteAppsManager.addFavoriteApp(app.packageName)
-                    homeScreenModel.reloadFavouriteApps()
-                }
-            })
+                },
+                onBackClicked = { },
+                hideTitle = false,
+                hideBack = true,
+                topPadding = false,
+                titleColor = primaryContentColor,
+                onAppClicked = { app, selected ->
+                    if (selected) {
+                        mainAppModel.favoriteAppsManager.removeFavoriteApp(app.packageName)
+                        homeScreenModel.reloadFavouriteApps()
+                    } else {
+                        mainAppModel.favoriteAppsManager.addFavoriteApp(app.packageName)
+                        homeScreenModel.reloadFavouriteApps()
+                    }
+                })
+        }
 
         PrevButton(
             Modifier

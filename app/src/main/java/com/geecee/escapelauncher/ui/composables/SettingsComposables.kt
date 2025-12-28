@@ -389,6 +389,7 @@ fun SettingsNavigationItem(
  * @param onClick When composable is clicked
  * @param isTopOfGroup Whether this item is at the top of a group of items, for corner rounding
  * @param isBottomOfGroup Whether this item is at the bottom of a group of items, for corner rounding
+ * @param useAutoResize Whether to use the expensive AutoResizingText or a standard Text with ellipsis
  */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -399,7 +400,8 @@ fun SettingsButton(
     isTopOfGroup: Boolean = false,
     isBottomOfGroup: Boolean = false,
     fontFamily: FontFamily? = MaterialTheme.typography.bodyMedium.fontFamily,
-    isDisabled: Boolean = false
+    isDisabled: Boolean = false,
+    useAutoResize: Boolean = true
 ) {
     // Define the base corner size
     val groupEdgeCornerRadius = 24.dp
@@ -456,14 +458,27 @@ fun SettingsButton(
                 .height(48.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            AutoResizingText(
-                text = label,
-                modifier = Modifier
-                    .weight(1f) // Allow text to take available space
-                    .padding(end = 8.dp), // Add space between text and icon
-                style = MaterialTheme.typography.bodyMedium,
-                fontFamily = fontFamily
-            )
+            if (useAutoResize) {
+                AutoResizingText(
+                    text = label,
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(end = 8.dp),
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontFamily = fontFamily
+                )
+            } else {
+                Text(
+                    text = label,
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(end = 8.dp),
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontFamily = fontFamily,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
         }
     }
 }
