@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Build
 import android.provider.Settings
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -23,6 +24,7 @@ import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
@@ -67,6 +69,7 @@ import com.geecee.escapelauncher.BuildConfig
 import com.geecee.escapelauncher.HomeScreenModel
 import com.geecee.escapelauncher.MainAppViewModel
 import com.geecee.escapelauncher.R
+import com.geecee.escapelauncher.ui.composables.AutoResizingText
 import com.geecee.escapelauncher.ui.composables.BulkAppManager
 import com.geecee.escapelauncher.ui.composables.SettingsSpacer
 import com.geecee.escapelauncher.ui.theme.BackgroundColor
@@ -195,27 +198,37 @@ fun Onboarding(
             .windowInsetsPadding(WindowInsets.displayCutout)
             .padding(start = 30.dp, end = 30.dp, top = 30.dp)
     ) {
-        AnimatedVisibility(navBackStackEntry?.destination?.route != "welcome") {
-            Column {
-                LinearProgressIndicator(
-                    progress = { animatedProgress },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(32.dp),
-                    color = primaryContentColor,
-                    trackColor = CardContainerColor
-                )
+        val showProgress = navBackStackEntry?.destination?.route != "welcome"
 
-                Spacer(
-                    Modifier.height(30.dp)
-                )
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(62.dp)
+        ) {
+            androidx.compose.animation.AnimatedVisibility(
+                visible = showProgress,
+                enter = fadeIn(),
+                exit = ExitTransition.None
+            ) {
+                Column {
+                    LinearProgressIndicator(
+                        progress = { animatedProgress },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(32.dp),
+                        color = primaryContentColor,
+                        trackColor = CardContainerColor
+                    )
+
+                    Spacer(Modifier.height(30.dp))
+                }
             }
         }
 
         NavHost(
             navController = navController,
             startDestination = startDestination,
-            modifier = Modifier.weight(1f)
+            modifier = Modifier.weight(1f),
         ) {
             pages.forEachIndexed { index, page ->
                 composable(page.route) {
@@ -320,7 +333,11 @@ fun WelcomeScreen(onNext: () -> Unit, @Suppress("unused") onPrev: () -> Unit) {
             .fillMaxSize()
             .padding(bottom = 30.dp)
     ) {
-        Column(Modifier.align(Alignment.Center)) {
+        Column(
+            Modifier
+                .align(Alignment.Center)
+                .offset(y = (-62).dp)
+        ) {
             Icon(
                 painterResource(R.drawable.outlineicon),
                 "Escape Launcher Icon",
@@ -330,11 +347,12 @@ fun WelcomeScreen(onNext: () -> Unit, @Suppress("unused") onPrev: () -> Unit) {
                 tint = primaryContentColor
             )
             Spacer(Modifier.height(15.dp))
-            Text(
-                stringResource(R.string.escape_launcher),
-                Modifier,
-                primaryContentColor,
+            AutoResizingText(
+                text = stringResource(R.string.escape_launcher),
+                modifier = Modifier,
+                color = primaryContentColor,
                 style = MaterialTheme.typography.titleSmall,
+                maxLines = 1,
                 textAlign = TextAlign.Center
             )
         }

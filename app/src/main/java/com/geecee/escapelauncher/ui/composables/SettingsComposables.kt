@@ -100,7 +100,8 @@ fun AutoResizingText(
     minFontSize: TextUnit = 10.sp,
     maxLines: Int = 1,
     color: Color = ContentColor,
-    fontFamily: FontFamily? = MaterialTheme.typography.bodyMedium.fontFamily
+    fontFamily: FontFamily? = MaterialTheme.typography.bodyMedium.fontFamily,
+    textAlign: TextAlign? = null
 ) {
     BoxWithConstraints(modifier = modifier) {
         val density = LocalDensity.current
@@ -170,6 +171,7 @@ fun AutoResizingText(
             overflow = TextOverflow.Ellipsis,
             color = color,
             fontFamily = fontFamily,
+            textAlign = textAlign
         )
     }
 }
