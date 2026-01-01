@@ -6,6 +6,8 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.background
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -35,11 +37,15 @@ import com.geecee.escapelauncher.ui.composables.HomeScreenItem
 import com.geecee.escapelauncher.ui.composables.ListGradient
 import com.geecee.escapelauncher.ui.composables.PrivateSpace
 import com.geecee.escapelauncher.ui.composables.SettingsSpacer
+import com.geecee.escapelauncher.ui.composables.WorkApps
+import com.geecee.escapelauncher.ui.composables.WorkAppsFab
+import com.geecee.escapelauncher.ui.theme.transparentHalf
 import com.geecee.escapelauncher.utils.AppUtils
 import com.geecee.escapelauncher.utils.AppUtils.doHapticFeedBack
 import com.geecee.escapelauncher.utils.AppUtils.resetHome
 import com.geecee.escapelauncher.utils.PrivateSpaceSettings
 import com.geecee.escapelauncher.utils.doesPrivateSpaceExist
+import com.geecee.escapelauncher.utils.doesWorkProfileExist
 import com.geecee.escapelauncher.utils.getAppsAlignment
 import com.geecee.escapelauncher.utils.getBooleanSetting
 import com.geecee.escapelauncher.utils.unlockPrivateSpace
@@ -311,6 +317,43 @@ fun AppsList(
                 )
         ) {
             ListGradient()
+        }
+
+        // Work apps
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) {
+            if (doesWorkProfileExist(mainAppModel.getContext())) {
+                WorkAppsFab(
+                    Modifier
+                        .align(Alignment.BottomEnd)
+                        .padding(vertical = 55.dp, horizontal = 30.dp)
+                ) {
+                    homeScreenModel.showWorkApps.value = true
+                }
+            }
+
+            AnimatedVisibility(
+                homeScreenModel.showWorkApps.value,
+                enter = fadeIn(),
+                exit = fadeOut()
+            ) {
+                Box(
+                    Modifier
+                        .fillMaxSize()
+                        .combinedClickable(
+                            onClick = { homeScreenModel.showWorkApps.value = false },
+                            onLongClick = {},
+                            indication = null,
+                            interactionSource = homeScreenModel.interactionSource
+                        )
+                        .background(transparentHalf)
+                ) {
+                    WorkApps(
+                        mainAppModel,
+                        homeScreenModel,
+                        Modifier.align(Alignment.Center)
+                    )
+                }
+            }
         }
 
         // Bottom search box

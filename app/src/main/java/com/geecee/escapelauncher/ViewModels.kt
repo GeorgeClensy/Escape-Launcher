@@ -150,7 +150,15 @@ class HomeScreenModel(application: Application, private val mainAppViewModel: Ma
 
     val currentSelectedPrivateApp =
         mutableStateOf(InstalledApp("", "", ComponentName("", ""))) //Only used for the bottom sheet
+
+    val currentSelectedWorkApp =
+        mutableStateOf(InstalledApp("", "", ComponentName("", ""))) //Only used for the bottom sheet
+
     var showPrivateBottomSheet = mutableStateOf(false)
+
+    var showWorkBottomSheet = mutableStateOf(false)
+
+    var showWorkApps = mutableStateOf(false)
 
     init {
         loadApps()
@@ -314,7 +322,7 @@ class MainAppViewModel(application: Application) : AndroidViewModel(application)
         }
     } // Function to update a single app's cached screen time
 
-    fun reloadScreenTimeCache(packageNames: List<String>) {
+    fun reloadScreenTimeCache() {
         Log.d("Loading", "ReloadScreenTimeCache started")
 
         viewModelScope.launch(Dispatchers.IO) {

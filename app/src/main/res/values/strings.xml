@@ -21,12 +21,12 @@
     <string name="private_space_search_term">pri</string>
 
     <!-- Work Profile strings -->
-    <string name="work_profile">Work Profile</string>
-    <string name="unlock_work_profile">Unlock Work Profile</string>
-    <string name="lock_work_profile">Lock Work Profile</string>
-    <string name="work_profile_settings">Work Profile Settings</string>
-    <string name="hide_work_profile_in_search">Hide work profile in search</string>
-    <string name="SearchHiddenWorkProfile">SearchHiddenWorkProfile</string>
+    <string name="work_profile">Work Apps</string>
+    <string name="unlock_work_profile">Unpause Work Apps</string>
+    <string name="unpause">Unpause</string>
+    <string name="lock_work_profile">Pause Work Apps</string>
+    <string name="work_apps_are_paused">Work apps are paused</string>
+    <string name="you_wont_receive_notifications_from_work_apps">You won\'t receive notifications from your work apps</string>
 
     <!-- Hidden Apps strings-->
     <string name="hidden_apps">Hidden Apps</string>

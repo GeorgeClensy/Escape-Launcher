@@ -38,15 +38,20 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material.icons.filled.WbSunny
+import androidx.compose.material.icons.rounded.Work
+import androidx.compose.material.icons.rounded.WorkOff
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardColors
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonColors
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -72,6 +77,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.geecee.escapelauncher.HomeScreenModel
@@ -89,12 +95,20 @@ import com.geecee.escapelauncher.utils.AppUtils.getCurrentTime
 import com.geecee.escapelauncher.utils.AppUtils.resetHome
 import com.geecee.escapelauncher.utils.InstalledApp
 import com.geecee.escapelauncher.utils.PrivateAppItem
+import com.geecee.escapelauncher.utils.WorkAppItem
 import com.geecee.escapelauncher.utils.getPrivateSpaceApps
 import com.geecee.escapelauncher.utils.getStringSetting
+import com.geecee.escapelauncher.utils.getWorkApps
+import com.geecee.escapelauncher.utils.goToWorkAppAppInfo
+import com.geecee.escapelauncher.utils.isWorkProfileUnlocked
 import com.geecee.escapelauncher.utils.lockPrivateSpace
+import com.geecee.escapelauncher.utils.lockWorkProfile
 import com.geecee.escapelauncher.utils.openPrivateSpaceApp
+import com.geecee.escapelauncher.utils.openWorkApp
 import com.geecee.escapelauncher.utils.showPrivateSpaceAppInfo
 import com.geecee.escapelauncher.utils.uninstallPrivateSpaceApp
+import com.geecee.escapelauncher.utils.uninstallWorkApp
+import com.geecee.escapelauncher.utils.unlockWorkProfile
 import kotlinx.coroutines.delay
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -293,13 +307,15 @@ fun Date(
             MaterialTheme.typography.bodyLarge
         },
         fontWeight = FontWeight.W600,
-        modifier = Modifier.padding(end = 10.dp).clickable {
-            val intent = Intent(Intent.ACTION_MAIN).apply {
-                addCategory(Intent.CATEGORY_APP_CALENDAR)
-                flags = Intent.FLAG_ACTIVITY_NEW_TASK
-            }
-            context.startActivity(intent)
-        },
+        modifier = Modifier
+            .padding(end = 10.dp)
+            .clickable {
+                val intent = Intent(Intent.ACTION_MAIN).apply {
+                    addCategory(Intent.CATEGORY_APP_CALENDAR)
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                }
+                context.startActivity(intent)
+            },
         textAlign = when (homeAlignment) {
             Alignment.Start -> TextAlign.Start
             Alignment.End -> TextAlign.End
@@ -357,7 +373,8 @@ fun Weather(
                     } else {
                         Toast.makeText(
                             context,
-                            mainAppModel.getContext().getString(R.string.set_weather_app_in_settings),
+                            mainAppModel.getContext()
+                                .getString(R.string.set_weather_app_in_settings),
                             Toast.LENGTH_SHORT
                         ).show()
                     }
@@ -771,4 +788,162 @@ fun ListGradient(modifier: Modifier = Modifier) {
                 )
             )
     )
+}
+
+@Composable
+fun WorkAppsFab(modifier: Modifier = Modifier, onClick: () -> Unit) {
+    FloatingActionButton(
+        onClick = {
+            onClick()
+        },
+        modifier = modifier.size(56.dp),
+        containerColor = primaryContentColor,
+        contentColor = BackgroundColor
+    ) {
+        Icon(Icons.Rounded.Work, contentDescription = stringResource(R.string.work_profile))
+    }
+}
+
+@Preview
+@Composable
+fun PrevWorkAppsFab() {
+    WorkAppsFab {}
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@RequiresApi(Build.VERSION_CODES.VANILLA_ICE_CREAM)
+@Composable
+fun WorkApps(
+    mainAppModel: MainAppViewModel,
+    homeScreenModel: HomeScreenModel,
+    modifier: Modifier = Modifier
+) {
+    val workAppActions = listOf(
+        AppAction(
+            stringResource(R.string.uninstall)
+        ) {
+            uninstallWorkApp(
+                homeScreenModel.currentSelectedWorkApp.value,
+                mainAppModel.getContext()
+            )
+        },
+        AppAction(
+            stringResource(R.string.app_info)
+        ) {
+            goToWorkAppAppInfo(
+                homeScreenModel.currentSelectedWorkApp.value,
+                homeScreenModel,
+                mainAppModel.getContext()
+            )
+        }
+    )
+
+    var isUnlocked by remember {
+        mutableStateOf(isWorkProfileUnlocked(mainAppModel.getContext()))
+    }
+
+    Card(
+        modifier
+            .padding(horizontal = 30.dp)
+            .clip(MaterialTheme.shapes.extraLarge),
+        colors = CardColors(
+            containerColor = CardContainerColor,
+            contentColor = ContentColor,
+            disabledContentColor = CardContainerColorDisabled,
+            disabledContainerColor = ContentColorDisabled,
+        )
+    ) {
+        AnimatedVisibility (isUnlocked) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(20.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        stringResource(R.string.work_profile),
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+
+                    IconButton(
+                        onClick = {
+                            lockWorkProfile(mainAppModel.getContext())
+                            isUnlocked = isWorkProfileUnlocked(mainAppModel.getContext())
+                        },
+                        colors = IconButtonColors(
+                            containerColor = SecondaryCardContainerColor,
+                            contentColor = ContentColor,
+                            disabledContainerColor = SecondaryCardContainerColor,
+                            disabledContentColor = ContentColor
+                        )
+                    ) {
+                        Icon(
+                            Icons.Rounded.WorkOff,
+                            contentDescription = stringResource(R.string.lock_work_profile)
+                        )
+                    }
+                }
+
+                getWorkApps(mainAppModel.getContext()).forEach { app ->
+                    WorkAppItem(app.displayName, {
+                        homeScreenModel.currentSelectedWorkApp.value = app
+                        homeScreenModel.showWorkBottomSheet.value = true
+                    }) {
+                        openWorkApp(
+                            installedApp = app, context = mainAppModel.getContext(), Rect()
+                        )
+                        resetHome(homeScreenModel)
+                    }
+                }
+
+                Spacer(Modifier.height(20.dp))
+            }
+        }
+        AnimatedVisibility (!isUnlocked) {
+            Column(
+                Modifier,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(stringResource(R.string.work_apps_are_paused), style = MaterialTheme.typography.bodyLarge, textAlign = TextAlign.Center, modifier = Modifier.padding(top = 30.dp, start = 30.dp, end = 30.dp, bottom = 5.dp))
+
+                Text(stringResource(R.string.you_wont_receive_notifications_from_work_apps), style = MaterialTheme.typography.bodyMedium, textAlign = TextAlign.Center, modifier = Modifier.padding(top = 5.dp, start = 30.dp, end = 30.dp, bottom = 10.dp))
+
+                OutlinedButton(
+                    onClick = {
+                        unlockWorkProfile(
+                            mainAppModel.getContext()
+                        )
+                        isUnlocked = isWorkProfileUnlocked(mainAppModel.getContext())
+                    },
+                    modifier = Modifier
+                        .padding(bottom = 30.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = SecondaryCardContainerColor,
+                        contentColor = ContentColor,
+                    )
+                ) {
+                    Text(stringResource(R.string.unpause))
+                }
+            }
+        }
+    }
+
+    if (homeScreenModel.showWorkBottomSheet.value) {
+        HomeScreenBottomSheet(
+            title = homeScreenModel.currentSelectedWorkApp.value.displayName,
+            actions = workAppActions,
+            onDismissRequest = {
+                homeScreenModel.showWorkBottomSheet.value = false
+                homeScreenModel.currentSelectedWorkApp.value =
+                    InstalledApp("", "", ComponentName("", ""))
+            },
+            sheetState = rememberModalBottomSheetState(),
+            modifier = Modifier
+        )
+    }
 }

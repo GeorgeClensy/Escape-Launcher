@@ -109,7 +109,7 @@ class MainHomeScreenActivity : ComponentActivity() {
         scheduleDailyCleanup(this)
         
         // Efficient bulk load of screen time
-        viewModel.reloadScreenTimeCache(emptyList())
+        viewModel.reloadScreenTimeCache()
 
         // Set up the application content
         setContent {

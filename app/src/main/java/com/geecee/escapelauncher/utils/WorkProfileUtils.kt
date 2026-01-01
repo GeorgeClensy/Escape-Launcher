@@ -17,38 +17,23 @@ import android.os.UserManager
 import android.os.UserManager.USER_TYPE_PROFILE_MANAGED
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.Arrangement.spacedBy
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat.getSystemService
 import androidx.core.net.toUri
-import com.geecee.escapelauncher.R
-import com.geecee.escapelauncher.ui.composables.SettingsSwitch
+import com.geecee.escapelauncher.HomeScreenModel
 import com.geecee.escapelauncher.ui.theme.ContentColor
-import com.geecee.escapelauncher.ui.theme.transparentHalf
+import com.geecee.escapelauncher.utils.AppUtils.resetHome
 
 /**
  * BroadcastReceiver that listens for Work Profile state changes (locked/unlocked).
  */
+@RequiresApi(Build.VERSION_CODES.VANILLA_ICE_CREAM)
 class WorkProfileStateReceiver(private val onStateChange: (Boolean) -> Unit) :
     BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
@@ -62,6 +47,7 @@ class WorkProfileStateReceiver(private val onStateChange: (Boolean) -> Unit) :
 /**
  * Checks if a Work Profile exists on the device.
  */
+@RequiresApi(Build.VERSION_CODES.VANILLA_ICE_CREAM)
 fun doesWorkProfileExist(context: Context): Boolean {
     val launcherApps =
         context.getSystemService(Context.LAUNCHER_APPS_SERVICE) as? LauncherApps ?: return false
@@ -79,6 +65,7 @@ fun doesWorkProfileExist(context: Context): Boolean {
 /**
  * Retrieves the UserHandle for the Work Profile.
  */
+@RequiresApi(Build.VERSION_CODES.VANILLA_ICE_CREAM)
 fun getWorkProfile(context: Context): UserHandle? {
     val launcherApps =
         context.getSystemService(Context.LAUNCHER_APPS_SERVICE) as? LauncherApps ?: return null
@@ -92,6 +79,7 @@ fun getWorkProfile(context: Context): UserHandle? {
 /**
  * Determines whether Work Profile is currently unlocked.
  */
+@RequiresApi(Build.VERSION_CODES.VANILLA_ICE_CREAM)
 fun isWorkProfileUnlocked(context: Context): Boolean {
     val userManager = getSystemService(context, UserManager::class.java) ?: return false
     val workProfile = getWorkProfile(context) ?: return false
@@ -101,6 +89,7 @@ fun isWorkProfileUnlocked(context: Context): Boolean {
 /**
  * Locks Work Profile by enabling Quiet Mode.
  */
+@RequiresApi(Build.VERSION_CODES.VANILLA_ICE_CREAM)
 fun lockWorkProfile(context: Context) {
     val userManager = getSystemService(context, UserManager::class.java) ?: return
     getWorkProfile(context)?.let { userHandle ->
@@ -111,6 +100,7 @@ fun lockWorkProfile(context: Context) {
 /**
  * Unlocks Work Profile by disabling Quiet Mode.
  */
+@RequiresApi(Build.VERSION_CODES.VANILLA_ICE_CREAM)
 fun unlockWorkProfile(context: Context) {
     val userManager = getSystemService(context, UserManager::class.java) ?: return
     getWorkProfile(context)?.let { userHandle ->
@@ -121,6 +111,7 @@ fun unlockWorkProfile(context: Context) {
 /**
  * Retrieves a list of installed apps in Work Profile.
  */
+@RequiresApi(Build.VERSION_CODES.VANILLA_ICE_CREAM)
 fun getWorkApps(context: Context): List<InstalledApp> {
     val launcherApps =
         context.getSystemService(Context.LAUNCHER_APPS_SERVICE) as? LauncherApps ?: return emptyList()
@@ -138,8 +129,10 @@ fun getWorkApps(context: Context): List<InstalledApp> {
 /**
  * Shows the system app info page for an app in Work Profile.
  */
+@RequiresApi(Build.VERSION_CODES.VANILLA_ICE_CREAM)
 fun goToWorkAppAppInfo(
     installedApp: InstalledApp,
+    homeScreenModel: HomeScreenModel,
     context: Context,
     sourceBounds: Rect? = null
 ) {
@@ -157,11 +150,13 @@ fun goToWorkAppAppInfo(
         sourceBounds,
         options.toBundle()
     )
+    resetHome(homeScreenModel, shouldGoToFirstPage = true)
 }
 
 /**
  * Uninstalls an app from Work Profile.
  */
+@RequiresApi(Build.VERSION_CODES.VANILLA_ICE_CREAM)
 fun uninstallWorkApp(installedApp: InstalledApp, context: Context) {
     val workProfile = getWorkProfile(context) ?: return
 
@@ -177,6 +172,7 @@ fun uninstallWorkApp(installedApp: InstalledApp, context: Context) {
 /**
  * Opens app in Work Profile.
  */
+@RequiresApi(Build.VERSION_CODES.VANILLA_ICE_CREAM)
 fun openWorkApp(installedApp: InstalledApp, context: Context, sourceBounds: Rect? = null) {
     val launcherApps =
         context.getSystemService(Context.LAUNCHER_APPS_SERVICE) as? LauncherApps ?: return
@@ -194,6 +190,7 @@ fun openWorkApp(installedApp: InstalledApp, context: Context, sourceBounds: Rect
 /**
  * UI component for displaying a single Work Profile app item.
  */
+@RequiresApi(Build.VERSION_CODES.VANILLA_ICE_CREAM)
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun WorkAppItem(
@@ -211,79 +208,4 @@ fun WorkAppItem(
         color = ContentColor,
         style = MaterialTheme.typography.bodyMedium
     )
-}
-
-/**
- * UI component for Work Profile settings dialog.
- */
-@OptIn(ExperimentalFoundationApi::class)
-@Composable
-fun WorkProfileSettings(
-    context: Context,
-    backgroundInteractionSource: MutableInteractionSource,
-    onDismiss: () -> Unit
-) {
-    Box(
-        Modifier
-            .fillMaxSize()
-            .combinedClickable(
-                onClick = { onDismiss() },
-                onLongClick = {},
-                indication = null,
-                interactionSource = backgroundInteractionSource
-            )
-            .background(transparentHalf)
-    )
-    Box(
-        Modifier.fillMaxSize()
-    ) {
-        Card(
-            Modifier
-                .fillMaxWidth()
-                .align(Alignment.Center)
-                .padding(20.dp, 0.dp)
-                .clip(MaterialTheme.shapes.extraLarge)
-                .shadow(
-                    5.dp,
-                    MaterialTheme.shapes.extraLarge,
-                    ambientColor = MaterialTheme.colorScheme.scrim
-                )
-                .combinedClickable(
-                    onClick = {},
-                    indication = null,
-                    interactionSource = backgroundInteractionSource
-                ),
-            elevation = CardDefaults.cardElevation(5.dp)
-        ) {
-            Column(
-                Modifier.padding(20.dp),
-                verticalArrangement = spacedBy(15.dp)
-            ) {
-                Text(
-                    stringResource(R.string.settings),
-                    style = MaterialTheme.typography.titleSmall,
-                    modifier = Modifier.fillMaxWidth(),
-                    textAlign = TextAlign.Center
-                )
-                val settingKey = context.resources.getString(R.string.SearchHiddenWorkProfile)
-                SettingsSwitch(
-                    stringResource(R.string.hide_work_profile_in_search),
-                    getBooleanSetting(context, settingKey, false),
-                    onCheckedChange = { value ->
-                        setBooleanSetting(context, settingKey, value)
-                    },
-                    isTopOfGroup = true,
-                    isBottomOfGroup = true
-                )
-                Button(
-                    onClick = {
-                        onDismiss()
-                    },
-                    modifier = Modifier.align(Alignment.End)
-                ) {
-                    Text(stringResource(R.string.done))
-                }
-            }
-        }
-    }
 }
