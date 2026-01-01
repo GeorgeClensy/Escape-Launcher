@@ -1,0 +1,31 @@
+android {
+    sourceSets {
+        google {
+            java.srcDirs = ['src/google/java']
+            res.srcDirs = ['src/google/res']
+        }
+    }
+}
+
+dependencies {
+    // Google version use google fonts, otherwise bundle fonts
+    googleImplementation 'androidx.compose.ui:ui-text-google-fonts:1.10.0'
+
+    // Firebase
+    googleImplementation platform('com.google.firebase:firebase-bom:34.7.0')
+    googleImplementation 'com.google.firebase:firebase-analytics'
+    googleImplementation 'com.google.firebase:firebase-crashlytics'
+    googleImplementation 'com.google.firebase:firebase-perf'
+    googleImplementation 'com.google.firebase:firebase-messaging:25.0.1'
+    googleImplementation 'com.google.android.gms:play-services-location:21.3.0'
+    googleImplementation 'com.squareup.okhttp3:okhttp:4.12.0'
+}
+
+def taskNames = gradle.startParameter.taskNames
+def isGoogleVariant = taskNames.any { it.toLowerCase().contains("google") }
+def isIdeSync = System.getProperty("idea.sync.active") == "true"
+
+if (isGoogleVariant || isIdeSync) {
+    apply plugin: 'com.google.gms.google-services'
+    apply plugin: 'com.google.firebase.crashlytics'
+}

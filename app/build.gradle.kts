@@ -59,10 +59,6 @@ android {
             res.srcDirs("src/foss/res")
             java.srcDirs("src/foss/java")
         }
-        getByName("google") {
-            res.srcDirs("src/google/res")
-            java.srcDirs("src/google/java")
-        }
     }
     
     androidComponents.beforeVariants { variantBuilder ->
@@ -100,15 +96,8 @@ android {
     }
 }
 
-// Apply Google Services and Crashlytics conditionally at the top level
-val taskNames = gradle.startParameter.taskNames
-val isGoogleVariant = taskNames.any { it.contains("google", ignoreCase = true) }
-val isIdeSync = System.getProperty("idea.sync.active") == "true"
-
-if (isGoogleVariant || isIdeSync) {
-    apply(plugin = "com.google.gms.google-services")
-    apply(plugin = "com.google.firebase.crashlytics")
-}
+// Apply Google-specific configurations from secondary file
+apply(from = "google.gradle")
 
 dependencies {
     // Core Android Libraries
@@ -143,19 +132,6 @@ dependencies {
 
     // WorkManager
     implementation(libs.androidx.work.runtime.ktx)
-
-    // Google version use google fonts, otherwise bundle fonts
-    "googleImplementation"(libs.androidx.ui.text.google.fonts)
-
-    // Firebase
-    "googleImplementation"(platform(libs.firebase.bom))
-    "googleImplementation"(libs.firebase.analytics)
-    "googleImplementation"(libs.firebase.crashlytics)
-    "googleImplementation"(libs.firebase.perf)
-    "googleImplementation"(libs.google.firebase.messaging)
-    "googleImplementation"(libs.firebase.messaging)
-    "googleImplementation"(libs.play.services.location)
-    "googleImplementation"("com.squareup.okhttp3:okhttp:4.12.0")
 
     // JSON Parsing
     implementation(libs.gson)
