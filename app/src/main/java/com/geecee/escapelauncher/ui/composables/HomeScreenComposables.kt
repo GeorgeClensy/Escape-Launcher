@@ -23,14 +23,17 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowForward
 import androidx.compose.material.icons.filled.Lock
@@ -72,6 +75,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -506,13 +510,22 @@ fun HomeScreenBottomSheet(
     actions: List<AppAction>,
     onDismissRequest: () -> Unit,
     sheetState: SheetState,
+    shortcutActions: List<AppAction> = listOf(),
     modifier: Modifier = Modifier
 ) {
+    val screenHeight = LocalWindowInfo.current.containerDpSize.height
+
     ModalBottomSheet(
         onDismissRequest = onDismissRequest,
         sheetState = sheetState
     ) {
-        Column(modifier.padding(25.dp, 25.dp, 25.dp, 50.dp)) {
+        Column(
+            modifier
+                .heightIn(max = screenHeight * 0.8f)
+                .fillMaxWidth()
+                .padding(25.dp, 25.dp, 25.dp, 0.dp)
+                .verticalScroll(rememberScrollState())
+        ) {
             // Header
             Row {
                 Icon(
@@ -533,7 +546,22 @@ fun HomeScreenBottomSheet(
             HorizontalDivider(Modifier.padding(vertical = 15.dp))
 
             // Actions
-            Column(Modifier.padding(start = 47.dp)) {
+            Column(Modifier.padding(start = 47.dp, bottom = 50.dp)) {
+                if(!shortcutActions.isEmpty()) {
+                    shortcutActions.forEach { action ->
+                        Text(
+                            text = action.label,
+                            modifier = Modifier
+                                .padding(vertical = 10.dp)
+                                .combinedClickable(onClick = action.onClick),
+                            color = ContentColor,
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    }
+
+                    HorizontalDivider(Modifier.padding(vertical = 15.dp))
+                }
+
                 actions.forEach { action ->
                     Text(
                         text = action.label,

@@ -28,9 +28,11 @@ import com.geecee.escapelauncher.ui.composables.HomeScreenBottomSheet
 import com.geecee.escapelauncher.utils.AppUtils
 import com.geecee.escapelauncher.utils.AppUtils.resetHome
 import com.geecee.escapelauncher.utils.EscapeAccessibilityService
+import com.geecee.escapelauncher.utils.getAppShortcuts
 import com.geecee.escapelauncher.utils.getBooleanSetting
 import com.geecee.escapelauncher.utils.managers.OpenChallenge
 import com.geecee.escapelauncher.utils.setBooleanSetting
+import com.geecee.escapelauncher.utils.startShortcut
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import com.geecee.escapelauncher.MainAppViewModel as MainAppModel
@@ -158,6 +160,21 @@ fun HomeScreenPageManager(
 
     //Bottom Sheet
     if (homeScreenModel.showBottomSheet.value) {
+        val selectedApp = homeScreenModel.currentSelectedApp.value
+        val context = mainAppModel.getContext()
+
+        val shortcuts = getAppShortcuts(context, selectedApp.packageName)
+        val shortcutActions = shortcuts.map { shortcut ->
+            AppAction(
+                label = shortcut.label,
+                onClick = {
+                    startShortcut(context, selectedApp.packageName, shortcut.id)
+                    homeScreenModel.showBottomSheet.value = false
+                    resetHome(homeScreenModel, false)
+                }
+            )
+        }
+
         var actions = listOf(
             AppAction(
                 label = stringResource(id = R.string.uninstall),
@@ -231,6 +248,7 @@ fun HomeScreenPageManager(
             title = homeScreenModel.currentSelectedApp.value.displayName,
             actions = actions,
             onDismissRequest = { homeScreenModel.showBottomSheet.value = false },
+            shortcutActions = shortcutActions,
             sheetState = rememberModalBottomSheetState()
         )
     }
