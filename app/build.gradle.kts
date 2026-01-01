@@ -59,6 +59,10 @@ android {
             res.srcDirs("src/foss/res")
             java.srcDirs("src/foss/java")
         }
+        getByName("google") {
+            res.srcDirs("src/google/res")
+            java.srcDirs("src/google/java")
+        }
     }
     
     androidComponents.beforeVariants { variantBuilder ->
@@ -97,7 +101,11 @@ android {
 }
 
 // Apply Google-specific configurations from secondary file
-apply(from = "google.gradle")
+val taskNames = gradle.startParameter.taskNames
+val isFoss = taskNames.any { it.contains("foss", ignoreCase = true) }
+if (!isFoss) {
+    apply(from = "google.gradle")
+}
 
 dependencies {
     // Core Android Libraries
