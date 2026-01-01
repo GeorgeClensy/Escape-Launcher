@@ -1,7 +1,7 @@
 [versions]
 agp = "8.13.2"
 coreSplashscreen = "1.2.0"
-firebaseBom = "34.7.0"
+
 graphicsShapes = "1.1.0"
 gson = "2.13.2"
 kotlin = "2.3.0"
@@ -22,7 +22,7 @@ roomKtx = "2.8.4"
 roomRuntime = "2.8.4"
 workRuntimeKtx = "2.11.0"
 uiTextGoogleFonts = "1.10.0"
-firebaseMessaging = "25.0.1"
+
 material3 = "1.5.0-alpha11"
 
 [libraries]
@@ -32,11 +32,7 @@ androidx-graphics-shapes = { module = "androidx.graphics:graphics-shapes", versi
 androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref = "roomCompiler" }
 androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "roomRuntime" }
 androidx-work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version.ref = "workRuntimeKtx" }
-firebase-analytics = { module = "com.google.firebase:firebase-analytics" }
-firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
-firebase-crashlytics = { module = "com.google.firebase:firebase-crashlytics" }
-firebase-perf = { module = "com.google.firebase:firebase-perf" }
-google-firebase-messaging = { module = "com.google.firebase:firebase-messaging" }
+
 gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
@@ -56,7 +52,7 @@ androidx-navigation-compose = { group = "androidx.navigation", name = "navigatio
 androidx-room-common = { group = "androidx.room", name = "room-common", version.ref = "roomCommon" }
 androidx-room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "roomKtx" }
 androidx-ui-text-google-fonts = { group = "androidx.compose.ui", name = "ui-text-google-fonts", version.ref = "uiTextGoogleFonts" }
-firebase-messaging = { group = "com.google.firebase", name = "firebase-messaging", version.ref = "firebaseMessaging" }
+
 androidx-compose-material-icons-core = { group = "androidx.compose.material", name = "material-icons-core" }
 androidx-compose-material-icons-extended = { group = "androidx.compose.material", name = "material-icons-extended" }
 androidx-compose-material3 = { group = "androidx.compose.material3", name = "material3", version.ref = "material3" }
