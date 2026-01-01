@@ -86,7 +86,7 @@ fun HigherRec(percent: Int, modifier: Modifier = Modifier) {
     ) {
         val boxWithConstraintsScope = this
         val padding = boxWithConstraintsScope.maxWidth * 0.1f
-        val titleFontSize = boxWithConstraintsScope.maxWidth * 0.3f
+        val titleFontSize = boxWithConstraintsScope.maxWidth * 0.25f
         val bodyFontSize = boxWithConstraintsScope.maxWidth * 0.1f
 
         Column(
@@ -134,7 +134,7 @@ fun DaySpent(percent: Int, modifier: Modifier = Modifier) {
     ) {
         val boxWithConstraintsScope = this
         val padding = boxWithConstraintsScope.maxWidth * 0.1f
-        val titleFontSize = boxWithConstraintsScope.maxWidth * 0.3f
+        val titleFontSize = boxWithConstraintsScope.maxWidth * 0.25f
         val bodyFontSize = boxWithConstraintsScope.maxWidth * 0.08f
 
         Column(
