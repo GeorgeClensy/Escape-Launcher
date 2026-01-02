@@ -90,6 +90,7 @@
     <string name="double_tap_to_lock">Double tap to lock</string>
     <string name="enable_accessibility">Grant Accessibility Permission</string>
     <string name="accessibility_not_granted_msg">Please grant accessibility permission in settings</string>
+    <string name="launcher_must_be_default_to_pause_or_unpause_work_apps">Launcher must be set as deafault to pause or unpause work apps</string>
 
     <!-- First time strings -->
     <string name="continue_str">Continue</string>

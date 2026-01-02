@@ -105,6 +105,7 @@ import com.geecee.escapelauncher.utils.getPrivateSpaceApps
 import com.geecee.escapelauncher.utils.getStringSetting
 import com.geecee.escapelauncher.utils.getWorkApps
 import com.geecee.escapelauncher.utils.goToWorkAppAppInfo
+import com.geecee.escapelauncher.utils.isDefaultLauncher
 import com.geecee.escapelauncher.utils.isWorkProfileUnlocked
 import com.geecee.escapelauncher.utils.lockPrivateSpace
 import com.geecee.escapelauncher.utils.lockWorkProfile
@@ -909,8 +910,17 @@ fun WorkApps(
 
                     IconButton(
                         onClick = {
-                            lockWorkProfile(mainAppModel.getContext())
-                            isUnlocked.value = isWorkProfileUnlocked(mainAppModel.getContext())
+                            if(isDefaultLauncher(mainAppModel.getContext())) {
+                                lockWorkProfile(mainAppModel.getContext())
+                                isUnlocked.value = isWorkProfileUnlocked(mainAppModel.getContext())
+                            }
+                            else {
+                                Toast.makeText(
+                                    mainAppModel.getContext(),
+                                    mainAppModel.getContext().getString(R.string.launcher_must_be_default_to_pause_or_unpause_work_apps),
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
                         },
                         colors = IconButtonColors(
                             containerColor = SecondaryCardContainerColor,
@@ -972,10 +982,19 @@ fun WorkApps(
 
                 OutlinedButton(
                     onClick = {
-                        unlockWorkProfile(
-                            mainAppModel.getContext()
-                        )
-                        isUnlocked.value = isWorkProfileUnlocked(mainAppModel.getContext())
+                        if(isDefaultLauncher(mainAppModel.getContext())) {
+                            unlockWorkProfile(
+                                mainAppModel.getContext()
+                            )
+                            isUnlocked.value = isWorkProfileUnlocked(mainAppModel.getContext())
+                        }
+                        else {
+                            Toast.makeText(
+                                mainAppModel.getContext(),
+                                mainAppModel.getContext().getString(R.string.launcher_must_be_default_to_pause_or_unpause_work_apps),
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
                     },
                     modifier = Modifier
                         .padding(bottom = 30.dp),
