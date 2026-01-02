@@ -5,6 +5,7 @@ import android.content.Intent
 import android.graphics.Rect
 import android.os.Build
 import android.provider.AlarmClock
+import android.util.Log
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.AnimatedVisibility
@@ -201,9 +202,13 @@ fun Clock(
             modifier = Modifier
                 .offset(0.dp, 15.dp)
                 .clickable {
-                    val intent = Intent(AlarmClock.ACTION_SHOW_ALARMS)
-                    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                    context.startActivity(intent)
+                    try {
+                        val intent = Intent(AlarmClock.ACTION_SHOW_ALARMS)
+                        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                        context.startActivity(intent)
+                    } catch (e: Exception) {
+                        Log.e("Error", e.message.toString())
+                    }
                 }
         ) {
             // Hours row
@@ -258,9 +263,13 @@ fun Clock(
             fontWeight = FontWeight.SemiBold,
             modifier = Modifier
                 .clickable {
-                    val intent = Intent(AlarmClock.ACTION_SHOW_ALARMS)
-                    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                    context.startActivity(intent)
+                    try {
+                        val intent = Intent(AlarmClock.ACTION_SHOW_ALARMS)
+                        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                        context.startActivity(intent)
+                    } catch (e: Exception) {
+                        Log.e("Error", e.message.toString())
+                    }
                 }
                 .offset((-2).dp, 5.dp),
             textAlign = when (homeAlignment) {
@@ -547,7 +556,7 @@ fun HomeScreenBottomSheet(
 
             // Actions
             Column(Modifier.padding(start = 47.dp, bottom = 50.dp)) {
-                if(!shortcutActions.isEmpty()) {
+                if (!shortcutActions.isEmpty()) {
                     shortcutActions.forEach { action ->
                         Text(
                             text = action.label,
@@ -881,7 +890,7 @@ fun WorkApps(
             disabledContainerColor = ContentColorDisabled,
         )
     ) {
-        AnimatedVisibility (isUnlocked.value) {
+        AnimatedVisibility(isUnlocked.value) {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier
@@ -932,14 +941,34 @@ fun WorkApps(
                 Spacer(Modifier.height(20.dp))
             }
         }
-        AnimatedVisibility (!isUnlocked.value) {
+        AnimatedVisibility(!isUnlocked.value) {
             Column(
                 Modifier,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text(stringResource(R.string.work_apps_are_paused), style = MaterialTheme.typography.bodyLarge, textAlign = TextAlign.Center, modifier = Modifier.padding(top = 30.dp, start = 30.dp, end = 30.dp, bottom = 5.dp))
+                Text(
+                    stringResource(R.string.work_apps_are_paused),
+                    style = MaterialTheme.typography.bodyLarge,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(
+                        top = 30.dp,
+                        start = 30.dp,
+                        end = 30.dp,
+                        bottom = 5.dp
+                    )
+                )
 
-                Text(stringResource(R.string.you_wont_receive_notifications_from_work_apps), style = MaterialTheme.typography.bodyMedium, textAlign = TextAlign.Center, modifier = Modifier.padding(top = 5.dp, start = 30.dp, end = 30.dp, bottom = 10.dp))
+                Text(
+                    stringResource(R.string.you_wont_receive_notifications_from_work_apps),
+                    style = MaterialTheme.typography.bodyMedium,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(
+                        top = 5.dp,
+                        start = 30.dp,
+                        end = 30.dp,
+                        bottom = 10.dp
+                    )
+                )
 
                 OutlinedButton(
                     onClick = {
