@@ -2,7 +2,6 @@ package com.geecee.escapelauncher.utils
 
 import android.content.Context
 import android.content.pm.LauncherApps
-import android.content.pm.ShortcutInfo
 import android.os.Process
 import android.util.Log
 

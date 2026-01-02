@@ -219,6 +219,7 @@ fun Onboarding(
                 .height(62.dp)
                 .padding(start = 30.dp, end = 30.dp)
         ) {
+            @Suppress("RemoveRedundantQualifierName")
             androidx.compose.animation.AnimatedVisibility (
                 pagerState.currentPage != 0,
                 enter = fadeIn(),
@@ -358,7 +359,7 @@ fun NextButton(
 }
 
 @Composable
-fun WelcomeScreen(onNext: () -> Unit, @Suppress("unused") onPrev: () -> Unit) {
+fun WelcomeScreen(onNext: () -> Unit, @Suppress("unused", "RedundantSuppression") onPrev: () -> Unit) {
     Box(
         Modifier
             .fillMaxSize()

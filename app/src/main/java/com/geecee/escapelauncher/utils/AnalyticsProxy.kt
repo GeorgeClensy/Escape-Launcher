@@ -3,7 +3,7 @@ package com.geecee.escapelauncher.utils
 import android.content.Context
 
 interface AnalyticsProxy {
-    fun configureAnalytics(context: Context, enabled: Boolean)
+    fun configureAnalytics(@Suppress("unused") context: Context, enabled: Boolean)
 
     fun logCustomKey(key: String, value: String)
 }

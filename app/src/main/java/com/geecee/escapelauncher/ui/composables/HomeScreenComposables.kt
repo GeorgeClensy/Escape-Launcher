@@ -506,12 +506,12 @@ data class AppAction(
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun HomeScreenBottomSheet(
+    modifier: Modifier = Modifier,
     title: String,
     actions: List<AppAction>,
     onDismissRequest: () -> Unit,
     sheetState: SheetState,
-    shortcutActions: List<AppAction> = listOf(),
-    modifier: Modifier = Modifier
+    shortcutActions: List<AppAction> = listOf()
 ) {
     val screenHeight = LocalWindowInfo.current.containerDpSize.height
 
@@ -866,7 +866,7 @@ fun WorkApps(
         }
     )
 
-    var isUnlocked by remember {
+    val isUnlocked = remember {
         mutableStateOf(isWorkProfileUnlocked(mainAppModel.getContext()))
     }
 
@@ -881,7 +881,7 @@ fun WorkApps(
             disabledContainerColor = ContentColorDisabled,
         )
     ) {
-        AnimatedVisibility (isUnlocked) {
+        AnimatedVisibility (isUnlocked.value) {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier
@@ -901,7 +901,7 @@ fun WorkApps(
                     IconButton(
                         onClick = {
                             lockWorkProfile(mainAppModel.getContext())
-                            isUnlocked = isWorkProfileUnlocked(mainAppModel.getContext())
+                            isUnlocked.value = isWorkProfileUnlocked(mainAppModel.getContext())
                         },
                         colors = IconButtonColors(
                             containerColor = SecondaryCardContainerColor,
@@ -932,7 +932,7 @@ fun WorkApps(
                 Spacer(Modifier.height(20.dp))
             }
         }
-        AnimatedVisibility (!isUnlocked) {
+        AnimatedVisibility (!isUnlocked.value) {
             Column(
                 Modifier,
                 horizontalAlignment = Alignment.CenterHorizontally
@@ -946,7 +946,7 @@ fun WorkApps(
                         unlockWorkProfile(
                             mainAppModel.getContext()
                         )
-                        isUnlocked = isWorkProfileUnlocked(mainAppModel.getContext())
+                        isUnlocked.value = isWorkProfileUnlocked(mainAppModel.getContext())
                     },
                     modifier = Modifier
                         .padding(bottom = 30.dp),

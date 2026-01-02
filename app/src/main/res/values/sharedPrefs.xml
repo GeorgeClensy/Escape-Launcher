@@ -17,7 +17,6 @@
     <string name="FirstTime" translatable="false">FirstTime</string>
     <string name="FirstTimeAppDrawHelp" translatable="false">FirstTimeAppDrawHelp</string>
     <string name="SearchHiddenPrivateSpace" translatable="false">searchHiddenPrivateSpace</string>
-    <string name="Haptic" translatable="false">Haptics</string>
     <string name="WasChangingLauncher" translatable="false">WasChangingLauncher</string>
     <string name="autoThemeSwitch" translatable="false">AutoThemeSwitch</string>
     <string name="show_date" translatable="false">ShowDate</string>
@@ -26,7 +25,6 @@
     <string name="showHiddenAppsInSearch" translatable="false">ShowHiddenAppsInSearch</string>
     <string name="bottomSearch" translatable="false">bottomSearch</string>
     <string name="appsListAutoSearch" translatable="false">AppsListAutoSearch</string>
-    <string name="SmallDate" translatable="false">SmallDate</string>
     <string name="weather_app_package">weather_app_package</string>
     <string name="DoubleTapToLock">DoubleTapToLock</string>
 </resources>

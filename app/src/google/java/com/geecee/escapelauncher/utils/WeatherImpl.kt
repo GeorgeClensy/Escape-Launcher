@@ -22,7 +22,7 @@ class WeatherImpl : WeatherProxy {
             LocationServices.getFusedLocationProviderClient(context)
 
         fusedLocationClient.lastLocation.addOnSuccessListener { location ->
-            Log.d("Weather","Retrieved Weather")
+            Log.d("Weather", "Retrieved Weather")
 
 
             if (location == null) {
@@ -45,8 +45,7 @@ class WeatherImpl : WeatherProxy {
                 }
 
                 override fun onResponse(call: Call, response: Response) {
-                    response.body?.string()?.let { json ->
-
+                    response.body.string().let { json ->
                         val obj = JSONObject(json)
                         val weather = obj.optJSONObject("current_weather")
                         if (weather != null) {

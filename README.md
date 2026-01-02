@@ -109,7 +109,7 @@ Escape is a minimalist home screen launcher replacement for android to help you 
   Building and running
 </h1>
 
-You can build Escape Launcher with default settings in Android Studio. You will not be able to build either of the Google variants without a firebase goolge-services.json file but by default the project is set to build the devDebugFOSS variant which doesn't include Firebase.
+You can build Escape Launcher with default settings in Android Studio. You will not be able to build either of the Google variants without a firebase google-services.json file but by default the project is set to build the devDebugFOSS variant which doesn't include Firebase.
 
 <br>
 

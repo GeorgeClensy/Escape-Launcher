@@ -20,9 +20,9 @@
     <string name="private_space_settings">Private Space Settings</string>
     <string name="private_space_search_term">pri</string>
 
+
     <!-- Work Profile strings -->
     <string name="work_profile">Work Apps</string>
-    <string name="unlock_work_profile">Unpause Work Apps</string>
     <string name="unpause">Unpause</string>
     <string name="lock_work_profile">Pause Work Apps</string>
     <string name="work_apps_are_paused">Work apps are paused</string>
@@ -84,7 +84,6 @@
     <string name="apps_list_auto_search">Automatically Open Search</string>
     <string name="sponsor">Sponsor</string>
     <string name="font_licences">Font Licences</string>
-    <string name="small_date">Small Date</string>
     <string name="show_weather">Show Weather</string>
     <string name="choose_weather_app">Choose weather app</string>
     <string name="set_weather_app_in_settings">Set weather app in settings</string>
@@ -110,7 +109,6 @@
     <string name="accessibility_title">Screen Lock Permission</string>
     <string name="accessibility_description">Escape Launcher uses androids accessibility APIs to lock the screen when the double tap to lock feature is enabled. If you choose not to grant this permission, you can always grant it later in settings.</string>
     <string name="grant_accessibility">Allow</string>
-    <string name="next">Next</string>
 
     <!-- Screen time dashboard -->
     <string name="of_your_day_spent_on_your_phone">Of your day spent on your phone</string>
