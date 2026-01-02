@@ -6,6 +6,8 @@ interface AnalyticsProxy {
     fun configureAnalytics(@Suppress("unused") context: Context, enabled: Boolean)
 
     fun logCustomKey(key: String, value: String)
+
+    fun recordException(exception: Exception)
 }
 
 // Global accessor that will be provided by the flavor-specific implementations

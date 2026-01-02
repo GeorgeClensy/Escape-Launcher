@@ -22,4 +22,8 @@ class AnalyticsProxyImpl : AnalyticsProxy {
     override fun logCustomKey(key: String, value: String) {
         crashlytics.setCustomKey(key, value)
     }
+
+    override fun recordException(exception: Exception) {
+        crashlytics.recordException(exception)
+    }
 }

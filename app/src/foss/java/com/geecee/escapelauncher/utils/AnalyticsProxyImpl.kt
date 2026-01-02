@@ -10,4 +10,8 @@ class AnalyticsProxyImpl : AnalyticsProxy {
     override fun logCustomKey(key: String, value: String) {
         // No-op for FOSS build
     }
+
+    override fun recordException(exception: Exception) {
+        // No-op for FOSS build
+    }
 }

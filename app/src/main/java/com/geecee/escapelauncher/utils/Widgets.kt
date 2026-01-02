@@ -437,6 +437,16 @@ fun WidgetPreviewItem(
             .fillMaxWidth()
     ) {
         // Widget preview
+        val imageBitmap = remember(widget.previewImage) {
+            try {
+                widget.previewImage?.toBitmap()?.asImageBitmap()
+            } catch (e: Exception) {
+                analyticsProxy.logCustomKey("widget_preview_error_widget", widget.label + " from app" + widget.provider)
+                analyticsProxy.recordException(e)
+                null
+            }
+        }
+
         Box(
             modifier = Modifier
                 .size(100.dp)
@@ -445,14 +455,13 @@ fun WidgetPreviewItem(
                 .padding(4.dp),
             contentAlignment = Alignment.Center
         ) {
-            widget.previewImage?.let {
+            if (imageBitmap != null) {
                 Image(
-                    bitmap = it.toBitmap().asImageBitmap(),
+                    bitmap = imageBitmap,
                     contentDescription = null,
                     modifier = Modifier.fillMaxSize()
                 )
-            } ?: run {
-                // Fallback if no preview image
+            } else {
                 Icon(
                     imageVector = Icons.Default.Search,
                     contentDescription = null,
