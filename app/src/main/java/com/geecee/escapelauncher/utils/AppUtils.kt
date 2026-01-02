@@ -93,22 +93,44 @@ object AppUtils {
         overrideOpenChallenge: Boolean,
         openChallengeShow: MutableState<Boolean>?
     ) {
-        val launcherApps = mainAppModel.getContext()
-            .getSystemService(Context.LAUNCHER_APPS_SERVICE) as LauncherApps
+        val context = mainAppModel.getContext()
+        val launcherApps = context.getSystemService(Context.LAUNCHER_APPS_SERVICE) as LauncherApps
         val options = ActivityOptions.makeBasic()
 
         if (!mainAppModel.challengesManager.doesAppHaveChallenge(app.packageName) || overrideOpenChallenge) {
-            launcherApps.startMainActivity(
-                app.componentName,
-                myUserHandle(),
-                Rect(),
-                options.toBundle()
-            )
-            ScreenTimeManager.onAppOpened(app.packageName)
+            try {
+                launcherApps.startMainActivity(
+                    app.componentName,
+                    myUserHandle(),
+                    Rect(),
+                    options.toBundle()
+                )
+                ScreenTimeManager.onAppOpened(app.packageName)
 
-            mainAppModel.isAppOpened = true
-            mainAppModel.shouldGoHomeOnResume.value = true
-            homeScreenModel.updateSelectedApp(app)
+                mainAppModel.isAppOpened = true
+                mainAppModel.shouldGoHomeOnResume.value = true
+                homeScreenModel.updateSelectedApp(app)
+            } catch (e: SecurityException) {
+                Log.e("AppUtils", "SecurityException opening app: ${e.message}")
+                try {
+                    val intent = context.packageManager.getLaunchIntentForPackage(app.packageName)
+                    intent?.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    if (intent != null) {
+                        context.startActivity(intent)
+                        ScreenTimeManager.onAppOpened(app.packageName)
+
+                        mainAppModel.isAppOpened = true
+                        mainAppModel.shouldGoHomeOnResume.value = true
+                        homeScreenModel.updateSelectedApp(app)
+                    }
+                } catch (fallbackException: Exception) {
+                    Log.e("AppUtils", "Failed to launch app even with fallback", fallbackException)
+                    analyticsProxy.logCustomKey("app_launch_error", app.packageName)
+                    analyticsProxy.recordException(fallbackException)
+                }
+            } catch (e: Exception) {
+                Log.e("AppUtils", "Error opening app", e)
+            }
         } else {
             if (openChallengeShow != null) {
                 openChallengeShow.value = true
