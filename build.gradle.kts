@@ -7,8 +7,9 @@ buildscript {
             mavenCentral()
         }
         dependencies {
-            classpath("com.google.gms:google-services:4.4.2")
-            classpath("com.google.fire" + "base:fire" + "base-crash" + "lytics-gradle:3.0.2")
+            //noinspection UseTomlInstead
+            classpath("com.google.gms:google-services:4.4.4")
+            classpath("com.google.fire" + "base:fire" + "base-crash" + "lytics-gradle:3.0.6")
         }
     }
 }

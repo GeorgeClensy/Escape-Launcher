@@ -1,7 +1,6 @@
 [versions]
 agp = "8.13.2"
 coreSplashscreen = "1.2.0"
-
 graphicsShapes = "1.1.0"
 gson = "2.13.2"
 kotlin = "2.3.0"
@@ -15,14 +14,11 @@ lifecycleRuntimeKtx = "2.10.0"
 activityCompose = "1.12.2"
 composeBom = "2025.12.01"
 navigationCompose = "2.9.6"
-playServicesLocation = "21.3.0"
 roomCommon = "2.8.4"
 roomCompiler = "2.8.4"
 roomKtx = "2.8.4"
 roomRuntime = "2.8.4"
 workRuntimeKtx = "2.11.0"
-uiTextGoogleFonts = "1.10.0"
-
 material3 = "1.5.0-alpha11"
 
 [libraries]
@@ -51,13 +47,9 @@ androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit
 androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose" }
 androidx-room-common = { group = "androidx.room", name = "room-common", version.ref = "roomCommon" }
 androidx-room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "roomKtx" }
-androidx-ui-text-google-fonts = { group = "androidx.compose.ui", name = "ui-text-google-fonts", version.ref = "uiTextGoogleFonts" }
-
 androidx-compose-material-icons-core = { group = "androidx.compose.material", name = "material-icons-core" }
 androidx-compose-material-icons-extended = { group = "androidx.compose.material", name = "material-icons-extended" }
 androidx-compose-material3 = { group = "androidx.compose.material3", name = "material3", version.ref = "material3" }
-play-services-location = { module = "com.google.android.gms:play-services-location", version.ref = "playServicesLocation" }
-
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
