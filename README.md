@@ -119,4 +119,8 @@ You can build Escape Launcher with default settings in Android Studio. You will 
 
 If you would like to contribute clone the repo and make your changes and then create a pull request, we'll get on it as fast as we can! In the projects section you can see a a roadmap with plans for the launcher.
 
+# Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=GeorgeClensy/Escape-Launcher&type=date&legend=top-left)](https://www.star-history.com/#GeorgeClensy/Escape-Launcher&type=date&legend=top-left)
+
 </div>
