@@ -1,0 +1,17 @@
+Escape Launcher is a minimalist home screen launcher app with features to help with phone and social media distractions.
+
+  Features:
+  * Screen time tracking
+  * Support for work apps (Android 15+)
+  * Support for private space (Android 15+)
+  * Colour themes
+  * Fonts
+  * Weather
+  * Search
+  * Widgets
+  * Double tap to lock
+  * Hide apps
+  * Countdown before opening apps you choose
+  * You can disable the screen time dashboard
+  * Customisable alignments, positioning of items
+  * Fuzzy find in search
