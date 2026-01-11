@@ -106,6 +106,18 @@ Escape is a minimalist home screen launcher replacement for android to help you 
 <br/>
 
 <h1>
+  Installing for non-tech users 
+</h1>
+
+To install the app, you first need to download an apk for the app. This is the file that contains the app and can be opened to install the app on your phone. You can download one from the [github releases page](https://github.com/GeorgeClensy/Escape-Launcher/releases/) or [the F-Droid page](https://f-droid.org/en/packages/com.geecee.escapelauncher). If you go onto the github releases page, you will see two .apk files at the bottom: A FOSS version and a normal version. The FOSS version removes any non open source libraries (open source means the code is visible to the public for free online) such as the google fonts, and weather libraries which means theese features, along with a few others, will be missing. If you do not know what FOSS is and why you would want it, just use the normal version which includes all the features in a smaller download. 
+
+Once you have your file downloaded, open up your files app from your home screen. Go to downloads and click on the Escape Launcher file. It will ask you if you want to install it. Press install. If a popup shows saying the app was blocked by google play protect, you can disable play protect from within the google play store settings (just google how to do this if you don't know how). Make sure to enable play protect again afterwards though to prevent accidentally installing malware.
+
+The app should now be installed, enjoy!
+
+<br>
+
+<h1>
   Building and running
 </h1>
 
