@@ -49,6 +49,7 @@ import com.geecee.escapelauncher.utils.doesWorkProfileExist
 import com.geecee.escapelauncher.utils.getAppsAlignment
 import com.geecee.escapelauncher.utils.getBooleanSetting
 import com.geecee.escapelauncher.utils.unlockPrivateSpace
+import java.text.Normalizer
 import com.geecee.escapelauncher.MainAppViewModel as MainAppModel
 import com.geecee.escapelauncher.utils.isPrivateSpaceUnlocked as isPrivateSpace
 

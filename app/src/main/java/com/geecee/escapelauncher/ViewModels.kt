@@ -32,6 +32,7 @@ import com.geecee.escapelauncher.utils.weatherProxy
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.text.Normalizer
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -84,17 +85,24 @@ class HomeScreenModel(application: Application, private val mainAppViewModel: Ma
             val filtered = if (query.isBlank()) {
                 apps.filter { !mainAppViewModel.hiddenAppsManager.isAppHidden(it.packageName) }
             } else {
-                val queryLower = query.lowercase()
                 apps.filter { app ->
                     val isHidden =
                         mainAppViewModel.hiddenAppsManager.isAppHidden(app.packageName)
                     val matchesQuery = AppUtils.fuzzyMatch(app.displayName, query)
                     matchesQuery && (!isHidden || showHiddenInSearch)
                 }.sortedWith(compareBy<InstalledApp> { app ->
-                    val nameLower = app.displayName.lowercase()
+                    val regexUnaccent = "\\p{M}+"
+                    val normalizedQuery = Normalizer.normalize(query, Normalizer.Form.NFD)
+                        .replace(Regex(regexUnaccent), "")
+                        .lowercase()
+
+                    val normalizedName = Normalizer.normalize(app.displayName, Normalizer.Form.NFD)
+                        .replace(Regex(regexUnaccent), "")
+                        .lowercase()
+
                     when {
-                        nameLower.startsWith(queryLower) -> 0
-                        nameLower.contains(queryLower) -> 1
+                        normalizedName.startsWith(normalizedQuery) -> 0
+                        normalizedName.contains(normalizedQuery) -> 1
                         else -> 2
                     }
                 }.thenBy { it.displayName.lowercase() })
