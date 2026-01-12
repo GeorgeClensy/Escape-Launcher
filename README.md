@@ -129,7 +129,15 @@ You can build Escape Launcher with default settings in Android Studio. You will 
   Contributing
 </h1>
 
-If you would like to contribute clone the repo and make your changes and then create a pull request, we'll get on it as fast as we can! In the projects section you can see a a roadmap with plans for the launcher.
+If you would like to contribute clone the repo and make your changes and then create a pull request, we'll get on it as fast as we can! In the projects section you can see a a roadmap with plans for the launcher. If you don't know what you want to contribute, you can check out the projects page.
+
+<br />
+
+<h1>
+  Donating
+</h1>
+
+At the moment, it is really just me working on this app. I love doing it but it takes alot of time. I would really appriciate it if you donated with [github sponsors](https://github.com/sponsors/GeorgeClensy)!
 
 # Star History
 
