@@ -129,4 +129,6 @@
     <string name="system">System</string>
     <string name="accessibility_service_description">Allows the app to turn off the screen.</string>
     <string name="back">Back</string>
+    <string name="launch_secure_folder">Secure Folder</string>
+    <string name="enable_secure_folder_on_settings">Enable the Secure Folder in settings</string>
 </resources>
