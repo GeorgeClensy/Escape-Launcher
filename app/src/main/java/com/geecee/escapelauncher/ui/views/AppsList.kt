@@ -1,6 +1,7 @@
 package com.geecee.escapelauncher.ui.views
 
 import android.os.Build
+import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -44,10 +45,12 @@ import com.geecee.escapelauncher.utils.AppUtils
 import com.geecee.escapelauncher.utils.AppUtils.doHapticFeedBack
 import com.geecee.escapelauncher.utils.AppUtils.resetHome
 import com.geecee.escapelauncher.utils.PrivateSpaceSettings
+import com.geecee.escapelauncher.utils.canUseSecureFolder
 import com.geecee.escapelauncher.utils.doesPrivateSpaceExist
 import com.geecee.escapelauncher.utils.doesWorkProfileExist
 import com.geecee.escapelauncher.utils.getAppsAlignment
 import com.geecee.escapelauncher.utils.getBooleanSetting
+import com.geecee.escapelauncher.utils.launchSecureFolder
 import com.geecee.escapelauncher.utils.unlockPrivateSpace
 import com.geecee.escapelauncher.MainAppViewModel as MainAppModel
 import com.geecee.escapelauncher.utils.isPrivateSpaceUnlocked as isPrivateSpace
@@ -232,8 +235,21 @@ fun AppsList(
 
             }
 
-            //Private Space
-            if (AppUtils.isDefaultLauncher(mainAppModel.getContext()) && Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM && doesPrivateSpaceExist(
+            //Secure Folder
+            if (canUseSecureFolder(mainAppModel.getContext())) {
+
+                item {
+                    Spacer(modifier = Modifier.height(20.dp))
+
+                    Button({
+                        launchSecureFolder(mainAppModel.getContext())
+                    }) {
+                        Text(stringResource(R.string.launch_secure_folder))
+                    }
+                }
+
+            } //Private Space
+            else if (AppUtils.isDefaultLauncher(mainAppModel.getContext()) && Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM && doesPrivateSpaceExist(
                     mainAppModel.getContext()
                 )
             ) {

@@ -116,4 +116,6 @@
     <string name="rem_from_fav">Quitar de Favoritos</string>
     <string name="add_open_challenge">Añadir Cuenta Atrás para Apertura</string>
     <string name="app_info">Información de App</string>
+    <string name="launch_secure_folder">Carpeta Segura</string>
+    <string name="enable_secure_folder_on_settings">Activa la Carpeta Segura en los ajustes</string>
 </resources>
