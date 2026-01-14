@@ -12,7 +12,7 @@ class Migration(private val context: Context) {
         private const val MIGRATION_COMPLETE_KEY = "MigrationComplete"
 
         private val OLD_PREFS_FILES = listOf(
-            "FavoriteAppsPrefs", "HiddenAppsPrefs", "ChallengePrefs", "SettingsPref"
+            "FavoriteAppsPrefs", "HiddenAppsPrefs", "ChallengePrefs", "SettingsPref", "2131755384"
         )
     }
 
