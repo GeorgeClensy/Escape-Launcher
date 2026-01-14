@@ -12,6 +12,7 @@ import androidx.compose.ui.Alignment
 import androidx.core.content.edit
 import com.geecee.escapelauncher.MainHomeScreenActivity
 import com.geecee.escapelauncher.R
+import com.geecee.escapelauncher.utils.managers.Migration
 
 /**
  * Shows the launcher selector
@@ -69,7 +70,7 @@ private const val REQUEST_ROLE_HOME_CODE = 678
  */
 fun changeHomeAlignment(context: Context, alignment: Int) {
     val sharedPreferences = context.getSharedPreferences(
-        R.string.settings_pref_file_name.toString(), Context.MODE_PRIVATE
+        Migration.UNIFIED_PREFS_NAME, Context.MODE_PRIVATE
     )
     sharedPreferences.edit {
 
@@ -89,7 +90,7 @@ fun changeHomeAlignment(context: Context, alignment: Int) {
  */
 fun getHomeAlignmentAsInt(context: Context): Int {
     val sharedPreferences = context.getSharedPreferences(
-        R.string.settings_pref_file_name.toString(), Context.MODE_PRIVATE
+        Migration.UNIFIED_PREFS_NAME, Context.MODE_PRIVATE
     )
 
     return if (sharedPreferences.getString(
@@ -114,7 +115,7 @@ fun getHomeAlignmentAsInt(context: Context): Int {
  */
 fun getHomeAlignment(context: Context): Alignment.Horizontal {
     val sharedPreferences = context.getSharedPreferences(
-        R.string.settings_pref_file_name.toString(), Context.MODE_PRIVATE
+        Migration.UNIFIED_PREFS_NAME, Context.MODE_PRIVATE
     )
 
     return if (sharedPreferences.getString(
@@ -139,7 +140,7 @@ fun getHomeAlignment(context: Context): Alignment.Horizontal {
  */
 fun changeHomeVAlignment(context: Context, alignment: Int) {
     val sharedPreferences = context.getSharedPreferences(
-        R.string.settings_pref_file_name.toString(), Context.MODE_PRIVATE
+        Migration.UNIFIED_PREFS_NAME, Context.MODE_PRIVATE
     )
     sharedPreferences.edit {
 
@@ -159,7 +160,7 @@ fun changeHomeVAlignment(context: Context, alignment: Int) {
  */
 fun getHomeVAlignmentAsInt(context: Context): Int {
     val sharedPreferences = context.getSharedPreferences(
-        R.string.settings_pref_file_name.toString(), Context.MODE_PRIVATE
+        Migration.UNIFIED_PREFS_NAME, Context.MODE_PRIVATE
     )
 
     return if (sharedPreferences.getString(
@@ -184,7 +185,7 @@ fun getHomeVAlignmentAsInt(context: Context): Int {
  */
 fun getHomeVAlignment(context: Context): Arrangement.Vertical {
     val sharedPreferences = context.getSharedPreferences(
-        R.string.settings_pref_file_name.toString(), Context.MODE_PRIVATE
+        Migration.UNIFIED_PREFS_NAME, Context.MODE_PRIVATE
     )
 
     return if (sharedPreferences.getString(
@@ -209,7 +210,7 @@ fun getHomeVAlignment(context: Context): Arrangement.Vertical {
  */
 fun changeAppsAlignment(context: Context, alignment: Int) {
     val sharedPreferences = context.getSharedPreferences(
-        R.string.settings_pref_file_name.toString(), Context.MODE_PRIVATE
+        Migration.UNIFIED_PREFS_NAME, Context.MODE_PRIVATE
     )
     sharedPreferences.edit {
 
@@ -229,7 +230,7 @@ fun changeAppsAlignment(context: Context, alignment: Int) {
  */
 fun getAppsAlignmentAsInt(context: Context): Int {
     val sharedPreferences = context.getSharedPreferences(
-        R.string.settings_pref_file_name.toString(), Context.MODE_PRIVATE
+        Migration.UNIFIED_PREFS_NAME, Context.MODE_PRIVATE
     )
 
     return if (sharedPreferences.getString(
@@ -254,7 +255,7 @@ fun getAppsAlignmentAsInt(context: Context): Int {
  */
 fun getAppsAlignment(context: Context): Alignment.Horizontal {
     val sharedPreferences = context.getSharedPreferences(
-        R.string.settings_pref_file_name.toString(), Context.MODE_PRIVATE
+        Migration.UNIFIED_PREFS_NAME, Context.MODE_PRIVATE
     )
 
     return if (sharedPreferences.getString(
@@ -278,7 +279,7 @@ fun getAppsAlignment(context: Context): Alignment.Horizontal {
 
 fun toggleBooleanSetting(context: Context, shouldTurnOn: Boolean, setting: String) {
     val sharedPreferences = context.getSharedPreferences(
-        R.string.settings_pref_file_name.toString(), Context.MODE_PRIVATE
+        Migration.UNIFIED_PREFS_NAME, Context.MODE_PRIVATE
     )
     sharedPreferences.edit {
 
@@ -293,7 +294,7 @@ fun toggleBooleanSetting(context: Context, shouldTurnOn: Boolean, setting: Strin
 
 fun getBooleanSetting(context: Context, setting: String): Boolean {
     val sharedPreferences = context.getSharedPreferences(
-        R.string.settings_pref_file_name.toString(), Context.MODE_PRIVATE
+        Migration.UNIFIED_PREFS_NAME, Context.MODE_PRIVATE
     )
 
     return sharedPreferences.getBoolean(setting, false)
@@ -301,14 +302,14 @@ fun getBooleanSetting(context: Context, setting: String): Boolean {
 
 fun getStringSetting(context: Context, setting: String, defaultValue: String): String {
     val sharedPreferences = context.getSharedPreferences(
-        R.string.settings_pref_file_name.toString(), Context.MODE_PRIVATE
+        Migration.UNIFIED_PREFS_NAME, Context.MODE_PRIVATE
     )
     return sharedPreferences.getString(setting, defaultValue) ?: defaultValue
 }
 
 fun setStringSetting(context: Context, setting: String, value: String) {
     val sharedPreferences = context.getSharedPreferences(
-        R.string.settings_pref_file_name.toString(), Context.MODE_PRIVATE
+        Migration.UNIFIED_PREFS_NAME, Context.MODE_PRIVATE
     )
     sharedPreferences.edit {
         putString(setting, value)
@@ -317,14 +318,14 @@ fun setStringSetting(context: Context, setting: String, value: String) {
 
 fun getIntSetting(context: Context, setting: String, defaultValue: Int): Int {
     val sharedPreferences = context.getSharedPreferences(
-        R.string.settings_pref_file_name.toString(), Context.MODE_PRIVATE
+        Migration.UNIFIED_PREFS_NAME, Context.MODE_PRIVATE
     )
     return sharedPreferences.getInt(setting, defaultValue)
 }
 
 fun setIntSetting(context: Context, setting: String, value: Int) {
     val sharedPreferences = context.getSharedPreferences(
-        R.string.settings_pref_file_name.toString(), Context.MODE_PRIVATE
+        Migration.UNIFIED_PREFS_NAME, Context.MODE_PRIVATE
     )
     sharedPreferences.edit {
         putInt(setting, value)
@@ -333,14 +334,14 @@ fun setIntSetting(context: Context, setting: String, value: Int) {
 
 fun getBooleanSetting(context: Context, setting: String, defaultValue: Boolean): Boolean {
     val sharedPreferences = context.getSharedPreferences(
-        R.string.settings_pref_file_name.toString(), Context.MODE_PRIVATE
+        Migration.UNIFIED_PREFS_NAME, Context.MODE_PRIVATE
     )
     return sharedPreferences.getBoolean(setting, defaultValue)
 }
 
 fun setBooleanSetting(context: Context, setting: String, value: Boolean) {
     val sharedPreferences = context.getSharedPreferences(
-        R.string.settings_pref_file_name.toString(), Context.MODE_PRIVATE
+        Migration.UNIFIED_PREFS_NAME, Context.MODE_PRIVATE
     )
     sharedPreferences.edit {
         putBoolean(setting, value)

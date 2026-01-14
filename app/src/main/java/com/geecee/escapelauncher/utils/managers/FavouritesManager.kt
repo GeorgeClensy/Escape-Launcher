@@ -6,6 +6,7 @@ import android.content.Context
 import androidx.core.content.edit
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import com.geecee.escapelauncher.utils.managers.Migration
 
 class FavoriteAppsManager(context: Context) {
 
@@ -13,7 +14,7 @@ class FavoriteAppsManager(context: Context) {
     private val gson = Gson()
 
     companion object {
-        private const val PREFS_NAME = "FavoriteAppsPrefs"
+        private const val PREFS_NAME = Migration.UNIFIED_PREFS_NAME
         private const val FAVORITE_APPS_KEY = "FavoriteApps"
     }
 

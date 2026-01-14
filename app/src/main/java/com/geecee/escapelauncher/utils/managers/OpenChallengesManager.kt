@@ -47,7 +47,7 @@ class ChallengesManager(context: Context) {
     private val gson = Gson()
 
     companion object {
-        private const val PREFS_NAME = "ChallengePrefs"
+        private const val PREFS_NAME = Migration.UNIFIED_PREFS_NAME
         private const val FAVORITE_APPS_KEY = "ChallengeApps"
     }
 
