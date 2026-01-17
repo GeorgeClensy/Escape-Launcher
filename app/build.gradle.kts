@@ -7,6 +7,8 @@ plugins {
     id("com.google.devtools.ksp")
 }
 
+val baseVersionCode = "2.3.1"
+
 android {
     namespace = "com.geecee.escapelauncher"
     compileSdk = 36
@@ -16,11 +18,15 @@ android {
         minSdk = 26
         targetSdk = 36
         versionCode = 2
-        versionName = "2.3.1"
+        versionName = baseVersionCode
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
             useSupportLibrary = true
         }
+        resValue("string", "app_version", baseVersionCode)
+        resValue("string", "app_name", "Escape Launcher")
+        resValue("string", "app_flavour", "Unknown Flavor")
+        resValue("string", "empty", "")
     }
     buildTypes {
         release {
@@ -38,6 +44,7 @@ android {
             applicationIdSuffix = ".dev"
             dimension = "version"
             versionNameSuffix = "-dev"
+            resValue("string", "app_name", "Escape Launcher Dev")
         }
         create("prod"){
             dimension = "version"
@@ -46,11 +53,13 @@ android {
         create("google") {
             dimension = "distribution"
             buildConfigField("boolean", "IS_FOSS", "false")
+            resValue("string", "app_flavour", "Google API")
         }
         create("foss") {
             dimension = "distribution"
             versionNameSuffix = "-foss"
             buildConfigField("boolean", "IS_FOSS", "true")
+            resValue("string", "app_flavour", "FOSS")
         }
     }
 
