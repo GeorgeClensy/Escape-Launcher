@@ -1,7 +1,6 @@
 package com.geecee.escapelauncher.ui.views
 
 import android.os.Build
-import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -52,7 +51,6 @@ import com.geecee.escapelauncher.utils.getAppsAlignment
 import com.geecee.escapelauncher.utils.getBooleanSetting
 import com.geecee.escapelauncher.utils.launchSecureFolder
 import com.geecee.escapelauncher.utils.unlockPrivateSpace
-import java.text.Normalizer
 import com.geecee.escapelauncher.MainAppViewModel as MainAppModel
 import com.geecee.escapelauncher.utils.isPrivateSpaceUnlocked as isPrivateSpace
 
@@ -237,7 +235,7 @@ fun AppsList(
             }
 
             //Secure Folder
-            if (canUseSecureFolder(mainAppModel.getContext())) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P && canUseSecureFolder(mainAppModel.getContext())) {
 
                 item {
                     Spacer(modifier = Modifier.height(20.dp))
