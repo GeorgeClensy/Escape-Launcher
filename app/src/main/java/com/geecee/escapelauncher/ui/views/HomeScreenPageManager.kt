@@ -16,10 +16,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalHapticFeedback
@@ -66,13 +63,13 @@ fun HomeScreenPageManager(
         )
     ) 1 else 2
 
-    val homeScreenPage = appsListPage - 1
-
-    // Track with an observable the state of going back gesture
-    var goBackEnabled by remember { mutableStateOf(false) }
+    val coroutineScope = rememberCoroutineScope()
 
     // Control if the user can go back or not depending the page
-    BackHandler(enabled = goBackEnabled) {
+    BackHandler(enabled = true) {
+        coroutineScope.launch {
+            homeScreenModel.animatedGoToMainPage()
+        }
     }
 
     // Add effect to hide keyboard on page change or open search if needed
@@ -93,9 +90,6 @@ fun HomeScreenPageManager(
                 homeScreenModel.searchExpanded.value = true
             }
         }
-
-        // Check if it's the homepage, if so, the back button gets disabled
-        goBackEnabled = homeScreenModel.pagerState.currentPage == homeScreenPage
     }
 
     // Home Screen Pages
