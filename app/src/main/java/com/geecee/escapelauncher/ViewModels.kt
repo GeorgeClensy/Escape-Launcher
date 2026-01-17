@@ -5,6 +5,8 @@ import android.content.ComponentName
 import android.content.Context
 import android.util.Log
 import android.view.Window
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.pager.PagerState
@@ -153,6 +155,25 @@ class HomeScreenModel(application: Application, private val mainAppViewModel: Ma
             pagerState.scrollToPage(0)
         } else {
             pagerState.scrollToPage(1)
+        }
+    }
+
+    suspend fun animatedGoToMainPage() {
+        if (getBooleanSetting(
+                context = mainAppViewModel.getContext(),
+                setting = mainAppViewModel.getContext().resources.getString(R.string.hideScreenTimePage),
+                defaultValue = false
+            )
+        ) {
+            pagerState.animateScrollToPage(
+                0,
+                animationSpec = tween(durationMillis = 500, easing = FastOutSlowInEasing)
+            )
+        } else {
+            pagerState.animateScrollToPage(
+                1,
+                animationSpec = tween(durationMillis = 500, easing = FastOutSlowInEasing)
+            )
         }
     }
 
