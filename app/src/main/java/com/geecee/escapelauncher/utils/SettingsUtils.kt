@@ -5,6 +5,7 @@ import android.app.ActivityOptions
 import android.app.role.RoleManager
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Build
 import android.provider.Settings
 import androidx.compose.foundation.layout.Arrangement
@@ -58,8 +59,17 @@ fun getDefaultLauncherPackage(context: Context): String {
  * Returns if the default launcher is escape launcher
  */
 fun isDefaultLauncher(context: Context): Boolean {
-    val launcherPackageName = getDefaultLauncherPackage(context)
-    return "com.geecee.escapelauncher" == launcherPackageName || "com.geecee.escapelauncher.dev" == launcherPackageName
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+        val roleManager = context.getSystemService(RoleManager::class.java)
+        return roleManager.isRoleHeld(RoleManager.ROLE_HOME)
+    } else {
+        val intent = Intent(Intent.ACTION_MAIN).apply {
+            addCategory(Intent.CATEGORY_HOME)
+        }
+        val resolveInfo = context.packageManager.resolveActivity(intent, PackageManager.MATCH_DEFAULT_ONLY)
+        val defaultLauncherPackage = resolveInfo?.activityInfo?.packageName
+        return context.packageName == defaultLauncherPackage
+    }
 }
 
 private const val REQUEST_ROLE_HOME_CODE = 678
