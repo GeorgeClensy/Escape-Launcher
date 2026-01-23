@@ -882,7 +882,7 @@ fun WorkApps(
 
     Card(
         modifier
-            .padding(horizontal = 30.dp)
+            .padding(horizontal = 30.dp, vertical = 120.dp)
             .clip(MaterialTheme.shapes.extraLarge),
         colors = CardColors(
             containerColor = CardContainerColor,
@@ -893,8 +893,7 @@ fun WorkApps(
     ) {
         AnimatedVisibility(isUnlocked.value) {
             Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Row(
                     modifier = Modifier
@@ -910,14 +909,14 @@ fun WorkApps(
 
                     IconButton(
                         onClick = {
-                            if(isDefaultLauncher(mainAppModel.getContext())) {
+                            if (isDefaultLauncher(mainAppModel.getContext())) {
                                 lockWorkProfile(mainAppModel.getContext())
                                 isUnlocked.value = isWorkProfileUnlocked(mainAppModel.getContext())
-                            }
-                            else {
+                            } else {
                                 Toast.makeText(
                                     mainAppModel.getContext(),
-                                    mainAppModel.getContext().getString(R.string.launcher_must_be_default_to_pause_or_unpause_work_apps),
+                                    mainAppModel.getContext()
+                                        .getString(R.string.launcher_must_be_default_to_pause_or_unpause_work_apps),
                                     Toast.LENGTH_SHORT
                                 ).show()
                             }
@@ -936,19 +935,26 @@ fun WorkApps(
                     }
                 }
 
-                getWorkApps(mainAppModel.getContext()).forEach { app ->
-                    WorkAppItem(app.displayName, {
-                        homeScreenModel.currentSelectedWorkApp.value = app
-                        homeScreenModel.showWorkBottomSheet.value = true
-                    }) {
-                        openWorkApp(
-                            installedApp = app, context = mainAppModel.getContext(), Rect()
-                        )
-                        resetHome(homeScreenModel)
-                    }
-                }
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.verticalScroll(rememberScrollState())
+                ) {
+                    getWorkApps(mainAppModel.getContext())
+                        .sortedBy { it.displayName.lowercase() }
+                        .forEach { app ->
+                            WorkAppItem(app.displayName, {
+                                homeScreenModel.currentSelectedWorkApp.value = app
+                                homeScreenModel.showWorkBottomSheet.value = true
+                            }) {
+                                openWorkApp(
+                                    installedApp = app, context = mainAppModel.getContext(), Rect()
+                                )
+                                resetHome(homeScreenModel)
+                            }
+                        }
 
-                Spacer(Modifier.height(20.dp))
+                    Spacer(Modifier.height(20.dp))
+                }
             }
         }
         AnimatedVisibility(!isUnlocked.value) {
@@ -982,16 +988,16 @@ fun WorkApps(
 
                 OutlinedButton(
                     onClick = {
-                        if(isDefaultLauncher(mainAppModel.getContext())) {
+                        if (isDefaultLauncher(mainAppModel.getContext())) {
                             unlockWorkProfile(
                                 mainAppModel.getContext()
                             )
                             isUnlocked.value = isWorkProfileUnlocked(mainAppModel.getContext())
-                        }
-                        else {
+                        } else {
                             Toast.makeText(
                                 mainAppModel.getContext(),
-                                mainAppModel.getContext().getString(R.string.launcher_must_be_default_to_pause_or_unpause_work_apps),
+                                mainAppModel.getContext()
+                                    .getString(R.string.launcher_must_be_default_to_pause_or_unpause_work_apps),
                                 Toast.LENGTH_SHORT
                             ).show()
                         }
