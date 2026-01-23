@@ -101,6 +101,7 @@ import com.geecee.escapelauncher.utils.AppUtils.resetHome
 import com.geecee.escapelauncher.utils.InstalledApp
 import com.geecee.escapelauncher.utils.PrivateAppItem
 import com.geecee.escapelauncher.utils.WorkAppItem
+import com.geecee.escapelauncher.utils.analyticsProxy
 import com.geecee.escapelauncher.utils.getPrivateSpaceApps
 import com.geecee.escapelauncher.utils.getStringSetting
 import com.geecee.escapelauncher.utils.getWorkApps
@@ -324,11 +325,16 @@ fun Date(
         modifier = Modifier
             .padding(end = 10.dp)
             .clickable {
-                val intent = Intent(Intent.ACTION_MAIN).apply {
-                    addCategory(Intent.CATEGORY_APP_CALENDAR)
-                    flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                try {
+                    val intent = Intent(Intent.ACTION_MAIN).apply {
+                        addCategory(Intent.CATEGORY_APP_CALENDAR)
+                        flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                    }
+                    context.startActivity(intent)
                 }
-                context.startActivity(intent)
+                catch(e: Exception) {
+                    analyticsProxy.recordException(e)
+                }
             },
         textAlign = when (homeAlignment) {
             Alignment.Start -> TextAlign.Start
