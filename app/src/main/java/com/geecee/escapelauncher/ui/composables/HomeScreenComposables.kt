@@ -199,64 +199,29 @@ fun Clock(
     }
 
     if (bigClock) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
+        val timeText = "%02d\n%02d".format(hours.toInt(), minutes.toInt())
+
+        Text(
+            text = timeText,
             modifier = Modifier
-                .offset(0.dp, 15.dp)
                 .clickable {
                     try {
-                        val intent = Intent(AlarmClock.ACTION_SHOW_ALARMS)
-                        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                        val intent = Intent(AlarmClock.ACTION_SHOW_ALARMS).apply {
+                            flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                        }
                         context.startActivity(intent)
                     } catch (e: Exception) {
-                        Log.e("Error", e.message.toString())
+                        Log.e("Error", e.message.orEmpty())
                     }
-                }
-        ) {
-            // Hours row
-            Row {
-                // Ensure hours has two digits
-                val hourDigits = if (hours.length == 1) "0$hours" else hours
+                },
+            color = primaryContentColor,
+            fontWeight = FontWeight.SemiBold,
+            style = MaterialTheme.typography.headlineLarge.copy(
+                fontFeatureSettings = "tnum"
+            ),
+            textAlign = TextAlign.Center
+        )
 
-                hourDigits.forEachIndexed { _, digit ->
-                    Box(
-                        contentAlignment = Alignment.Center,
-                        modifier = Modifier
-                            .width(40.dp)
-                            .offset(0.dp, 35.dp)
-                    ) {
-                        Text(
-                            text = digit.toString(),
-                            color = primaryContentColor,
-                            fontWeight = FontWeight.SemiBold,
-                            style = MaterialTheme.typography.headlineLarge,
-                            textAlign = TextAlign.Center
-                        )
-                    }
-                }
-            }
-
-            // Minutes row
-            Row {
-                // Ensure minutes has two digits
-                val minuteDigits = if (minutes.length == 1) "0$minutes" else minutes
-
-                minuteDigits.forEachIndexed { _, digit ->
-                    Box(
-                        contentAlignment = Alignment.Center,
-                        modifier = Modifier.width(40.dp)
-                    ) {
-                        Text(
-                            text = digit.toString(),
-                            color = primaryContentColor,
-                            fontWeight = FontWeight.SemiBold,
-                            style = MaterialTheme.typography.headlineLarge,
-                            textAlign = TextAlign.Center
-                        )
-                    }
-                }
-            }
-        }
     } else {
         Text(
             text = time,
