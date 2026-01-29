@@ -753,7 +753,7 @@ fun PrivateSpace(mainAppModel: MainAppViewModel, homeScreenModel: HomeScreenMode
                 }
             }
 
-            getPrivateSpaceApps(mainAppModel.getContext()).forEach { app ->
+            getPrivateSpaceApps(mainAppModel.getContext()).sortedBy { it.displayName }.forEach { app ->
                 PrivateAppItem(app.displayName, {
                     homeScreenModel.currentSelectedPrivateApp.value = app
                     homeScreenModel.showPrivateBottomSheet.value = true
