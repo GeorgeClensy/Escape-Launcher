@@ -239,6 +239,16 @@ class MainHomeScreenActivity : ComponentActivity() {
         }
     }
 
+    override fun onPause() {
+        super.onPause()
+
+        try {
+            AppUtils.resetHome(homeScreenModel, true)
+        } catch (ex: Exception) {
+            Log.e("ERROR", ex.toString())
+        }
+    }
+
     /**
      * Determines the start location for the NavHost
      *
