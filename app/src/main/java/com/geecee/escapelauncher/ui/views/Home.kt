@@ -1,5 +1,6 @@
 package com.geecee.escapelauncher.ui.views
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -18,6 +19,10 @@ import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.IntOffset
@@ -57,6 +62,41 @@ fun HomeScreen(
     val scrollState = rememberLazyListState()
     val haptics = LocalHapticFeedback.current
 
+    val nestedScrollConnection = remember {
+        object : NestedScrollConnection {
+            var totalDrag = 0f
+
+            override fun onPostScroll(
+                consumed: Offset,
+                available: Offset,
+                source: NestedScrollSource
+            ): Offset {
+                if (source == NestedScrollSource.UserInput && available.y > 0) {
+                    totalDrag += available.y
+
+                    if (totalDrag > 150f) {
+                        try {
+                            @SuppressLint("WrongConstant") val service =
+                                mainAppModel.getContext()
+                                    .getSystemService("statusbar") // Use literal string "statusbar"
+
+                            val statusBarManager = Class.forName("android.app.StatusBarManager")
+                            val expand = statusBarManager.getMethod("expandNotificationsPanel")
+                            expand.invoke(service)
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                        }
+                        totalDrag = 0f
+                        return available
+                    }
+                } else {
+                    totalDrag = 0f
+                }
+                return Offset.Zero
+            }
+        }
+    }
+
     LazyColumn(
         state = scrollState,
         verticalArrangement = getHomeVAlignment(mainAppModel.getContext()),
@@ -64,6 +104,7 @@ fun HomeScreen(
         modifier = Modifier
             .fillMaxSize()
             .padding(30.dp, 0.dp)
+            .nestedScroll(nestedScrollConnection)
     ) {
         //Top padding
         item {
@@ -84,9 +125,7 @@ fun HomeScreen(
                     ),
                     homeAlignment = getHomeAlignment(mainAppModel.getContext()),
                     twelveHour = getBooleanSetting(
-                        mainAppModel.getContext(),
-                        stringResource(R.string.twelve_hour_clock),
-                        false
+                        mainAppModel.getContext(), stringResource(R.string.twelve_hour_clock), false
                     )
                 )
             }
@@ -100,13 +139,11 @@ fun HomeScreen(
                     )
                 ) {
                     Date(
-                        homeAlignment = getHomeAlignment(mainAppModel.getContext()),
-                        small = true
+                        homeAlignment = getHomeAlignment(mainAppModel.getContext()), small = true
                     )
                 }
 
-                if (
-                    getBooleanSetting(
+                if (getBooleanSetting(
                         mainAppModel.getContext(), stringResource(R.string.ScreenTimeOnHome), false
                     )
                 ) {
@@ -167,9 +204,7 @@ fun HomeScreen(
                 context = mainAppModel.getContext(), modifier = Modifier
                     .offset {
                         IntOffset(
-                            (widgetOffset.dp)
-                                .toPx()
-                                .toInt(), 0
+                            (widgetOffset.dp).toPx().toInt(), 0
                         )
                     }
                     .size(
@@ -240,4 +275,5 @@ fun HomeScreen(
             Spacer(Modifier.height(90.dp))
         }
     }
+
 }
