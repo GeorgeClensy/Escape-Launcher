@@ -387,10 +387,11 @@ class MainAppViewModel(application: Application) : AndroidViewModel(application)
 
     fun updateWeather() {
         val currentTime = System.currentTimeMillis()
+        val useFahrenheit = getBooleanSetting(appContext, appContext.getString(R.string.UseFahrenheit))
         // Update weather if it's been more than 30 minutes or if it's empty
         if (currentTime - lastWeatherUpdate > 30 * 60 * 1000 || weatherText.value.isEmpty()) {
             viewModelScope.launch(Dispatchers.IO) {
-                weatherProxy.getWeather(appContext) { result ->
+                weatherProxy.getWeather(appContext, useFahrenheit) { result ->
                     viewModelScope.launch(Dispatchers.Main) {
                         weatherText.value = result
                         // Only update the last update time if we got a valid-looking result
@@ -399,6 +400,23 @@ class MainAppViewModel(application: Application) : AndroidViewModel(application)
                         ) {
                             lastWeatherUpdate = System.currentTimeMillis()
                         }
+                    }
+                }
+            }
+        }
+    }
+
+    fun forceUpdateWeather() {
+        val useFahrenheit = getBooleanSetting(appContext, appContext.getString(R.string.UseFahrenheit))
+        viewModelScope.launch(Dispatchers.IO) {
+            weatherProxy.getWeather(appContext, useFahrenheit) { result ->
+                viewModelScope.launch(Dispatchers.Main) {
+                    weatherText.value = result
+                    // Only update the last update time if we got a valid-looking result
+                    if (!result.contains("error", ignoreCase = true) &&
+                        !result.contains("unavailable", ignoreCase = true)
+                    ) {
+                        lastWeatherUpdate = System.currentTimeMillis()
                     }
                 }
             }

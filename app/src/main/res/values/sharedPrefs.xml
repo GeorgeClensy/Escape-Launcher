@@ -25,6 +25,7 @@
     <string name="showHiddenAppsInSearch" translatable="false">ShowHiddenAppsInSearch</string>
     <string name="bottomSearch" translatable="false">bottomSearch</string>
     <string name="appsListAutoSearch" translatable="false">AppsListAutoSearch</string>
-    <string name="weather_app_package">weather_app_package</string>
-    <string name="DoubleTapToLock">DoubleTapToLock</string>
+    <string name="weather_app_package" translatable="false">weather_app_package</string>
+    <string name="DoubleTapToLock" translatable="false">DoubleTapToLock</string>
+    <string name="UseFahrenheit" translatable="false">UseFahrenheit</string>
 </resources>

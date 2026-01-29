@@ -442,11 +442,29 @@ fun MainSettingsPage(
         }
 
         item {
-            SettingsNavigationItem(
-                label = stringResource(id = R.string.choose_weather_app),
-                false,
-                onClick = { showWeatherAppPicker = true }
-            )
+            if (!BuildConfig.IS_FOSS) {
+                SettingsSwitch(
+                    label = stringResource(id = R.string.use_farenhight), checked = getBooleanSetting(
+                        mainAppModel.getContext(), stringResource(R.string.UseFahrenheit), false
+                    ), onCheckedChange = {
+                        toggleBooleanSetting(
+                            mainAppModel.getContext(),
+                            it,
+                            mainAppModel.getContext().resources.getString(R.string.UseFahrenheit)
+                        )
+                        mainAppModel.forceUpdateWeather()
+                    })
+            }
+        }
+
+        item {
+            if (!BuildConfig.IS_FOSS) {
+                SettingsNavigationItem(
+                    label = stringResource(id = R.string.choose_weather_app),
+                    false,
+                    onClick = { showWeatherAppPicker = true }
+                )
+            }
         }
 
         item {

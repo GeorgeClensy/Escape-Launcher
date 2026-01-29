@@ -17,13 +17,12 @@ class WeatherImpl : WeatherProxy {
     private val client = OkHttpClient()
 
     @RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION])
-    override fun getWeather(context: Context, callback: (String) -> Unit) {
+    override fun getWeather(context: Context, useFarenheit: Boolean, callback: (String) -> Unit) {
         val fusedLocationClient =
             LocationServices.getFusedLocationProviderClient(context)
 
         fusedLocationClient.lastLocation.addOnSuccessListener { location ->
             Log.d("Weather", "Retrieved Weather")
-
 
             if (location == null) {
                 callback("Location unavailable")
@@ -33,9 +32,14 @@ class WeatherImpl : WeatherProxy {
             val lat = location.latitude
             val lon = location.longitude
 
+            val unitParam = if (useFarenheit) "&temperature_unit=fahrenheit" else ""
+            val unitSymbol = if (useFarenheit) "°F" else "°C"
+
             val url =
                 "https://api.open-meteo.com/v1/forecast?" +
-                        "latitude=$lat&longitude=$lon&current_weather=true"
+                        "latitude=$lat&longitude=$lon&current_weather=true" +
+                        unitParam
+
 
             val request = Request.Builder().url(url).build()
 
@@ -50,7 +54,7 @@ class WeatherImpl : WeatherProxy {
                         val weather = obj.optJSONObject("current_weather")
                         if (weather != null) {
                             val temp = weather.optDouble("temperature", Double.NaN)
-                            callback("${temp.toInt()}°C")
+                            callback("${temp.toInt()}${unitSymbol}")
                         } else {
                             callback("No weather data")
                         }
