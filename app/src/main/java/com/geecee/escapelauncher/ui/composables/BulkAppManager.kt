@@ -5,27 +5,40 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowDownward
-import androidx.compose.material.icons.filled.ArrowUpward
+import androidx.compose.material.icons.filled.DragHandle
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import com.geecee.escapelauncher.ui.theme.ContentColor
 import com.geecee.escapelauncher.utils.InstalledApp
+import kotlin.math.roundToInt
 
 @Composable
 fun BulkAppManager(
@@ -53,6 +66,12 @@ fun BulkAppManager(
         derivedStateOf { selectedState.map { it.packageName }.toSet() }
     }
 
+    // Drag state for reorderable items
+    var draggedPackageName by remember { mutableStateOf<String?>(null) }
+    var dragOffset by remember { mutableFloatStateOf(0f) }
+    var measuredItemHeight by remember { mutableIntStateOf(0) }
+    val lazyListState = rememberLazyListState()
+
     // Create a combined list with a spacer marker
     val combinedItems by remember(apps) {
         derivedStateOf {
@@ -67,6 +86,7 @@ fun BulkAppManager(
     }
 
     LazyColumn(
+        state = lazyListState,
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.Start,
         modifier = Modifier.fillMaxSize()
@@ -102,11 +122,32 @@ fun BulkAppManager(
                     }
 
                     if (item.isInSelectedSection && reorderable) {
+                        val isDragging = draggedPackageName == item.app.packageName
+                        
+                        // Calculate drag limits
+                        val currentIndex = selectedState.indexOf(item.app)
+                        val maxDragUp = -currentIndex * measuredItemHeight.toFloat()
+                        val maxDragDown = (selectedState.size - 1 - currentIndex) * measuredItemHeight.toFloat()
+
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .animateItem()
+                                .onSizeChanged { size ->
+                                    if (measuredItemHeight == 0) {
+                                        measuredItemHeight = size.height
+                                    }
+                                }
+                                .then(if (!isDragging) Modifier.animateItem() else Modifier)
+                                .zIndex(if (isDragging) 1f else 0f)
+                                .offset {
+                                    IntOffset(
+                                        x = 0,
+                                        y = if (isDragging) {
+                                            dragOffset.coerceIn(maxDragUp, maxDragDown).roundToInt()
+                                        } else 0
+                                    )
+                                }
                         ) {
                             SettingsButton(
                                 label = item.app.displayName,
@@ -120,42 +161,58 @@ fun BulkAppManager(
                                 },
                                 isTopOfGroup = isTopOfGroup,
                                 isBottomOfGroup = isBottomOfGroup,
-                                isDisabled = false, // Always enabled for selected and reorderable
                                 modifier = Modifier.weight(1f)
                             )
-                            IconButton(
-                                onClick = {
-                                    val currentIndex = selectedState.indexOf(item.app)
-                                    if (currentIndex > 0) {
-                                        val newIndex = currentIndex - 1
-                                        val movedItem = selectedState.removeAt(currentIndex)
-                                        selectedState.add(newIndex, movedItem)
-                                        onAppMoved(currentIndex, newIndex)
+                            Box(
+                                modifier = Modifier
+                                    .padding(horizontal = 8.dp)
+                                    .pointerInput(item.app.packageName) {
+                                        detectVerticalDragGestures(
+                                            onDragStart = {
+                                                draggedPackageName = item.app.packageName
+                                                dragOffset = 0f
+                                            },
+                                            onVerticalDrag = { change, dragAmount ->
+                                                change.consume()
+                                                dragOffset += dragAmount
+
+                                                val itemHeight = measuredItemHeight.toFloat()
+                                                val threshold = itemHeight / 2
+
+                                                val currentPkg = draggedPackageName ?: return@detectVerticalDragGestures
+                                                val fromIndex = selectedState.indexOfFirst { it.packageName == currentPkg }
+                                                if (fromIndex == -1) return@detectVerticalDragGestures
+
+                                                if (dragOffset > threshold && fromIndex < selectedState.size - 1) {
+                                                    // Move item down
+                                                    val toIndex = fromIndex + 1
+                                                    val movedItem = selectedState.removeAt(fromIndex)
+                                                    selectedState.add(toIndex, movedItem)
+                                                    dragOffset -= itemHeight
+                                                    onAppMoved(fromIndex, toIndex)
+                                                } else if (dragOffset < -threshold && fromIndex > 0) {
+                                                    // Move item up
+                                                    val toIndex = fromIndex - 1
+                                                    val movedItem = selectedState.removeAt(fromIndex)
+                                                    selectedState.add(toIndex, movedItem)
+                                                    dragOffset += itemHeight
+                                                    onAppMoved(fromIndex, toIndex)
+                                                }
+                                            },
+                                            onDragEnd = {
+                                                draggedPackageName = null
+                                                dragOffset = 0f
+                                            },
+                                            onDragCancel = {
+                                                draggedPackageName = null
+                                                dragOffset = 0f
+                                            }
+                                        )
                                     }
-                                },
-                                enabled = selectedState.indexOf(item.app) > 0
                             ) {
                                 Icon(
-                                    Icons.Default.ArrowUpward,
-                                    contentDescription = "Move Up",
-                                    tint = ContentColor
-                                )
-                            }
-                            IconButton(
-                                onClick = {
-                                    val currentIndex = selectedState.indexOf(item.app)
-                                    if (currentIndex < selectedState.size - 1) {
-                                        val newIndex = currentIndex + 1
-                                        val movedItem = selectedState.removeAt(currentIndex)
-                                        selectedState.add(newIndex, movedItem)
-                                        onAppMoved(currentIndex, newIndex)
-                                    }
-                                },
-                                enabled = selectedState.indexOf(item.app) < selectedState.size - 1
-                            ) {
-                                Icon(
-                                    Icons.Default.ArrowDownward,
-                                    contentDescription = "Move Down",
+                                    Icons.Default.DragHandle,
+                                    contentDescription = "Drag to reorder",
                                     tint = ContentColor
                                 )
                             }
