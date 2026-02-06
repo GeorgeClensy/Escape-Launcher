@@ -2,7 +2,6 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     alias(libs.plugins.android.application)
-    alias(libs.plugins.jetbrains.kotlin.android)
     alias(libs.plugins.compose.compiler)
     id("com.google.devtools.ksp")
 }
@@ -65,12 +64,12 @@ android {
 
     sourceSets {
         getByName("foss") {
-            res.srcDirs("src/foss/res")
-            java.srcDirs("src/foss/java")
+            res.directories.add("src/foss/res")
+            java.directories.add("src/foss/java")
         }
         getByName("google") {
-            res.srcDirs("src/google/res")
-            java.srcDirs("src/google/java")
+            res.directories.add("src/google/res")
+            java.directories.add("src/google/java")
         }
     }
     
@@ -88,15 +87,11 @@ android {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
     }
-    kotlin {
-        compilerOptions {
-            jvmTarget = JvmTarget.JVM_1_8
-            freeCompilerArgs = listOf("-XXLanguage:+PropertyParamAnnotationDefaultTargetMode")
-        }
-    }
+
     buildFeatures {
         compose = true
         buildConfig = true
+        resValues = true
     }
     @Suppress("UnstableApiUsage")
     composeOptions {
@@ -106,6 +101,13 @@ android {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
+    }
+}
+
+kotlin {
+    compilerOptions {
+        jvmTarget = JvmTarget.JVM_1_8
+        freeCompilerArgs = listOf("-XXLanguage:+PropertyParamAnnotationDefaultTargetMode")
     }
 }
 
@@ -170,3 +172,9 @@ java {
         languageVersion = JavaLanguageVersion.of(17)
     }
 }
+
+tasks.register("testClasses") {
+    group = "verification"
+    description = "Test claasses for all variants."
+    dependsOn(
+        tasks.matching { it.name.startsWith("compile") && it.name.endsWith("UnitTestSources") } )}

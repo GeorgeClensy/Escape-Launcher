@@ -1,8 +1,8 @@
 android {
     sourceSets {
         google {
-            java.srcDirs = ['src/google/java']
-            res.srcDirs = ['src/google/res']
+            java.srcDirs += ['src/google/java']
+            res.srcDirs += ['src/google/res']
         }
     }
 }
