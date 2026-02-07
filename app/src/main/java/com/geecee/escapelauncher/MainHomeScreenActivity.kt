@@ -259,7 +259,8 @@ class MainHomeScreenActivity : ComponentActivity() {
         Log.i("homeDebug", "${intent.hasCategory(Intent.CATEGORY_HOME)}")
 
         if (intent.action == Intent.ACTION_MAIN && intent.hasCategory(Intent.CATEGORY_HOME)) {
-            AppUtils.resetHome(homeScreenModel)
+            AppUtils.resetHome(homeScreenModel,false)
+            homeScreenModel.requestGoHome()
             viewModel.requestToGoHome()
         }
     }
