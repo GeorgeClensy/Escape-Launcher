@@ -32,6 +32,8 @@ import com.geecee.escapelauncher.utils.managers.getScreenTimeListSorted
 import com.geecee.escapelauncher.utils.managers.getUsageForApp
 import com.geecee.escapelauncher.utils.weatherProxy
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.text.Normalizer
@@ -269,6 +271,15 @@ class HomeScreenModelFactory(
  */
 class MainAppViewModel(application: Application) : AndroidViewModel(application) {
     private val appContext: Context = application.applicationContext // The app context
+
+    private val _navigateHomeEvent = MutableSharedFlow<Unit>(replay = 0)
+    val navigateHomeEvent = _navigateHomeEvent.asSharedFlow()
+
+    fun requestToGoHome() {
+        viewModelScope.launch {
+            _navigateHomeEvent.emit(Unit)
+        }
+    }
 
     fun getContext(): Context = appContext // Returns the context
 
