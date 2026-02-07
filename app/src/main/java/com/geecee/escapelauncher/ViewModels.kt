@@ -94,7 +94,6 @@ class HomeScreenModel(application: Application, private val mainAppViewModel: Ma
                     val matchesQuery = AppUtils.fuzzyMatch(app.displayName, query)
                     matchesQuery && (!isHidden || showHiddenInSearch)
                 }.sortedWith(compareBy<InstalledApp> { app ->
-                    val regexUnaccent = "\\p{M}+"
                     val normalizedQuery = Normalizer.normalize(query, Normalizer.Form.NFD)
                         .replace(regexUnaccentPattern, "")
                         .lowercase()
