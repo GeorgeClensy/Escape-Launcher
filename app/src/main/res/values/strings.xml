@@ -92,6 +92,12 @@
     <string name="accessibility_not_granted_msg">Please grant accessibility permission in settings</string>
     <string name="launcher_must_be_default_to_pause_or_unpause_work_apps">Launcher must be set as deafault to pause or unpause work apps</string>
     <string name="use_farenhight">Use fahrenheit</string>
+    <string name="set_app_countdown_time">Set App Countdown Time</string>
+    <string name="set_app_countdown_time_long">Long Time</string>
+    <string name="set_app_countdown_time_normal">Normal Time</string>
+    <string name="set_app_countdown_time_short">Short Time</string>
+    <string name="set_app_countdown_time_slider">Change Time</string>
+    <string name="new_settings">New Settings</string>
 
     <!-- First time strings -->
     <string name="continue_str">Continue</string>
