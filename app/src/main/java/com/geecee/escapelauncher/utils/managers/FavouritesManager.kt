@@ -12,6 +12,7 @@ class FavoriteAppsManager(context: Context) {
 
     private val sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
     private val gson = Gson()
+    private var favoriteAppsCache: MutableList<String>? = null
 
     companion object {
         private const val PREFS_NAME = Migration.UNIFIED_PREFS_NAME
@@ -19,6 +20,8 @@ class FavoriteAppsManager(context: Context) {
     }
 
     private fun saveFavoriteApps(favoriteApps: List<String>) {
+        favoriteAppsCache = favoriteApps.toMutableList()
+
         val json = gson.toJson(favoriteApps)
         sharedPreferences.edit {
             putString(FAVORITE_APPS_KEY, json)
@@ -26,13 +29,19 @@ class FavoriteAppsManager(context: Context) {
     }
 
     fun getFavoriteApps(): List<String> {
+        // Check if the Favourite List is in memory.
+        favoriteAppsCache?.let { return it.toList() }
+
         val json = sharedPreferences.getString(FAVORITE_APPS_KEY, null)
-        return if (json != null) {
+        val favList: List<String> = if (json != null) {
             val type = object : TypeToken<List<String>>() {}.type
             gson.fromJson(json, type)
         } else {
             emptyList()
         }
+
+        favoriteAppsCache = favList.toMutableList()
+        return favList
     }
 
     fun addFavoriteApp(packageName: String) {
