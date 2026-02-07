@@ -108,7 +108,7 @@ class MainHomeScreenActivity : ComponentActivity() {
         // Set up the screen time tracking
         ScreenTimeManager.initialize(this)
         scheduleDailyCleanup(this)
-        
+
         // Efficient bulk load of screen time
         viewModel.reloadScreenTimeCache()
 
@@ -254,10 +254,6 @@ class MainHomeScreenActivity : ComponentActivity() {
         super.onNewIntent(intent)
         setIntent(intent)
 
-        Log.i("homeDebug", "${intent.action}")
-        Log.i("homeDebug", "${intent.action == Intent.ACTION_MAIN}")
-        Log.i("homeDebug", "${intent.hasCategory(Intent.CATEGORY_HOME)}")
-
         if (intent.action == Intent.ACTION_MAIN && intent.hasCategory(Intent.CATEGORY_HOME)) {
             AppUtils.resetHome(homeScreenModel)
             viewModel.requestToGoHome()
@@ -298,6 +294,9 @@ class MainHomeScreenActivity : ComponentActivity() {
 
         LaunchedEffect(viewModel.navigateHomeEvent) {
             viewModel.navigateHomeEvent.collect {
+                homeScreenModel.appsListScrollState.scrollToItem(0)
+                homeScreenModel.animatedGoToMainPage()
+
                 if (navController.currentDestination?.route != "home") {
                     navController.navigate("home") {
                         popUpTo(navController.graph.startDestinationId)

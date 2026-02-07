@@ -44,7 +44,7 @@ import java.util.Locale
 /**
  * Home Screen View Model - Used for holding UI state for the home screen pages
  */
-class HomeScreenModel(application: Application, private val mainAppViewModel: MainAppViewModel) :
+class HomeScreenModel(application: Application, val mainAppViewModel: MainAppViewModel) :
     AndroidViewModel(application) {
     var currentSelectedApp = mutableStateOf(InstalledApp("", "", ComponentName("", "")))
     val isCurrentAppChallenged by derivedStateOf {
