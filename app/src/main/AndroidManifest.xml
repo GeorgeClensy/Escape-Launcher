@@ -39,7 +39,8 @@
             android:exported="true"
             android:theme="@style/Theme.EscapeLauncher.Splash"
             android:windowSoftInputMode="adjustResize"
-            android:launchMode="singleTask">
+            android:launchMode="singleTask"
+            android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize|uiMode|navigation">
 
             <intent-filter>
                 <category android:name="android.intent.category.HOME" />
