@@ -720,7 +720,7 @@ fun MainSettingsPage(
         }
 
         // New Settings
-        item { SettingsSubheading(stringResource(id = R.string.new_settings)) }
+        item { SettingsSubheading(stringResource(id = R.string.custom_settings)) }
 
         item {
             SettingsNavigationItem(
@@ -1625,7 +1625,7 @@ fun AppCountdownTime(context: Context, goBack: () -> Unit) {
         horizontalAlignment = Alignment.Start,
         modifier = Modifier.fillMaxSize()
     ) {
-        item { SettingsHeader(goBack, stringResource(R.string.new_settings)) }
+        item { SettingsHeader(goBack, stringResource(R.string.countdown_time_title)) }
 
         itemsIndexed(CountdownMode.entries) {index, mode ->
             SettingsButton(

@@ -97,7 +97,8 @@
     <string name="set_app_countdown_time_normal">Normal Time</string>
     <string name="set_app_countdown_time_short">Short Time</string>
     <string name="set_app_countdown_time_slider">Change Time</string>
-    <string name="new_settings">New Settings</string>
+    <string name="custom_settings">Custom Settings</string>
+    <string name="countdown_time_title">Countdown Time</string>
 
     <!-- First time strings -->
     <string name="continue_str">Continue</string>
