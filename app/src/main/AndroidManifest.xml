@@ -40,6 +40,7 @@
             android:theme="@style/Theme.EscapeLauncher.Splash"
             android:windowSoftInputMode="adjustResize"
             android:launchMode="singleTask"
+            android:excludeFromRecents="true"
             android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize|uiMode|navigation">
 
             <intent-filter>
