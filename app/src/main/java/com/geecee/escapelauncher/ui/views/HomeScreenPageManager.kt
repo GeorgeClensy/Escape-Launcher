@@ -75,10 +75,11 @@ fun HomeScreenPageManager(
     // Add effect to hide keyboard on page change or open search if needed
     LaunchedEffect(homeScreenModel.pagerState.currentPage) {
         if (homeScreenModel.pagerState.currentPage != appsListPage) {
-            focusManager.clearFocus()
-            keyboardController?.hide()
             homeScreenModel.searchText.value = ""
             homeScreenModel.searchExpanded.value = false
+
+            focusManager.clearFocus()
+            keyboardController?.hide()
         } else {
             // If we are on the apps list page and auto search is enabled, open it
             if (getBooleanSetting(
