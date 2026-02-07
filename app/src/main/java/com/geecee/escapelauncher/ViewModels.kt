@@ -33,7 +33,6 @@ import com.geecee.escapelauncher.utils.managers.getUsageForApp
 import com.geecee.escapelauncher.utils.weatherProxy
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -162,24 +161,22 @@ class HomeScreenModel(application: Application, private val mainAppViewModel: Ma
     }
 
     suspend fun animatedGoToMainPage() {
-        val page = if (
-            getBooleanSetting(
+        if (getBooleanSetting(
                 context = mainAppViewModel.getContext(),
-                setting = mainAppViewModel
-                    .getContext()
-                    .resources
-                    .getString(R.string.hideScreenTimePage),
+                setting = mainAppViewModel.getContext().resources.getString(R.string.hideScreenTimePage),
                 defaultValue = false
             )
-        ) 0 else 1
-
-        pagerState.animateScrollToPage(
-            page = page,
-            animationSpec = tween(
-                durationMillis = 500,
-                easing = FastOutSlowInEasing
+        ) {
+            pagerState.animateScrollToPage(
+                0,
+                animationSpec = tween(durationMillis = 500, easing = FastOutSlowInEasing)
             )
-        )
+        } else {
+            pagerState.animateScrollToPage(
+                1,
+                animationSpec = tween(durationMillis = 500, easing = FastOutSlowInEasing)
+            )
+        }
     }
 
     val currentSelectedPrivateApp =
@@ -253,17 +250,6 @@ class HomeScreenModel(application: Application, private val mainAppViewModel: Ma
 
     fun updateSelectedApp(app: InstalledApp) {
         currentSelectedApp.value = app
-    }
-
-    // Event trigger thing to animate going to favourites page when not in a compose scope
-    val animateGoHome = MutableStateFlow(false)
-
-    fun requestGoHome() {
-        animateGoHome.value = true
-    }
-
-    fun consumeGoHome() {
-        animateGoHome.value = false
     }
 }
 
