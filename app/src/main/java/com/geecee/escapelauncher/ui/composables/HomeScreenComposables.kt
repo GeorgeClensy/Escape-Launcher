@@ -653,7 +653,7 @@ fun AnimatedPillSearchBar(
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
                     keyboardActions = KeyboardActions(onDone = {
                         keyboardController?.hide()
-                        onSearchDone(searchText.text)
+                        onSearchDone(searchText.text.trim())
                     }),
                     textStyle = MaterialTheme.typography.bodyMedium.copy(
                         color = BackgroundColor

@@ -87,19 +87,19 @@ class HomeScreenModel(application: Application, private val mainAppViewModel: Ma
             val filtered = if (query.isBlank()) {
                 apps.filter { !mainAppViewModel.hiddenAppsManager.isAppHidden(it.packageName) }
             } else {
+                val regexUnaccentPattern = Regex("\\p{M}+")
                 apps.filter { app ->
                     val isHidden =
                         mainAppViewModel.hiddenAppsManager.isAppHidden(app.packageName)
                     val matchesQuery = AppUtils.fuzzyMatch(app.displayName, query)
                     matchesQuery && (!isHidden || showHiddenInSearch)
                 }.sortedWith(compareBy<InstalledApp> { app ->
-                    val regexUnaccent = "\\p{M}+"
                     val normalizedQuery = Normalizer.normalize(query, Normalizer.Form.NFD)
-                        .replace(Regex(regexUnaccent), "")
+                        .replace(regexUnaccentPattern, "")
                         .lowercase()
 
                     val normalizedName = Normalizer.normalize(app.displayName, Normalizer.Form.NFD)
-                        .replace(Regex(regexUnaccent), "")
+                        .replace(regexUnaccentPattern, "")
                         .lowercase()
 
                     when {
