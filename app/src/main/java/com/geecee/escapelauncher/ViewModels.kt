@@ -32,6 +32,9 @@ import com.geecee.escapelauncher.utils.managers.getScreenTimeListSorted
 import com.geecee.escapelauncher.utils.managers.getUsageForApp
 import com.geecee.escapelauncher.utils.weatherProxy
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.text.Normalizer
@@ -42,7 +45,7 @@ import java.util.Locale
 /**
  * Home Screen View Model - Used for holding UI state for the home screen pages
  */
-class HomeScreenModel(application: Application, private val mainAppViewModel: MainAppViewModel) :
+class HomeScreenModel(application: Application, val mainAppViewModel: MainAppViewModel) :
     AndroidViewModel(application) {
     var currentSelectedApp = mutableStateOf(InstalledApp("", "", ComponentName("", "")))
     val isCurrentAppChallenged by derivedStateOf {
@@ -145,36 +148,34 @@ class HomeScreenModel(application: Application, private val mainAppViewModel: Ma
         }
     }
 
+    private fun getMainPageIndex(): Int {
+        val hideScreenTime = getBooleanSetting(
+            context = mainAppViewModel.getContext(),
+            setting = mainAppViewModel.getContext().resources.getString(R.string.hideScreenTimePage),
+            defaultValue = false
+        )
+        return if (hideScreenTime) 0 else 1
+    }
+
     suspend fun goToMainPage() {
-        if (getBooleanSetting(
-                context = mainAppViewModel.getContext(),
-                setting = mainAppViewModel.getContext().resources.getString(R.string.hideScreenTimePage),
-                defaultValue = false
-            )
-        ) {
-            pagerState.scrollToPage(0)
-        } else {
-            pagerState.scrollToPage(1)
-        }
+        pagerState.scrollToPage(getMainPageIndex())
     }
 
     suspend fun animatedGoToMainPage() {
-        if (getBooleanSetting(
-                context = mainAppViewModel.getContext(),
-                setting = mainAppViewModel.getContext().resources.getString(R.string.hideScreenTimePage),
-                defaultValue = false
-            )
-        ) {
-            pagerState.animateScrollToPage(
-                0,
-                animationSpec = tween(durationMillis = 500, easing = FastOutSlowInEasing)
-            )
-        } else {
-            pagerState.animateScrollToPage(
-                1,
-                animationSpec = tween(durationMillis = 500, easing = FastOutSlowInEasing)
-            )
+        val targetPage = getMainPageIndex()
+
+        if (pagerState.currentPage == targetPage && pagerState.currentPageOffsetFraction == 0f) {
+            return
         }
+
+        if (pagerState.isScrollInProgress && pagerState.targetPage == targetPage) {
+            return
+        }
+
+        pagerState.animateScrollToPage(
+            targetPage,
+            animationSpec = tween(durationMillis = 500, easing = FastOutSlowInEasing)
+        )
     }
 
     val currentSelectedPrivateApp =
@@ -269,6 +270,19 @@ class HomeScreenModelFactory(
  */
 class MainAppViewModel(application: Application) : AndroidViewModel(application) {
     private val appContext: Context = application.applicationContext // The app context
+
+    private val _navigateHomeEvent = MutableSharedFlow<Unit>(
+        replay = 0,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST,
+        extraBufferCapacity = 1
+    )
+    val navigateHomeEvent = _navigateHomeEvent.asSharedFlow()
+
+    fun requestToGoHome() {
+        viewModelScope.launch {
+            _navigateHomeEvent.emit(Unit)
+        }
+    }
 
     fun getContext(): Context = appContext // Returns the context
 
@@ -387,7 +401,8 @@ class MainAppViewModel(application: Application) : AndroidViewModel(application)
 
     fun updateWeather() {
         val currentTime = System.currentTimeMillis()
-        val useFahrenheit = getBooleanSetting(appContext, appContext.getString(R.string.UseFahrenheit))
+        val useFahrenheit =
+            getBooleanSetting(appContext, appContext.getString(R.string.UseFahrenheit))
         // Update weather if it's been more than 30 minutes or if it's empty
         if (currentTime - lastWeatherUpdate > 30 * 60 * 1000 || weatherText.value.isEmpty()) {
             viewModelScope.launch(Dispatchers.IO) {
@@ -407,7 +422,8 @@ class MainAppViewModel(application: Application) : AndroidViewModel(application)
     }
 
     fun forceUpdateWeather() {
-        val useFahrenheit = getBooleanSetting(appContext, appContext.getString(R.string.UseFahrenheit))
+        val useFahrenheit =
+            getBooleanSetting(appContext, appContext.getString(R.string.UseFahrenheit))
         viewModelScope.launch(Dispatchers.IO) {
             weatherProxy.getWeather(appContext, useFahrenheit) { result ->
                 viewModelScope.launch(Dispatchers.Main) {
