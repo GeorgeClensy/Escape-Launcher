@@ -269,18 +269,22 @@ fun SettingsSwitch(
     val bottomStartRadius = if (isBottomOfGroup) groupEdgeCornerRadius else defaultCornerRadius
     val bottomEndRadius = if (isBottomOfGroup) groupEdgeCornerRadius else defaultCornerRadius
 
+    val currentShape = RoundedCornerShape(
+        topStart = topStartRadius,
+        topEnd = topEndRadius,
+        bottomEnd = bottomEndRadius,
+        bottomStart = bottomStartRadius
+    )
+
     Card(
         modifier = Modifier
             .padding(vertical = 1.dp)
+            .clip(currentShape)
             .clickable {
                 isChecked = !isChecked
                 onCheckedChange(isChecked)
-            }, shape = RoundedCornerShape(
-            topStart = topStartRadius,
-            topEnd = topEndRadius,
-            bottomEnd = bottomEndRadius,
-            bottomStart = bottomStartRadius
-        ), colors = CardDefaults.cardColors(
+            },shape = currentShape,
+            colors = CardDefaults.cardColors(
             containerColor = CardContainerColor,
             contentColor = ContentColor
         )
@@ -334,16 +338,20 @@ fun SettingsNavigationItem(
     val bottomStartRadius = if (isBottomOfGroup) groupEdgeCornerRadius else defaultCornerRadius
     val bottomEndRadius = if (isBottomOfGroup) groupEdgeCornerRadius else defaultCornerRadius
 
+    val currentShape = RoundedCornerShape(
+        topStart = topStartRadius,
+        topEnd = topEndRadius,
+        bottomEnd = bottomStartRadius,
+        bottomEndRadius
+    )
+
     Card(
         modifier = Modifier
             .padding(vertical = 1.dp)
+            .clip(currentShape)
             .combinedClickable(onClick = onClick),
-        shape = RoundedCornerShape(
-            topStart = topStartRadius,
-            topEnd = topEndRadius,
-            bottomEnd = bottomEndRadius,
-            bottomStart = bottomStartRadius
-        ), colors = CardDefaults.cardColors(
+        shape = currentShape,
+        colors = CardDefaults.cardColors(
             containerColor = CardContainerColor,
             contentColor = ContentColor
         )
@@ -441,16 +449,19 @@ fun SettingsButton(
         label = "contentColor"
     )
 
+    val currentShape = RoundedCornerShape(
+        topStart = topStartRadius,
+        topEnd = topEndRadius,
+        bottomEnd = bottomEndRadius,
+        bottomStart = bottomStartRadius
+    )
+
     Card(
         modifier = modifier
             .padding(vertical = 1.dp)
+            .clip(currentShape)
             .combinedClickable(onClick = onClick),
-        shape = RoundedCornerShape(
-            topStart = topStartRadius,
-            topEnd = topEndRadius,
-            bottomEnd = bottomEndRadius,
-            bottomStart = bottomStartRadius
-        ),
+        shape = currentShape,
         colors = CardDefaults.cardColors(
             containerColor = animatedContainerColor,
             contentColor = animatedContentColor
