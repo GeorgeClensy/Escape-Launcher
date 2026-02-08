@@ -692,15 +692,15 @@ fun MainSettingsPage(
 
         item {
             SettingsSwitch(
-                label = stringResource(id = R.string.show_status_bar),
+                label = stringResource(id = R.string.hide_screen_time_page),
                 checked = getBooleanSetting(
-                    mainAppModel.getContext(), stringResource(R.string.ShowStatusBar)
+                    mainAppModel.getContext(), stringResource(R.string.hideScreenTimePage)
                 ),
                 onCheckedChange = {
                     toggleBooleanSetting(
                         mainAppModel.getContext(),
                         it,
-                        mainAppModel.getContext().resources.getString(R.string.ShowStatusBar)
+                        mainAppModel.getContext().resources.getString(R.string.hideScreenTimePage)
                     )
 
                 })
