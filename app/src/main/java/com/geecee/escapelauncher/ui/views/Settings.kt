@@ -108,6 +108,10 @@ import com.geecee.escapelauncher.utils.getWidgetWidth
 import com.geecee.escapelauncher.utils.isDefaultLauncher
 import com.geecee.escapelauncher.utils.isWidgetConfigurable
 import com.geecee.escapelauncher.utils.launchWidgetConfiguration
+import com.geecee.escapelauncher.utils.managers.CountdownMode
+import com.geecee.escapelauncher.utils.managers.getCountdownTime
+import com.geecee.escapelauncher.utils.managers.resetAndGetCountdownTime
+import com.geecee.escapelauncher.utils.managers.setCountdownTime
 import com.geecee.escapelauncher.utils.removeWidget
 import com.geecee.escapelauncher.utils.resetActivity
 import com.geecee.escapelauncher.utils.saveWidgetId
@@ -290,6 +294,14 @@ fun Settings(
                 enterTransition = { fadeIn(tween(300)) },
                 exitTransition = { fadeOut(tween(300)) }) {
                 FontLicenceDialog(mainAppModel.getContext()) {
+                    navController.popBackStack()
+                }
+            }
+            composable(
+                "newSettingsScreen",
+                enterTransition = { fadeIn(tween(300)) },
+                exitTransition = { fadeOut(tween(300)) }) {
+                AppCountdownTime(mainAppModel.getContext()) {
                     navController.popBackStack()
                 }
             }
@@ -705,6 +717,18 @@ fun MainSettingsPage(
                 false,
                 isBottomOfGroup = true,
                 onClick = { navController.navigate("openChallenges") })
+        }
+
+        // New Settings
+        item { SettingsSubheading(stringResource(id = R.string.custom_settings)) }
+
+        item {
+            SettingsNavigationItem(
+                label = stringResource(id = R.string.set_app_countdown_time),
+                false,
+                isTopOfGroup = true,
+                isBottomOfGroup = true,
+                onClick = { navController.navigate("newSettingsScreen") })
         }
 
         //Other
@@ -1589,5 +1613,53 @@ fun FontLicenceDialog(context: Context, onOKClick: () -> Unit) {
         SettingsSpacer()
         SettingsSpacer()
         SettingsSpacer()
+    }
+}
+
+@Composable
+fun AppCountdownTime(context: Context, goBack: () -> Unit) {
+    var countdownTime by remember { mutableFloatStateOf(getCountdownTime(context)) }
+
+    LazyColumn(
+        verticalArrangement = Arrangement.Top,
+        horizontalAlignment = Alignment.Start,
+        modifier = Modifier.fillMaxSize()
+    ) {
+        item { SettingsHeader(goBack, stringResource(R.string.countdown_time_title)) }
+
+        itemsIndexed(CountdownMode.entries) {index, mode ->
+            SettingsButton(
+                label = stringResource(mode.labelRes),
+                isSelected = countdownTime == mode.value,
+                isTopOfGroup = index == 0,
+                isBottomOfGroup = index == CountdownMode.entries.size - 1,
+                onClick = {
+                    countdownTime = mode.value
+                    setCountdownTime(context, mode.value)
+                }
+            )
+        }
+
+        item { SettingsSpacer() }
+
+        item {
+            SettingsSlider(
+                label = stringResource(R.string.set_app_countdown_time_slider),
+                value = countdownTime,
+                onValueChange = {
+                    countdownTime = it
+                    setCountdownTime(context, countdownTime)
+                },
+                valueRange = 1f..5f,
+                steps = 3,
+                onReset = {
+                    countdownTime = resetAndGetCountdownTime(context)
+                },
+                isTopOfGroup = true,
+                isBottomOfGroup = true
+            )
+        }
+
+        item { SettingsSpacer() }
     }
 }

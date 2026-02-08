@@ -1,6 +1,7 @@
 package com.geecee.escapelauncher.utils.managers
 
 import android.content.Context
+import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -32,14 +33,29 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedback
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.content.edit
+import com.geecee.escapelauncher.R
 import com.geecee.escapelauncher.ui.theme.CardContainerColor
 import com.geecee.escapelauncher.ui.theme.ContentColor
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.delay
+
+const val DEFAULT_COUNTDOWN_TIME = 3f
+const val DEFAULT_COUNTDOWN_IN_BETWEEN_TIME = 1f
+const val DEFAULT_COUNTDOWN_WRAP_UP_TIME = 0.5f
+
+enum class CountdownMode(
+    @StringRes val labelRes: Int,
+    val value: Float
+) {
+    SHORT(R.string.set_app_countdown_time_short, 2f),
+    NORMAL(R.string.set_app_countdown_time_normal, 3f),
+    LONG(R.string.set_app_countdown_time_long, 4f),
+}
 
 class ChallengesManager(context: Context) {
 
@@ -92,6 +108,7 @@ class ChallengesManager(context: Context) {
 @Composable
 fun OpenChallenge(haptics: HapticFeedback, openApp: () -> Unit, goBack: () -> Unit) {
     val steps = listOf("5", "4", "3", "2", "1")
+    val countdownTime = getCountdownTimeInLong(LocalContext.current)
     var stepIndex by rememberSaveable { mutableIntStateOf(0) }
     var showText by rememberSaveable { mutableStateOf(true) }
     var nextScreen by rememberSaveable { mutableStateOf(false) }
@@ -101,11 +118,11 @@ fun OpenChallenge(haptics: HapticFeedback, openApp: () -> Unit, goBack: () -> Un
 
         while (stepIndex < steps.size) {
             if (showText) {
-                delay(3000)
+                delay(countdownTime)
                 showText = false
             }
 
-            delay(1000)
+            delay((DEFAULT_COUNTDOWN_IN_BETWEEN_TIME * 1000L).toLong())
             stepIndex++
 
             if (stepIndex < steps.size) {
@@ -114,7 +131,7 @@ fun OpenChallenge(haptics: HapticFeedback, openApp: () -> Unit, goBack: () -> Un
             } else {
                 nextScreen = true
                 haptics.performHapticFeedback(HapticFeedbackType.LongPress)
-                delay(500)
+                delay((DEFAULT_COUNTDOWN_WRAP_UP_TIME * 1000L).toLong())
                 openApp()
             }
         }
@@ -225,5 +242,30 @@ fun OpenChallenge(haptics: HapticFeedback, openApp: () -> Unit, goBack: () -> Un
                 ) {}
             }
         }
+    }
+}
+
+fun resetAndGetCountdownTime(context: Context): Float {
+    setCountdownTime(context, DEFAULT_COUNTDOWN_TIME)
+    return DEFAULT_COUNTDOWN_TIME
+}
+
+fun getCountdownTimeInLong(context: Context): Long {
+    return getCountdownTime(context).toLong() * 1000L
+}
+
+fun getCountdownTime(context: Context): Float {
+    val sharedPreferences = context.getSharedPreferences(
+        Migration.UNIFIED_PREFS_NAME, Context.MODE_PRIVATE
+    )
+    return sharedPreferences.getFloat("CountdownTime", DEFAULT_COUNTDOWN_TIME)
+}
+
+fun setCountdownTime(context: Context, value: Float) {
+    val sharedPreferences = context.getSharedPreferences(
+        Migration.UNIFIED_PREFS_NAME, Context.MODE_PRIVATE
+    )
+    sharedPreferences.edit {
+        putFloat("CountdownTime", value)
     }
 }
