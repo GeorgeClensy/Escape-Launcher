@@ -117,6 +117,7 @@ import com.geecee.escapelauncher.utils.resetActivity
 import com.geecee.escapelauncher.utils.saveWidgetId
 import com.geecee.escapelauncher.utils.setBooleanSetting
 import com.geecee.escapelauncher.utils.setIntSetting
+import com.geecee.escapelauncher.utils.setStatusBarImmersive
 import com.geecee.escapelauncher.utils.setStringSetting
 import com.geecee.escapelauncher.utils.setWidgetHeight
 import com.geecee.escapelauncher.utils.setWidgetOffset
@@ -667,16 +668,17 @@ fun MainSettingsPage(
 
         item {
             SettingsSwitch(
-                label = stringResource(id = R.string.hide_screen_time_page),
+                label = stringResource(id = R.string.show_status_bar),
                 checked = getBooleanSetting(
-                    mainAppModel.getContext(), stringResource(R.string.hideScreenTimePage)
+                    mainAppModel.getContext(), stringResource(R.string.ShowStatusBar)
                 ),
                 onCheckedChange = {
                     toggleBooleanSetting(
                         mainAppModel.getContext(),
                         it,
-                        mainAppModel.getContext().resources.getString(R.string.hideScreenTimePage)
+                        mainAppModel.getContext().resources.getString(R.string.ShowStatusBar)
                     )
+
                 })
         }
 
@@ -727,8 +729,24 @@ fun MainSettingsPage(
                 label = stringResource(id = R.string.set_app_countdown_time),
                 false,
                 isTopOfGroup = true,
-                isBottomOfGroup = true,
                 onClick = { navController.navigate("newSettingsScreen") })
+        }
+
+        item {
+            SettingsSwitch(
+                label = stringResource(id = R.string.show_status_bar),
+                checked = getBooleanSetting(
+                    mainAppModel.getContext(), stringResource(R.string.ScreenTimeOnHome)
+                ),
+                isBottomOfGroup = true,
+                onCheckedChange = {
+                    toggleBooleanSetting(
+                        mainAppModel.getContext(),
+                        it,
+                        mainAppModel.getContext().resources.getString(R.string.ScreenTimeOnHome)
+                    )
+                    activity.setStatusBarImmersive(!it)
+                })
         }
 
         //Other

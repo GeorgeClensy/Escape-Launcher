@@ -99,6 +99,7 @@
     <string name="set_app_countdown_time_slider">Change Time</string>
     <string name="custom_settings">Custom Settings</string>
     <string name="countdown_time_title">Countdown Time</string>
+    <string name="show_status_bar">Show Status Bar</string>
 
     <!-- First time strings -->
     <string name="continue_str">Continue</string>

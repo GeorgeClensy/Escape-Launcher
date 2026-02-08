@@ -48,6 +48,7 @@ import com.geecee.escapelauncher.utils.getBooleanSetting
 import com.geecee.escapelauncher.utils.managers.ScreenTimeManager
 import com.geecee.escapelauncher.utils.managers.scheduleDailyCleanup
 import com.geecee.escapelauncher.utils.messagingInitializer
+import com.geecee.escapelauncher.utils.setStatusBarImmersive
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
@@ -194,6 +195,9 @@ class MainHomeScreenActivity : ComponentActivity() {
 
     override fun onResume() {
         super.onResume()
+
+        val isSticky = getBooleanSetting(this, this.getString(R.string.ScreenTimeOnHome))
+        this.setStatusBarImmersive(isSticky)
 
         // Check if we need to update screen time when coming back from an app
         if (viewModel.isAppOpened) {

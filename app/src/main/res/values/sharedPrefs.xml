@@ -28,4 +28,5 @@
     <string name="weather_app_package" translatable="false">weather_app_package</string>
     <string name="DoubleTapToLock" translatable="false">DoubleTapToLock</string>
     <string name="UseFahrenheit" translatable="false">UseFahrenheit</string>
+    <string name="ShowStatusBar" translatable="false">ShowStatusBar</string>
 </resources>
