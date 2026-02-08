@@ -109,8 +109,10 @@ import com.geecee.escapelauncher.utils.isDefaultLauncher
 import com.geecee.escapelauncher.utils.isWidgetConfigurable
 import com.geecee.escapelauncher.utils.launchWidgetConfiguration
 import com.geecee.escapelauncher.utils.managers.CountdownMode
+import com.geecee.escapelauncher.utils.managers.SpacerMode
 import com.geecee.escapelauncher.utils.managers.getCountdownTime
 import com.geecee.escapelauncher.utils.managers.resetAndGetCountdownTime
+import com.geecee.escapelauncher.utils.managers.resetSpacerSize
 import com.geecee.escapelauncher.utils.managers.setCountdownTime
 import com.geecee.escapelauncher.utils.removeWidget
 import com.geecee.escapelauncher.utils.resetActivity
@@ -127,6 +129,7 @@ import com.geecee.escapelauncher.utils.showLauncherSettingsMenu
 import com.geecee.escapelauncher.utils.toggleBooleanSetting
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlin.math.roundToInt
 import kotlin.system.exitProcess
 import com.geecee.escapelauncher.MainAppViewModel as MainAppModel
 
@@ -170,7 +173,8 @@ fun Settings(
                     navController,
                     mainAppModel,
                     activity,
-                    homeScreenModel
+                    homeScreenModel,
+                    mainAppModel.spacerSize
                 )
             }
             composable(
@@ -180,6 +184,7 @@ fun Settings(
                 HiddenApps(
                     mainAppModel = mainAppModel,
                     homeScreenModel = homeScreenModel,
+                    mainAppModel.spacerSize,
                     goToManageHiddenApps = {
                         navController.navigate("bulkHiddenApps")
                     }
@@ -212,7 +217,11 @@ fun Settings(
                 "chooseFont",
                 enterTransition = { fadeIn(tween(300)) },
                 exitTransition = { fadeOut(tween(300)) }) {
-                ChooseFont(mainAppModel.getContext(), activity) { navController.popBackStack() }
+                ChooseFont(mainAppModel.getContext(),
+                    activity,
+                    mainAppModel.spacerSize
+                ) {
+                    navController.popBackStack() }
             }
             composable(
                 "devOptions",
@@ -228,14 +237,17 @@ fun Settings(
                 enterTransition = { fadeIn(tween(300)) },
                 exitTransition = { fadeOut(tween(300)) }) {
                 ThemeOptions(
-                    mainAppModel, mainAppModel.getContext()
+                    mainAppModel, mainAppModel.getContext(),
+                    mainAppModel.spacerSize
                 ) { navController.popBackStack() }
             }
             composable(
                 "widget",
                 enterTransition = { fadeIn(tween(300)) },
                 exitTransition = { fadeOut(tween(300)) }) {
-                WidgetOptions(mainAppModel.getContext()) { navController.popBackStack() }
+                WidgetOptions(mainAppModel.getContext(), mainAppModel.spacerSize) {
+                    navController.popBackStack()
+                }
             }
             composable(
                 "bulkHiddenApps",
@@ -294,7 +306,7 @@ fun Settings(
                 "fontLicences",
                 enterTransition = { fadeIn(tween(300)) },
                 exitTransition = { fadeOut(tween(300)) }) {
-                FontLicenceDialog(mainAppModel.getContext()) {
+                FontLicenceDialog(mainAppModel.getContext(), mainAppModel.spacerSize) {
                     navController.popBackStack()
                 }
             }
@@ -302,7 +314,18 @@ fun Settings(
                 "newSettingsScreen",
                 enterTransition = { fadeIn(tween(300)) },
                 exitTransition = { fadeOut(tween(300)) }) {
-                AppCountdownTime(mainAppModel.getContext()) {
+                AppCountdownTime(
+                    mainAppModel.getContext(),
+                    spacerSize = mainAppModel.spacerSize
+                ) {
+                    navController.popBackStack()
+                }
+            }
+            composable(
+                "spacerSettingsScreen",
+                enterTransition = { fadeIn(tween(300)) },
+                exitTransition = { fadeOut(tween(300)) }) {
+                SpacerSizeAdjustment(mainAppModel.getContext(), mainAppModel) {
                     navController.popBackStack()
                 }
             }
@@ -310,7 +333,7 @@ fun Settings(
     }
 
     AnimatedVisibility(showPolicyDialog.value, enter = fadeIn(), exit = fadeOut()) {
-        PrivacyPolicyDialog(mainAppModel, showPolicyDialog)
+        PrivacyPolicyDialog(mainAppModel, showPolicyDialog, mainAppModel.spacerSize)
     }
 }
 
@@ -333,7 +356,8 @@ fun MainSettingsPage(
     navController: NavController,
     mainAppModel: MainAppModel,
     activity: Activity,
-    homeScreenModel: HomeScreenModel
+    homeScreenModel: HomeScreenModel,
+    spacerSize: Float
 ) {
     var showWeatherAppPicker by remember { mutableStateOf(false) }
     val view = LocalView.current
@@ -733,6 +757,14 @@ fun MainSettingsPage(
         }
 
         item {
+            SettingsNavigationItem(
+                label = stringResource(R.string.set_spacer_size),
+                diagonalArrow = false,
+                onClick = { navController.navigate("spacerSettingsScreen") }
+            )
+        }
+
+        item {
             SettingsSwitch(
                 label = stringResource(id = R.string.show_status_bar),
                 checked = getBooleanSetting(
@@ -800,7 +832,7 @@ fun MainSettingsPage(
             }
         }
 
-        item { SettingsSpacer() }
+        item { SettingsSpacer(spacerSize) }
 
         item {
             SponsorBox(
@@ -818,8 +850,8 @@ fun MainSettingsPage(
                 })
         }
 
-        item { SettingsSpacer() }
-        item { SettingsSpacer() }
+        item { SettingsSpacer(spacerSize) }
+        item { SettingsSpacer(spacerSize) }
     }
 
     if (showWeatherAppPicker) {
@@ -851,7 +883,7 @@ fun MainSettingsPage(
 @Suppress("AssignedValueIsNeverRead")
 @Composable
 fun ThemeOptions(
-    mainAppModel: MainAppModel, context: Context, goBack: () -> Unit
+    mainAppModel: MainAppModel, context: Context, spacerSize: Float, goBack: () -> Unit
 ) {
     val settingToChange = stringResource(R.string.theme)
     val autoThemeChange = stringResource(R.string.autoThemeSwitch)
@@ -981,7 +1013,7 @@ fun ThemeOptions(
                 })
         }
         item {
-            SettingsSpacer()
+            SettingsSpacer(spacerSize)
         }
         itemsIndexed(themeIds, key = { _, themeId -> themeId }) { index, themeId ->
             val isSelected = currentSelectedTheme == themeId
@@ -1030,10 +1062,10 @@ fun ThemeOptions(
                 })
         }
         item {
-            SettingsSpacer()
+            SettingsSpacer(spacerSize)
         }
         item {
-            SettingsSpacer()
+            SettingsSpacer(spacerSize)
         }
     }
 }
@@ -1049,7 +1081,7 @@ fun ThemeOptions(
 @Suppress("AssignedValueIsNeverRead", "VariableNeverRead")
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun WidgetOptions(context: Context, goBack: () -> Unit) {
+fun WidgetOptions(context: Context, spacerSize: Float, goBack: () -> Unit) {
     val appWidgetManager = AppWidgetManager.getInstance(context)
     val appWidgetHost = remember { AppWidgetHost(context, WIDGET_HOST_ID) }
     var appWidgetId by remember { mutableIntStateOf(getSavedWidgetId(context)) }
@@ -1196,7 +1228,7 @@ fun WidgetOptions(context: Context, goBack: () -> Unit) {
             )
         }
 
-        item { SettingsSpacer() }
+        item { SettingsSpacer(spacerSize) }
 
         // Offset slider
         item {
@@ -1257,8 +1289,8 @@ fun WidgetOptions(context: Context, goBack: () -> Unit) {
             )
         }
 
-        item { SettingsSpacer() }
-        item { SettingsSpacer() }
+        item { SettingsSpacer(spacerSize) }
+        item { SettingsSpacer(spacerSize) }
     }
 }
 
@@ -1276,6 +1308,7 @@ fun WidgetOptions(context: Context, goBack: () -> Unit) {
 fun HiddenApps(
     mainAppModel: MainAppModel,
     homeScreenModel: HomeScreenModel,
+    spacerSize: Float,
     goToManageHiddenApps: () -> Unit,
     goBack: () -> Unit
 ) {
@@ -1380,12 +1413,8 @@ fun HiddenApps(
             }
         }
 
-        item {
-            SettingsSpacer()
-        }
-        item {
-            SettingsSpacer()
-        }
+        item { SettingsSpacer(spacerSize) }
+        item { SettingsSpacer(spacerSize) }
     }
 }
 
@@ -1400,7 +1429,7 @@ fun HiddenApps(
  */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun ChooseFont(context: Context, activity: Activity, goBack: () -> Unit) {
+fun ChooseFont(context: Context, activity: Activity, spacerSize: Float, goBack: () -> Unit) {
     val fontNames = listOf(
         "Jost",
         "Inter",
@@ -1434,8 +1463,8 @@ fun ChooseFont(context: Context, activity: Activity, goBack: () -> Unit) {
                 fontFamily = getFontFamily(context, fontName)
             )
         }
-        item { SettingsSpacer() }
-        item { SettingsSpacer() }
+        item { SettingsSpacer(spacerSize) }
+        item { SettingsSpacer(spacerSize) }
     }
 }
 
@@ -1531,7 +1560,7 @@ fun DevOptions(mainAppModel: MainAppModel, context: Context, goBack: () -> Unit)
  * @param showPolicyDialog Pass the MutableState<Boolean> your using to show and hide this dialog so that it can be hidden from within it
  */
 @Composable
-fun PrivacyPolicyDialog(mainAppModel: MainAppModel, showPolicyDialog: MutableState<Boolean>) {
+fun PrivacyPolicyDialog(mainAppModel: MainAppModel, showPolicyDialog: MutableState<Boolean>, spacerSize: Float) {
     val scrollState = rememberScrollState()
     Column {
         Card(
@@ -1574,9 +1603,9 @@ fun PrivacyPolicyDialog(mainAppModel: MainAppModel, showPolicyDialog: MutableSta
                     Text("OK")
                 }
 
-                SettingsSpacer()
-                SettingsSpacer()
-                SettingsSpacer()
+                SettingsSpacer(spacerSize)
+                SettingsSpacer(spacerSize)
+                SettingsSpacer(spacerSize)
             }
         }
     }
@@ -1588,7 +1617,7 @@ fun PrivacyPolicyDialog(mainAppModel: MainAppModel, showPolicyDialog: MutableSta
  * @param context Context
  */
 @Composable
-fun FontLicenceDialog(context: Context, onOKClick: () -> Unit) {
+fun FontLicenceDialog(context: Context, spacerSize: Float, onOKClick: () -> Unit) {
     val scrollState = rememberScrollState()
 
     Column(
@@ -1628,14 +1657,14 @@ fun FontLicenceDialog(context: Context, onOKClick: () -> Unit) {
             Text("OK")
         }
 
-        SettingsSpacer()
-        SettingsSpacer()
-        SettingsSpacer()
+        SettingsSpacer(spacerSize)
+        SettingsSpacer(spacerSize)
+        SettingsSpacer(spacerSize)
     }
 }
 
 @Composable
-fun AppCountdownTime(context: Context, goBack: () -> Unit) {
+fun AppCountdownTime(context: Context, spacerSize: Float, goBack: () -> Unit) {
     var countdownTime by remember { mutableFloatStateOf(getCountdownTime(context)) }
 
     LazyColumn(
@@ -1658,7 +1687,7 @@ fun AppCountdownTime(context: Context, goBack: () -> Unit) {
             )
         }
 
-        item { SettingsSpacer() }
+        item { SettingsSpacer(spacerSize) }
 
         item {
             SettingsSlider(
@@ -1678,6 +1707,52 @@ fun AppCountdownTime(context: Context, goBack: () -> Unit) {
             )
         }
 
-        item { SettingsSpacer() }
+        item { SettingsSpacer(spacerSize) }
+    }
+}
+
+@Composable
+fun SpacerSizeAdjustment(context: Context, mainAppModel: MainAppModel, goBack: () -> Unit) {
+    val spacerSize = mainAppModel.spacerSize
+
+    LazyColumn(
+        verticalArrangement = Arrangement.Top,
+        horizontalAlignment = Alignment.Start,
+        modifier = Modifier.fillMaxSize()
+    ) {
+        item { SettingsHeader(goBack, stringResource(R.string.set_spacer_size)) }
+
+        itemsIndexed(SpacerMode.entries) {index, mode ->
+            SettingsButton(
+                label = stringResource(mode.labelRes),
+                isSelected = spacerSize == mode.value,
+                isTopOfGroup = index == 0,
+                isBottomOfGroup = index == SpacerMode.entries.size - 1,
+                onClick = {
+                    mainAppModel.updateSpacerSize(context, mode.value)
+                }
+            )
+        }
+
+        item { SettingsSpacer(mainAppModel.spacerSize) }
+
+        item {
+            SettingsSlider(
+                label = stringResource(R.string.set_spacer_size_slider),
+                value = spacerSize,
+                onValueChange = {
+                    mainAppModel.updateSpacerSize(context, it.roundToInt().toFloat())
+                },
+                valueRange = 5f..50f,
+                steps = 8,
+                onReset = {
+                    resetSpacerSize(context, mainAppModel)
+                },
+                isTopOfGroup = true,
+                isBottomOfGroup = true
+            )
+        }
+
+        item { SettingsSpacer(mainAppModel.spacerSize) }
     }
 }

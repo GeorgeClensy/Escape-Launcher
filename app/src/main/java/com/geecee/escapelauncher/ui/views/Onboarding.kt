@@ -705,7 +705,7 @@ fun AnalyticsConsentScreen(
 
     AnimatedVisibility(showPolicyDialog.value, enter = fadeIn(), exit = fadeOut()) {
         Box(Modifier.padding(bottom = 30.dp)) {
-            PrivacyPolicyDialog(mainAppModel, showPolicyDialog)
+            PrivacyPolicyDialog(mainAppModel, showPolicyDialog, mainAppModel.spacerSize)
         }
     }
 }

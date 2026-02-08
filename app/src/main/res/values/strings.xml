@@ -100,6 +100,11 @@
     <string name="custom_settings">Custom Settings</string>
     <string name="countdown_time_title">Countdown Time</string>
     <string name="show_status_bar">Show Status Bar</string>
+    <string name="set_spacer_size">Set Spacer Size</string>
+    <string name="set_spacer_size_compact">Compact</string>
+    <string name="set_spacer_size_standard">Standard</string>
+    <string name="set_spacer_size_relaxed">Relaxed</string>
+    <string name="set_spacer_size_slider">Change Spacing</string>
 
     <!-- First time strings -->
     <string name="continue_str">Continue</string>

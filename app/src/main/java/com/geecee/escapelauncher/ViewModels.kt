@@ -13,10 +13,12 @@ import androidx.compose.foundation.pager.PagerState
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -29,7 +31,9 @@ import com.geecee.escapelauncher.utils.managers.ChallengesManager
 import com.geecee.escapelauncher.utils.managers.FavoriteAppsManager
 import com.geecee.escapelauncher.utils.managers.HiddenAppsManager
 import com.geecee.escapelauncher.utils.managers.getScreenTimeListSorted
+import com.geecee.escapelauncher.utils.managers.getSpacerSize
 import com.geecee.escapelauncher.utils.managers.getUsageForApp
+import com.geecee.escapelauncher.utils.managers.setSpacerSize
 import com.geecee.escapelauncher.utils.weatherProxy
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -279,6 +283,14 @@ class MainAppViewModel(application: Application) : AndroidViewModel(application)
         viewModelScope.launch {
             _navigateHomeEvent.emit(Unit)
         }
+    }
+
+    var spacerSize by mutableFloatStateOf(getSpacerSize(getApplication()))
+        private set
+
+    fun updateSpacerSize(context: Context, size: Float) {
+        spacerSize = size
+        setSpacerSize(context, size)
     }
 
     fun getContext(): Context = appContext // Returns the context

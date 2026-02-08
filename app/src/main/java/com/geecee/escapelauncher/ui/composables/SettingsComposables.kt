@@ -832,8 +832,8 @@ fun ThemeCard(
  * Spacer 30.dp height
  */
 @Composable
-fun SettingsSpacer() {
-    Spacer(modifier = Modifier.height(30.dp))
+fun SettingsSpacer(height: Float = 30f) {
+    Spacer(modifier = Modifier.height(height.dp))
 }
 
 /**
