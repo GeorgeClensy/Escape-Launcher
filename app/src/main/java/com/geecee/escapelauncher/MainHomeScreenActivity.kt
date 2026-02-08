@@ -50,6 +50,8 @@ import com.geecee.escapelauncher.utils.managers.scheduleDailyCleanup
 import com.geecee.escapelauncher.utils.messagingInitializer
 import com.geecee.escapelauncher.utils.setStatusBarImmersive
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 class MainHomeScreenActivity : ComponentActivity() {
@@ -297,14 +299,22 @@ class MainHomeScreenActivity : ComponentActivity() {
         val navController = rememberNavController()
 
         LaunchedEffect(viewModel.navigateHomeEvent) {
-            viewModel.navigateHomeEvent.collect {
-                homeScreenModel.appsListScrollState.scrollToItem(0)
-                homeScreenModel.animatedGoToMainPage()
-
+            viewModel.navigateHomeEvent.collectLatest {
                 if (navController.currentDestination?.route != "home") {
+                    homeScreenModel.goToMainPage()
+                    homeScreenModel.appsListScrollState.scrollToItem(0)
                     navController.navigate("home") {
                         popUpTo(navController.graph.startDestinationId)
                         launchSingleTop = true
+                    }
+                }
+                else {
+                    launch {
+                        homeScreenModel.animatedGoToMainPage()
+                    }
+                    launch {
+                        delay(550)
+                        homeScreenModel.appsListScrollState.scrollToItem(0)
                     }
                 }
             }
