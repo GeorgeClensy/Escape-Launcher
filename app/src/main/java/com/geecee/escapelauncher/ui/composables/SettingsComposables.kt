@@ -269,18 +269,22 @@ fun SettingsSwitch(
     val bottomStartRadius = if (isBottomOfGroup) groupEdgeCornerRadius else defaultCornerRadius
     val bottomEndRadius = if (isBottomOfGroup) groupEdgeCornerRadius else defaultCornerRadius
 
+    val currentShape = RoundedCornerShape(
+        topStart = topStartRadius,
+        topEnd = topEndRadius,
+        bottomEnd = bottomEndRadius,
+        bottomStart = bottomStartRadius
+    )
+
     Card(
         modifier = Modifier
             .padding(vertical = 1.dp)
+            .clip(currentShape)
             .clickable {
                 isChecked = !isChecked
                 onCheckedChange(isChecked)
-            }, shape = RoundedCornerShape(
-            topStart = topStartRadius,
-            topEnd = topEndRadius,
-            bottomEnd = bottomEndRadius,
-            bottomStart = bottomStartRadius
-        ), colors = CardDefaults.cardColors(
+            },shape = currentShape,
+            colors = CardDefaults.cardColors(
             containerColor = CardContainerColor,
             contentColor = ContentColor
         )
@@ -334,16 +338,20 @@ fun SettingsNavigationItem(
     val bottomStartRadius = if (isBottomOfGroup) groupEdgeCornerRadius else defaultCornerRadius
     val bottomEndRadius = if (isBottomOfGroup) groupEdgeCornerRadius else defaultCornerRadius
 
+    val currentShape = RoundedCornerShape(
+        topStart = topStartRadius,
+        topEnd = topEndRadius,
+        bottomEnd = bottomStartRadius,
+        bottomEndRadius
+    )
+
     Card(
         modifier = Modifier
             .padding(vertical = 1.dp)
+            .clip(currentShape)
             .combinedClickable(onClick = onClick),
-        shape = RoundedCornerShape(
-            topStart = topStartRadius,
-            topEnd = topEndRadius,
-            bottomEnd = bottomEndRadius,
-            bottomStart = bottomStartRadius
-        ), colors = CardDefaults.cardColors(
+        shape = currentShape,
+        colors = CardDefaults.cardColors(
             containerColor = CardContainerColor,
             contentColor = ContentColor
         )
@@ -401,6 +409,7 @@ fun SettingsButton(
     isBottomOfGroup: Boolean = false,
     fontFamily: FontFamily? = MaterialTheme.typography.bodyMedium.fontFamily,
     isDisabled: Boolean = false,
+    isSelected: Boolean = false,
     useAutoResize: Boolean = true
 ) {
     // Define the base corner size
@@ -425,7 +434,11 @@ fun SettingsButton(
     )
 
     val animatedContainerColor by animateColorAsState(
-        targetValue = if (!isDisabled) CardContainerColor else CardContainerColorDisabled,
+        targetValue = when {
+            isDisabled -> CardContainerColorDisabled
+            isSelected -> CardContainerColor.copy(alpha = 0.5f)
+            else -> CardContainerColor
+        },
         animationSpec = tween(durationMillis = 300),
         label = "containerColor"
     )
@@ -436,16 +449,19 @@ fun SettingsButton(
         label = "contentColor"
     )
 
+    val currentShape = RoundedCornerShape(
+        topStart = topStartRadius,
+        topEnd = topEndRadius,
+        bottomEnd = bottomEndRadius,
+        bottomStart = bottomStartRadius
+    )
+
     Card(
         modifier = modifier
             .padding(vertical = 1.dp)
+            .clip(currentShape)
             .combinedClickable(onClick = onClick),
-        shape = RoundedCornerShape(
-            topStart = topStartRadius,
-            topEnd = topEndRadius,
-            bottomEnd = bottomEndRadius,
-            bottomStart = bottomStartRadius
-        ),
+        shape = currentShape,
         colors = CardDefaults.cardColors(
             containerColor = animatedContainerColor,
             contentColor = animatedContentColor
@@ -816,8 +832,8 @@ fun ThemeCard(
  * Spacer 30.dp height
  */
 @Composable
-fun SettingsSpacer() {
-    Spacer(modifier = Modifier.height(30.dp))
+fun SettingsSpacer(height: Float = 30f) {
+    Spacer(modifier = Modifier.height(height.dp))
 }
 
 /**
