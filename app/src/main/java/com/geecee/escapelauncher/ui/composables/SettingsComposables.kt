@@ -401,6 +401,7 @@ fun SettingsButton(
     isBottomOfGroup: Boolean = false,
     fontFamily: FontFamily? = MaterialTheme.typography.bodyMedium.fontFamily,
     isDisabled: Boolean = false,
+    isSelected: Boolean = false,
     useAutoResize: Boolean = true
 ) {
     // Define the base corner size
@@ -425,7 +426,11 @@ fun SettingsButton(
     )
 
     val animatedContainerColor by animateColorAsState(
-        targetValue = if (!isDisabled) CardContainerColor else CardContainerColorDisabled,
+        targetValue = when {
+            isDisabled -> CardContainerColorDisabled
+            isSelected -> CardContainerColor.copy(alpha = 0.5f)
+            else -> CardContainerColor
+        },
         animationSpec = tween(durationMillis = 300),
         label = "containerColor"
     )
