@@ -112,9 +112,9 @@ kotlin {
 }
 
 // Apply Google-specific configurations from secondary file
-val taskNames = gradle.startParameter.taskNames
-val isFoss = taskNames.any { it.contains("foss", ignoreCase = true) }
-if (!isFoss) {
+val taskNames: List<String?>? = gradle.startParameter.taskNames
+val isFoss = taskNames?.any { it?.contains("foss", ignoreCase = true) ?: false  }
+if (!isFoss!!) {
     apply(from = "google.gradle")
 }
 

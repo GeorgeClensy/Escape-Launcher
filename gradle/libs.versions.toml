@@ -11,15 +11,15 @@ espressoCore = "3.7.0"
 appcompat = "1.7.1"
 material = "1.13.0"
 lifecycleRuntimeKtx = "2.10.0"
-activityCompose = "1.12.3"
-composeBom = "2026.01.01"
+activityCompose = "1.12.4"
+composeBom = "2026.02.00"
 navigationCompose = "2.9.7"
 roomCommon = "2.8.4"
 roomCompiler = "2.8.4"
 roomKtx = "2.8.4"
 roomRuntime = "2.8.4"
 workRuntimeKtx = "2.11.1"
-material3 = "1.5.0-alpha13"
+material3 = "1.5.0-alpha14"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }

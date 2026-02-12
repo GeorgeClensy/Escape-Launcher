@@ -10,7 +10,7 @@ android {
 dependencies {
     // Google version use google fonts, otherwise bundle fonts
     //noinspection UseTomlInstead
-    googleImplementation 'androidx.compose.ui:ui-text-google-fonts:1.10.2'
+    googleImplementation 'androidx.compose.ui:ui-text-google-fonts:1.10.3'
 
 
     googleImplementation platform('com.google.fire' + 'base:fire' + 'base-bom:34.8.0')

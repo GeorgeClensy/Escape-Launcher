@@ -1,4 +1,4 @@
-// Top-level build file where you can add configuration options common to all sub-projects/modules.
+// Top-level build file where you can add configuration options common to all subprojects/modules.
 buildscript {
     val isFoss = gradle.startParameter.taskNames.any { it.contains("foss", ignoreCase = true) }
     if (!isFoss) {
