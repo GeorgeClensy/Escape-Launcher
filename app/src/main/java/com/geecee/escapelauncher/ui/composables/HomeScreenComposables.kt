@@ -98,7 +98,7 @@ import com.geecee.escapelauncher.core.ui.theme.primaryContentColor
 import com.geecee.escapelauncher.utils.AppUtils.formatScreenTime
 import com.geecee.escapelauncher.utils.AppUtils.getCurrentTime
 import com.geecee.escapelauncher.utils.AppUtils.resetHome
-import com.geecee.escapelauncher.utils.InstalledApp
+import com.geecee.escapelauncher.core.model.InstalledApp
 import com.geecee.escapelauncher.utils.PrivateAppItem
 import com.geecee.escapelauncher.utils.WorkAppItem
 import com.geecee.escapelauncher.utils.analyticsProxy

@@ -168,6 +168,7 @@ dependencies {
 
     // Modules
     implementation(project(":core:ui"))
+    implementation(project(":core:model"))
 }
 
 java {

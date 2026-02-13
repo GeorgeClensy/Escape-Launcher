@@ -25,3 +25,4 @@ dependencyResolutionManagement {
 rootProject.name = "Escape Launcher"
 include(":app")
 include(":core:ui")
+include(":core:model")

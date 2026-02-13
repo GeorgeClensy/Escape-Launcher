@@ -90,7 +90,7 @@ import com.geecee.escapelauncher.core.ui.theme.ErrorContentColor
 import com.geecee.escapelauncher.core.ui.theme.primaryContentColor
 import com.geecee.escapelauncher.core.ui.theme.resolveColorScheme
 import com.geecee.escapelauncher.core.ui.theme.transparentHalf
-import com.geecee.escapelauncher.utils.InstalledApp
+import com.geecee.escapelauncher.core.model.InstalledApp
 
 @Composable
 fun AutoResizingText(

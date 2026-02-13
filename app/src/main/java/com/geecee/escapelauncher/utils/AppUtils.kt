@@ -50,6 +50,7 @@ import java.util.concurrent.TimeUnit
 import android.graphics.Color as AndroidColor
 import androidx.compose.ui.graphics.Color as ComposeColor
 import com.geecee.escapelauncher.MainAppViewModel as MainAppModel
+import com.geecee.escapelauncher.core.model.InstalledApp
 
 /**
  * Broadcast receiver to detect when the screen turns off,
@@ -63,15 +64,6 @@ class ScreenOffReceiver(private val onScreenOff: () -> Unit) : BroadcastReceiver
         }
     }
 }
-
-/**
- * Data class representing an app
- */
-data class InstalledApp(
-    var displayName: String,
-    var packageName: String,
-    var componentName: ComponentName
-)
 
 /**
  * Set of functions used throughout Escape Launcher app
