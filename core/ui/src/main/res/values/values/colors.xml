@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <color name="splash_background">@color/OffWhite</color>
+    <color name="DeepTeal" tools:ignore="UnusedResources">#004C4C</color>
+    <color name="LightTeal" tools:ignore="UnusedResources">#66B2B2</color>
+    <color name="Seafoam" tools:ignore="UnusedResources">#B2D8D8</color>
+    <color name="Cream" tools:ignore="UnusedResources">#FFF1E3</color>
+    <color name="DeepGrey" tools:ignore="UnusedResources">#1E1E1E</color>
+    <color name="OffBlack" tools:ignore="UnusedResources">@color/DeepGrey</color>
+    <color name="YellowOffWhite" tools:ignore="UnusedResources">@color/Cream</color>
+    <color name="OffWhite" tools:ignore="UnusedResources">@color/Cream</color>
+</resources>

@@ -80,16 +80,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.isUnspecified
 import androidx.compose.ui.unit.sp
 import com.geecee.escapelauncher.R
-import com.geecee.escapelauncher.ui.theme.AppTheme
-import com.geecee.escapelauncher.ui.theme.CardContainerColor
-import com.geecee.escapelauncher.ui.theme.CardContainerColorDisabled
-import com.geecee.escapelauncher.ui.theme.ContentColor
-import com.geecee.escapelauncher.ui.theme.ContentColorDisabled
-import com.geecee.escapelauncher.ui.theme.ErrorContainerColor
-import com.geecee.escapelauncher.ui.theme.ErrorContentColor
-import com.geecee.escapelauncher.ui.theme.primaryContentColor
-import com.geecee.escapelauncher.ui.theme.resolveColorScheme
-import com.geecee.escapelauncher.ui.theme.transparentHalf
+import com.geecee.escapelauncher.core.ui.theme.AppTheme
+import com.geecee.escapelauncher.core.ui.theme.CardContainerColor
+import com.geecee.escapelauncher.core.ui.theme.CardContainerColorDisabled
+import com.geecee.escapelauncher.core.ui.theme.ContentColor
+import com.geecee.escapelauncher.core.ui.theme.ContentColorDisabled
+import com.geecee.escapelauncher.core.ui.theme.ErrorContainerColor
+import com.geecee.escapelauncher.core.ui.theme.ErrorContentColor
+import com.geecee.escapelauncher.core.ui.theme.primaryContentColor
+import com.geecee.escapelauncher.core.ui.theme.resolveColorScheme
+import com.geecee.escapelauncher.core.ui.theme.transparentHalf
 import com.geecee.escapelauncher.utils.InstalledApp
 
 @Composable
@@ -593,7 +593,7 @@ fun SettingsSwipeableButton(
  *
  * @param theme The theme ID number (see: Theme.kt)
  *
- * @see com.geecee.escapelauncher.ui.theme.EscapeTheme
+ * @see com.geecee.escapelauncher.core.ui.theme.EscapeTheme
  */
 @Composable
 fun ThemeCard(

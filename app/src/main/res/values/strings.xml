@@ -58,10 +58,7 @@
     <string name="home">Home</string>
     <string name="apps">Apps</string>
     <string name="font">Font</string>
-    <string name="pitch_black">Pitch black</string>
     <string name="theme">Theme</string>
-    <string name="light">Light</string>
-    <string name="dark">Dark</string>
     <string name="screen_time_on_app">Screen Time On Apps</string>
     <string name="screen_time_on_home_screen">Home Screen Time</string>
     <string name="hide_private_space_in_search">Hidden private space</string>
@@ -92,6 +89,8 @@
     <string name="accessibility_not_granted_msg">Please grant accessibility permission in settings</string>
     <string name="launcher_must_be_default_to_pause_or_unpause_work_apps">Launcher must be set as deafault to pause or unpause work apps</string>
     <string name="use_farenhight">Use fahrenheit</string>
+    <string name="light">Light</string>
+    <string name="dark">Dark</string>
 
     <!-- First time strings -->
     <string name="continue_str">Continue</string>
@@ -117,17 +116,6 @@
     <string name="higher_we_rec">Higher than we recommend</string>
     <string name="no_apps_used">No apps opened yet!</string>
     
-    <!-- Themes -->
-    <string name="light_red">Light Red</string>
-    <string name="dark_red">Dark Red</string>
-    <string name="light_blue">Light Blue</string>
-    <string name="dark_blue">Dark Blue</string>
-    <string name="light_yellow">Light Yellow</string>
-    <string name="dark_yellow">Dark Yellow</string>
-    <string name="light_green">Light Green</string>
-    <string name="dark_green">Dark Green</string>
-    <string name="off_white">Off white</string>
-    <string name="system">System</string>
     <string name="accessibility_service_description">Allows the app to turn off the screen.</string>
     <string name="back">Back</string>
     <string name="launch_secure_folder">Secure Folder</string>

@@ -17,6 +17,8 @@ import android.util.Log
 import android.view.Window
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.hapticfeedback.HapticFeedback
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalConfiguration
@@ -28,8 +30,9 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import com.geecee.escapelauncher.HomeScreenModel
 import com.geecee.escapelauncher.R
-import com.geecee.escapelauncher.ui.theme.AppTheme
-import com.geecee.escapelauncher.ui.theme.EscapeTheme
+import com.geecee.escapelauncher.core.ui.theme.AppTheme
+import com.geecee.escapelauncher.core.ui.theme.EscapeTheme
+import com.geecee.escapelauncher.ui.theme.getFontFamily
 import com.geecee.escapelauncher.utils.managers.ScreenTimeManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -519,7 +522,19 @@ object AppUtils {
             }
         }
 
-        EscapeTheme(viewModel.appTheme.value) {
+        val fontFamily = remember {
+            mutableStateOf(
+                getFontFamily(
+                    context,
+                    getStringSetting(context, resources.getString(R.string.Font), "Jost")
+                )
+            )
+        }
+
+        EscapeTheme(
+            theme = viewModel.appTheme.value,
+            fontFamily = fontFamily.value
+        ) {
             content()
         }
     }

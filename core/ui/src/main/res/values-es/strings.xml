@@ -1,0 +1,16 @@
+<resources>
+    <!-- Themes -->
+    <string name="light_red">Rojo Claro</string>
+    <string name="dark_red">Rojo Oscuro</string>
+    <string name="light_blue">Azul Claro</string>
+    <string name="dark_blue">Azul Oscuro</string>
+    <string name="light_yellow">Amarillo Claro</string>
+    <string name="dark_yellow">Amarillo Oscuro</string>
+    <string name="light_green">Verde Claro</string>
+    <string name="dark_green">Verde Oscuro</string>
+    <string name="off_white">Blanquecino</string>
+    <string name="system">Sistema</string>
+    <string name="pitch_black">Oscuro total</string>
+    <string name="light">Claro</string>
+    <string name="dark">Oscuro</string>
+</resources>

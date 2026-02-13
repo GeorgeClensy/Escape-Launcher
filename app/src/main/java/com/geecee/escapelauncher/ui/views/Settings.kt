@@ -82,11 +82,10 @@ import com.geecee.escapelauncher.ui.composables.SettingsSwitch
 import com.geecee.escapelauncher.ui.composables.SponsorBox
 import com.geecee.escapelauncher.ui.composables.ThemeCard
 import com.geecee.escapelauncher.ui.composables.WeatherAppPicker
-import com.geecee.escapelauncher.ui.theme.AppTheme
-import com.geecee.escapelauncher.ui.theme.CardContainerColor
-import com.geecee.escapelauncher.ui.theme.ContentColor
-import com.geecee.escapelauncher.ui.theme.getFontFamily
-import com.geecee.escapelauncher.ui.theme.resolveColorScheme
+import com.geecee.escapelauncher.core.ui.theme.AppTheme
+import com.geecee.escapelauncher.core.ui.theme.CardContainerColor
+import com.geecee.escapelauncher.core.ui.theme.ContentColor
+import com.geecee.escapelauncher.core.ui.theme.resolveColorScheme
 import com.geecee.escapelauncher.utils.AppUtils
 import com.geecee.escapelauncher.utils.AppUtils.loadTextFromAssets
 import com.geecee.escapelauncher.utils.AppUtils.resetHome
@@ -124,6 +123,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.system.exitProcess
 import com.geecee.escapelauncher.MainAppViewModel as MainAppModel
+import com.geecee.escapelauncher.ui.theme.getFontFamily
 
 
 //

@@ -36,7 +36,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
-import com.geecee.escapelauncher.ui.theme.ContentColor
+import com.geecee.escapelauncher.core.ui.theme.ContentColor
 import com.geecee.escapelauncher.utils.InstalledApp
 import kotlin.math.roundToInt
 

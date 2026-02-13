@@ -165,6 +165,9 @@ dependencies {
     // Debugging Tools
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+
+    // Modules
+    implementation(project(":core:ui"))
 }
 
 java {

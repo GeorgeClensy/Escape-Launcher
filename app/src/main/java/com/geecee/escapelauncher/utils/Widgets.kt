@@ -60,10 +60,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.edit
 import androidx.core.graphics.drawable.toBitmap
-import com.geecee.escapelauncher.R
-import com.geecee.escapelauncher.ui.theme.BackgroundColor
-import com.geecee.escapelauncher.ui.theme.ContentColor
-import com.geecee.escapelauncher.ui.theme.primaryContentColor
+import com.geecee.escapelauncher.core.ui.theme.BackgroundColor
+import com.geecee.escapelauncher.core.ui.theme.ContentColor
+import com.geecee.escapelauncher.core.ui.theme.primaryContentColor
 import com.geecee.escapelauncher.utils.managers.Migration
 
 // Constants for SharedPreferences used in widget saving/loading

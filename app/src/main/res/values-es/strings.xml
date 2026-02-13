@@ -39,10 +39,7 @@
     <string name="home">Inicio</string>
     <string name="apps">Apps</string>
     <string name="font">Fuente</string>
-    <string name="pitch_black">Oscuro total</string>
     <string name="theme">Tema</string>
-    <string name="light">Claro</string>
-    <string name="dark">Oscuro</string>
     <string name="screen_time_on_app">Tiempo de Pantalla en Apps</string>
     <string name="hide_private_space_in_search">Espacio privado oculto</string>
     <string name="haptic_feedback">Respuesta háptica</string>
@@ -91,16 +88,6 @@
     <string name="of_your_day_spent_on_your_phone">De tu día usando tu teléfono</string>
     <string name="higher_we_rec">Superior a lo recomendado</string>
     <string name="no_apps_used">Aún no se han abierto apps!</string>
-    <string name="light_red">Rojo Claro</string>
-    <string name="dark_red">Rojo Oscuro</string>
-    <string name="light_blue">Azul Claro</string>
-    <string name="dark_blue">Azul Oscuro</string>
-    <string name="light_yellow">Amarillo Claro</string>
-    <string name="dark_yellow">Amarillo Oscuro</string>
-    <string name="light_green">Verde Claro</string>
-    <string name="dark_green">Verde Oscuro</string>
-    <string name="off_white">Blanquecino</string>
-    <string name="system">Sistema</string>
     <string name="accessibility_service_description">Permite a la app apagar la pantalla.</string>
     <string name="back">Atrás</string>
     <string name="screen_time_on_home_screen">Tiempo de Pantalla en Inicio</string>
@@ -118,4 +105,6 @@
     <string name="app_info">Información de App</string>
     <string name="launch_secure_folder">Carpeta Segura</string>
     <string name="enable_secure_folder_on_settings">Activa la Carpeta Segura en los ajustes</string>
+    <string name="light">Claro</string>
+    <string name="dark">Oscuro</string>
 </resources>

@@ -30,10 +30,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.geecee.escapelauncher.R
-import com.geecee.escapelauncher.ui.theme.CardContainerColor
-import com.geecee.escapelauncher.ui.theme.escapeGreen
-import com.geecee.escapelauncher.ui.theme.escapeRed
-import com.geecee.escapelauncher.ui.theme.primaryContentColor
+import com.geecee.escapelauncher.core.ui.theme.CardContainerColor
+import com.geecee.escapelauncher.core.ui.theme.escapeGreen
+import com.geecee.escapelauncher.core.ui.theme.escapeRed
+import com.geecee.escapelauncher.core.ui.theme.primaryContentColor
 import com.geecee.escapelauncher.ui.views.calculateOveragePercentage
 
 /**

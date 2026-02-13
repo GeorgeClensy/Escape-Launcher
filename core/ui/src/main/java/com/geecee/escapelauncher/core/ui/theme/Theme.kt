@@ -1,26 +1,16 @@
-package com.geecee.escapelauncher.ui.theme
+package com.geecee.escapelauncher.core.ui.theme
 
-// Import the flavor-specific font resolver
 import android.os.Build
 import androidx.annotation.StringRes
-import androidx.compose.material3.ColorScheme
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Typography
-import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.dynamicDarkColorScheme
-import androidx.compose.material3.dynamicLightColorScheme
-import androidx.compose.material3.lightColorScheme
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
-import com.geecee.escapelauncher.R
-import com.geecee.escapelauncher.utils.getStringSetting
+import com.geecee.escapelauncher.core.ui.R
 
 val PitchDarkColorScheme = darkColorScheme(
     primary = primaryDark,
@@ -480,74 +470,61 @@ val darkSchemeYellow = darkColorScheme(
 
 @Composable
 fun EscapeTheme(
-    theme: AppTheme, content: @Composable (() -> Unit)
+    theme: AppTheme, fontFamily: FontFamily = FontFamily.Default, content: @Composable (() -> Unit)
 ) {
-    val context = LocalContext.current
-    val resources = LocalResources.current
-
     val colorScheme = theme.resolveColorScheme()
-
-    // Make the typography using flavor-specific font resolver
-    val fontFamily = remember {
-        mutableStateOf(
-            getFontFamily(
-                context,
-                getStringSetting(context, resources.getString(R.string.Font), "Jost")
-            )
-        )
-    }
 
     val typography = Typography(
         headlineLarge = TextStyle(
-            fontFamily = fontFamily.value,
+            fontFamily = fontFamily,
             fontWeight = FontWeight.Light,
             fontSize = 66.sp,
             lineHeight = 53.sp,
             letterSpacing = 0.6.sp
         ), headlineMedium = TextStyle(
-            fontFamily = fontFamily.value,
+            fontFamily = fontFamily,
             fontWeight = FontWeight.Light,
             fontSize = 62.sp,
             lineHeight = 49.sp,
             letterSpacing = 0.6.sp
         ), headlineSmall = TextStyle(
-            fontFamily = fontFamily.value,
+            fontFamily = fontFamily,
             fontWeight = FontWeight.Light,
             fontSize = 58.sp,
             lineHeight = 45.sp,
             letterSpacing = 0.6.sp
         ), titleLarge = TextStyle(
-            fontFamily = fontFamily.value,
+            fontFamily = fontFamily,
             fontWeight = FontWeight.Light,
             fontSize = 52.sp,
             lineHeight = 53.sp,
             letterSpacing = 0.6.sp
         ), titleMedium = TextStyle(
-            fontFamily = fontFamily.value,
+            fontFamily = fontFamily,
             fontWeight = FontWeight.Light,
             fontSize = 48.sp,
             lineHeight = 49.sp,
             letterSpacing = 0.6.sp
         ), titleSmall = TextStyle(
-            fontFamily = fontFamily.value,
+            fontFamily = fontFamily,
             fontWeight = FontWeight.Light,
             fontSize = 44.sp,
             lineHeight = 45.sp,
             letterSpacing = 0.6.sp
         ), bodyLarge = TextStyle(
-            fontFamily = fontFamily.value,
+            fontFamily = fontFamily,
             fontWeight = FontWeight.Normal,
             fontSize = 28.sp,
             lineHeight = 29.sp,
             letterSpacing = 0.6.sp
         ), bodyMedium = TextStyle(
-            fontFamily = fontFamily.value,
+            fontFamily = fontFamily,
             fontWeight = FontWeight.Normal,
             fontSize = 24.sp,
             lineHeight = 25.sp,
             letterSpacing = 0.6.sp
         ), bodySmall = TextStyle(
-            fontFamily = fontFamily.value,
+            fontFamily = fontFamily,
             fontWeight = FontWeight.Normal,
             fontSize = 20.sp,
             lineHeight = 21.sp,
@@ -555,14 +532,14 @@ fun EscapeTheme(
         )
     )
 
-    androidx.compose.material3.MaterialTheme(
+    MaterialTheme(
         colorScheme = colorScheme, typography = typography, content = content
     )
 }
 
 enum class AppTheme(
     val id: Int,
-    @StringRes val nameRes: Int
+    @get:StringRes val nameRes: Int
 ) {
     DARK(0, R.string.dark),
     LIGHT(1, R.string.light),

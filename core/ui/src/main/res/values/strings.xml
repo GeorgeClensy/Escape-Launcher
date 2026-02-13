@@ -1,0 +1,16 @@
+<resources>
+    <!-- Themes -->
+    <string name="light_red">Light Red</string>
+    <string name="dark_red">Dark Red</string>
+    <string name="light_blue">Light Blue</string>
+    <string name="dark_blue">Dark Blue</string>
+    <string name="light_yellow">Light Yellow</string>
+    <string name="dark_yellow">Dark Yellow</string>
+    <string name="light_green">Light Green</string>
+    <string name="dark_green">Dark Green</string>
+    <string name="off_white">Off white</string>
+    <string name="system">System</string>
+    <string name="pitch_black">Pitch black</string>
+    <string name="light">Light</string>
+    <string name="dark">Dark</string>
+</resources>

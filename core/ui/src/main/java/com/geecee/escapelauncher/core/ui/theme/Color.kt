@@ -1,6 +1,6 @@
 @file:Suppress("unused")
 
-package com.geecee.escapelauncher.ui.theme
+package com.geecee.escapelauncher.core.ui.theme
 
 import androidx.compose.ui.graphics.Color
 

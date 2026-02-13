@@ -59,10 +59,7 @@
     <string name="home">Home</string>
     <string name="apps">App</string>
     <string name="font">Font</string>
-    <string name="pitch_black">Nero profondo</string>
     <string name="theme">Tema</string>
-    <string name="light">Chiaro</string>
-    <string name="dark">Scuro</string>
     <string name="screen_time_on_app">Tempo di Schermo sulle App</string>
     <string name="screen_time_on_home_screen">Tempo di Schermo Home</string>
     <string name="hide_private_space_in_search">Spazio privato nascosto</string>
@@ -118,18 +115,10 @@
     <string name="no_apps_used">Nessuna app aperta ancora!</string>
     
     <!-- Themes -->
-    <string name="light_red">Rosso Chiaro</string>
-    <string name="dark_red">Rosso Scuro</string>
-    <string name="light_blue">Blu Chiaro</string>
-    <string name="dark_blue">Blu Scuro</string>
-    <string name="light_yellow">Giallo Chiaro</string>
-    <string name="dark_yellow">Giallo Scuro</string>
-    <string name="light_green">Verde Chiaro</string>
-    <string name="dark_green">Verde Scuro</string>
-    <string name="off_white">Bianco sporco</string>
-    <string name="system">Sistema</string>
     <string name="accessibility_service_description">Consente all\'app di spegnere lo schermo.</string>
     <string name="back">Indietro</string>
     <string name="launch_secure_folder">Cartella Protetta</string>
     <string name="enable_secure_folder_on_settings">Attiva la Cartella Protetta nelle impostazioni</string>
+    <string name="light">Chiaro</string>
+    <string name="dark">Scuro</string>
 </resources>

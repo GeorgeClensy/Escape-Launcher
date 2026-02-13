@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Privacy and Analytics stuff -->
+    <string name="analytics_and_data_collection">Analisi e raccolta dati</string>
+    <string name="anonymous_data">Utilizziamo dati anonimi per migliorare la tua esperienza con Escape launcher. Assicurati di leggere l\'informativa sulla privacy prima di selezionare consenti.</string>
+    <string name="allow">Consenti</string>
+    <string name="deny">Nega</string>
+    <string name="read_privacy_policy">Informativa sulla Privacy</string>
+    <!-- All Apps strings -->
+    <string name="all_apps">Tutte le App</string>
+    <string name="uninstall">Disinstalla</string>
+    <string name="hide">Nascondi</string>
+    <string name="add_to_fav">Aggiungi ai Preferiti</string>
+    <string name="rem_from_fav">Rimuovi dai Preferiti</string>
+    <string name="add_open_challenge">Aggiungi Conto alla Rovescia per Apertura</string>
+    <string name="app_info">Info App</string>
+    <string name="search">Cerca</string>
+    <string name="unlock_private_space">Sblocca Spazio Privato</string>
+    <string name="lock_private_space">Blocca Spazio Privato</string>
+    <string name="private_space">Spazio Privato</string>
+    <string name="private_space_settings">Impostazioni Spazio Privato</string>
+    <string name="private_space_search_term">pri</string>
+
+
+    <!-- Work Profile strings -->
+    <string name="work_profile">App di Lavoro</string>
+    <string name="unpause">Riprendi</string>
+    <string name="lock_work_profile">Metti in Pausa App di Lavoro</string>
+    <string name="work_apps_are_paused">Le app di lavoro sono in pausa</string>
+    <string name="you_wont_receive_notifications_from_work_apps">Non riceverai notifiche dalle tue app di lavoro</string>
+
+    <!-- Hidden Apps strings-->
+    <string name="hidden_apps">App Nascoste</string>
+    <string name="swipe_to_show_app">Scorri per mostrare l\'app</string>
+
+    <!-- Settings strings-->
+    <string name="settings">Impostazioni</string>
+    <string name="make_default_launcher">Imposta come Launcher Predefinito</string>
+    <string name="left">Sinistra</string>
+    <string name="center">Centro</string>
+    <string name="right">Destra</string>
+    <string name="top">Alto</string>
+    <string name="bottom">Basso</string>
+    <string name="search_box">Barra di ricerca</string>
+    <string name="widget">Widget</string>
+    <string name="remove_widget">Rimuovi Widget</string>
+    <string name="alignments">Allineamenti</string>
+    <string name="choose_font">Scegli Font</string>
+    <string name="select_widget">Seleziona Widget</string>
+    <string name="manage_open_challenges">Gestisci Conto alla Rovescia App</string>
+    <string name="manage_hidden_apps">Gestisci App Nascoste</string>
+    <string name="escape_launcher">Escape launcher</string>
+    <string name="auto_open">Ricerca rapida</string>
+    <string name="offset">Offset</string>
+    <string name="show_clock">Mostra Orologio</string>
+    <string name="height">Altezza</string>
+    <string name="width">Larghezza</string>
+    <string name="big_clock">Orologio Grande</string>
+    <string name="home">Home</string>
+    <string name="apps">App</string>
+    <string name="font">Font</string>
+    <string name="pitch_black">Nero profondo</string>
+    <string name="theme">Tema</string>
+    <string name="light">Chiaro</string>
+    <string name="dark">Scuro</string>
+    <string name="screen_time_on_app">Tempo di Schermo sulle App</string>
+    <string name="screen_time_on_home_screen">Tempo di Schermo Home</string>
+    <string name="hide_private_space_in_search">Spazio privato nascosto</string>
+    <string name="haptic_feedback">Feedback aptico</string>
+    <string name="done">Fatto</string>
+    <string name="syncLightDark">Sincronizza con sistema chiaro/scuro</string>
+    <string name="match_system_wallpaper">Adatta sfondo sistema al tema</string>
+    <string name="date">Data</string>
+    <string name="home_screen_options">Opzioni Schermata Home</string>
+    <string name="screen_time">Tempo di Schermo</string>
+    <string name="other">Altro</string>
+    <string name="general">Generale</string>
+    <string name="reset_to_default">Ripristina predefiniti</string>
+    <string name="remove">Rimuovi</string>
+    <string name="twelve_hour_clock_setting">Orologio 12 Ore</string>
+    <string name="hide_screen_time_page">Nascondi pagina tempo di schermo</string>
+    <string name="show_hidden_apps_in_search">Mostra app nascoste nella ricerca</string>
+    <string name="manage_favourite_apps">Gestisci app preferite</string>
+    <string name="search_at_bottom">Ricerca in basso</string>
+    <string name="apps_list_auto_search">Apri Ricerca Automaticamente</string>
+    <string name="sponsor">Sponsor</string>
+    <string name="font_licences">Licenze Font</string>
+    <string name="show_weather">Mostra Meteo</string>
+    <string name="choose_weather_app">Scegli app meteo</string>
+    <string name="set_weather_app_in_settings">Imposta app meteo nelle impostazioni</string>
+    <string name="double_tap_to_lock">Doppio tocco per bloccare</string>
+    <string name="enable_accessibility">Concedi Permesso Accessibilità</string>
+    <string name="accessibility_not_granted_msg">Concedi il permesso di accessibilità nelle impostazioni</string>
+    <string name="launcher_must_be_default_to_pause_or_unpause_work_apps">Il launcher deve essere impostato come predefinito per mettere in pausa o riprendere le app di lavoro</string>
+
+    <!-- First time strings -->
+    <string name="continue_str">Continua</string>
+    <string name="most_people_waste">La maggior parte delle persone spreca oltre</string>
+    <string name="hours_every_day">ore ogni giorno sul proprio telefono</string>
+    <string name="thats">Questo equivale a</string>
+    <string name="every_week">giorni consecutivi ogni settimana</string>
+    <string name="adds_to">Questo si aggiunge a</string>
+    <string name="years_straight">anni consecutivi</string>
+    <string name="choose_your_favourite_apps">Scegli le tue app preferite</string>
+    <string name="set_launcher">Imposta come launcher predefinito</string>
+    <string name="already_default">Già Predefinito</string>
+    <string name="set_escape">Imposta Escape come launcher predefinito</string>
+    <string name="stop_going_back">Questo impedirà di tornare alla tua home screen predefinita</string>
+    <string name="swipe_for_all_apps">Scorri per tutte le app</string>
+    <string name="hold_for_settings">Tieni premuto per impostazioni</string>
+    <string name="accessibility_title">Permesso Blocco Schermo</string>
+    <string name="accessibility_description">Escape Launcher utilizza le API di accessibilità di Android per bloccare lo schermo quando la funzione doppio tocco per bloccare è attivata. Se scegli di non concedere questo permesso, potrai sempre concederlo in seguito nelle impostazioni.</string>
+    <string name="grant_accessibility">Consenti</string>
+
+    <!-- Screen time dashboard -->
+    <string name="of_your_day_spent_on_your_phone">Della tua giornata spesa sul telefono</string>
+    <string name="higher_we_rec">Superiore a quanto raccomandato</string>
+    <string name="no_apps_used">Nessuna app aperta ancora!</string>
+    
+    <!-- Themes -->
+    <string name="light_red">Rosso Chiaro</string>
+    <string name="dark_red">Rosso Scuro</string>
+    <string name="light_blue">Blu Chiaro</string>
+    <string name="dark_blue">Blu Scuro</string>
+    <string name="light_yellow">Giallo Chiaro</string>
+    <string name="dark_yellow">Giallo Scuro</string>
+    <string name="light_green">Verde Chiaro</string>
+    <string name="dark_green">Verde Scuro</string>
+    <string name="off_white">Bianco sporco</string>
+    <string name="system">Sistema</string>
+    <string name="accessibility_service_description">Consente all\'app di spegnere lo schermo.</string>
+    <string name="back">Indietro</string>
+    <string name="launch_secure_folder">Cartella Protetta</string>
+    <string name="enable_secure_folder_on_settings">Attiva la Cartella Protetta nelle impostazioni</string>
+</resources>
