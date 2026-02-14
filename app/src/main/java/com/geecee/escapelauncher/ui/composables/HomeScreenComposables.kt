@@ -9,8 +9,6 @@ import android.util.Log
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -30,15 +28,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowForward
 import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material.icons.filled.WbSunny
@@ -57,7 +50,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.SheetState
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -70,24 +62,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.geecee.escapelauncher.HomeScreenModel
 import com.geecee.escapelauncher.MainAppViewModel
 import com.geecee.escapelauncher.R
+import com.geecee.escapelauncher.core.model.InstalledApp
 import com.geecee.escapelauncher.core.ui.theme.BackgroundColor
 import com.geecee.escapelauncher.core.ui.theme.CardContainerColor
 import com.geecee.escapelauncher.core.ui.theme.CardContainerColorDisabled
@@ -97,8 +83,8 @@ import com.geecee.escapelauncher.core.ui.theme.SecondaryCardContainerColor
 import com.geecee.escapelauncher.core.ui.theme.primaryContentColor
 import com.geecee.escapelauncher.utils.AppUtils.formatScreenTime
 import com.geecee.escapelauncher.utils.AppUtils.getCurrentTime
+import com.geecee.escapelauncher.utils.AppUtils.isDefaultLauncher
 import com.geecee.escapelauncher.utils.AppUtils.resetHome
-import com.geecee.escapelauncher.core.model.InstalledApp
 import com.geecee.escapelauncher.utils.PrivateAppItem
 import com.geecee.escapelauncher.utils.WorkAppItem
 import com.geecee.escapelauncher.utils.analyticsProxy
@@ -106,7 +92,6 @@ import com.geecee.escapelauncher.utils.getPrivateSpaceApps
 import com.geecee.escapelauncher.utils.getStringSetting
 import com.geecee.escapelauncher.utils.getWorkApps
 import com.geecee.escapelauncher.utils.goToWorkAppAppInfo
-import com.geecee.escapelauncher.utils.isDefaultLauncher
 import com.geecee.escapelauncher.utils.isWorkProfileUnlocked
 import com.geecee.escapelauncher.utils.lockPrivateSpace
 import com.geecee.escapelauncher.utils.lockWorkProfile
@@ -119,6 +104,7 @@ import com.geecee.escapelauncher.utils.unlockWorkProfile
 import kotlinx.coroutines.delay
 import java.text.SimpleDateFormat
 import java.util.Calendar
+import java.util.Date
 import java.util.Locale
 
 // Home Screen Item
@@ -258,7 +244,7 @@ fun Date(
     val dateFormat = SimpleDateFormat("EEE d MMM", Locale.getDefault())
 
     fun getCurrentDate(): String {
-        return dateFormat.format(java.util.Date())
+        return dateFormat.format(Date())
     }
 
     var date by remember { mutableStateOf(getCurrentDate()) }
@@ -573,97 +559,6 @@ fun AppsListHeader() {
     )
 }
 
-/**
- * Search Bar for apps list that collapses into a pill
- */
-@Composable
-fun AnimatedPillSearchBar(
-    isExpanded: Boolean,
-    onExpandedChange: (Boolean) -> Unit,
-    onSearchTextChanged: (String) -> Unit,
-    onSearchDone: (String) -> Unit,
-    modifier: Modifier = Modifier,
-    initialText: String = "",
-    autoFocus: Boolean = false
-) {
-    var searchText by remember { mutableStateOf(TextFieldValue(initialText)) }
-
-    // Animation Specs
-    val width by animateDpAsState(
-        targetValue = if (isExpanded) 280.dp else 150.dp,
-        label = "widthAnimation"
-    )
-    val alpha by animateFloatAsState(
-        targetValue = if (isExpanded) 1f else 0f,
-        label = "alphaAnimation"
-    )
-
-    val focusRequester = remember { FocusRequester() }
-    val keyboardController = LocalSoftwareKeyboardController.current
-
-    // Handle Auto-focus and Expansion changes
-    LaunchedEffect(isExpanded, autoFocus) {
-        if (isExpanded) {
-            focusRequester.requestFocus()
-            keyboardController?.show()
-        } else {
-            keyboardController?.hide()
-        }
-    }
-
-    Surface(
-        modifier = modifier
-            .width(width)
-            .height(56.dp)
-            .clickable { onExpandedChange(!isExpanded) },
-        shape = RoundedCornerShape(28.dp),
-        color = primaryContentColor
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(horizontal = 12.dp)
-        ) {
-            Icon(
-                imageVector = Icons.Default.Search,
-                contentDescription = "Search",
-                tint = BackgroundColor,
-                modifier = Modifier.size(24.dp)
-            )
-
-            if (!isExpanded) {
-                Text(
-                    text = stringResource(id = R.string.search),
-                    color = BackgroundColor,
-                    style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier.padding(start = 4.dp)
-                )
-            } else {
-                BasicTextField(
-                    value = searchText,
-                    onValueChange = {
-                        searchText = it
-                        onSearchTextChanged(it.text)
-                    },
-                    modifier = Modifier
-                        .weight(1f)
-                        .padding(start = 4.dp)
-                        .alpha(alpha)
-                        .focusRequester(focusRequester),
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
-                    keyboardActions = KeyboardActions(onDone = {
-                        keyboardController?.hide()
-                        onSearchDone(searchText.text.trim())
-                    }),
-                    textStyle = MaterialTheme.typography.bodyMedium.copy(
-                        color = BackgroundColor
-                    ),
-                    cursorBrush = SolidColor(BackgroundColor)
-                )
-            }
-        }
-    }
-}
 
 /**
  * Android 15+ Private space UI with apps, settings button and lock button
@@ -811,12 +706,6 @@ fun WorkAppsFab(modifier: Modifier = Modifier, onClick: () -> Unit) {
     ) {
         Icon(Icons.Rounded.Work, contentDescription = stringResource(R.string.work_profile))
     }
-}
-
-@Preview
-@Composable
-fun PrevWorkAppsFab() {
-    WorkAppsFab {}
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

@@ -31,7 +31,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.geecee.escapelauncher.HomeScreenModel
 import com.geecee.escapelauncher.R
-import com.geecee.escapelauncher.ui.composables.AnimatedPillSearchBar
+import com.geecee.escapelauncher.core.ui.composables.AnimatedPillSearchBar
 import com.geecee.escapelauncher.ui.composables.AppsListHeader
 import com.geecee.escapelauncher.ui.composables.HomeScreenItem
 import com.geecee.escapelauncher.ui.composables.ListGradient
@@ -77,6 +77,7 @@ fun AppsList(
     @Composable
     fun SearchBox() {
         AnimatedPillSearchBar(
+            closedText = stringResource(R.string.search),
             isExpanded = homeScreenModel.searchExpanded.value,
             onExpandedChange = { it: Boolean ->
                 homeScreenModel.searchExpanded.value = it

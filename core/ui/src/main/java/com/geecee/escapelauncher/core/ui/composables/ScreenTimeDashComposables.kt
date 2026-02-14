@@ -1,4 +1,4 @@
-package com.geecee.escapelauncher.ui.composables
+package com.geecee.escapelauncher.core.ui.composables
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -24,17 +24,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.geecee.escapelauncher.R
 import com.geecee.escapelauncher.core.ui.theme.CardContainerColor
 import com.geecee.escapelauncher.core.ui.theme.escapeGreen
 import com.geecee.escapelauncher.core.ui.theme.escapeRed
 import com.geecee.escapelauncher.core.ui.theme.primaryContentColor
-import com.geecee.escapelauncher.ui.views.calculateOveragePercentage
 
 /**
  * Screen time with an arrow indicating whether it's increased or decreased
@@ -73,11 +71,11 @@ fun ScreenTime(time: String, increased: Boolean, modifier: Modifier) {
 }
 
 /**
- * Square shaped composable showing how many percent higher screen time is than recommended using [calculateOveragePercentage] function
+ * Square shaped composable showing a percent with a text beneath it
  */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun HigherRec(percent: Int, modifier: Modifier = Modifier) {
+fun ScreenTimeInfoBox(text: String, percent: Int, percentageColour: Color, modifier: Modifier = Modifier) {
     BoxWithConstraints(
         modifier = modifier
             .clip(RoundedCornerShape(48.dp))
@@ -102,60 +100,12 @@ fun HigherRec(percent: Int, modifier: Modifier = Modifier) {
                     fontSize = with(LocalDensity.current) { titleFontSize.toSp() },
                     fontWeight = FontWeight.SemiBold
                 ),
-                color = if (percent < 1) escapeGreen else escapeRed
+                color = percentageColour
             )
 
             // Description Text
             Text(
-                text = stringResource(R.string.higher_we_rec),
-                style = MaterialTheme.typography.bodySmall.copy(
-                    fontSize = with(LocalDensity.current) { bodyFontSize.toSp() },
-                    lineHeight = with(LocalDensity.current) { (bodyFontSize + 5.dp).toSp() },
-                    textAlign = TextAlign.Center,
-                    fontWeight = FontWeight.SemiBold
-                ),
-                color = primaryContentColor
-            )
-        }
-    }
-}
-
-/**
- * Circular composable showing what percent of your day was spent on your phone
- */
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
-@Composable
-fun DaySpent(percent: Int, modifier: Modifier = Modifier) {
-    BoxWithConstraints(
-        modifier = modifier
-            .aspectRatio(1f)
-            .clip(RoundedCornerShape(48.dp))
-            .background(CardContainerColor)
-    ) {
-        val boxWithConstraintsScope = this
-        val padding = boxWithConstraintsScope.maxWidth * 0.1f
-        val titleFontSize = boxWithConstraintsScope.maxWidth * 0.25f
-        val bodyFontSize = boxWithConstraintsScope.maxWidth * 0.08f
-
-        Column(
-            modifier = Modifier
-                .align(Alignment.Center)
-                .padding(padding),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            // Percent Text
-            Text(
-                text = "$percent%",
-                style = MaterialTheme.typography.titleMedium.copy(
-                    fontSize = with(LocalDensity.current) { titleFontSize.toSp() },
-                    fontWeight = FontWeight.SemiBold
-                ),
-                color = if (percent < 10) escapeGreen else escapeRed
-            )
-
-            // Description Text
-            Text(
-                text = stringResource(R.string.of_your_day_spent_on_your_phone),
+                text = text,
                 style = MaterialTheme.typography.bodySmall.copy(
                     fontSize = with(LocalDensity.current) { bodyFontSize.toSp() },
                     lineHeight = with(LocalDensity.current) { (bodyFontSize + 5.dp).toSp() },

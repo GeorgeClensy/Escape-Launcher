@@ -27,13 +27,14 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.geecee.escapelauncher.MainAppViewModel
 import com.geecee.escapelauncher.R
-import com.geecee.escapelauncher.ui.composables.AppUsage
-import com.geecee.escapelauncher.ui.composables.AppUsages
-import com.geecee.escapelauncher.ui.composables.DaySpent
-import com.geecee.escapelauncher.ui.composables.HigherRec
-import com.geecee.escapelauncher.ui.composables.ScreenTime
+import com.geecee.escapelauncher.core.ui.composables.AppUsage
+import com.geecee.escapelauncher.core.ui.composables.AppUsages
+import com.geecee.escapelauncher.core.ui.composables.ScreenTime
+import com.geecee.escapelauncher.core.ui.composables.ScreenTimeInfoBox
 import com.geecee.escapelauncher.core.ui.composables.SettingsSpacer
 import com.geecee.escapelauncher.core.ui.theme.ContentColor
+import com.geecee.escapelauncher.core.ui.theme.escapeGreen
+import com.geecee.escapelauncher.core.ui.theme.escapeRed
 import com.geecee.escapelauncher.utils.AppUtils
 import com.geecee.escapelauncher.utils.managers.AppUsageEntity
 import com.geecee.escapelauncher.utils.managers.getScreenTimeListSorted
@@ -48,7 +49,7 @@ import java.util.Locale
  * This function works out if the screen time is over the recommended and if it is finds out how many percent over it is
  */
 fun calculateOveragePercentage(screenTime: Long): Int {
-    val recommendedTime: Double = 0.5 * 60 * 60 * 1000 // 1 hours in milliseconds
+    val recommendedTime: Double = 0.5 * 60 * 60 * 1000 // 1 hour in milliseconds
 
     // If screen time is less than or equal to the recommended time, return 0%
     if (screenTime <= recommendedTime) {
@@ -70,7 +71,7 @@ fun calculateOveragePercentage(screenTime: Long): Int {
 fun ScreenTimeDashboard(context: Context, mainAppModel: MainAppViewModel) {
     val today = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
 
-    // Retrieves data in in a subroutine
+    // Retrieves data in a subroutine
     val todayUsage = remember { mutableLongStateOf(0L) }
     val yesterdayUsage = remember { mutableLongStateOf(0L) }
     val appUsageToday = remember { mutableStateListOf<AppUsageEntity>() }
@@ -161,16 +162,23 @@ fun ScreenTimeDashboard(context: Context, mainAppModel: MainAppViewModel) {
         ) {
             val totalDayHours = 16
             val totalMs = totalDayHours * 60L * 60 * 1000
-            DaySpent(
-                ((todayUsage.longValue.toDouble() / totalMs) * 100).toInt(),
-                Modifier
+
+            val percentOfYourDayOnYourPhone = ((todayUsage.longValue.toDouble() / totalMs) * 100).toInt()
+            ScreenTimeInfoBox(
+                text = stringResource(R.string.of_your_day_spent_on_your_phone),
+                percent = ((todayUsage.longValue.toDouble() / totalMs) * 100).toInt(),
+                percentageColour = if (percentOfYourDayOnYourPhone < 10) escapeGreen else escapeRed,
+                modifier = Modifier
                     .weight(1f)
                     .aspectRatio(1f)
             )
 
-            HigherRec(
-                calculateOveragePercentage(todayUsage.longValue),
-                Modifier
+            val percentHigherThanRec = calculateOveragePercentage(todayUsage.longValue)
+            ScreenTimeInfoBox(
+                text = stringResource(R.string.higher_we_rec),
+                percent = percentHigherThanRec,
+                percentageColour = if (percentHigherThanRec < 1) escapeGreen else escapeRed,
+                modifier = Modifier
                     .weight(1f)
                     .aspectRatio(1f)
             )
