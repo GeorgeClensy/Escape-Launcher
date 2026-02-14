@@ -70,9 +70,9 @@ import com.geecee.escapelauncher.BuildConfig
 import com.geecee.escapelauncher.HomeScreenModel
 import com.geecee.escapelauncher.MainAppViewModel
 import com.geecee.escapelauncher.R
-import com.geecee.escapelauncher.ui.composables.AutoResizingText
+import com.geecee.escapelauncher.core.ui.composables.AutoResizingText
 import com.geecee.escapelauncher.ui.composables.BulkAppManager
-import com.geecee.escapelauncher.ui.composables.SettingsSpacer
+import com.geecee.escapelauncher.core.ui.composables.SettingsSpacer
 import com.geecee.escapelauncher.core.ui.theme.BackgroundColor
 import com.geecee.escapelauncher.core.ui.theme.CardContainerColor
 import com.geecee.escapelauncher.core.ui.theme.primaryContentColor

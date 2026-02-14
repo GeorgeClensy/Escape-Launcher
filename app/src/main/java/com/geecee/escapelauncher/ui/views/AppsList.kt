@@ -36,7 +36,7 @@ import com.geecee.escapelauncher.ui.composables.AppsListHeader
 import com.geecee.escapelauncher.ui.composables.HomeScreenItem
 import com.geecee.escapelauncher.ui.composables.ListGradient
 import com.geecee.escapelauncher.ui.composables.PrivateSpace
-import com.geecee.escapelauncher.ui.composables.SettingsSpacer
+import com.geecee.escapelauncher.core.ui.composables.SettingsSpacer
 import com.geecee.escapelauncher.ui.composables.WorkApps
 import com.geecee.escapelauncher.ui.composables.WorkAppsFab
 import com.geecee.escapelauncher.core.ui.theme.transparentHalf

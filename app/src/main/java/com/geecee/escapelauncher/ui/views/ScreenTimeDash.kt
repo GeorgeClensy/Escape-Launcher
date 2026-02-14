@@ -32,7 +32,7 @@ import com.geecee.escapelauncher.ui.composables.AppUsages
 import com.geecee.escapelauncher.ui.composables.DaySpent
 import com.geecee.escapelauncher.ui.composables.HigherRec
 import com.geecee.escapelauncher.ui.composables.ScreenTime
-import com.geecee.escapelauncher.ui.composables.SettingsSpacer
+import com.geecee.escapelauncher.core.ui.composables.SettingsSpacer
 import com.geecee.escapelauncher.core.ui.theme.ContentColor
 import com.geecee.escapelauncher.utils.AppUtils
 import com.geecee.escapelauncher.utils.managers.AppUsageEntity

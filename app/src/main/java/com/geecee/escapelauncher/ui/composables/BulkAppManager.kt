@@ -38,6 +38,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import com.geecee.escapelauncher.core.ui.theme.ContentColor
 import com.geecee.escapelauncher.core.model.InstalledApp
+import com.geecee.escapelauncher.core.ui.composables.SettingsButton
+import com.geecee.escapelauncher.core.ui.composables.EscapeHeader
+import com.geecee.escapelauncher.core.ui.composables.SettingsSpacer
 import kotlin.math.roundToInt
 
 @Composable
@@ -93,7 +96,13 @@ fun BulkAppManager(
     ) {
         if (!hideTitle) {
             item {
-                SettingsHeader(goBack = { onBackClicked() }, title = title, hideBack = hideBack, color = titleColor, padding = topPadding)
+                EscapeHeader(
+                    goBack = { onBackClicked() },
+                    title = title,
+                    hideBack = hideBack,
+                    color = titleColor,
+                    padding = topPadding
+                )
             }
         }
 

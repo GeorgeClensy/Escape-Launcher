@@ -41,7 +41,7 @@ import androidx.core.content.ContextCompat.getSystemService
 import androidx.core.net.toUri
 import com.geecee.escapelauncher.R
 import com.geecee.escapelauncher.core.model.InstalledApp
-import com.geecee.escapelauncher.ui.composables.SettingsSwitch
+import com.geecee.escapelauncher.core.ui.composables.SettingsSwitch
 import com.geecee.escapelauncher.core.ui.theme.ContentColor
 import com.geecee.escapelauncher.core.ui.theme.transparentHalf
 

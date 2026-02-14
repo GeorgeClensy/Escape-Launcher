@@ -20,7 +20,6 @@ roomKtx = "2.8.4"
 roomRuntime = "2.8.4"
 workRuntimeKtx = "2.11.1"
 material3 = "1.5.0-alpha14"
-material3Version = "1.4.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -51,7 +50,6 @@ androidx-room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = 
 androidx-compose-material-icons-core = { group = "androidx.compose.material", name = "material-icons-core" }
 androidx-compose-material-icons-extended = { group = "androidx.compose.material", name = "material-icons-extended" }
 androidx-compose-material3 = { group = "androidx.compose.material3", name = "material3", version.ref = "material3" }
-androidx-material3 = { group = "androidx.compose.material3", name = "material3", version.ref = "material3Version" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

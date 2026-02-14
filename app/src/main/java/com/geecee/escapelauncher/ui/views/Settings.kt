@@ -21,26 +21,42 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -54,8 +70,10 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -69,23 +87,24 @@ import androidx.navigation.compose.rememberNavController
 import com.geecee.escapelauncher.BuildConfig
 import com.geecee.escapelauncher.HomeScreenModel
 import com.geecee.escapelauncher.R
+import com.geecee.escapelauncher.core.model.InstalledApp
 import com.geecee.escapelauncher.ui.composables.BulkAppManager
-import com.geecee.escapelauncher.ui.composables.SettingsButton
-import com.geecee.escapelauncher.ui.composables.SettingsHeader
-import com.geecee.escapelauncher.ui.composables.SettingsNavigationItem
-import com.geecee.escapelauncher.ui.composables.SettingsSingleChoiceSegmentedButtons
-import com.geecee.escapelauncher.ui.composables.SettingsSlider
-import com.geecee.escapelauncher.ui.composables.SettingsSpacer
-import com.geecee.escapelauncher.ui.composables.SettingsSubheading
-import com.geecee.escapelauncher.ui.composables.SettingsSwipeableButton
-import com.geecee.escapelauncher.ui.composables.SettingsSwitch
-import com.geecee.escapelauncher.ui.composables.SponsorBox
-import com.geecee.escapelauncher.ui.composables.ThemeCard
-import com.geecee.escapelauncher.ui.composables.WeatherAppPicker
+import com.geecee.escapelauncher.core.ui.composables.SettingsButton
+import com.geecee.escapelauncher.core.ui.composables.EscapeHeader
+import com.geecee.escapelauncher.core.ui.composables.SettingsNavigationItem
+import com.geecee.escapelauncher.core.ui.composables.SettingsSingleChoiceSegmentedButtons
+import com.geecee.escapelauncher.core.ui.composables.SettingsSlider
+import com.geecee.escapelauncher.core.ui.composables.SettingsSpacer
+import com.geecee.escapelauncher.core.ui.composables.EscapeSubhead
+import com.geecee.escapelauncher.core.ui.composables.SettingsSwipeableButton
+import com.geecee.escapelauncher.core.ui.composables.SettingsSwitch
+import com.geecee.escapelauncher.core.ui.composables.FooterBox
 import com.geecee.escapelauncher.core.ui.theme.AppTheme
 import com.geecee.escapelauncher.core.ui.theme.CardContainerColor
 import com.geecee.escapelauncher.core.ui.theme.ContentColor
+import com.geecee.escapelauncher.core.ui.theme.primaryContentColor
 import com.geecee.escapelauncher.core.ui.theme.resolveColorScheme
+import com.geecee.escapelauncher.core.ui.theme.transparentHalf
 import com.geecee.escapelauncher.utils.AppUtils
 import com.geecee.escapelauncher.utils.AppUtils.loadTextFromAssets
 import com.geecee.escapelauncher.utils.AppUtils.resetHome
@@ -332,13 +351,13 @@ fun MainSettingsPage(
         modifier = Modifier.fillMaxSize()
     ) {
         item {
-            SettingsHeader(
+            EscapeHeader(
                 goBack, stringResource(R.string.settings)
             )
         }
 
         //General
-        item { SettingsSubheading(stringResource(id = R.string.general)) }
+        item { EscapeSubhead(stringResource(id = R.string.general)) }
 
         item {
             SettingsNavigationItem(
@@ -366,7 +385,7 @@ fun MainSettingsPage(
         }
 
         // Home options
-        item { SettingsSubheading(stringResource(R.string.home_screen_options)) }
+        item { EscapeSubhead(stringResource(R.string.home_screen_options)) }
 
         item {
             SettingsSwitch(
@@ -519,7 +538,7 @@ fun MainSettingsPage(
 
 
         //Alignment Options
-        item { SettingsSubheading(stringResource(R.string.alignments)) }
+        item { EscapeSubhead(stringResource(R.string.alignments)) }
 
         item {
             val homeHorizontalOptions = listOf(
@@ -577,7 +596,7 @@ fun MainSettingsPage(
         }
 
         // Search settings
-        item { SettingsSubheading(stringResource(R.string.search)) }
+        item { EscapeSubhead(stringResource(R.string.search)) }
 
         item {
             SettingsSwitch(
@@ -635,7 +654,7 @@ fun MainSettingsPage(
         }
 
         //Screen time
-        item { SettingsSubheading(stringResource(R.string.screen_time)) }
+        item { EscapeSubhead(stringResource(R.string.screen_time)) }
 
         item {
             SettingsSwitch(
@@ -686,7 +705,7 @@ fun MainSettingsPage(
 
         //Apps
         item {
-            SettingsSubheading(
+            EscapeSubhead(
                 stringResource(R.string.apps)
             )
         }
@@ -708,7 +727,7 @@ fun MainSettingsPage(
         }
 
         //Other
-        item { SettingsSubheading(stringResource(id = R.string.other)) }
+        item { EscapeSubhead(stringResource(id = R.string.other)) }
 
         item {
             SettingsNavigationItem(
@@ -761,7 +780,7 @@ fun MainSettingsPage(
         item { SettingsSpacer() }
 
         item {
-            SponsorBox(
+            FooterBox(
                 stringResource(id = R.string.app_name) + " " + stringResource(id = R.string.app_version),
                 secondText = stringResource(R.string.app_flavour),
                 onSponsorClick = {
@@ -771,6 +790,8 @@ fun MainSettingsPage(
                     i.addFlags(FLAG_ACTIVITY_NEW_TASK)
                     mainAppModel.getContext().startActivity(i)
                 },
+                icon = painterResource(R.drawable.outlineicon),
+                sponsorButtonText = stringResource(R.string.sponsor),
                 onBackgroundClick = {
                     navController.navigate("devOptions")
                 })
@@ -859,7 +880,7 @@ fun ThemeOptions(
             )
     ) {
         item {
-            SettingsHeader(goBack, stringResource(R.string.theme))
+            EscapeHeader(goBack, stringResource(R.string.theme))
         }
         item {
             SettingsSwitch(
@@ -1132,7 +1153,7 @@ fun WidgetOptions(context: Context, goBack: () -> Unit) {
         modifier = Modifier.fillMaxSize()
     )
     {
-        item { SettingsHeader(goBack, stringResource(R.string.widget)) }
+        item { EscapeHeader(goBack, stringResource(R.string.widget)) }
 
         item {
             SettingsButton(
@@ -1168,6 +1189,7 @@ fun WidgetOptions(context: Context, goBack: () -> Unit) {
                 },
                 valueRange = -20f..20f,
                 steps = 19,
+                resetButtonContentDescription = stringResource(R.string.reset_to_default),
                 onReset = {
                     offset = 0f
                     setWidgetOffset(context, offset)
@@ -1188,6 +1210,7 @@ fun WidgetOptions(context: Context, goBack: () -> Unit) {
                 },
                 valueRange = 100f..400f,
                 steps = 9,
+                resetButtonContentDescription = stringResource(R.string.reset_to_default),
                 onReset = {
                     height = 125f
                     setWidgetHeight(context, height)
@@ -1207,6 +1230,7 @@ fun WidgetOptions(context: Context, goBack: () -> Unit) {
                 },
                 valueRange = 100f..400f,
                 steps = 9,
+                resetButtonContentDescription = stringResource(R.string.reset_to_default),
                 onReset = {
                     width = 250f
                     setWidgetWidth(context, width)
@@ -1247,7 +1271,7 @@ fun HiddenApps(
         modifier = Modifier.fillMaxSize()
     ) {
         item {
-            SettingsHeader(goBack, stringResource(R.string.hidden_apps))
+            EscapeHeader(goBack, stringResource(R.string.hidden_apps))
         }
 
         item {
@@ -1280,7 +1304,7 @@ fun HiddenApps(
         }
 
         item {
-            SettingsSubheading(stringResource(R.string.swipe_to_show_app))
+            EscapeSubhead(stringResource(R.string.swipe_to_show_app))
         }
 
         items(
@@ -1333,7 +1357,8 @@ fun HiddenApps(
                         }
                     },
                     isTopOfGroup = hiddenAppsList.firstOrNull() == appPackageName,
-                    isBottomOfGroup = hiddenAppsList.lastOrNull() == appPackageName
+                    isBottomOfGroup = hiddenAppsList.lastOrNull() == appPackageName,
+                    deleteIconContentDescription = stringResource(R.string.remove),
                 )
             }
         }
@@ -1378,7 +1403,7 @@ fun ChooseFont(context: Context, activity: Activity, goBack: () -> Unit) {
         horizontalAlignment = Alignment.Start,
         modifier = Modifier.fillMaxSize()
     ) {
-        item { SettingsHeader(goBack, stringResource(R.string.font)) }
+        item { EscapeHeader(goBack, stringResource(R.string.font)) }
 
         itemsIndexed(fontNames) { index, fontName ->
             SettingsButton(
@@ -1407,7 +1432,7 @@ fun DevOptions(mainAppModel: MainAppModel, context: Context, goBack: () -> Unit)
         horizontalAlignment = Alignment.Start,
         modifier = Modifier.fillMaxSize()
     ) {
-        item { SettingsHeader(goBack, "Developer Options") }
+        item { EscapeHeader(goBack, "Developer Options") }
 
         item {
             SettingsSwitch(
@@ -1589,5 +1614,273 @@ fun FontLicenceDialog(context: Context, onOKClick: () -> Unit) {
         SettingsSpacer()
         SettingsSpacer()
         SettingsSpacer()
+    }
+}
+
+/**
+ * Weather app picker
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun WeatherAppPicker(
+    apps: List<InstalledApp>,
+    onAppSelected: (InstalledApp) -> Unit,
+    onDismiss: () -> Unit
+) {
+    ModalBottomSheet(
+        onDismissRequest = onDismiss
+    ) {
+        Surface(
+            modifier = Modifier
+                .fillMaxWidth()
+                .fillMaxHeight(0.8f),
+            shape = MaterialTheme.shapes.extraLarge
+        ) {
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(16.dp)
+            ) {
+                items(apps.sortedBy { it.displayName }) { app ->
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .combinedClickable(onClick = { onAppSelected(app) })
+                            .padding(vertical = 12.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Spacer(modifier = Modifier.width(16.dp))
+                        Text(
+                            text = app.displayName,
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = primaryContentColor
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+/**
+ * Theme select card
+ *
+ * @param theme The theme ID number (see: Theme.kt)
+ *
+ * @see com.geecee.escapelauncher.core.ui.theme.EscapeTheme
+ */
+@Composable
+fun ThemeCard(
+    theme: Int,
+    showLightDarkPicker: MutableState<Boolean>,
+    isSelected: MutableState<Boolean>,
+    isDSelected: MutableState<Boolean>,
+    isLSelected: MutableState<Boolean>,
+    updateLTheme: (Int) -> Unit,
+    updateDTheme: (Int) -> Unit,
+    modifier: Modifier,
+    onClick: (Int) -> Unit,
+    isTopOfGroup: Boolean = false,
+    isBottomOfGroup: Boolean = false
+) {
+    val groupEdgeCornerRadius = 24.dp
+    val defaultCornerRadius = 8.dp
+
+    val topStartRadius = if (isTopOfGroup) groupEdgeCornerRadius else defaultCornerRadius
+    val topEndRadius = if (isTopOfGroup) groupEdgeCornerRadius else defaultCornerRadius
+    val bottomStartRadius = if (isBottomOfGroup) groupEdgeCornerRadius else defaultCornerRadius
+    val bottomEndRadius = if (isBottomOfGroup) groupEdgeCornerRadius else defaultCornerRadius
+
+    Box(Modifier.padding(vertical = 1.dp)) {
+        Box(
+            modifier
+                .clip(
+                    RoundedCornerShape(
+                        topStart = topStartRadius,
+                        topEnd = topEndRadius,
+                        bottomEnd = bottomEndRadius,
+                        bottomStart = bottomStartRadius
+                    )
+                )
+                .clickable {
+                    onClick(theme)
+                }
+                .background(AppTheme.fromId(theme).resolveColorScheme().background)
+                .height(72.dp)) {
+            AnimatedVisibility(
+                isSelected.value && !showLightDarkPicker.value && !showLightDarkPicker.value,
+                enter = fadeIn(),
+                exit = fadeOut()
+            ) {
+                Box(
+                    Modifier
+                        .fillMaxSize()
+                        .border(
+                            2.dp,
+                            AppTheme.fromId(theme).resolveColorScheme().onPrimaryContainer,
+                            RoundedCornerShape(
+                                topStart = topStartRadius,
+                                topEnd = topEndRadius,
+                                bottomEnd = bottomEndRadius,
+                                bottomStart = bottomStartRadius
+                            )
+                        )
+                ) {
+                    Box(
+                        Modifier
+                            .align(Alignment.BottomEnd)
+                            .padding(10.dp)
+                    ) {
+                        Icon(
+                            Icons.Default.CheckCircle,
+                            "",
+                            tint = AppTheme.fromId(theme).resolveColorScheme().onPrimaryContainer
+                        )
+                    }
+                }
+            }
+
+            AnimatedVisibility(
+                isSelected.value && !showLightDarkPicker.value, enter = fadeIn(), exit = fadeOut()
+            ) {
+                Box(
+                    Modifier
+                        .fillMaxSize()
+                        .border(
+                            2.dp,
+                            AppTheme.fromId(theme).resolveColorScheme().onPrimaryContainer,
+                            RoundedCornerShape(
+                                topStart = topStartRadius,
+                                topEnd = topEndRadius,
+                                bottomEnd = bottomEndRadius,
+                                bottomStart = bottomStartRadius
+                            )
+                        )
+                ) {
+                    Box(
+                        Modifier
+                            .align(Alignment.BottomEnd)
+                            .padding(10.dp)
+                    ) {
+                        Icon(
+                            Icons.Default.CheckCircle,
+                            "",
+                            tint = AppTheme.fromId(theme).resolveColorScheme().onPrimaryContainer
+                        )
+                    }
+                }
+            }
+
+            AnimatedVisibility(
+                isDSelected.value && !showLightDarkPicker.value, enter = fadeIn(), exit = fadeOut()
+            ) {
+                Box(
+                    Modifier
+                        .fillMaxSize()
+                        .border(
+                            2.dp,
+                            AppTheme.fromId(theme).resolveColorScheme().onPrimaryContainer,
+                            RoundedCornerShape(
+                                topStart = topStartRadius,
+                                topEnd = topEndRadius,
+                                bottomEnd = bottomEndRadius,
+                                bottomStart = bottomStartRadius
+                            )
+                        )
+                ) {
+                    Box(
+                        Modifier
+                            .align(Alignment.BottomEnd)
+                            .padding(10.dp)
+                    ) {
+                        Icon(
+                            painterResource(R.drawable.dark_mode),
+                            "",
+                            tint = AppTheme.fromId(theme).resolveColorScheme().onPrimaryContainer
+                        )
+                    }
+                }
+            }
+
+            Text(
+                stringResource(AppTheme.nameResFromId(theme)),
+                Modifier
+                    .align(Alignment.Center)
+                    .padding(horizontal = 24.dp, vertical = 12.dp),
+                AppTheme.fromId(theme).resolveColorScheme().onPrimaryContainer,
+                style = MaterialTheme.typography.bodyMedium,
+                textAlign = TextAlign.Center
+            )
+
+            AnimatedVisibility(
+                isLSelected.value && !showLightDarkPicker.value, enter = fadeIn(), exit = fadeOut()
+            ) {
+                Box(
+                    Modifier
+                        .fillMaxSize()
+                        .border(
+                            2.dp,
+                            AppTheme.fromId(theme).resolveColorScheme().onPrimaryContainer,
+                            RoundedCornerShape(
+                                topStart = topStartRadius,
+                                topEnd = topEndRadius,
+                                bottomEnd = bottomEndRadius,
+                                bottomStart = bottomStartRadius
+                            )
+                        )
+                ) {
+                    Box(
+                        Modifier
+                            .align(Alignment.TopEnd)
+                            .padding(10.dp)
+                    ) {
+                        Icon(
+                            painterResource(R.drawable.light_mode),
+                            "",
+                            tint = AppTheme.fromId(theme).resolveColorScheme().onPrimaryContainer
+                        )
+                    }
+                }
+            }
+
+            AnimatedVisibility(showLightDarkPicker.value, enter = fadeIn(), exit = fadeOut()) {
+                Row(
+                    Modifier
+                        .fillMaxSize()
+                        .background(transparentHalf)
+                ) {
+                    Button(
+                        onClick = {
+                            updateLTheme(theme)
+                        },
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxHeight()
+                            .padding(20.dp, 5.dp, 5.dp, 5.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = AppTheme.fromId(theme).resolveColorScheme().primary,
+                            contentColor = AppTheme.fromId(theme).resolveColorScheme().onPrimary
+                        )
+                    ) {
+                        Text(stringResource(com.geecee.escapelauncher.core.ui.R.string.light))
+                    }
+
+                    Button(
+                        onClick = {
+                            updateDTheme(theme)
+                        },
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxHeight()
+                            .padding(5.dp, 5.dp, 20.dp, 5.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = AppTheme.fromId(theme).resolveColorScheme().primary,
+                            contentColor = AppTheme.fromId(theme).resolveColorScheme().onPrimary
+                        )
+                    ) {
+                        Text(stringResource(com.geecee.escapelauncher.core.ui.R.string.dark))
+                    }
+                }
+            }
+        }
     }
 }
