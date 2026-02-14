@@ -71,7 +71,7 @@ import com.geecee.escapelauncher.HomeScreenModel
 import com.geecee.escapelauncher.MainAppViewModel
 import com.geecee.escapelauncher.R
 import com.geecee.escapelauncher.core.ui.composables.AutoResizingText
-import com.geecee.escapelauncher.ui.composables.BulkAppManager
+import com.geecee.escapelauncher.core.ui.composables.BulkManager
 import com.geecee.escapelauncher.core.ui.composables.SettingsSpacer
 import com.geecee.escapelauncher.core.ui.theme.BackgroundColor
 import com.geecee.escapelauncher.core.ui.theme.CardContainerColor
@@ -481,12 +481,14 @@ fun FavoritesSelectionScreen(
 
     Box(Modifier.fillMaxSize().padding(start = 30.dp, end = 30.dp)) {
         if (showList) {
-            BulkAppManager(
-                apps = homeScreenModel.installedApps,
-                preSelectedApps = homeScreenModel.favoriteApps,
+            BulkManager(
+                items = homeScreenModel.installedApps,
+                id = { it.packageName },
+                label = { it.displayName },
+                preSelectedItems = homeScreenModel.favoriteApps,
                 title = stringResource(R.string.choose_your_favourite_apps),
                 reorderable = true,
-                onAppMoved = { fromIndex, toIndex ->
+                onItemMoved = { fromIndex, toIndex ->
                     mainAppModel.favoriteAppsManager.reorderFavoriteApps(fromIndex, toIndex)
                     homeScreenModel.reloadFavouriteApps()
                 },
@@ -495,7 +497,7 @@ fun FavoritesSelectionScreen(
                 hideBack = true,
                 topPadding = false,
                 titleColor = primaryContentColor,
-                onAppClicked = { app, selected ->
+                onItemClicked = { app, selected ->
                     if (selected) {
                         mainAppModel.favoriteAppsManager.removeFavoriteApp(app.packageName)
                         homeScreenModel.reloadFavouriteApps()

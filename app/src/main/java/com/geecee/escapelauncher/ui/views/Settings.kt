@@ -88,7 +88,7 @@ import com.geecee.escapelauncher.BuildConfig
 import com.geecee.escapelauncher.HomeScreenModel
 import com.geecee.escapelauncher.R
 import com.geecee.escapelauncher.core.model.InstalledApp
-import com.geecee.escapelauncher.ui.composables.BulkAppManager
+import com.geecee.escapelauncher.core.ui.composables.BulkManager
 import com.geecee.escapelauncher.core.ui.composables.SettingsButton
 import com.geecee.escapelauncher.core.ui.composables.EscapeHeader
 import com.geecee.escapelauncher.core.ui.composables.SettingsNavigationItem
@@ -208,12 +208,14 @@ fun Settings(
                     homeScreenModel.installedApps.filter { it.packageName in currentChallenges }
                 }
 
-                BulkAppManager(
-                    apps = homeScreenModel.installedApps,
-                    preSelectedApps = challengeApps,
+                BulkManager(
+                    items = homeScreenModel.installedApps,
+                    id = { it.packageName },
+                    label = { it.displayName },
+                    preSelectedItems = challengeApps,
                     title = stringResource(R.string.manage_open_challenges),
                     onBackClicked = { navController.popBackStack() },
-                    onAppClicked = { app, selected ->
+                    onItemClicked = { app, selected ->
                         if (selected) {
                             mainAppModel.challengesManager.removeChallengeApp(app.packageName)
                         } else {
@@ -260,12 +262,14 @@ fun Settings(
                     homeScreenModel.installedApps.filter { it.packageName in currentHidden }
                 }
 
-                BulkAppManager(
-                    apps = homeScreenModel.installedApps,
-                    preSelectedApps = hiddenAppsList,
+                BulkManager(
+                    items = homeScreenModel.installedApps,
+                    id = { it.packageName },
+                    label = { it.displayName },
+                    preSelectedItems = hiddenAppsList,
                     title = stringResource(R.string.manage_hidden_apps),
                     onBackClicked = { navController.popBackStack() },
-                    onAppClicked = { app, selected ->
+                    onItemClicked = { app, selected ->
                         if (selected) {
                             mainAppModel.hiddenAppsManager.removeHiddenApp(app.packageName)
                         } else {
@@ -284,17 +288,19 @@ fun Settings(
                     favoritePackages.mapNotNull { pkg -> homeScreenModel.installedApps.find { it.packageName == pkg } }
                 }
 
-                BulkAppManager(
-                    apps = homeScreenModel.installedApps,
-                    preSelectedApps = preSelectedFavoriteApps,
+                BulkManager(
+                    items = homeScreenModel.installedApps,
+                    id = { it.packageName },
+                    label = { it.displayName },
+                    preSelectedItems = preSelectedFavoriteApps,
                     title = stringResource(R.string.manage_favourite_apps),
                     reorderable = true,
-                    onAppMoved = { fromIndex, toIndex ->
+                    onItemMoved = { fromIndex, toIndex ->
                         mainAppModel.favoriteAppsManager.reorderFavoriteApps(fromIndex, toIndex)
                         homeScreenModel.reloadFavouriteApps()
                     },
                     onBackClicked = { navController.popBackStack() },
-                    onAppClicked = { app, selected ->
+                    onItemClicked = { app, selected ->
                         if (selected) {
                             mainAppModel.favoriteAppsManager.removeFavoriteApp(app.packageName)
                             homeScreenModel.reloadFavouriteApps()
