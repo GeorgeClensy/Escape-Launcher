@@ -3,6 +3,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.compose.compiler)
+    alias(libs.plugins.hilt)
     id("com.google.devtools.ksp")
 }
 
@@ -165,6 +166,9 @@ dependencies {
     // Modules
     implementation(project(":core:ui"))
     implementation(project(":core:model"))
+
+    implementation(libs.hilt.android)
+    ksp(libs.hilt.compiler)
 }
 
 java {
