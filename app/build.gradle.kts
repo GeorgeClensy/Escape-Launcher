@@ -29,7 +29,13 @@ android {
         resValue("string", "empty", "")
     }
     buildTypes {
+        debug {
+            applicationIdSuffix = ".dev"
+            versionNameSuffix = "-dev"
+            resValue("string", "app_name", "Escape Launcher Dev")
+        }
         release {
+            resValue("string", "app_name", "Escape Launcher")
             isMinifyEnabled = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
@@ -37,19 +43,9 @@ android {
             )
         }
     }
-    
-    flavorDimensions += listOf("version", "distribution")
+
+    flavorDimensions += listOf("distribution")
     productFlavors{
-        create("dev"){
-            applicationIdSuffix = ".dev"
-            dimension = "version"
-            versionNameSuffix = "-dev"
-            resValue("string", "app_name", "Escape Launcher Dev")
-        }
-        create("prod"){
-            dimension = "version"
-            applicationIdSuffix = ""
-        }
         create("google") {
             dimension = "distribution"
             buildConfigField("boolean", "IS_FOSS", "false")
@@ -71,16 +67,6 @@ android {
         getByName("google") {
             res.directories.add("src/google/res")
             java.directories.add("src/google/java")
-        }
-    }
-    
-    androidComponents.beforeVariants { variantBuilder ->
-        val flavorVersion = variantBuilder.productFlavors.find { it.first == "version" }?.second
-        val buildType = variantBuilder.buildType
-
-        if ((flavorVersion == "prod" && buildType == "debug") ||
-            (flavorVersion == "dev" && buildType == "release")) {
-            variantBuilder.enable = false
         }
     }
     

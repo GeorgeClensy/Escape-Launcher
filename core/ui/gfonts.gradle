@@ -1,0 +1,17 @@
+// This file adds google fonts
+
+// Configure source sets for the google flavor
+android {
+    sourceSets {
+        google {
+            java.srcDirs += ['src/google/java']
+            res.srcDirs += ['src/google/res']
+        }
+    }
+}
+
+// Add dependencies for Google fonts
+dependencies {
+    //noinspection UseTomlInstead
+    googleImplementation 'androidx.compose.ui:ui-text-google-fonts:1.10.3'
+}
