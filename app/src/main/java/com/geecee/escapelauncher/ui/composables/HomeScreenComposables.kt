@@ -70,6 +70,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.geecee.escapelauncher.BuildConfig
 import com.geecee.escapelauncher.HomeScreenModel
 import com.geecee.escapelauncher.MainAppViewModel
 import com.geecee.escapelauncher.R
@@ -302,60 +303,67 @@ fun Date(
 fun Weather(
     homeAlignment: Alignment.Horizontal, mainAppModel: MainAppViewModel, small: Boolean
 ) {
-    val context = LocalContext.current
-    LaunchedEffect(Unit) {
-        mainAppModel.updateWeather()
-    }
+    @Suppress("KotlinConstantConditions")
+    if(!BuildConfig.IS_FOSS) {
+        val context = LocalContext.current
+        LaunchedEffect(Unit) {
+            mainAppModel.updateWeather()
+        }
 
-    AnimatedVisibility(mainAppModel.weatherText.value != "", enter = fadeIn(), exit = fadeOut()) {
-        Row(Modifier.padding(end = 10.dp)) {
-            Icon(
-                Icons.Default.WbSunny,
-                "",
-                Modifier
-                    .align(Alignment.CenterVertically)
-                    .size(22.dp)
-                    .padding(end = 2.dp),
-                tint = primaryContentColor
-            )
+        AnimatedVisibility(
+            mainAppModel.weatherText.value != "",
+            enter = fadeIn(),
+            exit = fadeOut()
+        ) {
+            Row(Modifier.padding(end = 10.dp)) {
+                Icon(
+                    Icons.Default.WbSunny,
+                    "",
+                    Modifier
+                        .align(Alignment.CenterVertically)
+                        .size(22.dp)
+                        .padding(end = 2.dp),
+                    tint = primaryContentColor
+                )
 
-            Text(
-                text = mainAppModel.weatherText.value,
-                color = primaryContentColor,
-                style = if (small) {
-                    MaterialTheme.typography.bodyMedium
-                } else {
-                    MaterialTheme.typography.bodyLarge
-                },
-                fontWeight = FontWeight.W600,
-                modifier = Modifier.clickable {
-                    val weatherAppPackage = getStringSetting(
-                        context,
-                        mainAppModel.getContext().getString(R.string.weather_app_package),
-                        ""
-                    )
-                    if (weatherAppPackage.isNotEmpty()) {
-                        val launchIntent =
-                            context.packageManager.getLaunchIntentForPackage(weatherAppPackage)
-                        launchIntent?.let {
-                            it.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                            context.startActivity(it)
-                        }
+                Text(
+                    text = mainAppModel.weatherText.value,
+                    color = primaryContentColor,
+                    style = if (small) {
+                        MaterialTheme.typography.bodyMedium
                     } else {
-                        Toast.makeText(
+                        MaterialTheme.typography.bodyLarge
+                    },
+                    fontWeight = FontWeight.W600,
+                    modifier = Modifier.clickable {
+                        val weatherAppPackage = getStringSetting(
                             context,
-                            mainAppModel.getContext()
-                                .getString(R.string.set_weather_app_in_settings),
-                            Toast.LENGTH_SHORT
-                        ).show()
+                            mainAppModel.getContext().getString(R.string.weather_app_package),
+                            ""
+                        )
+                        if (weatherAppPackage.isNotEmpty()) {
+                            val launchIntent =
+                                context.packageManager.getLaunchIntentForPackage(weatherAppPackage)
+                            launchIntent?.let {
+                                it.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                context.startActivity(it)
+                            }
+                        } else {
+                            Toast.makeText(
+                                context,
+                                mainAppModel.getContext()
+                                    .getString(R.string.set_weather_app_in_settings),
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    },
+                    textAlign = when (homeAlignment) {
+                        Alignment.Start -> TextAlign.Start
+                        Alignment.End -> TextAlign.End
+                        else -> TextAlign.Center
                     }
-                },
-                textAlign = when (homeAlignment) {
-                    Alignment.Start -> TextAlign.Start
-                    Alignment.End -> TextAlign.End
-                    else -> TextAlign.Center
-                }
-            )
+                )
+            }
         }
     }
 }
