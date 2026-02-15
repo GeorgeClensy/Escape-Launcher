@@ -4,13 +4,15 @@ import android.os.Build
 import androidx.annotation.StringRes
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import com.geecee.escapelauncher.core.ui.R
+import com.geecee.escapelauncher.ui.theme.getFontFamily
 
 val PitchDarkColorScheme = darkColorScheme(
     primary = primaryDark,
@@ -470,61 +472,71 @@ val darkSchemeYellow = darkColorScheme(
 
 @Composable
 fun EscapeTheme(
-    theme: AppTheme, fontFamily: FontFamily = FontFamily.Default, content: @Composable (() -> Unit)
+    theme: AppTheme, fontName: String, content: @Composable (() -> Unit)
 ) {
+    val context = LocalContext.current
     val colorScheme = theme.resolveColorScheme()
+
+    val fontFamily = remember {
+        mutableStateOf(
+            getFontFamily(
+                context = context,
+                fontName = fontName
+            )
+        )
+    }
 
     val typography = Typography(
         headlineLarge = TextStyle(
-            fontFamily = fontFamily,
+            fontFamily = fontFamily.value,
             fontWeight = FontWeight.Light,
             fontSize = 66.sp,
             lineHeight = 53.sp,
             letterSpacing = 0.6.sp
         ), headlineMedium = TextStyle(
-            fontFamily = fontFamily,
+            fontFamily = fontFamily.value,
             fontWeight = FontWeight.Light,
             fontSize = 62.sp,
             lineHeight = 49.sp,
             letterSpacing = 0.6.sp
         ), headlineSmall = TextStyle(
-            fontFamily = fontFamily,
+            fontFamily = fontFamily.value,
             fontWeight = FontWeight.Light,
             fontSize = 58.sp,
             lineHeight = 45.sp,
             letterSpacing = 0.6.sp
         ), titleLarge = TextStyle(
-            fontFamily = fontFamily,
+            fontFamily = fontFamily.value,
             fontWeight = FontWeight.Light,
             fontSize = 52.sp,
             lineHeight = 53.sp,
             letterSpacing = 0.6.sp
         ), titleMedium = TextStyle(
-            fontFamily = fontFamily,
+            fontFamily = fontFamily.value,
             fontWeight = FontWeight.Light,
             fontSize = 48.sp,
             lineHeight = 49.sp,
             letterSpacing = 0.6.sp
         ), titleSmall = TextStyle(
-            fontFamily = fontFamily,
+            fontFamily = fontFamily.value,
             fontWeight = FontWeight.Light,
             fontSize = 44.sp,
             lineHeight = 45.sp,
             letterSpacing = 0.6.sp
         ), bodyLarge = TextStyle(
-            fontFamily = fontFamily,
+            fontFamily = fontFamily.value,
             fontWeight = FontWeight.Normal,
             fontSize = 28.sp,
             lineHeight = 29.sp,
             letterSpacing = 0.6.sp
         ), bodyMedium = TextStyle(
-            fontFamily = fontFamily,
+            fontFamily = fontFamily.value,
             fontWeight = FontWeight.Normal,
             fontSize = 24.sp,
             lineHeight = 25.sp,
             letterSpacing = 0.6.sp
         ), bodySmall = TextStyle(
-            fontFamily = fontFamily,
+            fontFamily = fontFamily.value,
             fontWeight = FontWeight.Normal,
             fontSize = 20.sp,
             lineHeight = 21.sp,
