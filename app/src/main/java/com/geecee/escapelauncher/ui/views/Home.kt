@@ -1,6 +1,12 @@
 package com.geecee.escapelauncher.ui.views
 
 import android.annotation.SuppressLint
+import android.content.Intent
+import android.widget.Toast
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -11,11 +17,15 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Timer
+import androidx.compose.material.icons.filled.WbSunny
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -27,19 +37,19 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import com.geecee.escapelauncher.BuildConfig
 import com.geecee.escapelauncher.HomeScreenModel
 import com.geecee.escapelauncher.R
+import com.geecee.escapelauncher.core.ui.composables.GlanceWidget
 import com.geecee.escapelauncher.ui.composables.Clock
-import com.geecee.escapelauncher.ui.composables.Date
 import com.geecee.escapelauncher.ui.composables.FirstTimeHelp
 import com.geecee.escapelauncher.ui.composables.HomeScreenItem
-import com.geecee.escapelauncher.ui.composables.HomeScreenScreenTime
-import com.geecee.escapelauncher.ui.composables.Weather
 import com.geecee.escapelauncher.utils.AppUtils
 import com.geecee.escapelauncher.utils.AppUtils.doHapticFeedBack
 import com.geecee.escapelauncher.utils.AppUtils.formatScreenTime
 import com.geecee.escapelauncher.utils.AppUtils.resetHome
 import com.geecee.escapelauncher.utils.WidgetsScreen
+import com.geecee.escapelauncher.utils.analyticsProxy
 import com.geecee.escapelauncher.utils.getBooleanSetting
 import com.geecee.escapelauncher.utils.getHomeAlignment
 import com.geecee.escapelauncher.utils.getHomeVAlignment
@@ -49,7 +59,12 @@ import com.geecee.escapelauncher.utils.getWidgetOffset
 import com.geecee.escapelauncher.utils.getWidgetWidth
 import com.geecee.escapelauncher.utils.managers.getTotalUsageForDate
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Date
+import java.util.Locale
 import com.geecee.escapelauncher.MainAppViewModel as MainAppModel
 
 /**
@@ -131,22 +146,55 @@ fun HomeScreen(
             }
         }
 
-        //Date and weather and screen time
+        //Glace widgets
         item {
-            FlowRow {
-                if (getBooleanSetting(
-                        mainAppModel.getContext(), stringResource(R.string.show_date), false
+            FlowRow (
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+            ) {
+                val context = mainAppModel.getContext()
+                val homeAlignment = getHomeAlignment(context)
+
+                if (getBooleanSetting(context, stringResource(R.string.show_date), false)) {
+                    val dateFormat = remember { SimpleDateFormat("EEE d MMM", Locale.getDefault()) }
+                    var dateText by remember { mutableStateOf(dateFormat.format(Date())) }
+
+                    LaunchedEffect(Unit) {
+                        while (true) {
+                            val calendar = Calendar.getInstance()
+                            val now = calendar.timeInMillis
+                            calendar.add(Calendar.DAY_OF_YEAR, 1)
+                            calendar.set(Calendar.HOUR_OF_DAY, 0)
+                            calendar.set(Calendar.MINUTE, 0)
+                            calendar.set(Calendar.SECOND, 0)
+                            calendar.set(Calendar.MILLISECOND, 0)
+                            val delayMillis = calendar.timeInMillis - now
+                            delay(delayMillis)
+                            dateText = dateFormat.format(Date())
+                        }
+                    }
+
+                    GlanceWidget(
+                        text = dateText,
+                        icon = null,
+                        iconContentDescription = "",
+                        homeAlignment = homeAlignment,
+                        small = true,
+                        onClick = {
+                            try {
+                                val intent = Intent(Intent.ACTION_MAIN).apply {
+                                    addCategory(Intent.CATEGORY_APP_CALENDAR)
+                                    flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                                }
+                                context.startActivity(intent)
+                            } catch (e: Exception) {
+                                analyticsProxy.recordException(e)
+                            }
+                        }
                     )
-                ) {
-                    Date(
-                        homeAlignment = getHomeAlignment(mainAppModel.getContext()), small = true
-                    )
+
                 }
 
-                if (getBooleanSetting(
-                        mainAppModel.getContext(), stringResource(R.string.ScreenTimeOnHome), false
-                    )
-                ) {
+                if (getBooleanSetting(context, stringResource(R.string.ScreenTimeOnHome), false)) {
                     val todayUsage = remember { mutableLongStateOf(0L) }
                     LaunchedEffect(mainAppModel.shouldReloadScreenTime.value) {
                         withContext(Dispatchers.IO) {
@@ -157,22 +205,62 @@ fun HomeScreen(
                         }
                     }
 
-                    HomeScreenScreenTime(
-                        homeAlignment = getHomeAlignment(mainAppModel.getContext()),
+                    GlanceWidget(
+                        text = formatScreenTime(todayUsage.longValue),
+                        icon = Icons.Default.Timer,
+                        iconContentDescription = "Screen Time",
+                        homeAlignment = homeAlignment,
                         small = true,
-                        screenTime = formatScreenTime(todayUsage.longValue)
+                        onClick = {}
                     )
+
                 }
 
-                if (getBooleanSetting(
-                        mainAppModel.getContext(), stringResource(R.string.show_weather), false
-                    )
-                ) {
-                    Weather(
-                        homeAlignment = getHomeAlignment(mainAppModel.getContext()),
-                        mainAppModel = mainAppModel,
-                        small = true
-                    )
+                if (getBooleanSetting(context, stringResource(R.string.show_weather), false)) {
+                    @Suppress("KotlinConstantConditions")
+                    if (!BuildConfig.IS_FOSS) {
+                        LaunchedEffect(Unit) {
+                            mainAppModel.updateWeather()
+                        }
+
+                        AnimatedVisibility(
+                            mainAppModel.weatherText.value != "",
+                            enter = fadeIn(),
+                            exit = fadeOut()
+                        ) {
+                            GlanceWidget(
+                                text = mainAppModel.weatherText.value,
+                                icon = Icons.Default.WbSunny,
+                                iconContentDescription = "Weather",
+                                homeAlignment = homeAlignment,
+                                small = true,
+                                onClick = {
+                                    val weatherAppPackage = getStringSetting(
+                                        context,
+                                        context.getString(R.string.weather_app_package),
+                                        ""
+                                    )
+                                    if (weatherAppPackage.isNotEmpty()) {
+                                        val launchIntent =
+                                            context.packageManager.getLaunchIntentForPackage(
+                                                weatherAppPackage
+                                            )
+                                        launchIntent?.let {
+                                            it.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                            context.startActivity(it)
+                                        }
+                                    } else {
+                                        Toast.makeText(
+                                            context,
+                                            context.getString(R.string.set_weather_app_in_settings),
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                    }
+                                }
+                            )
+
+                        }
+                    }
                 }
             }
         }
@@ -275,5 +363,4 @@ fun HomeScreen(
             Spacer(Modifier.height(90.dp))
         }
     }
-
 }

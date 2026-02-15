@@ -9,8 +9,6 @@ import android.util.Log
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -33,8 +31,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowForward
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.Timer
-import androidx.compose.material.icons.filled.WbSunny
 import androidx.compose.material.icons.rounded.Work
 import androidx.compose.material.icons.rounded.WorkOff
 import androidx.compose.material3.ButtonDefaults
@@ -70,7 +66,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.geecee.escapelauncher.BuildConfig
 import com.geecee.escapelauncher.HomeScreenModel
 import com.geecee.escapelauncher.MainAppViewModel
 import com.geecee.escapelauncher.R
@@ -88,9 +83,7 @@ import com.geecee.escapelauncher.utils.AppUtils.isDefaultLauncher
 import com.geecee.escapelauncher.utils.AppUtils.resetHome
 import com.geecee.escapelauncher.utils.PrivateAppItem
 import com.geecee.escapelauncher.utils.WorkAppItem
-import com.geecee.escapelauncher.utils.analyticsProxy
 import com.geecee.escapelauncher.utils.getPrivateSpaceApps
-import com.geecee.escapelauncher.utils.getStringSetting
 import com.geecee.escapelauncher.utils.getWorkApps
 import com.geecee.escapelauncher.utils.goToWorkAppAppInfo
 import com.geecee.escapelauncher.utils.isWorkProfileUnlocked
@@ -103,10 +96,7 @@ import com.geecee.escapelauncher.utils.uninstallPrivateSpaceApp
 import com.geecee.escapelauncher.utils.uninstallWorkApp
 import com.geecee.escapelauncher.utils.unlockWorkProfile
 import kotlinx.coroutines.delay
-import java.text.SimpleDateFormat
 import java.util.Calendar
-import java.util.Date
-import java.util.Locale
 
 // Home Screen Item
 
@@ -226,180 +216,6 @@ fun Clock(
                     }
                 }
                 .offset((-2).dp, 5.dp),
-            textAlign = when (homeAlignment) {
-                Alignment.Start -> TextAlign.Start
-                Alignment.End -> TextAlign.End
-                else -> TextAlign.Center
-            }
-        )
-    }
-}
-
-@Composable
-fun Date(
-    homeAlignment: Alignment.Horizontal,
-    small: Boolean
-) {
-    val context = LocalContext.current
-
-    val dateFormat = SimpleDateFormat("EEE d MMM", Locale.getDefault())
-
-    fun getCurrentDate(): String {
-        return dateFormat.format(Date())
-    }
-
-    var date by remember { mutableStateOf(getCurrentDate()) }
-
-    LaunchedEffect(Unit) {
-        while (true) {
-            val calendar = Calendar.getInstance()
-            val now = calendar.timeInMillis
-            calendar.add(Calendar.DAY_OF_YEAR, 1)
-            calendar.set(Calendar.HOUR_OF_DAY, 0)
-            calendar.set(Calendar.MINUTE, 0)
-            calendar.set(Calendar.SECOND, 0)
-            calendar.set(Calendar.MILLISECOND, 0)
-            val delayMillis = calendar.timeInMillis - now
-            delay(delayMillis)
-            date = getCurrentDate()
-        }
-    }
-
-    Text(
-        text = date,
-        color = primaryContentColor,
-        style = if (small) {
-            MaterialTheme.typography.bodyMedium
-        } else {
-            MaterialTheme.typography.bodyLarge
-        },
-        fontWeight = FontWeight.W600,
-        modifier = Modifier
-            .padding(end = 10.dp)
-            .clickable {
-                try {
-                    val intent = Intent(Intent.ACTION_MAIN).apply {
-                        addCategory(Intent.CATEGORY_APP_CALENDAR)
-                        flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                    }
-                    context.startActivity(intent)
-                }
-                catch(e: Exception) {
-                    analyticsProxy.recordException(e)
-                }
-            },
-        textAlign = when (homeAlignment) {
-            Alignment.Start -> TextAlign.Start
-            Alignment.End -> TextAlign.End
-            else -> TextAlign.Center
-        }
-    )
-}
-
-/**
- * Weather composable to be shown on home screen
- */
-@Composable
-fun Weather(
-    homeAlignment: Alignment.Horizontal, mainAppModel: MainAppViewModel, small: Boolean
-) {
-    @Suppress("KotlinConstantConditions")
-    if(!BuildConfig.IS_FOSS) {
-        val context = LocalContext.current
-        LaunchedEffect(Unit) {
-            mainAppModel.updateWeather()
-        }
-
-        AnimatedVisibility(
-            mainAppModel.weatherText.value != "",
-            enter = fadeIn(),
-            exit = fadeOut()
-        ) {
-            Row(Modifier.padding(end = 10.dp)) {
-                Icon(
-                    Icons.Default.WbSunny,
-                    "",
-                    Modifier
-                        .align(Alignment.CenterVertically)
-                        .size(22.dp)
-                        .padding(end = 2.dp),
-                    tint = primaryContentColor
-                )
-
-                Text(
-                    text = mainAppModel.weatherText.value,
-                    color = primaryContentColor,
-                    style = if (small) {
-                        MaterialTheme.typography.bodyMedium
-                    } else {
-                        MaterialTheme.typography.bodyLarge
-                    },
-                    fontWeight = FontWeight.W600,
-                    modifier = Modifier.clickable {
-                        val weatherAppPackage = getStringSetting(
-                            context,
-                            mainAppModel.getContext().getString(R.string.weather_app_package),
-                            ""
-                        )
-                        if (weatherAppPackage.isNotEmpty()) {
-                            val launchIntent =
-                                context.packageManager.getLaunchIntentForPackage(weatherAppPackage)
-                            launchIntent?.let {
-                                it.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                                context.startActivity(it)
-                            }
-                        } else {
-                            Toast.makeText(
-                                context,
-                                mainAppModel.getContext()
-                                    .getString(R.string.set_weather_app_in_settings),
-                                Toast.LENGTH_SHORT
-                            ).show()
-                        }
-                    },
-                    textAlign = when (homeAlignment) {
-                        Alignment.Start -> TextAlign.Start
-                        Alignment.End -> TextAlign.End
-                        else -> TextAlign.Center
-                    }
-                )
-            }
-        }
-    }
-}
-
-/**
- * Screen time on home screen
- */
-@Composable
-fun HomeScreenScreenTime(
-    homeAlignment: Alignment.Horizontal,
-    small: Boolean,
-    screenTime: String,
-) {
-    Row(Modifier.padding(end = 10.dp)) {
-        Icon(
-            Icons.Default.Timer,
-            "",
-            Modifier
-                .align(Alignment.CenterVertically)
-                .size(22.dp)
-                .padding(end = 2.dp),
-            tint = primaryContentColor
-        )
-
-        Text(
-            text = screenTime,
-            color = primaryContentColor,
-            style = if (small) {
-                MaterialTheme.typography.bodyMedium
-            } else {
-                MaterialTheme.typography.bodyLarge
-            },
-            fontWeight = FontWeight.W600,
-            modifier = Modifier.clickable {
-                // Logic to open a weather app if needed
-            },
             textAlign = when (homeAlignment) {
                 Alignment.Start -> TextAlign.Start
                 Alignment.End -> TextAlign.End
