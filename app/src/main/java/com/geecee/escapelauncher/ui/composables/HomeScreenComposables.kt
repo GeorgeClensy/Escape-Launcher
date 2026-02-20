@@ -100,58 +100,6 @@ import java.util.Calendar
 
 // Home Screen Item
 
-/**
- * An item displayed on the HomeScreen or Apps list
- *
- * If [showScreenTime] is enabled and [screenTime] is not null the screen time is written next to the app name.
- */
-@OptIn(ExperimentalFoundationApi::class)
-@Composable
-fun HomeScreenItem(
-    modifier: Modifier = Modifier,
-    appName: String,
-    screenTime: Long? = null,
-    onAppClick: () -> Unit,
-    onAppLongClick: () -> Unit,
-    showScreenTime: Boolean = false,
-    alignment: Alignment.Horizontal = Alignment.CenterHorizontally
-) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = when (alignment) {
-            Alignment.Start -> Arrangement.Start
-            Alignment.CenterHorizontally -> Arrangement.Center
-            Alignment.End -> Arrangement.End
-            else -> Arrangement.Center
-        },
-        modifier = modifier
-            .combinedClickable(
-                onClick = onAppClick,
-                onLongClick = onAppLongClick
-            )
-            .fillMaxWidth()
-    ) {
-        // App name text with click and long click handlers
-        Text(
-            appName,
-            modifier = Modifier.padding(vertical = 15.dp),
-            color = primaryContentColor,
-            style = MaterialTheme.typography.bodyMedium
-        )
-
-        // Optional screen time
-        if (showScreenTime && screenTime != null) {
-            Text(
-                formatScreenTime(screenTime),
-                modifier = Modifier
-                    .padding(vertical = 15.dp, horizontal = 5.dp)
-                    .alpha(0.5f),
-                color = primaryContentColor,
-                style = MaterialTheme.typography.bodyMedium
-            )
-        }
-    }
-}
 
 /**
  * Clock to be shown on home screen

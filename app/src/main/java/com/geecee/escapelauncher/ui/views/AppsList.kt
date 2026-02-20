@@ -32,8 +32,8 @@ import androidx.compose.ui.unit.dp
 import com.geecee.escapelauncher.HomeScreenModel
 import com.geecee.escapelauncher.R
 import com.geecee.escapelauncher.core.ui.composables.AnimatedPillSearchBar
+import com.geecee.escapelauncher.core.ui.composables.HomeScreenItem
 import com.geecee.escapelauncher.ui.composables.AppsListHeader
-import com.geecee.escapelauncher.ui.composables.HomeScreenItem
 import com.geecee.escapelauncher.ui.composables.ListGradient
 import com.geecee.escapelauncher.ui.composables.PrivateSpace
 import com.geecee.escapelauncher.core.ui.composables.SettingsSpacer
@@ -42,6 +42,7 @@ import com.geecee.escapelauncher.ui.composables.WorkAppsFab
 import com.geecee.escapelauncher.core.ui.theme.transparentHalf
 import com.geecee.escapelauncher.utils.AppUtils
 import com.geecee.escapelauncher.utils.AppUtils.doHapticFeedBack
+import com.geecee.escapelauncher.utils.AppUtils.formatScreenTime
 import com.geecee.escapelauncher.utils.AppUtils.resetHome
 import com.geecee.escapelauncher.utils.PrivateSpaceSettings
 import com.geecee.escapelauncher.utils.canUseSecureFolder
@@ -206,7 +207,7 @@ fun AppsList(
 
                 HomeScreenItem(
                     appName = app.displayName,
-                    screenTime = screenTime.longValue,
+                    screenTime = formatScreenTime(screenTime.longValue),
                     onAppClick = {
                         homeScreenModel.updateSelectedApp(app)
 

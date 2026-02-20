@@ -41,9 +41,9 @@ import com.geecee.escapelauncher.BuildConfig
 import com.geecee.escapelauncher.HomeScreenModel
 import com.geecee.escapelauncher.R
 import com.geecee.escapelauncher.core.ui.composables.GlanceWidget
+import com.geecee.escapelauncher.core.ui.composables.HomeScreenItem
 import com.geecee.escapelauncher.ui.composables.Clock
 import com.geecee.escapelauncher.ui.composables.FirstTimeHelp
-import com.geecee.escapelauncher.ui.composables.HomeScreenItem
 import com.geecee.escapelauncher.utils.AppUtils
 import com.geecee.escapelauncher.utils.AppUtils.doHapticFeedBack
 import com.geecee.escapelauncher.utils.AppUtils.formatScreenTime
@@ -315,7 +315,7 @@ fun HomeScreen(
 
             HomeScreenItem(
                 appName = app.displayName,
-                screenTime = screenTime.longValue,
+                screenTime = formatScreenTime(screenTime.longValue),
                 onAppClick = {
                     homeScreenModel.updateSelectedApp(app)
 
