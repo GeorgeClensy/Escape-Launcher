@@ -48,8 +48,8 @@ import com.geecee.escapelauncher.core.ui.composables.Clock
 import com.geecee.escapelauncher.core.ui.composables.GlanceWidget
 import com.geecee.escapelauncher.core.ui.composables.HomeScreenItem
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.geecee.escapelauncher.core.ui.composables.FirstTimeHelp
 import com.geecee.escapelauncher.feature.homescreen.ClockViewModel
-import com.geecee.escapelauncher.ui.composables.FirstTimeHelp
 import com.geecee.escapelauncher.utils.AppUtils
 import com.geecee.escapelauncher.utils.AppUtils.doHapticFeedBack
 import com.geecee.escapelauncher.utils.AppUtils.formatScreenTime
@@ -380,7 +380,10 @@ fun HomeScreen(
             }
 
             item {
-                FirstTimeHelp()
+                FirstTimeHelp(
+                    swipeForAllAppsText = stringResource(R.string.swipe_for_all_apps),
+                    holdForSettingsText = stringResource(R.string.hold_for_settings)
+                )
             }
         }
 

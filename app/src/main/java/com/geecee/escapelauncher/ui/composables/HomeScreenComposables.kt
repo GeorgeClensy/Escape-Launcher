@@ -19,11 +19,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.ArrowForward
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.rounded.Work
@@ -82,64 +80,6 @@ import com.geecee.escapelauncher.utils.showPrivateSpaceAppInfo
 import com.geecee.escapelauncher.utils.uninstallPrivateSpaceApp
 import com.geecee.escapelauncher.utils.uninstallWorkApp
 import com.geecee.escapelauncher.utils.unlockWorkProfile
-
-// Home Screen Item
-
-/**
- * Block with tips for first time users
- */
-@Composable
-fun FirstTimeHelp() {
-    Box(
-        Modifier.clip(
-            MaterialTheme.shapes.extraLarge
-        )
-    ) {
-        Column(
-            Modifier.background(CardContainerColor)
-        ) {
-            Row(
-                Modifier
-                    .padding(25.dp, 25.dp, 25.dp, 15.dp)
-                    .align(Alignment.CenterHorizontally)
-            ) {
-                Icon(
-                    Icons.AutoMirrored.Rounded.ArrowForward,
-                    "",
-                    Modifier.align(Alignment.CenterVertically),
-                    tint = ContentColor
-                )
-                Spacer(Modifier.width(5.dp))
-                Text(
-                    stringResource(R.string.swipe_for_all_apps),
-                    modifier = Modifier,
-                    color = ContentColor,
-                    style = MaterialTheme.typography.bodyMedium
-                )
-            }
-
-            Row(
-                Modifier
-                    .padding(25.dp, 0.dp, 25.dp, 25.dp)
-                    .align(Alignment.CenterHorizontally)
-            ) {
-                Icon(
-                    Icons.Default.Settings,
-                    "",
-                    Modifier.align(Alignment.CenterVertically),
-                    tint = ContentColor
-                )
-                Spacer(Modifier.width(5.dp))
-                Text(
-                    stringResource(R.string.hold_for_settings),
-                    modifier = Modifier,
-                    color = ContentColor,
-                    style = MaterialTheme.typography.bodyMedium
-                )
-            }
-        }
-    }
-}
 
 // Bottom Sheet
 
