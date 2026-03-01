@@ -48,11 +48,13 @@ import com.geecee.escapelauncher.utils.getBooleanSetting
 import com.geecee.escapelauncher.utils.managers.ScreenTimeManager
 import com.geecee.escapelauncher.utils.managers.scheduleDailyCleanup
 import com.geecee.escapelauncher.utils.messagingInitializer
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
+@AndroidEntryPoint
 class MainHomeScreenActivity : ComponentActivity() {
     private lateinit var privateSpaceReceiver: PrivateSpaceStateReceiver
     private lateinit var screenOffReceiver: ScreenOffReceiver

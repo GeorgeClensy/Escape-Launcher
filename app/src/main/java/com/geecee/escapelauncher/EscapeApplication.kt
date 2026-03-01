@@ -8,7 +8,9 @@ import com.geecee.escapelauncher.utils.analyticsProxy
 import com.geecee.escapelauncher.utils.managers.Migration
 import com.geecee.escapelauncher.utils.messagingInitializer
 import com.geecee.escapelauncher.utils.weatherProxy
+import dagger.hilt.android.HiltAndroidApp
 
+@HiltAndroidApp
 class EscapeApplication : Application() {
     override fun onCreate() {
         super.onCreate()

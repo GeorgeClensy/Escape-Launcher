@@ -1,17 +1,13 @@
 package com.geecee.escapelauncher.ui.composables
 
 import android.content.ComponentName
-import android.content.Intent
 import android.graphics.Rect
 import android.os.Build
-import android.provider.AlarmClock
-import android.util.Log
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -21,7 +17,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -49,20 +44,14 @@ import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -77,8 +66,6 @@ import com.geecee.escapelauncher.core.ui.theme.ContentColor
 import com.geecee.escapelauncher.core.ui.theme.ContentColorDisabled
 import com.geecee.escapelauncher.core.ui.theme.SecondaryCardContainerColor
 import com.geecee.escapelauncher.core.ui.theme.primaryContentColor
-import com.geecee.escapelauncher.utils.AppUtils.formatScreenTime
-import com.geecee.escapelauncher.utils.AppUtils.getCurrentTime
 import com.geecee.escapelauncher.utils.AppUtils.isDefaultLauncher
 import com.geecee.escapelauncher.utils.AppUtils.resetHome
 import com.geecee.escapelauncher.utils.PrivateAppItem
@@ -95,83 +82,8 @@ import com.geecee.escapelauncher.utils.showPrivateSpaceAppInfo
 import com.geecee.escapelauncher.utils.uninstallPrivateSpaceApp
 import com.geecee.escapelauncher.utils.uninstallWorkApp
 import com.geecee.escapelauncher.utils.unlockWorkProfile
-import kotlinx.coroutines.delay
-import java.util.Calendar
 
 // Home Screen Item
-
-
-/**
- * Clock to be shown on home screen
- */
-@Composable
-fun Clock(
-    bigClock: Boolean, homeAlignment: Alignment.Horizontal, twelveHour: Boolean
-) {
-    var time by remember { mutableStateOf(getCurrentTime(twelveHour)) }
-    val parts = time.split(":")
-    val hours = parts[0]
-    val minutes = parts[1]
-    val context = LocalContext.current
-
-    LaunchedEffect(Unit) {
-        while (true) {
-            val now = Calendar.getInstance()
-            val secondsToNextMinute = 60 - now.get(Calendar.SECOND)
-            delay(secondsToNextMinute * 1000L)
-            time = getCurrentTime(twelveHour)
-        }
-    }
-
-    if (bigClock) {
-        val timeText = "%02d\n%02d".format(hours.toInt(), minutes.toInt())
-
-        Text(
-            text = timeText,
-            modifier = Modifier
-                .clickable {
-                    try {
-                        val intent = Intent(AlarmClock.ACTION_SHOW_ALARMS).apply {
-                            flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                        }
-                        context.startActivity(intent)
-                    } catch (e: Exception) {
-                        Log.e("Error", e.message.orEmpty())
-                    }
-                },
-            color = primaryContentColor,
-            fontWeight = FontWeight.SemiBold,
-            style = MaterialTheme.typography.headlineLarge.copy(
-                fontFeatureSettings = "tnum"
-            ),
-            textAlign = TextAlign.Center
-        )
-
-    } else {
-        Text(
-            text = time,
-            color = primaryContentColor,
-            style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.SemiBold,
-            modifier = Modifier
-                .clickable {
-                    try {
-                        val intent = Intent(AlarmClock.ACTION_SHOW_ALARMS)
-                        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                        context.startActivity(intent)
-                    } catch (e: Exception) {
-                        Log.e("Error", e.message.toString())
-                    }
-                }
-                .offset((-2).dp, 5.dp),
-            textAlign = when (homeAlignment) {
-                Alignment.Start -> TextAlign.Start
-                Alignment.End -> TextAlign.End
-                else -> TextAlign.Center
-            }
-        )
-    }
-}
 
 /**
  * Block with tips for first time users

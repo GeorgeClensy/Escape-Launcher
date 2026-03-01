@@ -2,6 +2,8 @@ package com.geecee.escapelauncher.ui.views
 
 import android.annotation.SuppressLint
 import android.content.Intent
+import android.provider.AlarmClock
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
@@ -22,6 +24,7 @@ import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material.icons.filled.WbSunny
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
@@ -33,6 +36,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.IntOffset
@@ -40,9 +44,11 @@ import androidx.compose.ui.unit.dp
 import com.geecee.escapelauncher.BuildConfig
 import com.geecee.escapelauncher.HomeScreenModel
 import com.geecee.escapelauncher.R
+import com.geecee.escapelauncher.core.ui.composables.Clock
 import com.geecee.escapelauncher.core.ui.composables.GlanceWidget
 import com.geecee.escapelauncher.core.ui.composables.HomeScreenItem
-import com.geecee.escapelauncher.ui.composables.Clock
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.geecee.escapelauncher.feature.homescreen.ClockViewModel
 import com.geecee.escapelauncher.ui.composables.FirstTimeHelp
 import com.geecee.escapelauncher.utils.AppUtils
 import com.geecee.escapelauncher.utils.AppUtils.doHapticFeedBack
@@ -72,8 +78,18 @@ import com.geecee.escapelauncher.MainAppViewModel as MainAppModel
  */
 @Composable
 fun HomeScreen(
-    mainAppModel: MainAppModel, homeScreenModel: HomeScreenModel
+    mainAppModel: MainAppModel, homeScreenModel: HomeScreenModel, clockViewModel: ClockViewModel = hiltViewModel()
 ) {
+    val context = LocalContext.current
+    val timeParts by clockViewModel.timeParts.collectAsState()
+    val (hour, minute, _) = timeParts
+
+    val twelveHourClockSetting = stringResource(R.string.twelve_hour_clock)
+    LaunchedEffect(Unit) {
+        val twelveHourFormat = getBooleanSetting(context, twelveHourClockSetting,false)
+        clockViewModel.startTicker(twelveHourFormat)
+    }
+
     val scrollState = rememberLazyListState()
     val haptics = LocalHapticFeedback.current
 
@@ -133,15 +149,24 @@ fun HomeScreen(
                 )
             ) {
                 Clock(
+                    hour = hour,
+                    minute = minute,
                     bigClock = getBooleanSetting(
                         context = mainAppModel.getContext(),
                         stringResource(R.string.BigClock),
                         false
                     ),
                     homeAlignment = getHomeAlignment(mainAppModel.getContext()),
-                    twelveHour = getBooleanSetting(
-                        mainAppModel.getContext(), stringResource(R.string.twelve_hour_clock), false
-                    )
+                    onClockClick = {
+                        try {
+                            val intent = Intent(AlarmClock.ACTION_SHOW_ALARMS).apply {
+                                flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                            }
+                            mainAppModel.getContext().startActivity(intent)
+                        } catch (e: Exception) {
+                            Log.e("Error", e.message.orEmpty())
+                        }
+                    }
                 )
             }
         }

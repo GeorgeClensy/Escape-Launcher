@@ -152,9 +152,11 @@ dependencies {
     // Modules
     implementation(project(":core:ui"))
     implementation(project(":core:model"))
+    implementation(project(":feature:homescreen"))
 
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
+    implementation(libs.androidx.hilt.navigation.compose)
 }
 
 java {
