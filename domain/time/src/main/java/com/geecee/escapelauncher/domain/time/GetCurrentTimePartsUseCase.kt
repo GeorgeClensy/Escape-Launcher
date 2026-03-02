@@ -4,15 +4,14 @@ import java.time.LocalTime
 import javax.inject.Inject
 
 class GetCurrentTimePartsUseCase @Inject constructor() {
-    fun invoke(twelveHourDisplay: Boolean): Triple<Int, Int, Boolean> {
-        val now = LocalTime.now()
-        val isPm = now.hour >= 12
+    fun invoke(time: LocalTime, twelveHourDisplay: Boolean): Triple<Int, Int, Boolean> {
+        val isPm = time.hour >= 12
         val hour = if (twelveHourDisplay) {
-            val h = now.hour % 12
+            val h = time.hour % 12
             if (h == 0) 12 else h
         } else {
-            now.hour
+            time.hour
         }
-        return Triple(hour, now.minute, isPm)
+        return Triple(hour, time.minute, isPm)
     }
 }

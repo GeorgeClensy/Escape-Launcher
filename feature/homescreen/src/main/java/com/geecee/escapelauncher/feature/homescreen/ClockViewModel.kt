@@ -10,6 +10,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.time.LocalTime
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.isActive
 import javax.inject.Inject
 
 @HiltViewModel
@@ -17,27 +19,30 @@ class ClockViewModel @Inject constructor(
     private val getCurrentTimeParts: GetCurrentTimePartsUseCase
 ) : ViewModel() {
 
-    private val _timeParts = MutableStateFlow(getCurrentTimeParts.invoke(false))
+    private val _timeParts = MutableStateFlow(getCurrentTimeParts.invoke(LocalTime.now(),false))
     val timeParts: StateFlow<Triple<Int, Int, Boolean>> = _timeParts.asStateFlow()
+    private var tickerJob: Job? = null
 
     fun startTicker(twelveHourDisplay: Boolean) {
-        viewModelScope.launch {
-            while (true) {
-                _timeParts.value = getCurrentTimeParts.invoke(twelveHourDisplay)
-
+        tickerJob?.cancel()
+        tickerJob = viewModelScope.launch {
+            while (isActive) {
                 val now = LocalTime.now()
-                val currentMinute = now.minute
-                
-                // Sleep until the minute changes, with small polls to catch the exact boundary
-                while (true) {
-                    val millisUntilNextSecond = 1000L - (LocalTime.now().nano / 1_000_000L)
-                    delay(millisUntilNextSecond.coerceAtLeast(10L))
-                    
-                    if (LocalTime.now().minute != currentMinute) {
-                        break
-                    }
-                }
+                _timeParts.value = getCurrentTimeParts.invoke(now, twelveHourDisplay)
+                val millisUntilNextMinute = ((59 - now.second) * 1000L) +
+                        ((1_000_000_000L - now.nano) / 1_000_000L)
+                delay(millisUntilNextMinute.coerceAtLeast(1L))
             }
         }
+    }
+
+    fun stopTicker() {
+        tickerJob?.cancel()
+        tickerJob = null
+    }
+
+    override fun onCleared() {
+        stopTicker()
+        super.onCleared()
     }
 }
