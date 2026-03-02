@@ -26,8 +26,17 @@ class ClockViewModel @Inject constructor(
                 _timeParts.value = getCurrentTimeParts.invoke(twelveHourDisplay)
 
                 val now = LocalTime.now()
-                val millisUntilNextMinute = (60 - now.second) * 1000L - (now.nano / 1_000_000L)
-                delay(millisUntilNextMinute.coerceAtLeast(0L))
+                val currentMinute = now.minute
+                
+                // Sleep until the minute changes, with small polls to catch the exact boundary
+                while (true) {
+                    val millisUntilNextSecond = 1000L - (LocalTime.now().nano / 1_000_000L)
+                    delay(millisUntilNextSecond.coerceAtLeast(10L))
+                    
+                    if (LocalTime.now().minute != currentMinute) {
+                        break
+                    }
+                }
             }
         }
     }
