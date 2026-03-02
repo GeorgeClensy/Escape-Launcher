@@ -25,7 +25,7 @@ class WeatherImpl : WeatherProxy {
             Log.d("Weather", "Retrieved Weather")
 
             if (location == null) {
-                callback("Location unavailable")
+                callback("~~")
                 return@addOnSuccessListener
             }
 
@@ -45,7 +45,7 @@ class WeatherImpl : WeatherProxy {
 
             client.newCall(request).enqueue(object : Callback {
                 override fun onFailure(call: Call, e: IOException) {
-                    callback("Weather error")
+                    callback("~~")
                 }
 
                 override fun onResponse(call: Call, response: Response) {
