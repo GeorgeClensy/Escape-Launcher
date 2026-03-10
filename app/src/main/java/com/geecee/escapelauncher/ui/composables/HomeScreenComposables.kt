@@ -57,6 +57,8 @@ import com.geecee.escapelauncher.HomeScreenModel
 import com.geecee.escapelauncher.MainAppViewModel
 import com.geecee.escapelauncher.R
 import com.geecee.escapelauncher.core.model.InstalledApp
+import com.geecee.escapelauncher.core.ui.composables.AppAction
+import com.geecee.escapelauncher.core.ui.composables.HomeScreenBottomSheet
 import com.geecee.escapelauncher.core.ui.theme.BackgroundColor
 import com.geecee.escapelauncher.core.ui.theme.CardContainerColor
 import com.geecee.escapelauncher.core.ui.theme.CardContainerColorDisabled
@@ -83,90 +85,6 @@ import com.geecee.escapelauncher.utils.unlockWorkProfile
 
 // Bottom Sheet
 
-/**
- * Action that can be shown in the bottom sheet
- * */
-data class AppAction(
-    val label: String,
-    val onClick: () -> Unit
-)
-
-/**
- * Bottom Sheet home screen
- */
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
-@Composable
-fun HomeScreenBottomSheet(
-    modifier: Modifier = Modifier,
-    title: String,
-    actions: List<AppAction>,
-    onDismissRequest: () -> Unit,
-    sheetState: SheetState,
-    shortcutActions: List<AppAction> = listOf()
-) {
-    val screenHeight = LocalWindowInfo.current.containerDpSize.height
-
-    ModalBottomSheet(
-        onDismissRequest = onDismissRequest,
-        sheetState = sheetState
-    ) {
-        Column(
-            modifier
-                .heightIn(max = screenHeight * 0.8f)
-                .fillMaxWidth()
-                .padding(25.dp, 25.dp, 25.dp, 0.dp)
-                .verticalScroll(rememberScrollState())
-        ) {
-            // Header
-            Row {
-                Icon(
-                    Icons.Default.Settings,
-                    contentDescription = "App Options",
-                    tint = ContentColor,
-                    modifier = Modifier
-                        .size(45.dp)
-                        .padding(end = 10.dp)
-                )
-                Text(
-                    title,
-                    color = ContentColor,
-                    fontSize = 32.sp,
-                    style = MaterialTheme.typography.titleMedium
-                )
-            }
-            HorizontalDivider(Modifier.padding(vertical = 15.dp))
-
-            // Actions
-            Column(Modifier.padding(start = 47.dp, bottom = 50.dp)) {
-                if (!shortcutActions.isEmpty()) {
-                    shortcutActions.forEach { action ->
-                        Text(
-                            text = action.label,
-                            modifier = Modifier
-                                .padding(vertical = 10.dp)
-                                .combinedClickable(onClick = action.onClick),
-                            color = ContentColor,
-                            style = MaterialTheme.typography.bodyMedium
-                        )
-                    }
-
-                    HorizontalDivider(Modifier.padding(vertical = 15.dp))
-                }
-
-                actions.forEach { action ->
-                    Text(
-                        text = action.label,
-                        modifier = Modifier
-                            .padding(vertical = 10.dp)
-                            .combinedClickable(onClick = action.onClick),
-                        color = ContentColor,
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                }
-            }
-        }
-    }
-}
 
 // Apps list
 

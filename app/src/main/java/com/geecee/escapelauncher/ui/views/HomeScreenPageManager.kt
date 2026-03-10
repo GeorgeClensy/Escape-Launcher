@@ -25,8 +25,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.core.net.toUri
 import com.geecee.escapelauncher.HomeScreenModel
 import com.geecee.escapelauncher.R
-import com.geecee.escapelauncher.ui.composables.AppAction
-import com.geecee.escapelauncher.ui.composables.HomeScreenBottomSheet
+import com.geecee.escapelauncher.core.ui.composables.AppAction
+import com.geecee.escapelauncher.core.ui.composables.HomeScreenBottomSheet
 import com.geecee.escapelauncher.utils.AppUtils
 import com.geecee.escapelauncher.utils.AppUtils.resetHome
 import com.geecee.escapelauncher.utils.EscapeAccessibilityService
@@ -65,7 +65,7 @@ fun HomeScreenPageManager(
 
     val coroutineScope = rememberCoroutineScope()
 
-    // Control if the user can go back or not depending the page
+    // Control if the user can go back or not depending upon the page
     BackHandler(enabled = true) {
         coroutineScope.launch {
             homeScreenModel.animatedGoToMainPage()
