@@ -47,7 +47,7 @@ import java.util.concurrent.TimeUnit
 import android.graphics.Color as AndroidColor
 import androidx.compose.ui.graphics.Color as ComposeColor
 import com.geecee.escapelauncher.MainAppViewModel as MainAppModel
-import com.geecee.escapelauncher.core.model.InstalledApp
+import com.geecee.escapelauncher.core.common.InstalledApp
 
 /**
  * Broadcast receiver to detect when the screen turns off,

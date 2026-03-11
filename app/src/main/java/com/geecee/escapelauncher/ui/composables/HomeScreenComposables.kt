@@ -7,7 +7,6 @@ import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -16,7 +15,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -31,14 +29,11 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardColors
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonColors
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -47,16 +42,20 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.geecee.escapelauncher.HomeScreenModel
 import com.geecee.escapelauncher.MainAppViewModel
 import com.geecee.escapelauncher.R
-import com.geecee.escapelauncher.core.model.InstalledApp
+import com.geecee.escapelauncher.core.common.InstalledApp
+import com.geecee.escapelauncher.core.common.getWorkApps
+import com.geecee.escapelauncher.core.common.goToWorkAppAppInfo
+import com.geecee.escapelauncher.core.common.isWorkProfileUnlocked
+import com.geecee.escapelauncher.core.common.lockWorkProfile
+import com.geecee.escapelauncher.core.common.openWorkApp
+import com.geecee.escapelauncher.core.common.uninstallWorkApp
+import com.geecee.escapelauncher.core.common.unlockWorkProfile
 import com.geecee.escapelauncher.core.ui.composables.AppAction
 import com.geecee.escapelauncher.core.ui.composables.HomeScreenBottomSheet
 import com.geecee.escapelauncher.core.ui.theme.BackgroundColor
@@ -69,26 +68,11 @@ import com.geecee.escapelauncher.core.ui.theme.primaryContentColor
 import com.geecee.escapelauncher.utils.AppUtils.isDefaultLauncher
 import com.geecee.escapelauncher.utils.AppUtils.resetHome
 import com.geecee.escapelauncher.utils.PrivateAppItem
-import com.geecee.escapelauncher.utils.WorkAppItem
 import com.geecee.escapelauncher.utils.getPrivateSpaceApps
-import com.geecee.escapelauncher.utils.getWorkApps
-import com.geecee.escapelauncher.utils.goToWorkAppAppInfo
-import com.geecee.escapelauncher.utils.isWorkProfileUnlocked
 import com.geecee.escapelauncher.utils.lockPrivateSpace
-import com.geecee.escapelauncher.utils.lockWorkProfile
 import com.geecee.escapelauncher.utils.openPrivateSpaceApp
-import com.geecee.escapelauncher.utils.openWorkApp
 import com.geecee.escapelauncher.utils.showPrivateSpaceAppInfo
 import com.geecee.escapelauncher.utils.uninstallPrivateSpaceApp
-import com.geecee.escapelauncher.utils.uninstallWorkApp
-import com.geecee.escapelauncher.utils.unlockWorkProfile
-
-// Bottom Sheet
-
-
-// Apps list
-
-
 
 /**
  * Android 15+ Private space UI with apps, settings button and lock button
@@ -245,9 +229,9 @@ fun WorkApps(
         ) {
             goToWorkAppAppInfo(
                 homeScreenModel.currentSelectedWorkApp.value,
-                homeScreenModel,
                 mainAppModel.getContext()
             )
+            resetHome(homeScreenModel, shouldGoToFirstPage = true)
         }
     )
 
@@ -404,3 +388,28 @@ fun WorkApps(
         )
     }
 }
+
+
+/**
+ * UI component for displaying a single Work Profile app item.
+ */
+@RequiresApi(Build.VERSION_CODES.VANILLA_ICE_CREAM)
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun WorkAppItem(
+    appName: String,
+    onLongClick: () -> Unit,
+    onClick: () -> Unit
+) {
+    val modifier = Modifier
+        .padding(vertical = 15.dp)
+        .combinedClickable(onClick = onClick, onLongClick = onLongClick)
+
+    Text(
+        appName,
+        modifier = modifier,
+        color = ContentColor,
+        style = MaterialTheme.typography.bodyMedium
+    )
+}
+

@@ -1,9 +1,4 @@
-/**
- * @author George Clensy
- * Utility functions and UI components for managing and interacting with Work Profile in Escape Launcher.
- */
-
-package com.geecee.escapelauncher.utils
+package com.geecee.escapelauncher.core.common
 
 import android.app.ActivityOptions
 import android.content.BroadcastReceiver
@@ -16,20 +11,8 @@ import android.os.UserHandle
 import android.os.UserManager
 import android.os.UserManager.USER_TYPE_PROFILE_MANAGED
 import androidx.annotation.RequiresApi
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat.getSystemService
 import androidx.core.net.toUri
-import com.geecee.escapelauncher.HomeScreenModel
-import com.geecee.escapelauncher.core.model.InstalledApp
-import com.geecee.escapelauncher.core.ui.theme.ContentColor
-import com.geecee.escapelauncher.utils.AppUtils.resetHome
 
 /**
  * BroadcastReceiver that listens for Work Profile state changes (locked/unlocked).
@@ -128,33 +111,6 @@ fun getWorkApps(context: Context): List<InstalledApp> {
 }
 
 /**
- * Shows the system app info page for an app in Work Profile.
- */
-@RequiresApi(Build.VERSION_CODES.VANILLA_ICE_CREAM)
-fun goToWorkAppAppInfo(
-    installedApp: InstalledApp,
-    homeScreenModel: HomeScreenModel,
-    context: Context,
-    sourceBounds: Rect? = null
-) {
-    val launcherApps =
-        context.getSystemService(Context.LAUNCHER_APPS_SERVICE) as? LauncherApps ?: return
-    val workProfile = getWorkProfile(context) ?: return
-
-    val options = ActivityOptions.makeBasic()
-    if (sourceBounds != null) {
-        options.launchBounds = sourceBounds
-    }
-    launcherApps.startAppDetailsActivity(
-        installedApp.componentName,
-        workProfile,
-        sourceBounds,
-        options.toBundle()
-    )
-    resetHome(homeScreenModel, shouldGoToFirstPage = true)
-}
-
-/**
  * Uninstalls an app from Work Profile.
  */
 @RequiresApi(Build.VERSION_CODES.VANILLA_ICE_CREAM)
@@ -189,24 +145,26 @@ fun openWorkApp(installedApp: InstalledApp, context: Context, sourceBounds: Rect
 }
 
 /**
- * UI component for displaying a single Work Profile app item.
+ * Shows the system app info page for an app in Work Profile.
  */
 @RequiresApi(Build.VERSION_CODES.VANILLA_ICE_CREAM)
-@OptIn(ExperimentalFoundationApi::class)
-@Composable
-fun WorkAppItem(
-    appName: String,
-    onLongClick: () -> Unit,
-    onClick: () -> Unit
+fun goToWorkAppAppInfo(
+    installedApp: InstalledApp,
+    context: Context,
+    sourceBounds: Rect? = null
 ) {
-    val modifier = Modifier
-        .padding(vertical = 15.dp)
-        .combinedClickable(onClick = onClick, onLongClick = onLongClick)
+    val launcherApps =
+        context.getSystemService(Context.LAUNCHER_APPS_SERVICE) as? LauncherApps ?: return
+    val workProfile = getWorkProfile(context) ?: return
 
-    Text(
-        appName,
-        modifier = modifier,
-        color = ContentColor,
-        style = MaterialTheme.typography.bodyMedium
+    val options = ActivityOptions.makeBasic()
+    if (sourceBounds != null) {
+        options.launchBounds = sourceBounds
+    }
+    launcherApps.startAppDetailsActivity(
+        installedApp.componentName,
+        workProfile,
+        sourceBounds,
+        options.toBundle()
     )
 }

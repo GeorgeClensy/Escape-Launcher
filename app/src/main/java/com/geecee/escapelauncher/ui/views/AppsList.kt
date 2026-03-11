@@ -47,7 +47,7 @@ import com.geecee.escapelauncher.utils.AppUtils.resetHome
 import com.geecee.escapelauncher.utils.PrivateSpaceSettings
 import com.geecee.escapelauncher.utils.canUseSecureFolder
 import com.geecee.escapelauncher.utils.doesPrivateSpaceExist
-import com.geecee.escapelauncher.utils.doesWorkProfileExist
+import com.geecee.escapelauncher.core.common.doesWorkProfileExist
 import com.geecee.escapelauncher.utils.getAppsAlignment
 import com.geecee.escapelauncher.utils.getBooleanSetting
 import com.geecee.escapelauncher.utils.launchSecureFolder

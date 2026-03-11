@@ -1,4 +1,4 @@
-package com.geecee.escapelauncher.core.model
+package com.geecee.escapelauncher.core.common
 
 import android.content.ComponentName
 
