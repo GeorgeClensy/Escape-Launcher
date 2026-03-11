@@ -88,18 +88,6 @@ import com.geecee.escapelauncher.utils.unlockWorkProfile
 
 // Apps list
 
-/**
- * Apps List title
- */
-@Composable
-fun AppsListHeader() {
-    Spacer(modifier = Modifier.height(140.dp))
-    Text(
-        text = stringResource(id = R.string.all_apps),
-        color = primaryContentColor,
-        style = MaterialTheme.typography.titleMedium
-    )
-}
 
 
 /**
@@ -219,21 +207,6 @@ fun PrivateSpace(mainAppModel: MainAppViewModel, homeScreenModel: HomeScreenMode
             modifier = Modifier
         )
     }
-}
-
-@Composable
-fun ListGradient(modifier: Modifier = Modifier) {
-    Box(
-        modifier = modifier
-            .background(
-                brush = Brush.verticalGradient(
-                    colors = listOf(
-                        BackgroundColor.copy(alpha = 0f),
-                        BackgroundColor
-                    )
-                )
-            )
-    )
 }
 
 @Composable
