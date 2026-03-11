@@ -39,8 +39,6 @@ import java.io.IOException
 import java.io.InputStream
 import java.text.Normalizer
 import java.text.SimpleDateFormat
-import java.time.LocalTime
-import java.time.format.DateTimeFormatter
 import java.util.Calendar
 import java.util.Locale
 import java.util.concurrent.TimeUnit
@@ -282,20 +280,6 @@ object AppUtils {
         } catch (_: PackageManager.NameNotFoundException) {
             return "null"
         }
-    }
-
-    /**
-     * Returns the current time as a string
-     *
-     * @return String the time with the format HH:mm
-     */
-    fun getCurrentTime(twelveHour: Boolean): String {
-        val now = LocalTime.now()
-        var formatter = DateTimeFormatter.ofPattern("HH:mm") // Format as hours:minutes:seconds
-        if (twelveHour) {
-            formatter = DateTimeFormatter.ofPattern("hh:mm")
-        }
-        return now.format(formatter)
     }
 
     /**

@@ -38,7 +38,7 @@ import com.geecee.escapelauncher.core.ui.composables.ListGradient
 import com.geecee.escapelauncher.ui.composables.PrivateSpace
 import com.geecee.escapelauncher.core.ui.composables.SettingsSpacer
 import com.geecee.escapelauncher.ui.composables.WorkApps
-import com.geecee.escapelauncher.ui.composables.WorkAppsFab
+import com.geecee.escapelauncher.feature.workapps.WorkAppsFab
 import com.geecee.escapelauncher.core.ui.theme.transparentHalf
 import com.geecee.escapelauncher.utils.AppUtils
 import com.geecee.escapelauncher.utils.AppUtils.doHapticFeedBack

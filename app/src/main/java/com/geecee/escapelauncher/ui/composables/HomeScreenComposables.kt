@@ -16,19 +16,16 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.rounded.Work
 import androidx.compose.material.icons.rounded.WorkOff
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardColors
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonColors
@@ -58,13 +55,11 @@ import com.geecee.escapelauncher.core.common.uninstallWorkApp
 import com.geecee.escapelauncher.core.common.unlockWorkProfile
 import com.geecee.escapelauncher.core.ui.composables.AppAction
 import com.geecee.escapelauncher.core.ui.composables.HomeScreenBottomSheet
-import com.geecee.escapelauncher.core.ui.theme.BackgroundColor
 import com.geecee.escapelauncher.core.ui.theme.CardContainerColor
 import com.geecee.escapelauncher.core.ui.theme.CardContainerColorDisabled
 import com.geecee.escapelauncher.core.ui.theme.ContentColor
 import com.geecee.escapelauncher.core.ui.theme.ContentColorDisabled
 import com.geecee.escapelauncher.core.ui.theme.SecondaryCardContainerColor
-import com.geecee.escapelauncher.core.ui.theme.primaryContentColor
 import com.geecee.escapelauncher.utils.AppUtils.isDefaultLauncher
 import com.geecee.escapelauncher.utils.AppUtils.resetHome
 import com.geecee.escapelauncher.utils.PrivateAppItem
@@ -190,20 +185,6 @@ fun PrivateSpace(mainAppModel: MainAppViewModel, homeScreenModel: HomeScreenMode
             sheetState = rememberModalBottomSheetState(),
             modifier = Modifier
         )
-    }
-}
-
-@Composable
-fun WorkAppsFab(modifier: Modifier = Modifier, onClick: () -> Unit) {
-    FloatingActionButton(
-        onClick = {
-            onClick()
-        },
-        modifier = modifier.size(56.dp),
-        containerColor = primaryContentColor,
-        contentColor = BackgroundColor
-    ) {
-        Icon(Icons.Rounded.Work, contentDescription = stringResource(R.string.work_profile))
     }
 }
 

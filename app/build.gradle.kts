@@ -154,6 +154,7 @@ dependencies {
     implementation(project(":core:model"))
     implementation(project(":core:common"))
     implementation(project(":feature:homescreen"))
+    implementation(project(":feature:workapps"))
 
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
