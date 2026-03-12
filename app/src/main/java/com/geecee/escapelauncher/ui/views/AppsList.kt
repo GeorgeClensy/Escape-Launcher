@@ -37,7 +37,6 @@ import com.geecee.escapelauncher.core.ui.composables.HomeScreenItem
 import com.geecee.escapelauncher.core.ui.composables.ListGradient
 import com.geecee.escapelauncher.ui.composables.PrivateSpace
 import com.geecee.escapelauncher.core.ui.composables.SettingsSpacer
-import com.geecee.escapelauncher.ui.composables.WorkApps
 import com.geecee.escapelauncher.feature.workapps.WorkAppsFab
 import com.geecee.escapelauncher.core.ui.theme.transparentHalf
 import com.geecee.escapelauncher.utils.AppUtils
@@ -48,6 +47,9 @@ import com.geecee.escapelauncher.utils.PrivateSpaceSettings
 import com.geecee.escapelauncher.utils.canUseSecureFolder
 import com.geecee.escapelauncher.utils.doesPrivateSpaceExist
 import com.geecee.escapelauncher.core.common.doesWorkProfileExist
+import com.geecee.escapelauncher.core.common.isDefaultLauncher
+import com.geecee.escapelauncher.core.common.openWorkApp
+import com.geecee.escapelauncher.feature.workapps.WorkApps
 import com.geecee.escapelauncher.utils.getAppsAlignment
 import com.geecee.escapelauncher.utils.getBooleanSetting
 import com.geecee.escapelauncher.utils.launchSecureFolder
@@ -250,7 +252,7 @@ fun AppsList(
                 }
 
             } //Private Space
-            else if (AppUtils.isDefaultLauncher(mainAppModel.getContext()) && Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM && doesPrivateSpaceExist(
+            else if (isDefaultLauncher(mainAppModel.getContext()) && Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM && doesPrivateSpaceExist(
                     mainAppModel.getContext()
                 )
             ) {
@@ -365,9 +367,16 @@ fun AppsList(
                         .background(transparentHalf)
                 ) {
                     WorkApps(
-                        mainAppModel,
-                        homeScreenModel,
-                        Modifier.align(Alignment.Center)
+                        modifier = Modifier.align(Alignment.Center),
+                        onAppClick = { app ->
+                            openWorkApp(app, mainAppModel.getContext())
+                            resetHome(homeScreenModel)
+                        },
+                        onAppLongClick = { app ->
+                            homeScreenModel.showBottomSheet.value = true
+                            homeScreenModel.updateSelectedApp(app)
+                            doHapticFeedBack(haptics)
+                        }
                     )
                 }
             }

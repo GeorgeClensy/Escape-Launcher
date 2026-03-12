@@ -3,12 +3,7 @@ package com.geecee.escapelauncher.ui.composables
 import android.content.ComponentName
 import android.graphics.Rect
 import android.os.Build
-import android.widget.Toast
 import androidx.annotation.RequiresApi
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -16,13 +11,9 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.rounded.WorkOff
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardColors
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -30,29 +21,18 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonColors
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.geecee.escapelauncher.HomeScreenModel
 import com.geecee.escapelauncher.MainAppViewModel
 import com.geecee.escapelauncher.R
 import com.geecee.escapelauncher.core.common.InstalledApp
-import com.geecee.escapelauncher.core.common.getWorkApps
-import com.geecee.escapelauncher.core.common.goToWorkAppAppInfo
-import com.geecee.escapelauncher.core.common.isWorkProfileUnlocked
-import com.geecee.escapelauncher.core.common.lockWorkProfile
-import com.geecee.escapelauncher.core.common.openWorkApp
-import com.geecee.escapelauncher.core.common.uninstallWorkApp
-import com.geecee.escapelauncher.core.common.unlockWorkProfile
 import com.geecee.escapelauncher.core.ui.composables.AppAction
 import com.geecee.escapelauncher.core.ui.composables.HomeScreenBottomSheet
 import com.geecee.escapelauncher.core.ui.theme.CardContainerColor
@@ -60,7 +40,6 @@ import com.geecee.escapelauncher.core.ui.theme.CardContainerColorDisabled
 import com.geecee.escapelauncher.core.ui.theme.ContentColor
 import com.geecee.escapelauncher.core.ui.theme.ContentColorDisabled
 import com.geecee.escapelauncher.core.ui.theme.SecondaryCardContainerColor
-import com.geecee.escapelauncher.utils.AppUtils.isDefaultLauncher
 import com.geecee.escapelauncher.utils.AppUtils.resetHome
 import com.geecee.escapelauncher.utils.PrivateAppItem
 import com.geecee.escapelauncher.utils.getPrivateSpaceApps
@@ -187,210 +166,3 @@ fun PrivateSpace(mainAppModel: MainAppViewModel, homeScreenModel: HomeScreenMode
         )
     }
 }
-
-@OptIn(ExperimentalMaterial3Api::class)
-@RequiresApi(Build.VERSION_CODES.VANILLA_ICE_CREAM)
-@Composable
-fun WorkApps(
-    mainAppModel: MainAppViewModel,
-    homeScreenModel: HomeScreenModel,
-    modifier: Modifier = Modifier
-) {
-    val workAppActions = listOf(
-        AppAction(
-            stringResource(R.string.uninstall)
-        ) {
-            uninstallWorkApp(
-                homeScreenModel.currentSelectedWorkApp.value,
-                mainAppModel.getContext()
-            )
-        },
-        AppAction(
-            stringResource(R.string.app_info)
-        ) {
-            goToWorkAppAppInfo(
-                homeScreenModel.currentSelectedWorkApp.value,
-                mainAppModel.getContext()
-            )
-            resetHome(homeScreenModel, shouldGoToFirstPage = true)
-        }
-    )
-
-    val isUnlocked = remember {
-        mutableStateOf(isWorkProfileUnlocked(mainAppModel.getContext()))
-    }
-
-    Card(
-        modifier
-            .padding(horizontal = 30.dp, vertical = 120.dp)
-            .clip(MaterialTheme.shapes.extraLarge),
-        colors = CardColors(
-            containerColor = CardContainerColor,
-            contentColor = ContentColor,
-            disabledContentColor = CardContainerColorDisabled,
-            disabledContainerColor = ContentColorDisabled,
-        )
-    ) {
-        AnimatedVisibility(isUnlocked.value) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(20.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text(
-                        stringResource(R.string.work_profile),
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-
-                    IconButton(
-                        onClick = {
-                            if (isDefaultLauncher(mainAppModel.getContext())) {
-                                lockWorkProfile(mainAppModel.getContext())
-                                isUnlocked.value = isWorkProfileUnlocked(mainAppModel.getContext())
-                            } else {
-                                Toast.makeText(
-                                    mainAppModel.getContext(),
-                                    mainAppModel.getContext()
-                                        .getString(R.string.launcher_must_be_default_to_pause_or_unpause_work_apps),
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                            }
-                        },
-                        colors = IconButtonColors(
-                            containerColor = SecondaryCardContainerColor,
-                            contentColor = ContentColor,
-                            disabledContainerColor = SecondaryCardContainerColor,
-                            disabledContentColor = ContentColor
-                        )
-                    ) {
-                        Icon(
-                            Icons.Rounded.WorkOff,
-                            contentDescription = stringResource(R.string.lock_work_profile)
-                        )
-                    }
-                }
-
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.verticalScroll(rememberScrollState())
-                ) {
-                    getWorkApps(mainAppModel.getContext())
-                        .sortedBy { it.displayName.lowercase() }
-                        .forEach { app ->
-                            WorkAppItem(app.displayName, {
-                                homeScreenModel.currentSelectedWorkApp.value = app
-                                homeScreenModel.showWorkBottomSheet.value = true
-                            }) {
-                                openWorkApp(
-                                    installedApp = app, context = mainAppModel.getContext(), Rect()
-                                )
-                                resetHome(homeScreenModel)
-                            }
-                        }
-
-                    Spacer(Modifier.height(20.dp))
-                }
-            }
-        }
-        AnimatedVisibility(!isUnlocked.value) {
-            Column(
-                Modifier,
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(
-                    stringResource(R.string.work_apps_are_paused),
-                    style = MaterialTheme.typography.bodyLarge,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(
-                        top = 30.dp,
-                        start = 30.dp,
-                        end = 30.dp,
-                        bottom = 5.dp
-                    )
-                )
-
-                Text(
-                    stringResource(R.string.you_wont_receive_notifications_from_work_apps),
-                    style = MaterialTheme.typography.bodyMedium,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(
-                        top = 5.dp,
-                        start = 30.dp,
-                        end = 30.dp,
-                        bottom = 10.dp
-                    )
-                )
-
-                OutlinedButton(
-                    onClick = {
-                        if (isDefaultLauncher(mainAppModel.getContext())) {
-                            unlockWorkProfile(
-                                mainAppModel.getContext()
-                            )
-                            isUnlocked.value = isWorkProfileUnlocked(mainAppModel.getContext())
-                        } else {
-                            Toast.makeText(
-                                mainAppModel.getContext(),
-                                mainAppModel.getContext()
-                                    .getString(R.string.launcher_must_be_default_to_pause_or_unpause_work_apps),
-                                Toast.LENGTH_SHORT
-                            ).show()
-                        }
-                    },
-                    modifier = Modifier
-                        .padding(bottom = 30.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = SecondaryCardContainerColor,
-                        contentColor = ContentColor,
-                    )
-                ) {
-                    Text(stringResource(R.string.unpause))
-                }
-            }
-        }
-    }
-
-    if (homeScreenModel.showWorkBottomSheet.value) {
-        HomeScreenBottomSheet(
-            title = homeScreenModel.currentSelectedWorkApp.value.displayName,
-            actions = workAppActions,
-            onDismissRequest = {
-                homeScreenModel.showWorkBottomSheet.value = false
-                homeScreenModel.currentSelectedWorkApp.value =
-                    InstalledApp("", "", ComponentName("", ""))
-            },
-            sheetState = rememberModalBottomSheetState(),
-            modifier = Modifier
-        )
-    }
-}
-
-
-/**
- * UI component for displaying a single Work Profile app item.
- */
-@RequiresApi(Build.VERSION_CODES.VANILLA_ICE_CREAM)
-@OptIn(ExperimentalFoundationApi::class)
-@Composable
-fun WorkAppItem(
-    appName: String,
-    onLongClick: () -> Unit,
-    onClick: () -> Unit
-) {
-    val modifier = Modifier
-        .padding(vertical = 15.dp)
-        .combinedClickable(onClick = onClick, onLongClick = onLongClick)
-
-    Text(
-        appName,
-        modifier = modifier,
-        color = ContentColor,
-        style = MaterialTheme.typography.bodyMedium
-    )
-}
-
