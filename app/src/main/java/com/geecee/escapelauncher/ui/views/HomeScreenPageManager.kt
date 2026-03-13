@@ -1,8 +1,6 @@
 package com.geecee.escapelauncher.ui.views
 
-import android.content.Intent
 import android.os.Build
-import android.provider.Settings
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
@@ -22,11 +20,13 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
-import androidx.core.net.toUri
 import com.geecee.escapelauncher.HomeScreenModel
 import com.geecee.escapelauncher.R
+import com.geecee.escapelauncher.core.common.goToAppInfo
+import com.geecee.escapelauncher.core.common.uninstallApp
 import com.geecee.escapelauncher.core.ui.composables.AppAction
 import com.geecee.escapelauncher.core.ui.composables.HomeScreenBottomSheet
+import com.geecee.escapelauncher.utils.AppShortcut
 import com.geecee.escapelauncher.utils.AppUtils
 import com.geecee.escapelauncher.utils.AppUtils.resetHome
 import com.geecee.escapelauncher.utils.EscapeAccessibilityService
@@ -175,73 +175,81 @@ fun HomeScreenPageManager(
         val selectedApp = homeScreenModel.currentSelectedApp.value
         val context = mainAppModel.getContext()
 
-        val shortcuts = getAppShortcuts(context, selectedApp.packageName)
-        val shortcutActions = shortcuts.map { shortcut ->
-            AppAction(
-                label = shortcut.label,
-                onClick = {
-                    startShortcut(context, selectedApp.packageName, shortcut.id)
-                    homeScreenModel.showBottomSheet.value = false
-                    resetHome(homeScreenModel, false)
-                }
-            )
+
+        val shortcuts: List<AppShortcut?> =
+            if (homeScreenModel.currentSelectedApp.value.user == android.os.Process.myUserHandle()) {
+                getAppShortcuts(context, selectedApp.packageName)
+            } else {
+                listOf(null)
+            }
+        val shortcutActions: List<AppAction?> = shortcuts.map { shortcut ->
+            if (shortcut != null) {
+                AppAction(
+                    label = shortcut.label,
+                    onClick = {
+                        startShortcut(context, selectedApp.packageName, shortcut.id)
+                        homeScreenModel.showBottomSheet.value = false
+                        resetHome(homeScreenModel, false)
+                    }
+                )
+            }
+            else {
+                null
+            }
         }
 
         var actions = listOf(
             AppAction(
                 label = stringResource(id = R.string.uninstall),
                 onClick = {
-                    val intent = Intent(
-                        Intent.ACTION_DELETE,
-                        "package:${homeScreenModel.currentSelectedApp.value.packageName}".toUri()
-                    )
-                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                    mainAppModel.getContext().startActivity(intent)
+                    uninstallApp(context, selectedApp)
                 }
             ),
-            AppAction(
-                label = stringResource(if (homeScreenModel.isCurrentAppFavorite) R.string.rem_from_fav else R.string.add_to_fav),
-                onClick = {
-                    val selectedApp = homeScreenModel.currentSelectedApp.value
-                    if (homeScreenModel.isCurrentAppFavorite) {
-                        mainAppModel.favoriteAppsManager.removeFavoriteApp(selectedApp.packageName)
-                        homeScreenModel.favoriteApps.remove(selectedApp)
-                    } else {
-                        mainAppModel.favoriteAppsManager.addFavoriteApp(selectedApp.packageName)
-                        homeScreenModel.favoriteApps.add(selectedApp)
+            if (homeScreenModel.currentSelectedApp.value.user == android.os.Process.myUserHandle()) {
+                AppAction(
+                    label = stringResource(if (homeScreenModel.isCurrentAppFavorite) R.string.rem_from_fav else R.string.add_to_fav),
+                    onClick = {
+                        val selectedApp = homeScreenModel.currentSelectedApp.value
+                        if (homeScreenModel.isCurrentAppFavorite) {
+                            mainAppModel.favoriteAppsManager.removeFavoriteApp(selectedApp.packageName)
+                            homeScreenModel.favoriteApps.remove(selectedApp)
+                        } else {
+                            mainAppModel.favoriteAppsManager.addFavoriteApp(selectedApp.packageName)
+                            homeScreenModel.favoriteApps.add(selectedApp)
 
-                        homeScreenModel.coroutineScope.launch {
-                            homeScreenModel.goToMainPage()
+                            homeScreenModel.coroutineScope.launch {
+                                homeScreenModel.goToMainPage()
+                            }
                         }
+                        homeScreenModel.showBottomSheet.value = false
                     }
-                    homeScreenModel.showBottomSheet.value = false
-                }
-            ),
-            AppAction(
-                label = stringResource(R.string.hide),
-                onClick = {
-                    mainAppModel.hiddenAppsManager.addHiddenApp(homeScreenModel.currentSelectedApp.value.packageName)
-                    homeScreenModel.showBottomSheet.value = false
-                    mainAppModel.notifyHiddenAppsChanged()
-                    resetHome(homeScreenModel, false)
-                }
-            ),
+                )
+            } else {
+                null
+            },
+            if (homeScreenModel.currentSelectedApp.value.user == android.os.Process.myUserHandle()) {
+                AppAction(
+                    label = stringResource(R.string.hide),
+                    onClick = {
+                        mainAppModel.hiddenAppsManager.addHiddenApp(homeScreenModel.currentSelectedApp.value.packageName)
+                        homeScreenModel.showBottomSheet.value = false
+                        mainAppModel.notifyHiddenAppsChanged()
+                        resetHome(homeScreenModel, false)
+                    }
+                )
+            } else {
+                null
+            },
             AppAction(
                 label = stringResource(id = R.string.app_info),
                 onClick = {
-                    val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
-                        data =
-                            "package:${homeScreenModel.currentSelectedApp.value.packageName}".toUri()
-                    }.apply {
-                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                    }
-                    mainAppModel.getContext().startActivity(intent)
+                    goToAppInfo(mainAppModel.getContext(), homeScreenModel.currentSelectedApp.value)
                     resetHome(homeScreenModel, false)
                 }
             )
         )
 
-        if (!homeScreenModel.isCurrentAppChallenged) {
+        if (!homeScreenModel.isCurrentAppChallenged && homeScreenModel.currentSelectedApp.value.user == android.os.Process.myUserHandle()) {
             actions = actions +
                     AppAction(
                         label = stringResource(R.string.add_open_challenge),
@@ -258,9 +266,9 @@ fun HomeScreenPageManager(
 
         HomeScreenBottomSheet(
             title = homeScreenModel.currentSelectedApp.value.displayName,
-            actions = actions,
+            actions = actions.filterNotNull(),
             onDismissRequest = { homeScreenModel.showBottomSheet.value = false },
-            shortcutActions = shortcutActions,
+            shortcutActions = shortcutActions.filterNotNull(),
             sheetState = rememberModalBottomSheetState()
         )
     }

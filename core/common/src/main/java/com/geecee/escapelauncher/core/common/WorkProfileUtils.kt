@@ -105,7 +105,8 @@ fun getWorkApps(context: Context): List<InstalledApp> {
         InstalledApp(
             displayName = it.label?.toString() ?: "Unknown App",
             packageName = it.applicationInfo.packageName,
-            componentName = it.componentName
+            componentName = it.componentName,
+            user = workProfile
         )
     }
 }

@@ -52,6 +52,8 @@ import com.geecee.escapelauncher.core.ui.theme.ContentColorDisabled
 import com.geecee.escapelauncher.core.ui.theme.SecondaryCardContainerColor
 import com.geecee.escapelauncher.core.ui.theme.primaryContentColor
 
+// IMPORTANT TODO: Fix that the app doesn't track the work apps state for example if you uninstall an app escape will still show it until it has been restarted which can cause it to crash if you then tap on the app
+
 @Composable
 fun WorkAppsFab(
     modifier: Modifier = Modifier,
