@@ -1,36 +1,12 @@
 plugins {
-    alias(libs.plugins.android.library)
-    alias(libs.plugins.compose.compiler)
+    id("escapelauncher.android.library")
+    id("escapelauncher.android.compose")
 }
 
 android {
     namespace = "com.geecee.escapelauncher.core.ui"
-    compileSdk {
-        version = release(36)
-    }
 
-    defaultConfig {
-        minSdk = 26
-
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        consumerProguardFiles("consumer-rules.pro")
-    }
-
-    buildTypes {
-        release {
-            isMinifyEnabled = false
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
-            )
-        }
-    }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
-    }
     buildFeatures {
-        compose = true
         buildConfig = true
     }
 
@@ -69,11 +45,6 @@ if (!isFoss) {
 }
 
 dependencies {
-    // Add the compose BOM
-    val bom = platform(libs.androidx.compose.bom)
-    implementation(bom)
-    androidTestImplementation(bom)
-
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)

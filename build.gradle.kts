@@ -1,6 +1,7 @@
 // Top-level build file where you can add configuration options common to all subprojects/modules.
 buildscript {
-    val isFoss = gradle.startParameter.taskNames.any { it.contains("foss", ignoreCase = true) }
+    val taskNames = gradle.startParameter.taskNames
+    val isFoss = taskNames.any { it.contains("foss", ignoreCase = true) }
     if (!isFoss) {
         repositories {
             google()
@@ -16,9 +17,9 @@ buildscript {
 
 plugins {
     alias(libs.plugins.android.application) apply false
+    alias(libs.plugins.android.library) apply false
     alias(libs.plugins.jetbrains.kotlin.android) apply false
-    id("com.google.devtools.ksp") version "2.3.4" apply false
+    alias(libs.plugins.ksp) apply false
     alias(libs.plugins.hilt) apply false
     alias(libs.plugins.compose.compiler) apply false
-    alias(libs.plugins.android.library) apply false
 }
