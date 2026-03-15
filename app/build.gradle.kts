@@ -1,21 +1,16 @@
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-
 plugins {
-    alias(libs.plugins.android.application)
-    alias(libs.plugins.compose.compiler)
-    alias(libs.plugins.hilt)
-    alias(libs.plugins.ksp)
+    id("escapelauncher.android.application")
+    id("escapelauncher.android.compose")
+    id("escapelauncher.android.hilt")
 }
 
 val baseVersionCode = "2.3.1"
 
 android {
     namespace = "com.geecee.escapelauncher"
-    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.geecee.escapelauncher"
-        minSdk = 26
         targetSdk = 36
         versionCode = 2
         versionName = baseVersionCode
@@ -68,11 +63,6 @@ android {
             res.directories.add("src/google/res")
             java.directories.add("src/google/java")
         }
-    }
-    
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
     }
 
     buildFeatures {
@@ -152,12 +142,6 @@ dependencies {
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
     implementation(libs.androidx.hilt.navigation.compose)
-}
-
-java {
-    toolchain {
-        languageVersion = JavaLanguageVersion.of(17)
-    }
 }
 
 tasks.register("testClasses") {
