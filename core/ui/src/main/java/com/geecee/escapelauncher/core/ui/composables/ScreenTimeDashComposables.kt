@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowUp
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -73,7 +72,6 @@ fun ScreenTime(time: String, increased: Boolean, modifier: Modifier) {
 /**
  * Square shaped composable showing a percent with a text beneath it
  */
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun ScreenTimeInfoBox(text: String, percent: Int, percentageColour: Color, modifier: Modifier = Modifier) {
     BoxWithConstraints(

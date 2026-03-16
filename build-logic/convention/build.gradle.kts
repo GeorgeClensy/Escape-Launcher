@@ -43,5 +43,9 @@ gradlePlugin {
             id = "escapelauncher.android.hilt"
             implementationClass = "com.geecee.escapelauncher.AndroidHiltConventionPlugin"
         }
+        register("escapeLauncherFlavours") {
+            id = "escapelauncher.android.flavours"
+            implementationClass = "com.geecee.escapelauncher.FlavorsConventionPlugin"
+        }
     }
 }

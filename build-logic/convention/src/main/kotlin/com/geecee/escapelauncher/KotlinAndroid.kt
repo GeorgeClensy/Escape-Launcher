@@ -1,9 +1,9 @@
 package com.geecee.escapelauncher
 
-import com.android.build.api.dsl.CommonExtension
+import com.android.build.api.dsl.ApplicationExtension
+import com.android.build.api.dsl.LibraryExtension
 import org.gradle.api.JavaVersion
 import org.gradle.api.Project
-import org.gradle.kotlin.dsl.assign
 import org.gradle.kotlin.dsl.provideDelegate
 import org.gradle.kotlin.dsl.withType
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
@@ -13,19 +13,34 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
  * Configure base Kotlin with Android options
  */
 internal fun Project.configureKotlinAndroid(
-    commonExtension: CommonExtension<*, *, *, *, *, *>,
+    commonExtension: ApplicationExtension,
 ) {
-    commonExtension.apply {
-        compileSdk = 36
+    commonExtension.compileSdk = 36
 
-        defaultConfig {
-            minSdk = 26
-        }
+    commonExtension.defaultConfig {
+        minSdk = 26
+    }
 
-        compileOptions {
-            sourceCompatibility = JavaVersion.VERSION_17
-            targetCompatibility = JavaVersion.VERSION_17
-        }
+    commonExtension.compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
+
+    configureKotlin()
+}
+
+internal fun Project.configureKotlinAndroid(
+    commonExtension: LibraryExtension,
+) {
+    commonExtension.compileSdk = 36
+
+    commonExtension.defaultConfig {
+        minSdk = 26
+    }
+
+    commonExtension.compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
 
     configureKotlin()

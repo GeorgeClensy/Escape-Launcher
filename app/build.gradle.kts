@@ -2,6 +2,8 @@ plugins {
     id("escapelauncher.android.application")
     id("escapelauncher.android.compose")
     id("escapelauncher.android.hilt")
+    id("escapelauncher.android.flavours")
+    alias(libs.plugins.compose.compiler)
 }
 
 val baseVersionCode = "2.3.1"
@@ -34,34 +36,8 @@ android {
             isMinifyEnabled = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
+                "../proguard-rules.pro"
             )
-        }
-    }
-
-    flavorDimensions += listOf("distribution")
-    productFlavors{
-        create("google") {
-            dimension = "distribution"
-            buildConfigField("boolean", "IS_FOSS", "false")
-            resValue("string", "app_flavour", "Google API")
-        }
-        create("foss") {
-            dimension = "distribution"
-            versionNameSuffix = "-foss"
-            buildConfigField("boolean", "IS_FOSS", "true")
-            resValue("string", "app_flavour", "FOSS")
-        }
-    }
-
-    sourceSets {
-        getByName("foss") {
-            res.directories.add("src/foss/res")
-            java.directories.add("src/foss/java")
-        }
-        getByName("google") {
-            res.directories.add("src/google/res")
-            java.directories.add("src/google/java")
         }
     }
 
@@ -75,13 +51,6 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
-}
-
-// Apply Google-specific configurations from secondary file
-val taskNames: List<String?>? = gradle.startParameter.taskNames
-val isFoss = taskNames?.any { it?.contains("foss", ignoreCase = true) ?: false  }
-if (!isFoss!!) {
-    apply(from = "google.gradle")
 }
 
 dependencies {
