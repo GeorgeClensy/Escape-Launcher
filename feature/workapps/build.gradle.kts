@@ -9,7 +9,7 @@ android {
 
     defaultConfig {
         // Specify which flavor to use from :core:ui since this module is flavorless
-        missingDimensionStrategy("distribution", "google")
+        missingDimensionStrategy("distribution", "foss")
     }
 }
 
