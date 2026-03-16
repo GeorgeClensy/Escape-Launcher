@@ -18,6 +18,9 @@ class AndroidLibraryConventionPlugin : Plugin<Project> {
                 lint {
                     targetSdk = 36
                 }
+                defaultConfig {
+                    missingDimensionStrategy("distribution", "foss")
+                }
             }
         }
     }

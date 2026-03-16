@@ -6,11 +6,6 @@ plugins {
 
 android {
     namespace = "com.geecee.escapelauncher.feature.workapps"
-
-    defaultConfig {
-        // Specify which flavor to use from :core:ui since this module is flavorless
-        missingDimensionStrategy("distribution", "foss")
-    }
 }
 
 dependencies {

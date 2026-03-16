@@ -43,7 +43,7 @@ class FlavorsConventionPlugin : Plugin<Project> {
                 val scriptFile = rootProject.file("google.gradle")
                 if (scriptFile.exists()) {
                     apply(mapOf("from" to scriptFile))
-                    println(">>> [FlavorsPlugin] Added the google.gradle script to this build because it's a google build. :D")
+                    println(">>> [FlavorsPlugin] Added the google.gradle script to this build because it's a google build. :D (Or it could be a sync, for some reason its fine that if the google stuff is in a foss sync cuz its not in the build.)")
                 }
             }
             else {

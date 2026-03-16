@@ -10,7 +10,7 @@ android {
 dependencies {
     // Google version use google fonts, otherwise bundle fonts
     //noinspection UseTomlInstead
-    googleImplementation 'androidx.compose.ui:ui-text-google-fonts:1.10.3'
+    googleImplementation 'androidx.compose.ui:ui-text-google-fonts:1.10.5'
 
 
     // Similar thing to whats going on below, theese plugins are only meant to be on an :app module so we just check if the thing its being applied to has android.applicaiton
@@ -25,6 +25,7 @@ dependencies {
         //noinspection UseTomlInstead
         googleImplementation 'com.squareup.okhttp3:okhttp:5.3.2'
     }
+    println(">>> [Google.gradle] Imported the google deps because this is a google build. (Or it could be a sync, for some reason its fine that if the google stuff is in a foss sync cuz its not in the build.)")
 }
 
 // This is the stuff that should only be added to the :app module so we check it first
