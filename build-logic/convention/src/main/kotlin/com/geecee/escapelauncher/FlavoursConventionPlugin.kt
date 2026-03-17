@@ -1,9 +1,11 @@
 package com.geecee.escapelauncher
 
-import com.android.build.gradle.BaseExtension
+import com.android.build.api.dsl.CommonExtension
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.kotlin.dsl.invoke
 
+@Suppress("unused")
 class FlavorsConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         with(target) {
@@ -19,10 +21,10 @@ class FlavorsConventionPlugin : Plugin<Project> {
 
 private fun applyFlavors(target: Project) {
     with(target) {
-        val android = extensions.findByType(BaseExtension::class.java) ?: return
+        val android = extensions.findByType(CommonExtension::class.java) ?: return
 
         android.apply {
-            flavorDimensions("distribution")
+            flavorDimensions += "distribution"
 
             productFlavors {
                 create("google") {
@@ -37,12 +39,12 @@ private fun applyFlavors(target: Project) {
 
             sourceSets {
                 getByName("foss") {
-                    res.srcDirs("src/foss/res")
-                    java.srcDirs("src/foss/java")
+                    res.directories.add("src/foss/res")
+                    java.directories.add("src/foss/java")
                 }
                 getByName("google") {
-                    res.srcDirs("src/google/res")
-                    java.srcDirs("src/google/java")
+                    res.directories.add("src/google/res")
+                    java.directories.add("src/google/java")
                 }
             }
         }
@@ -50,7 +52,7 @@ private fun applyFlavors(target: Project) {
         // Apply a Google-only script if one exists alongside this module's build file
         val isFoss = isFossBuild(gradle)
         if (!isFoss) {
-            val scriptFile = rootProject.file("google.gradle")
+            val scriptFile = rootProject.file("google.gradle.kts")
             if (scriptFile.exists()) {
                 apply(mapOf("from" to scriptFile))
                 println(">>> [FlavorsPlugin] Added the google.gradle script to this build because it's a google build. :D (Or it could be a sync, for some reason its fine that if the google stuff is in a foss sync cuz its not in the build.)")
