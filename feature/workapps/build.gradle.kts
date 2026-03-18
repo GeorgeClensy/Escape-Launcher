@@ -2,6 +2,7 @@ plugins {
     id("escapelauncher.android.library")
     id("escapelauncher.android.compose")
     id("escapelauncher.android.hilt")
+    id("escapelauncher.android.testing")
 }
 
 android {
@@ -21,9 +22,4 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
 
     implementation(libs.androidx.hilt.navigation.compose)
-
-    // Testing stuff
-    testImplementation(libs.junit)
-    androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
 }

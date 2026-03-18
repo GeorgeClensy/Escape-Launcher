@@ -2,6 +2,7 @@ plugins {
     id("escapelauncher.android.library")
     id("escapelauncher.android.compose")
     id("escapelauncher.android.flavours")
+    id("escapelauncher.android.testing")
 }
 
 android {
@@ -20,9 +21,4 @@ dependencies {
     implementation(libs.androidx.compose.material.icons.core)
     implementation(libs.androidx.compose.material.icons.extended)
     debugImplementation(libs.androidx.ui.tooling)
-
-    // Test stuff
-    testImplementation(libs.junit)
-    androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
 }

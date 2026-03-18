@@ -47,5 +47,9 @@ gradlePlugin {
             id = "escapelauncher.android.flavours"
             implementationClass = "com.geecee.escapelauncher.FlavorsConventionPlugin"
         }
+        register("escapeLauncherTests") {
+            id = "escapelauncher.android.testing"
+            implementationClass = "com.geecee.escapelauncher.AndroidTestConventionPlugin"
+        }
     }
 }

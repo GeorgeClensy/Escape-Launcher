@@ -3,6 +3,7 @@ plugins {
     id("escapelauncher.android.compose")
     id("escapelauncher.android.hilt")
     id("escapelauncher.android.flavours")
+    id("escapelauncher.android.testing")
     alias(libs.plugins.compose.compiler)
 }
 
@@ -91,9 +92,7 @@ dependencies {
     implementation(libs.gson)
 
     // Testing Libraries
-    testImplementation(libs.junit)
-    androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
+
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.ui.test.junit4)
 
