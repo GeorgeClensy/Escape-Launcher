@@ -51,5 +51,9 @@ gradlePlugin {
             id = "escapelauncher.android.testing"
             implementationClass = "com.geecee.escapelauncher.AndroidTestConventionPlugin"
         }
+        register("androidRoom") {
+            id = "escapelauncher.android.room"
+            implementationClass = "com.geecee.escapelauncher.AndroidRoomConventionPlugin"
+        }
     }
 }

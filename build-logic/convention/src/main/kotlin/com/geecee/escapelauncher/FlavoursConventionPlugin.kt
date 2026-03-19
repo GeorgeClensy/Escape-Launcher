@@ -30,10 +30,16 @@ private fun applyFlavors(target: Project) {
                 create("google") {
                     dimension = "distribution"
                     buildConfigField("boolean", "IS_FOSS", "false")
+                    if(target.plugins.hasPlugin("com.android.application")) {
+                        resValue("string", "app_flavour", "Google APIs")
+                    }
                 }
                 create("foss") {
                     dimension = "distribution"
                     buildConfigField("boolean", "IS_FOSS", "true")
+                    if(target.plugins.hasPlugin("com.android.application")) {
+                        resValue("string", "app_flavour", "FOSS")
+                    }
                 }
             }
 

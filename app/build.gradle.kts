@@ -4,6 +4,7 @@ plugins {
     id("escapelauncher.android.hilt")
     id("escapelauncher.android.flavours")
     id("escapelauncher.android.testing")
+    id("escapelauncher.android.room")
     alias(libs.plugins.compose.compiler)
 }
 
@@ -61,7 +62,6 @@ dependencies {
     implementation(libs.androidx.core.splashscreen)
 
     // Material Design and UI Libraries
-    implementation(libs.material)
     implementation(libs.androidx.compose.material3)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.ui)
@@ -78,12 +78,6 @@ dependencies {
 
     // Navigation
     implementation(libs.androidx.navigation.compose)
-
-    // Room Database
-    implementation(libs.androidx.room.common)
-    implementation(libs.androidx.room.ktx)
-    implementation(libs.androidx.room.runtime)
-    ksp(libs.androidx.room.compiler)
 
     // WorkManager
     implementation(libs.androidx.work.runtime.ktx)
