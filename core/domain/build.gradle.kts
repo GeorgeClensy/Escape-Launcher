@@ -7,9 +7,3 @@ plugins {
 android {
     namespace = "com.geecee.escapelauncher.domain"
 }
-
-dependencies {
-    implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.appcompat)
-
-}
