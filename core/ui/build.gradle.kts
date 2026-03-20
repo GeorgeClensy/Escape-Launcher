@@ -3,6 +3,7 @@ plugins {
     id("escapelauncher.android.compose")
     id("escapelauncher.android.flavours")
     id("escapelauncher.android.testing")
+    id("escapelauncher.android.compose.ui")
 }
 
 android {
@@ -15,9 +16,4 @@ android {
 
 dependencies {
     implementation(libs.androidx.appcompat)
-
-    implementation(libs.androidx.compose.material3)
-    implementation(libs.androidx.compose.material.icons.core)
-    implementation(libs.androidx.compose.material.icons.extended)
-    debugImplementation(libs.androidx.ui.tooling)
 }

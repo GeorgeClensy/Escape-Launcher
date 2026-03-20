@@ -1,7 +1,5 @@
 plugins {
-    id("escapelauncher.android.library")
-    id("escapelauncher.android.hilt")
-    id("escapelauncher.android.testing")
+    id("escapelauncher.android.feature")
 }
 
 android {
@@ -9,9 +7,8 @@ android {
 }
 
 dependencies {
-    implementation(libs.androidx.appcompat)
-
-    implementation(libs.androidx.lifecycle.runtime.ktx)
-
     implementation(project(":domain:time"))
+
+    implementation(libs.androidx.appcompat)
+    implementation(libs.androidx.lifecycle.runtime.ktx) // For viewmodels
 }

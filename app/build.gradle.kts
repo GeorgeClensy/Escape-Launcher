@@ -5,6 +5,7 @@ plugins {
     id("escapelauncher.android.flavours")
     id("escapelauncher.android.testing")
     id("escapelauncher.android.room")
+    id("escapelauncher.android.compose.ui")
     alias(libs.plugins.compose.compiler)
 }
 
@@ -62,14 +63,10 @@ dependencies {
     implementation(libs.androidx.core.splashscreen)
 
     // Material Design and UI Libraries
-    implementation(libs.androidx.compose.material3)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.ui)
     implementation(libs.androidx.ui.graphics)
-    implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.graphics.shapes)
-    implementation(libs.androidx.compose.material.icons.core)
-    implementation(libs.androidx.compose.material.icons.extended)
 
 
     // Lifecycle and Activity Libraries
@@ -91,7 +88,6 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
 
     // Debugging Tools
-    debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 
     // Modules

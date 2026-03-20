@@ -55,5 +55,13 @@ gradlePlugin {
             id = "escapelauncher.android.room"
             implementationClass = "com.geecee.escapelauncher.AndroidRoomConventionPlugin"
         }
+        register("androidComposeUi") {
+            id = "escapelauncher.android.compose.ui"
+            implementationClass = "com.geecee.escapelauncher.AndroidComposeUiConventionPlugin"
+        }
+        register("androidFeature") {
+            id = "escapelauncher.android.feature"
+            implementationClass = "com.geecee.escapelauncher.AndroidFeatureConventionPlugin"
+        }
     }
 }
