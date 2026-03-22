@@ -1,12 +1,11 @@
 plugins {
     id("escapelauncher.android.application")
     id("escapelauncher.android.compose")
+    id("escapelauncher.android.compose.ui")
     id("escapelauncher.android.hilt")
     id("escapelauncher.android.flavours")
     id("escapelauncher.android.testing")
     id("escapelauncher.android.room")
-    id("escapelauncher.android.compose.ui")
-    alias(libs.plugins.compose.compiler)
 }
 
 val baseVersionCode = "2.4"
@@ -45,10 +44,9 @@ android {
     }
 
     buildFeatures {
-        compose = true
-        buildConfig = true
         resValues = true
     }
+
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
@@ -63,7 +61,6 @@ dependencies {
     implementation(libs.androidx.core.splashscreen)
 
     // Material Design and UI Libraries
-    implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.ui)
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.graphics.shapes)
@@ -83,8 +80,6 @@ dependencies {
     implementation(libs.gson)
 
     // Testing Libraries
-
-    androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.ui.test.junit4)
 
     // Debugging Tools
@@ -97,13 +92,5 @@ dependencies {
     implementation(project(":feature:homescreen"))
     implementation(project(":feature:workapps"))
 
-    implementation(libs.hilt.android)
-    ksp(libs.hilt.compiler)
     implementation(libs.androidx.hilt.navigation.compose)
 }
-
-tasks.register("testClasses") {
-    group = "verification"
-    description = "Test claasses for all variants."
-    dependsOn(
-        tasks.matching { it.name.startsWith("compile") && it.name.endsWith("UnitTestSources") } )}
