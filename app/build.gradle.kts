@@ -9,7 +9,7 @@ plugins {
     alias(libs.plugins.compose.compiler)
 }
 
-val baseVersionCode = "2.3.1"
+val baseVersionCode = "2.4"
 
 android {
     namespace = "com.geecee.escapelauncher"
