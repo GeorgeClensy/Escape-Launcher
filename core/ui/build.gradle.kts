@@ -1,17 +1,13 @@
 plugins {
     id("escapelauncher.android.library")
     id("escapelauncher.android.compose")
+    id("escapelauncher.android.compose.ui")
     id("escapelauncher.android.flavours")
     id("escapelauncher.android.testing")
-    id("escapelauncher.android.compose.ui")
 }
 
 android {
     namespace = "com.geecee.escapelauncher.core.ui"
-
-    buildFeatures {
-        buildConfig = true
-    }
 }
 
 dependencies {

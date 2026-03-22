@@ -26,6 +26,8 @@ private fun applyFlavors(target: Project) {
         android.apply {
             flavorDimensions += "distribution"
 
+            buildFeatures.buildConfig = true
+
             productFlavors {
                 create("google") {
                     dimension = "distribution"
