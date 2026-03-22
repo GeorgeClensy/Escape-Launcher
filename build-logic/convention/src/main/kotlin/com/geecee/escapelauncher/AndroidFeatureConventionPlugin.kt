@@ -2,6 +2,7 @@ package com.geecee.escapelauncher
 
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.kotlin.dsl.dependencies
 
 @Suppress("unused")
 class AndroidFeatureConventionPlugin : Plugin<Project> {
@@ -12,6 +13,11 @@ class AndroidFeatureConventionPlugin : Plugin<Project> {
                 apply("escapelauncher.android.compose.ui")
                 apply("escapelauncher.android.hilt")
                 apply("escapelauncher.android.testing")
+            }
+
+            dependencies {
+                add("implementation", libs.findLibrary("androidx-hilt-navigation-compose").get())
+                add("implementation", libs.findLibrary("androidx-lifecycle-runtime-ktx").get())
             }
         }
     }

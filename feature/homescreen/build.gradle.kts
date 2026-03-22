@@ -10,5 +10,4 @@ dependencies {
     implementation(project(":domain:time"))
 
     implementation(libs.androidx.appcompat)
-    implementation(libs.androidx.lifecycle.runtime.ktx) // For viewmodels
 }
