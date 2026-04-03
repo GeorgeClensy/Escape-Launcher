@@ -14,9 +14,9 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -58,7 +58,6 @@ class HomeScreenModel(application: Application, val mainAppViewModel: MainAppVie
 
     var showOpenChallenge = mutableStateOf(false)
     var showBottomSheet = mutableStateOf(false)
-    var showPrivateSpaceSettings = mutableStateOf(false)
 
     var searchText = mutableStateOf("")
     var searchExpanded = mutableStateOf(false)
@@ -177,14 +176,6 @@ class HomeScreenModel(application: Application, val mainAppViewModel: MainAppVie
             animationSpec = tween(durationMillis = 500, easing = FastOutSlowInEasing)
         )
     }
-
-    val currentSelectedPrivateApp =
-        mutableStateOf(InstalledApp("", "", ComponentName("", ""))) //Only used for the bottom sheet
-
-    val currentSelectedWorkApp =
-        mutableStateOf(InstalledApp("", "", ComponentName("", ""))) //Only used for the bottom sheet
-
-    var showPrivateBottomSheet = mutableStateOf(false)
 
     var showWorkBottomSheet = mutableStateOf(false)
 
@@ -336,9 +327,6 @@ class MainAppViewModel(application: Application) : AndroidViewModel(application)
 
     var isAppOpened: Boolean =
         false // Set to true when an app is opened and false when it is closed again, used mainly for screen time
-
-    val isPrivateSpaceUnlocked: MutableState<Boolean> =
-        mutableStateOf(false) // If the private space is unlocked, set by a registered receiver when the private space is closed or opened
 
     val shouldGoHomeOnResume: MutableState<Boolean> =
         mutableStateOf(false) // This is to check whether to go back to the first page of the home screen the next time onResume is called, It is only ever used once in AllApps when you come back from signing in to private space

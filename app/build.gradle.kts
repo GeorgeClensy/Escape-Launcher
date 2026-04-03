@@ -91,6 +91,7 @@ dependencies {
     implementation(project(":core:common"))
     implementation(project(":feature:homescreen"))
     implementation(project(":feature:workapps"))
+    implementation(project(":feature:privatespace"))
 
     implementation(libs.androidx.hilt.navigation.compose)
 }

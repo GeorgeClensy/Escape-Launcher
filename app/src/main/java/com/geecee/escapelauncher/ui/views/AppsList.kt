@@ -4,8 +4,6 @@ import android.os.Build
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
@@ -31,31 +29,30 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.geecee.escapelauncher.HomeScreenModel
 import com.geecee.escapelauncher.R
+import com.geecee.escapelauncher.core.common.doesPrivateSpaceExist
+import com.geecee.escapelauncher.core.common.doesWorkProfileExist
+import com.geecee.escapelauncher.core.common.isDefaultLauncher
+import com.geecee.escapelauncher.core.common.openPrivateSpaceApp
+import com.geecee.escapelauncher.core.common.openWorkApp
 import com.geecee.escapelauncher.core.ui.composables.AnimatedPillSearchBar
 import com.geecee.escapelauncher.core.ui.composables.AppsListHeader
 import com.geecee.escapelauncher.core.ui.composables.HomeScreenItem
 import com.geecee.escapelauncher.core.ui.composables.ListGradient
-import com.geecee.escapelauncher.ui.composables.PrivateSpace
 import com.geecee.escapelauncher.core.ui.composables.SettingsSpacer
-import com.geecee.escapelauncher.feature.workapps.WorkAppsFab
 import com.geecee.escapelauncher.core.ui.theme.transparentHalf
+import com.geecee.escapelauncher.feature.workapps.WorkApps
+import com.geecee.escapelauncher.feature.workapps.WorkAppsFab
+import com.geecee.escapelauncher.privatespace.PrivateSpace
 import com.geecee.escapelauncher.utils.AppUtils
 import com.geecee.escapelauncher.utils.AppUtils.doHapticFeedBack
 import com.geecee.escapelauncher.utils.AppUtils.formatScreenTime
+import com.geecee.escapelauncher.utils.AppUtils.openApp
 import com.geecee.escapelauncher.utils.AppUtils.resetHome
-import com.geecee.escapelauncher.utils.PrivateSpaceSettings
 import com.geecee.escapelauncher.utils.canUseSecureFolder
-import com.geecee.escapelauncher.utils.doesPrivateSpaceExist
-import com.geecee.escapelauncher.core.common.doesWorkProfileExist
-import com.geecee.escapelauncher.core.common.isDefaultLauncher
-import com.geecee.escapelauncher.core.common.openWorkApp
-import com.geecee.escapelauncher.feature.workapps.WorkApps
 import com.geecee.escapelauncher.utils.getAppsAlignment
 import com.geecee.escapelauncher.utils.getBooleanSetting
 import com.geecee.escapelauncher.utils.launchSecureFolder
-import com.geecee.escapelauncher.utils.unlockPrivateSpace
 import com.geecee.escapelauncher.MainAppViewModel as MainAppModel
-import com.geecee.escapelauncher.utils.isPrivateSpaceUnlocked as isPrivateSpace
 
 /**
  * Parent apps list composable
@@ -115,7 +112,7 @@ fun AppsList(
                 if (autoOpen && sortedResults.size == 1) {
                     val appInfo = sortedResults.first()
                     homeScreenModel.updateSelectedApp(appInfo)
-                    AppUtils.openApp(
+                    openApp(
                         app = appInfo,
                         overrideOpenChallenge = false,
                         openChallengeShow = homeScreenModel.showOpenChallenge,
@@ -142,7 +139,7 @@ fun AppsList(
                 if (sortedResults.isNotEmpty()) {
                     val firstAppInfo = sortedResults.first()
                     homeScreenModel.updateSelectedApp(firstAppInfo)
-                    AppUtils.openApp(
+                    openApp(
                         app = firstAppInfo,
                         overrideOpenChallenge = false,
                         openChallengeShow = homeScreenModel.showOpenChallenge,
@@ -195,6 +192,7 @@ fun AppsList(
                 }
             }
 
+            // Apps
             items(homeScreenModel.filteredApps, key = { app -> app.packageName })
             { app ->
 
@@ -213,7 +211,7 @@ fun AppsList(
                     onAppClick = {
                         homeScreenModel.updateSelectedApp(app)
 
-                        AppUtils.openApp(
+                        openApp(
                             app = app,
                             overrideOpenChallenge = false,
                             openChallengeShow = homeScreenModel.showOpenChallenge,
@@ -251,49 +249,26 @@ fun AppsList(
                     }
                 }
 
-            } //Private Space
+            }
+            //Private Space
             else if (isDefaultLauncher(mainAppModel.getContext()) && Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM && doesPrivateSpaceExist(
                     mainAppModel.getContext()
                 )
             ) {
-                // Spacing
                 item {
-                    Spacer(modifier = Modifier.height(20.dp))
-                }
-
-                // Stores whether the private space is unlocked and whether to try and show it
-                mainAppModel.isPrivateSpaceUnlocked.value =
-                    isPrivateSpace(mainAppModel.getContext())
-
-                item {
-                    // Private space is locked, shows button to unlock it
-                    if ((!mainAppModel.isPrivateSpaceUnlocked.value && !getBooleanSetting(
-                            mainAppModel.getContext(),
-                            stringResource(R.string.SearchHiddenPrivateSpace),
-                            false
-                        )) || (!mainAppModel.isPrivateSpaceUnlocked.value && homeScreenModel.searchText.value.contains(
-                            stringResource(R.string.private_space_search_term)
-                        ) && getBooleanSetting(
-                            mainAppModel.getContext(),
-                            stringResource(R.string.SearchHiddenPrivateSpace),
-                            false
-                        ))
-                    ) {
-                        Button({
-                            unlockPrivateSpace(mainAppModel.getContext())
-                        }) {
-                            Text(stringResource(R.string.unlock_private_space))
-                        }
-                    }
-
-                    // Private space itself
-                    AnimatedVisibility(
-                        visible = mainAppModel.isPrivateSpaceUnlocked.value,
-                        enter = slideInVertically(initialOffsetY = { it }) + fadeIn(),
-                        exit = slideOutVertically(targetOffsetY = { it }) + fadeOut()
-                    ) {
-                        PrivateSpace(mainAppModel, homeScreenModel)
-                    }
+                    PrivateSpace(
+                        modifier = Modifier,
+                        onAppClick = { app ->
+                            openPrivateSpaceApp(app, mainAppModel.getContext())
+                            resetHome(homeScreenModel)
+                        },
+                        onAppLongClick = { app ->
+                            homeScreenModel.updateSelectedApp(app)
+                            homeScreenModel.showBottomSheet.value = true
+                            doHapticFeedBack(haptics)
+                        },
+                        onSettingsClick = {}
+                    )
                 }
             }
 
@@ -306,37 +281,7 @@ fun AppsList(
             }
         }
 
-        // Private space settings
-        AnimatedVisibility(
-            visible = homeScreenModel.showPrivateSpaceSettings.value && mainAppModel.isPrivateSpaceUnlocked.value,
-            enter = fadeIn(),
-            exit = fadeOut()
-        ) {
-            PrivateSpaceSettings(
-                mainAppModel.getContext(),
-                homeScreenModel.interactionSource
-            ) {
-                homeScreenModel.showPrivateSpaceSettings.value = false
-            }
-        }
-
-        AnimatedVisibility(
-            visible = !homeScreenModel.showPrivateSpaceSettings.value,
-            enter = fadeIn(),
-            exit = fadeOut(),
-            modifier = Modifier
-                .fillMaxWidth()
-                .align(Alignment.BottomStart)
-                .height(
-                    if (showSearch && bottomSearch) {
-                        200.dp
-                    } else {
-                        40.dp
-                    }
-                )
-        ) {
-            ListGradient()
-        }
+        ListGradient() // Adds a gradient to the bottom of the screen just to make it a bit nicer
 
         // Work apps
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) {

@@ -42,7 +42,6 @@ import com.geecee.escapelauncher.ui.views.Settings
 import com.geecee.escapelauncher.utils.AppUtils
 import com.geecee.escapelauncher.utils.AppUtils.configureAnalytics
 import com.geecee.escapelauncher.core.common.InstalledApp
-import com.geecee.escapelauncher.utils.PrivateSpaceStateReceiver
 import com.geecee.escapelauncher.utils.ScreenOffReceiver
 import com.geecee.escapelauncher.utils.getBooleanSetting
 import com.geecee.escapelauncher.utils.managers.ScreenTimeManager
@@ -56,7 +55,6 @@ import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class MainHomeScreenActivity : ComponentActivity() {
-    private lateinit var privateSpaceReceiver: PrivateSpaceStateReceiver
     private lateinit var screenOffReceiver: ScreenOffReceiver
     private lateinit var packageChangeReceiver: BroadcastReceiver
 
@@ -157,18 +155,6 @@ class MainHomeScreenActivity : ComponentActivity() {
         val filter = IntentFilter(Intent.ACTION_SCREEN_OFF)
         registerReceiver(screenOffReceiver, filter)
 
-        //Private space receiver
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) {
-            privateSpaceReceiver = PrivateSpaceStateReceiver { isUnlocked ->
-                viewModel.isPrivateSpaceUnlocked.value = isUnlocked
-            }
-            val intentFilter = IntentFilter().apply {
-                addAction(Intent.ACTION_PROFILE_AVAILABLE)
-                addAction(Intent.ACTION_PROFILE_UNAVAILABLE)
-            }
-            registerReceiver(privateSpaceReceiver, intentFilter)
-        }
-
         // Package change receiver
         packageChangeReceiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context, intent: Intent) {
@@ -220,22 +206,18 @@ class MainHomeScreenActivity : ComponentActivity() {
 
         // Reset home
         try {
+            //todo: fix private space going home when u try and sign in
             AppUtils.resetHome(homeScreenModel, viewModel.shouldGoHomeOnResume.value)
             viewModel.shouldGoHomeOnResume.value = false
         } catch (ex: Exception) {
             Log.e("ERROR", ex.toString())
         }
-
-
     }
 
     override fun onDestroy() {
         super.onDestroy()
 
         // Stop the receivers
-        if (::privateSpaceReceiver.isInitialized) {
-            unregisterReceiver(privateSpaceReceiver)
-        }
         if (::screenOffReceiver.isInitialized) {
             unregisterReceiver(screenOffReceiver)
         }
