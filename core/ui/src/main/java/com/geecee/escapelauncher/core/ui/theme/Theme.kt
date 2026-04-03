@@ -549,6 +549,13 @@ fun EscapeTheme(
     )
 }
 
+@Composable
+fun EscapePreviewTheme(content: @Composable (() -> Unit)) {
+    MaterialTheme(
+        colorScheme = offLightScheme, content = content
+    )
+}
+
 enum class AppTheme(
     val id: Int,
     @get:StringRes val nameRes: Int

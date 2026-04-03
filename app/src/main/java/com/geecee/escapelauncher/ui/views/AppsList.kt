@@ -16,8 +16,6 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Button
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableLongStateOf
@@ -40,6 +38,8 @@ import com.geecee.escapelauncher.core.ui.composables.HomeScreenItem
 import com.geecee.escapelauncher.core.ui.composables.ListGradient
 import com.geecee.escapelauncher.core.ui.composables.SettingsSpacer
 import com.geecee.escapelauncher.core.ui.theme.transparentHalf
+import com.geecee.escapelauncher.feature.securefolder.SecureFolderButton
+import com.geecee.escapelauncher.feature.securefolder.canUseSecureFolder
 import com.geecee.escapelauncher.feature.workapps.WorkApps
 import com.geecee.escapelauncher.feature.workapps.WorkAppsFab
 import com.geecee.escapelauncher.privatespace.PrivateSpace
@@ -48,10 +48,8 @@ import com.geecee.escapelauncher.utils.AppUtils.doHapticFeedBack
 import com.geecee.escapelauncher.utils.AppUtils.formatScreenTime
 import com.geecee.escapelauncher.utils.AppUtils.openApp
 import com.geecee.escapelauncher.utils.AppUtils.resetHome
-import com.geecee.escapelauncher.utils.canUseSecureFolder
 import com.geecee.escapelauncher.utils.getAppsAlignment
 import com.geecee.escapelauncher.utils.getBooleanSetting
-import com.geecee.escapelauncher.utils.launchSecureFolder
 import com.geecee.escapelauncher.MainAppViewModel as MainAppModel
 
 /**
@@ -240,13 +238,7 @@ fun AppsList(
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P && canUseSecureFolder(mainAppModel.getContext())) {
 
                 item {
-                    Spacer(modifier = Modifier.height(20.dp))
-
-                    Button({
-                        launchSecureFolder(mainAppModel.getContext())
-                    }) {
-                        Text(stringResource(R.string.launch_secure_folder))
-                    }
+                    SecureFolderButton()
                 }
 
             }

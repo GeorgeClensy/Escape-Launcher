@@ -2,23 +2,18 @@ package com.geecee.escapelauncher.privatespace
 
 import android.os.Build
 import androidx.annotation.RequiresApi
-import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardColors
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -30,16 +25,14 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.geecee.escapelauncher.core.common.InstalledApp
 import com.geecee.escapelauncher.core.ui.R
-import com.geecee.escapelauncher.core.ui.theme.CardContainerColor
-import com.geecee.escapelauncher.core.ui.theme.CardContainerColorDisabled
+import com.geecee.escapelauncher.core.ui.composables.LockedAppFolderUI
+import com.geecee.escapelauncher.core.ui.composables.LockedFolderCard
 import com.geecee.escapelauncher.core.ui.theme.ContentColor
-import com.geecee.escapelauncher.core.ui.theme.ContentColorDisabled
 import com.geecee.escapelauncher.core.ui.theme.SecondaryCardContainerColor
 
 /**
@@ -58,23 +51,8 @@ fun PrivateSpace(
     val isUnlocked by viewModel.isUnlocked.collectAsState()
     val privateApps by viewModel.PrivateSpaceApps.collectAsState()
 
-    Card(
+    LockedFolderCard(
         modifier = modifier
-            .fillMaxWidth()
-            .clip(MaterialTheme.shapes.extraLarge)
-            .animateContentSize()
-            .clickable(
-                onClick = {
-                    if (!isUnlocked) {
-                        viewModel.togglePrivateSpaceProfile(onLauncherNotDefault = {})
-                    }
-                },
-            ), colors = CardColors(
-            containerColor = CardContainerColor,
-            contentColor = ContentColor,
-            disabledContentColor = CardContainerColorDisabled,
-            disabledContainerColor = ContentColorDisabled,
-        )
     ) {
         if (isUnlocked) {
             Column(
@@ -139,32 +117,15 @@ fun PrivateSpace(
                 Spacer(Modifier.height(20.dp))
             }
         } else {
-            Box(
-                modifier = Modifier
-                    .padding(20.dp)
-                    .fillMaxSize()
-            ) {
-                Text(
-                    stringResource(R.string.private_space),
-                    style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier.align(Alignment.CenterStart)
-                )
-
-                IconButton(
-                    onClick = {
-                        viewModel.togglePrivateSpaceProfile(onLauncherNotDefault = {})
-                    }, modifier = Modifier.align(Alignment.CenterEnd), colors = IconButtonColors(
-                        containerColor = SecondaryCardContainerColor,
-                        contentColor = ContentColor,
-                        disabledContainerColor = SecondaryCardContainerColor,
-                        disabledContentColor = ContentColor
-                    )
-                ) {
-                    Icon(
-                        Icons.Default.Lock, stringResource(R.string.lock_private_space)
-                    )
+            LockedAppFolderUI(
+                text = stringResource(R.string.private_space),
+                iconContentDescription = stringResource(R.string.unlock_private_space),
+                unlockClick = {
+                        viewModel.togglePrivateSpaceProfile(onLauncherNotDefault = {
+                            //todo: do something here
+                        })
                 }
-            }
+            )
         }
     }
 }

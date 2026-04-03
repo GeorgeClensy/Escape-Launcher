@@ -92,6 +92,7 @@ dependencies {
     implementation(project(":feature:homescreen"))
     implementation(project(":feature:workapps"))
     implementation(project(":feature:privatespace"))
+    implementation(project(":feature:securefolder"))
 
     implementation(libs.androidx.hilt.navigation.compose)
 }
