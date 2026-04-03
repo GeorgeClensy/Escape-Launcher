@@ -133,7 +133,7 @@ Escape Launcher has four build variants:
   Contributing
 </h1>
 
-If you wish to contribute code, feel free to have a look at the projects page to see what needs doing, comment on any issues before starting just to make sure I haven't already done it and that I do want it in the app. Then, clone the repo, make your changes and create a PR. Apologies if I decline the merge. Please avoid any "vibe coding" or coding purely with AI and no human imput and try to follow the project style guide.
+If you wish to contribute code, feel free to have a look at the projects page to see what needs doing, comment on any issues before starting just to make sure I haven't already done it and that I do want it in the app. Then, clone the repo, make your changes and create a PR. Apologies if I decline the merge. Please avoid any "vibe coding" or coding purely with AI and no human imput and try to follow the [project style guide](./STYLE_GUIDE.md).
 
 You can also help by translating the app's strings. To do this: clone the repo, go to `./core/ui/res/values-en` and copy `string.xml` into `./core/ui/res/values-NEW-LANG-CODE/strings.xml`. Then edit the strings.xml and create a PR. You can see a list of all the language codes [here](https://github.com/championswimmer/android-locales). I will check your translations with AI and then will merge your branch.
 
