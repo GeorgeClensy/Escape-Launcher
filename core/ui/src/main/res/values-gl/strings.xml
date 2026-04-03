@@ -1,0 +1,135 @@
+<resources>
+    <!-- Privacy and Analytics stuff -->
+    <string name="analytics_and_data_collection">Análise e Recollida de datos</string>
+    <string name="anonymous_data">Usamos datos anónimos para mellorar a experiencia de uso coa lanzadora Escape. Comproba que liches a información antes de conceder permiso.</string>
+    <string name="allow">Permitir</string>
+    <string name="deny">Rexeitar</string>
+    <string name="read_privacy_policy">Directiva de privacidade</string>
+    <!-- All Apps strings -->
+    <string name="all_apps">Todas as Apps</string>
+    <string name="uninstall">Desinstalar</string>
+    <string name="hide">Ocultar</string>
+    <string name="add_to_fav">Engadir a Favoritas</string>
+    <string name="rem_from_fav">Retirar das Favoritas</string>
+    <string name="add_open_challenge">Engadir conta atrás para abrir</string>
+    <string name="app_info">Info da App</string>
+    <string name="search">Buscar</string>
+    <string name="unlock_private_space">Desbloquear Espazo Privado</string>
+    <string name="lock_private_space">Bloquear Espazo Privado</string>
+    <string name="private_space">Espazo Privado</string>
+    <string name="private_space_settings">Axustes do Espazo Privado</string>
+    <string name="private_space_search_term">pri</string>
+
+
+    <!-- Work Profile strings -->
+    <string name="work_profile">Apps para Traballo</string>
+    <string name="unpause">Reactivar</string>
+    <string name="lock_work_profile">Deter Apps para Traballo</string>
+    <string name="work_apps_are_paused">As apps para Traballo están en pausa</string>
+    <string name="you_wont_receive_notifications_from_work_apps">Non vas recibir notificacións das apps do traballo</string>
+
+    <!-- Hidden Apps strings-->
+    <string name="hidden_apps">Apps ocultas</string>
+    <string name="swipe_to_show_app">Despraza para volver mostrar app</string>
+
+    <!-- Settings strings-->
+    <string name="settings">Axustes</string>
+    <string name="make_default_launcher">Lanzadora predeterminada</string>
+    <string name="left">Esquerda</string>
+    <string name="center">Centro</string>
+    <string name="right">Dereita</string>
+    <string name="top">Arriba</string>
+    <string name="bottom">Abaixo</string>
+    <string name="search_box">Caixa de busca</string>
+    <string name="widget">Widget</string>
+    <string name="remove_widget">Retirar Widget</string>
+    <string name="alignments">Enfeitamento</string>
+    <string name="choose_font">Tipo de letra</string>
+    <string name="select_widget">Seleccionar Widget</string>
+    <string name="manage_open_challenges">Xestión da conta atrás</string>
+    <string name="manage_hidden_apps">Xestión de apps ocultas</string>
+    <string name="escape_launcher">Lanzadora Escape</string>
+    <string name="auto_open">Busca rápida</string>
+    <string name="offset">Desprazamento</string>
+    <string name="show_clock">Mostrar reloxo</string>
+    <string name="height">Altura</string>
+    <string name="width">Anchura</string>
+    <string name="big_clock">Reloxo grande</string>
+    <string name="home">Inicio</string>
+    <string name="apps">Apps</string>
+    <string name="font">Letra</string>
+    <string name="pitch_black">Negro total</string>
+    <string name="theme">Decorado</string>
+    <string name="light">Claro</string>
+    <string name="dark">Escuro</string>
+    <string name="screen_time_on_app">Tempo de Pantalla das Apps</string>
+    <string name="screen_time_on_home_screen">Tempo en pantalla do Inicio</string>
+    <string name="hide_private_space_in_search">Espazo privado oculto</string>
+    <string name="haptic_feedback">Resposta háptica</string>
+    <string name="done">Feito</string>
+    <string name="syncLightDark">Sincr. co sistema, claro/escuro</string>
+    <string name="match_system_wallpaper">Facer coincidir fondo de pantalla do sistema coa decoración</string>
+    <string name="date">Data</string>
+    <string name="home_screen_options">Opcións da Pantalla de Inicio</string>
+    <string name="screen_time">Tempo en Pantalla</string>
+    <string name="other">Outros</string>
+    <string name="general">Xeral</string>
+    <string name="reset_to_default">Restablecer predeterminados</string>
+    <string name="remove">Retirar</string>
+    <string name="twelve_hour_clock_setting">Reloxo 12 horas</string>
+    <string name="hide_screen_time_page">Ocultar páxina de tempo en pantalla</string>
+    <string name="show_hidden_apps_in_search">Mostrar apps ocultas ao buscar</string>
+    <string name="manage_favourite_apps">Xestión das apps favoritas</string>
+    <string name="search_at_bottom">Busca na parte inferior</string>
+    <string name="apps_list_auto_search">Abrir automáticamente a busca</string>
+    <string name="sponsor">Patrocinio</string>
+    <string name="font_licences">Licenzas das tipografías</string>
+    <string name="show_weather">Mostrar a Meteoroloxía</string>
+    <string name="choose_weather_app">Escoller app do tempo</string>
+    <string name="set_weather_app_in_settings">Establecer app meteorolóxica nos axustes</string>
+    <string name="double_tap_to_lock">Dobre toque para bloquear</string>
+    <string name="enable_accessibility">Conceder permiso de accesibilidade</string>
+    <string name="accessibility_not_granted_msg">Concede o permiso de accesibilidade nos axustes</string>
+    <string name="launcher_must_be_default_to_pause_or_unpause_work_apps">Hai que establecer a lanzadora como predeterminada para deter ou reactivar as apps do traballo</string>
+    <string name="use_farenhight">Usar fahrenheit</string>
+
+    <!-- First time strings -->
+    <string name="continue_str">Continuar</string>
+    <string name="most_people_waste">A maioría das persoas pasa máis de</string>
+    <string name="hours_every_day">horas cada día co móbil</string>
+    <string name="thats">Iso son</string>
+    <string name="every_week">días cada semana</string>
+    <string name="adds_to">Que suman</string>
+    <string name="years_straight">anos de vida</string>
+    <string name="choose_your_favourite_apps">Escolle as túas apps favoritas</string>
+    <string name="set_launcher">Establece lanzadora predetermianda</string>
+    <string name="already_default">Xa é a predeterminada</string>
+    <string name="set_escape">Establece Escape como app lanzadora predeterminada</string>
+    <string name="stop_going_back">Isto vai evitar que volvas á túa pantalla de inicio predeterminada</string>
+    <string name="swipe_for_all_apps">Desprazar para Todas as Apps</string>
+    <string name="hold_for_settings">Manter premido para Axustes</string>
+    <string name="accessibility_title">Permiso para Bloquear Pantalla</string>
+    <string name="accessibility_description">Escape Launcher usa APIs de accesibilidade de Android para bloquear a pantalla con dobre toque. Se non concedes este permiso agora poderás facelo máis tarde nos axustes.</string>
+    <string name="grant_accessibility">Permitir</string>
+
+    <!-- Screen time dashboard -->
+    <string name="of_your_day_spent_on_your_phone">Do teu día mirando o móbil</string>
+    <string name="higher_we_rec">Superior ao recomendable</string>
+    <string name="no_apps_used">Aínda non abriches ningunha app!</string>
+    
+    <!-- Themes -->
+    <string name="light_red">Vermello claro</string>
+    <string name="dark_red">Vermello escuro</string>
+    <string name="light_blue">Azul claro</string>
+    <string name="dark_blue">Azul escuro</string>
+    <string name="light_yellow">Amarelo claro</string>
+    <string name="dark_yellow">Amarelo escuro</string>
+    <string name="light_green">Verde claro</string>
+    <string name="dark_green">Verde escuro</string>
+    <string name="off_white">Branco estragado</string>
+    <string name="system">Sistema</string>
+    <string name="accessibility_service_description">Permite que a app apague a pantalla.</string>
+    <string name="back">Volver</string>
+    <string name="launch_secure_folder">Cartafol Seguro</string>
+    <string name="enable_secure_folder_on_settings">Activa o Cartafol Seguro nos axustes</string>
+</resources>
