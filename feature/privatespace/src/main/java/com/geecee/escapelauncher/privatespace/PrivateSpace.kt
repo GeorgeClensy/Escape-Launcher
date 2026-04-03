@@ -37,6 +37,14 @@ import com.geecee.escapelauncher.core.ui.theme.SecondaryCardContainerColor
 
 /**
  * Android 15+ Private space UI with apps, settings button and lock button
+ *
+ * @param modifier The modifier to apply to the UI
+ * @param viewModel The view model to use
+ * @param onAppClick The action to perform when an app is clicked
+ * @param onAppLongClick The action to perform when an app is long clicked
+ * @param onSettingsClick The action to perform when the settings button is clicked
+ *
+ * @author George Clensy
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @RequiresApi(Build.VERSION_CODES.VANILLA_ICE_CREAM)
@@ -49,7 +57,7 @@ fun PrivateSpace(
     onSettingsClick: () -> Unit
 ) {
     val isUnlocked by viewModel.isUnlocked.collectAsState()
-    val privateApps by viewModel.PrivateSpaceApps.collectAsState()
+    val privateApps by viewModel.privateSpaceApps.collectAsState()
 
     LockedFolderCard(
         modifier = modifier
@@ -134,6 +142,12 @@ fun PrivateSpace(
 
 /**
  * UI component for displaying a single Private Space app item.
+ *
+ * @param appName The name of the app
+ * @param onLongClick The action to perform when the app is long clicked
+ * @param onClick The action to perform when the app is clicked
+ *
+ * @author George Clensy
  */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable

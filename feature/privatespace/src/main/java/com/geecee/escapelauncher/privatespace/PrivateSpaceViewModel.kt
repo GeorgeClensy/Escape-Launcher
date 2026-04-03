@@ -27,8 +27,8 @@ class PrivateSpaceViewModel @Inject constructor(
     private val _isUnlocked = MutableStateFlow(false)
     val isUnlocked: StateFlow<Boolean> = _isUnlocked.asStateFlow()
 
-    private val _PrivateSpaceApps = MutableStateFlow<List<InstalledApp>>(emptyList())
-    val PrivateSpaceApps: StateFlow<List<InstalledApp>> = _PrivateSpaceApps.asStateFlow()
+    private val _privateSpaceApps = MutableStateFlow<List<InstalledApp>>(emptyList())
+    val privateSpaceApps: StateFlow<List<InstalledApp>> = _privateSpaceApps.asStateFlow()
 
     private var privateSpaceReceiver: PrivateSpaceStateReceiver? = null
 
@@ -44,7 +44,7 @@ class PrivateSpaceViewModel @Inject constructor(
                 if (isUnlocked) {
                     refreshPrivateSpaceApps()
                 } else {
-                    _PrivateSpaceApps.value = emptyList()
+                    _privateSpaceApps.value = emptyList()
                 }
             }
             val intentFilter = IntentFilter().apply {
@@ -60,9 +60,9 @@ class PrivateSpaceViewModel @Inject constructor(
             val unlocked = isPrivateSpaceUnlocked(context)
             _isUnlocked.value = unlocked
             if (unlocked) {
-                _PrivateSpaceApps.value = getPrivateSpaceApps(context).sortedBy { it.displayName.lowercase() }
+                _privateSpaceApps.value = getPrivateSpaceApps(context).sortedBy { it.displayName.lowercase() }
             } else {
-                _PrivateSpaceApps.value = emptyList()
+                _privateSpaceApps.value = emptyList()
             }
         }
     }

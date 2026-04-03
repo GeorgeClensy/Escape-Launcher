@@ -3,7 +3,6 @@ package com.geecee.escapelauncher.feature.workapps
 import android.os.Build
 import android.widget.Toast
 import androidx.annotation.RequiresApi
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
@@ -20,8 +19,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Work
 import androidx.compose.material.icons.rounded.WorkOff
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardColors
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -35,7 +32,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
@@ -44,16 +40,22 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.geecee.escapelauncher.core.common.InstalledApp
 import com.geecee.escapelauncher.core.ui.R
+import com.geecee.escapelauncher.core.ui.composables.LockedFolderCard
 import com.geecee.escapelauncher.core.ui.theme.BackgroundColor
-import com.geecee.escapelauncher.core.ui.theme.CardContainerColor
-import com.geecee.escapelauncher.core.ui.theme.CardContainerColorDisabled
 import com.geecee.escapelauncher.core.ui.theme.ContentColor
-import com.geecee.escapelauncher.core.ui.theme.ContentColorDisabled
 import com.geecee.escapelauncher.core.ui.theme.SecondaryCardContainerColor
 import com.geecee.escapelauncher.core.ui.theme.primaryContentColor
 
 // IMPORTANT TODO: Fix that the app doesn't track the work apps state for example if you uninstall an app escape will still show it until it has been restarted which can cause it to crash if you then tap on the app
 
+/**
+ * A FAB with a Work Profile icon.
+ *
+ * @param modifier The modifier to apply to the FAB
+ * @param onClick The action to perform when the FAB is clicked
+ *
+ * @author George Clensy
+ */
 @Composable
 fun WorkAppsFab(
     modifier: Modifier = Modifier,
@@ -72,7 +74,13 @@ fun WorkAppsFab(
 }
 
 /**
- * UI component for displaying a single Work Profile app item.
+ * UI component for displaying a single Work Profile app item. Just a `Text()` with `bodyMedium`
+ *
+ * @param appName The name of the app
+ * @param onLongClick The action to perform when the app is long clicked
+ * @param onClick The action to perform when the app is clicked
+ *
+ * @author George Clensy
  */
 @RequiresApi(Build.VERSION_CODES.VANILLA_ICE_CREAM)
 @OptIn(ExperimentalFoundationApi::class)
@@ -94,6 +102,16 @@ fun WorkAppItem(
     )
 }
 
+/**
+ * The main work apps UI
+ *
+ * @param modifier The modifier to apply to the UI
+ * @param viewModel The view model to use
+ * @param onAppClick The action to perform when an app is clicked
+ * @param onAppLongClick The action to perform when an app is long clicked
+ *
+ * @author George Clensy
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @RequiresApi(Build.VERSION_CODES.VANILLA_ICE_CREAM)
 @Composable
@@ -108,20 +126,11 @@ fun WorkApps(
     val isUnlocked by viewModel.isUnlocked.collectAsState()
     val workApps by viewModel.workApps.collectAsState()
 
-    // Container
-    Card(
-        modifier
-            .padding(horizontal = 30.dp, vertical = 120.dp)
-            .clip(MaterialTheme.shapes.extraLarge),
-        colors = CardColors(
-            containerColor = CardContainerColor,
-            contentColor = ContentColor,
-            disabledContentColor = CardContainerColorDisabled,
-            disabledContainerColor = ContentColorDisabled,
-        )
-    ) {
+    LockedFolderCard(
+       modifier = modifier.padding(horizontal = 30.dp, vertical = 120.dp))
+    {
         // Work apps unlocked
-        AnimatedVisibility(isUnlocked) {
+        if(isUnlocked) {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
@@ -177,9 +186,7 @@ fun WorkApps(
                 }
             }
         }
-
-        // Work apps locked
-        AnimatedVisibility(!isUnlocked) {
+        else {
             Column(
                 Modifier,
                 horizontalAlignment = Alignment.CenterHorizontally
