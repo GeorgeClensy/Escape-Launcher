@@ -1,7 +1,7 @@
 <!--suppress ALL -->
 <div align="center">
 
-<img src="https://github.com/GeorgeClensy/Escape-Launcher/blob/master/branding/Banner.png" height="350" align="center"/>
+<img src="branding/escape-launcher-banner/launcher-banner.png" height="350" align="center"/>
 
 <br>
 
