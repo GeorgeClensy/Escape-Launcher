@@ -5,5 +5,5 @@ plugins {
 }
 
 android {
-    namespace = "com.geecee.escapelauncher.domain"
+    namespace = "com.geecee.escapelauncher.core.domain"
 }

@@ -5,6 +5,7 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.os.Build
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.geecee.escapelauncher.core.common.InstalledApp
 import com.geecee.escapelauncher.core.common.PrivateSpaceStateReceiver
 import com.geecee.escapelauncher.core.common.getPrivateSpaceApps
@@ -12,16 +13,19 @@ import com.geecee.escapelauncher.core.common.isDefaultLauncher
 import com.geecee.escapelauncher.core.common.isPrivateSpaceUnlocked
 import com.geecee.escapelauncher.core.common.lockPrivateSpace
 import com.geecee.escapelauncher.core.common.unlockPrivateSpace
+import com.geecee.escapelauncher.core.domain.repository.SettingsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class PrivateSpaceViewModel @Inject constructor(
-    @ApplicationContext private val context: Context
+    @ApplicationContext private val context: Context,
+    private val repository: SettingsRepository
 ) : ViewModel() {
 
     private val _isUnlocked = MutableStateFlow(false)
@@ -86,6 +90,13 @@ class PrivateSpaceViewModel @Inject constructor(
         super.onCleared()
         privateSpaceReceiver?.let {
             context.unregisterReceiver(it)
+        }
+    }
+
+    val hiddenPrivateSpace = repository.hidePrivateSpace
+    fun setHiddenPrivateSpace(enabled: Boolean) {
+        viewModelScope.launch {
+            repository.setHidePrivateSpace(enabled)
         }
     }
 }

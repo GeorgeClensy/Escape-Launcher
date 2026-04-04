@@ -1,5 +1,6 @@
 [versions]
 agp = "9.1.0"
+datastorePreferences = "1.2.1"
 kotlin = "2.3.20"
 ksp = "2.3.6"
 coreSplashscreen = "1.2.0"
@@ -24,6 +25,7 @@ material3 = "1.4.0"
 [libraries]
 # Dependencies for build-logic
 android-gradlePlugin = { group = "com.android.tools.build", name = "gradle", version.ref = "agp" }
+androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastorePreferences" }
 kotlin-gradlePlugin = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-plugin", version.ref = "kotlin" }
 compose-compiler-gradlePlugin = { group = "org.jetbrains.kotlin", name = "compose-compiler-gradle-plugin", version.ref = "kotlin" }
 hilt-gradlePlugin = { group = "com.google.dagger", name = "hilt-android-gradle-plugin", version.ref = "hilt" }
