@@ -258,8 +258,7 @@ fun AppsList(
                             homeScreenModel.updateSelectedApp(app)
                             homeScreenModel.showBottomSheet.value = true
                             doHapticFeedBack(haptics)
-                        },
-                        onSettingsClick = {}
+                        }
                     )
                 }
             }

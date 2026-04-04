@@ -7,8 +7,9 @@ import com.geecee.escapelauncher.core.data.datastore.PreferencesKeys
 import com.geecee.escapelauncher.core.domain.repository.SettingsRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import javax.inject.Inject
 
-class SettingsRepositoryImpl(
+class SettingsRepositoryImpl @Inject constructor(
     private val dataStore: DataStore<Preferences>
 ) : SettingsRepository {
     override val hapticFeedBackEnabled: Flow<Boolean>

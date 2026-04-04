@@ -32,6 +32,7 @@ import com.geecee.escapelauncher.core.common.InstalledApp
 import com.geecee.escapelauncher.core.ui.R
 import com.geecee.escapelauncher.core.ui.composables.LockedAppFolderUI
 import com.geecee.escapelauncher.core.ui.composables.LockedFolderCard
+import com.geecee.escapelauncher.core.ui.composables.SettingsSwitch
 import com.geecee.escapelauncher.core.ui.theme.ContentColor
 import com.geecee.escapelauncher.core.ui.theme.SecondaryCardContainerColor
 
@@ -42,7 +43,6 @@ import com.geecee.escapelauncher.core.ui.theme.SecondaryCardContainerColor
  * @param viewModel The view model to use
  * @param onAppClick The action to perform when an app is clicked
  * @param onAppLongClick The action to perform when an app is long clicked
- * @param onSettingsClick The action to perform when the settings button is clicked
  *
  * @author George Clensy
  */
@@ -53,11 +53,12 @@ fun PrivateSpace(
     modifier: Modifier = Modifier,
     viewModel: PrivateSpaceViewModel = hiltViewModel(),
     onAppClick: (InstalledApp) -> Unit,
-    onAppLongClick: (InstalledApp) -> Unit,
-    onSettingsClick: () -> Unit
+    onAppLongClick: (InstalledApp) -> Unit
 ) {
     val isUnlocked by viewModel.isUnlocked.collectAsState()
     val privateApps by viewModel.privateSpaceApps.collectAsState()
+    val showSettings by viewModel.showSettings.collectAsState()
+    val hiddenPrivateSpaceSetting by viewModel.hiddenPrivateSpace.collectAsState(initial = false)
 
     LockedFolderCard(
         modifier = modifier
@@ -83,7 +84,7 @@ fun PrivateSpace(
                     ) {
                         IconButton(
                             onClick = {
-                                onSettingsClick()
+                                viewModel.toggleSettings()
                             }, modifier = Modifier, colors = IconButtonColors(
                                 containerColor = SecondaryCardContainerColor,
                                 contentColor = ContentColor,
@@ -114,12 +115,25 @@ fun PrivateSpace(
                     }
                 }
 
-                privateApps.forEach { app ->
-                    PrivateAppItem(app.displayName, {
-                        onAppLongClick(app)
-                    }) {
-                        onAppClick(app)
+                if (!showSettings) {
+                    privateApps.forEach { app ->
+                        PrivateAppItem(app.displayName, {
+                            onAppLongClick(app)
+                        }) {
+                            onAppClick(app)
+                        }
                     }
+                }
+                else {
+                    SettingsSwitch(
+                        label = stringResource(R.string.hide_private_space_in_search),
+                        checked = hiddenPrivateSpaceSetting,
+                        onCheckedChange = { enabled ->
+                            viewModel.setHiddenPrivateSpace(enabled)
+                        },
+                        isTopOfGroup = true,
+                        isBottomOfGroup = true,
+                    )
                 }
 
                 Spacer(Modifier.height(20.dp))

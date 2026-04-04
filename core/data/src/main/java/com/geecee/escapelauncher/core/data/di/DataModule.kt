@@ -14,6 +14,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
+@Suppress("unused") // It is used by the generated build code.
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class DataModule {

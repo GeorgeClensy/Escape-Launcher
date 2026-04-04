@@ -34,6 +34,13 @@ class PrivateSpaceViewModel @Inject constructor(
     private val _privateSpaceApps = MutableStateFlow<List<InstalledApp>>(emptyList())
     val privateSpaceApps: StateFlow<List<InstalledApp>> = _privateSpaceApps.asStateFlow()
 
+    private val _showSettings = MutableStateFlow(false)
+    val showSettings: StateFlow<Boolean> = _showSettings.asStateFlow()
+    fun toggleSettings() {
+        _showSettings.value = !_showSettings.value
+    }
+
+
     private var privateSpaceReceiver: PrivateSpaceStateReceiver? = null
 
     init {
