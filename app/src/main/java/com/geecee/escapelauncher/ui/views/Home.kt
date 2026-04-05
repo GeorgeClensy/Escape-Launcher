@@ -26,7 +26,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -59,9 +58,6 @@ import com.geecee.escapelauncher.utils.AppUtils.resetHome
 import com.geecee.escapelauncher.utils.WidgetsScreen
 import com.geecee.escapelauncher.utils.analyticsProxy
 import com.geecee.escapelauncher.utils.getStringSetting
-import com.geecee.escapelauncher.utils.getWidgetHeight
-import com.geecee.escapelauncher.utils.getWidgetOffset
-import com.geecee.escapelauncher.utils.getWidgetWidth
 import com.geecee.escapelauncher.utils.managers.getTotalUsageForDate
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -94,6 +90,11 @@ fun HomeScreen(
     val firstTimeHelp by homeScreenViewModel.firstTimeHelp.collectAsState(initial = true)
     val homeAlignment by homeScreenViewModel.homeAlignment.collectAsState(initial = Alignment.CenterHorizontally)
     val homeVAlignment by homeScreenViewModel.homeVAlignment.collectAsState(initial = Arrangement.Center)
+
+    val widgetOffsetPref by homeScreenViewModel.widgetOffset.collectAsState(initial = 0f)
+    val widgetHeight by homeScreenViewModel.widgetHeight.collectAsState(initial = 125f)
+    val widgetWidth by homeScreenViewModel.widgetWidth.collectAsState(initial = 250f)
+
     val (hour, minute, _) = timeParts
 
     LaunchedEffect(twelveHourClock) {
@@ -297,13 +298,13 @@ fun HomeScreen(
         //Widgets
         item {
             // Find out offset of widget
-            val widgetOffset = remember(homeAlignment) {
+            val widgetOffset = remember(homeAlignment, widgetOffsetPref) {
                 val alignmentOffset = when (homeAlignment) {
                     Alignment.Start -> -8
                     Alignment.End -> 8
                     else -> 0
                 }
-                alignmentOffset + getWidgetOffset(mainAppModel.getContext()).toInt()
+                alignmentOffset + widgetOffsetPref.toInt()
             }
 
             WidgetsScreen(
@@ -314,8 +315,8 @@ fun HomeScreen(
                         )
                     }
                     .size(
-                        (getWidgetWidth(mainAppModel.getContext())).dp,
-                        (getWidgetHeight(mainAppModel.getContext())).dp
+                        widgetWidth.dp,
+                        widgetHeight.dp
                     )
                     .padding(0.dp, 0.dp))
         }

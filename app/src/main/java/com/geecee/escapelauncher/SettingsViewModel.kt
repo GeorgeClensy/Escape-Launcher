@@ -18,6 +18,33 @@ class SettingsViewModel @Inject constructor(
 }
 
 @HiltViewModel
+class WidgetOptionsPageViewModel @Inject constructor(
+    @ApplicationContext private val context: Context,
+    private val repository: SettingsRepository
+) : ViewModel() {
+    val widgetOffset = repository.widgetOffset
+    fun setWidgetOffset(value: Float) {
+        viewModelScope.launch {
+            repository.setWidgetOffset(value)
+        }
+    }
+
+    val widgetHeight = repository.widgetHeight
+    fun setWidgetHeight(value: Float) {
+        viewModelScope.launch {
+            repository.setWidgetHeight(value)
+        }
+    }
+
+    val widgetWidth = repository.widgetWidth
+    fun setWidgetWidth(value: Float) {
+        viewModelScope.launch {
+            repository.setWidgetWidth(value)
+        }
+    }
+}
+
+@HiltViewModel
 class MainSettingsPageViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
     private val repository: SettingsRepository

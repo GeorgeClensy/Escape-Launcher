@@ -40,4 +40,13 @@ interface SettingsRepository {
 
     val homeAlignment: Flow<String>
     suspend fun setHomeAlignment(alignment: String)
-}
+
+    val widgetOffset: Flow<Float>
+    suspend fun setWidgetOffset(offset: Float)
+
+    val widgetHeight: Flow<Float>
+    suspend fun setWidgetHeight(height: Float)
+
+    val widgetWidth: Flow<Float>
+    suspend fun setWidgetWidth(width: Float)
+    }

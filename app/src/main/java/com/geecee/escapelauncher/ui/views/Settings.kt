@@ -63,7 +63,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -93,24 +92,26 @@ import com.geecee.escapelauncher.HomeScreenModel
 import com.geecee.escapelauncher.MainSettingsPageViewModel
 import com.geecee.escapelauncher.R
 import com.geecee.escapelauncher.SettingsViewModel
+import com.geecee.escapelauncher.WidgetOptionsPageViewModel
 import com.geecee.escapelauncher.core.common.InstalledApp
 import com.geecee.escapelauncher.core.ui.composables.BulkManager
-import com.geecee.escapelauncher.core.ui.composables.SettingsButton
 import com.geecee.escapelauncher.core.ui.composables.EscapeHeader
+import com.geecee.escapelauncher.core.ui.composables.EscapeSubhead
+import com.geecee.escapelauncher.core.ui.composables.FooterBox
+import com.geecee.escapelauncher.core.ui.composables.SettingsButton
 import com.geecee.escapelauncher.core.ui.composables.SettingsNavigationItem
 import com.geecee.escapelauncher.core.ui.composables.SettingsSingleChoiceSegmentedButtons
 import com.geecee.escapelauncher.core.ui.composables.SettingsSlider
 import com.geecee.escapelauncher.core.ui.composables.SettingsSpacer
-import com.geecee.escapelauncher.core.ui.composables.EscapeSubhead
 import com.geecee.escapelauncher.core.ui.composables.SettingsSwipeableButton
 import com.geecee.escapelauncher.core.ui.composables.SettingsSwitch
-import com.geecee.escapelauncher.core.ui.composables.FooterBox
 import com.geecee.escapelauncher.core.ui.theme.AppTheme
 import com.geecee.escapelauncher.core.ui.theme.CardContainerColor
 import com.geecee.escapelauncher.core.ui.theme.ContentColor
 import com.geecee.escapelauncher.core.ui.theme.primaryContentColor
 import com.geecee.escapelauncher.core.ui.theme.resolveColorScheme
 import com.geecee.escapelauncher.core.ui.theme.transparentHalf
+import com.geecee.escapelauncher.ui.theme.getFontFamily
 import com.geecee.escapelauncher.utils.AppUtils
 import com.geecee.escapelauncher.utils.AppUtils.loadTextFromAssets
 import com.geecee.escapelauncher.utils.AppUtils.resetHome
@@ -122,9 +123,6 @@ import com.geecee.escapelauncher.utils.getAppsAlignmentAsInt
 import com.geecee.escapelauncher.utils.getBooleanSetting
 import com.geecee.escapelauncher.utils.getIntSetting
 import com.geecee.escapelauncher.utils.getSavedWidgetId
-import com.geecee.escapelauncher.utils.getWidgetHeight
-import com.geecee.escapelauncher.utils.getWidgetOffset
-import com.geecee.escapelauncher.utils.getWidgetWidth
 import com.geecee.escapelauncher.utils.isDefaultLauncher
 import com.geecee.escapelauncher.utils.isWidgetConfigurable
 import com.geecee.escapelauncher.utils.launchWidgetConfiguration
@@ -134,9 +132,6 @@ import com.geecee.escapelauncher.utils.saveWidgetId
 import com.geecee.escapelauncher.utils.setBooleanSetting
 import com.geecee.escapelauncher.utils.setIntSetting
 import com.geecee.escapelauncher.utils.setStringSetting
-import com.geecee.escapelauncher.utils.setWidgetHeight
-import com.geecee.escapelauncher.utils.setWidgetOffset
-import com.geecee.escapelauncher.utils.setWidgetWidth
 import com.geecee.escapelauncher.utils.showLauncherSelector
 import com.geecee.escapelauncher.utils.showLauncherSettingsMenu
 import com.geecee.escapelauncher.utils.toggleBooleanSetting
@@ -144,7 +139,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.system.exitProcess
 import com.geecee.escapelauncher.MainAppViewModel as MainAppModel
-import com.geecee.escapelauncher.ui.theme.getFontFamily
 
 
 //
@@ -1006,12 +1000,20 @@ fun ThemeOptions(
 @Suppress("AssignedValueIsNeverRead", "VariableNeverRead")
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun WidgetOptions(context: Context, goBack: () -> Unit) {
+fun WidgetOptions(
+    context: Context,
+    viewModel: WidgetOptionsPageViewModel = hiltViewModel(),
+    goBack: () -> Unit
+) {
     val appWidgetManager = AppWidgetManager.getInstance(context)
     val appWidgetHost = remember { AppWidgetHost(context, WIDGET_HOST_ID) }
     var appWidgetId by remember { mutableIntStateOf(getSavedWidgetId(context)) }
     var appWidgetHostView by remember { mutableStateOf<AppWidgetHostView?>(null) }
     var showCustomPicker by remember { mutableStateOf(false) }
+
+    val widgetOffset by viewModel.widgetOffset.collectAsState(initial = 0f)
+    val widgetHeight by viewModel.widgetHeight.collectAsState(initial = 125f)
+    val widgetWidth by viewModel.widgetWidth.collectAsState(initial = 250f)
 
     // Called whenever the widget cannot be loaded or bound
     fun widgetCouldNotBind(message: String) {
@@ -1157,20 +1159,17 @@ fun WidgetOptions(context: Context, goBack: () -> Unit) {
 
         // Offset slider
         item {
-            var offset by remember { mutableFloatStateOf(getWidgetOffset(context)) }
             SettingsSlider(
                 label = stringResource(R.string.offset),
-                value = offset,
+                value = widgetOffset,
                 onValueChange = {
-                    offset = it
-                    setWidgetOffset(context, offset)
+                    viewModel.setWidgetOffset(it)
                 },
                 valueRange = -20f..20f,
                 steps = 19,
                 resetButtonContentDescription = stringResource(R.string.reset_to_default),
                 onReset = {
-                    offset = 0f
-                    setWidgetOffset(context, offset)
+                    viewModel.setWidgetOffset(0f)
                 },
                 isTopOfGroup = true
             )
@@ -1178,40 +1177,34 @@ fun WidgetOptions(context: Context, goBack: () -> Unit) {
 
         // Height slider
         item {
-            var height by remember { mutableFloatStateOf(getWidgetHeight(context)) }
             SettingsSlider(
                 label = stringResource(R.string.height),
-                value = height,
+                value = widgetHeight,
                 onValueChange = {
-                    height = it
-                    setWidgetHeight(context, height)
+                    viewModel.setWidgetHeight(it)
                 },
                 valueRange = 100f..400f,
                 steps = 9,
                 resetButtonContentDescription = stringResource(R.string.reset_to_default),
                 onReset = {
-                    height = 125f
-                    setWidgetHeight(context, height)
+                    viewModel.setWidgetHeight(125f)
                 }
             )
         }
 
         // Width slider
         item {
-            var width by remember { mutableFloatStateOf(getWidgetWidth(context)) }
             SettingsSlider(
                 label = stringResource(R.string.width),
-                value = width,
+                value = widgetWidth,
                 onValueChange = {
-                    width = it
-                    setWidgetWidth(context, width)
+                    viewModel.setWidgetWidth(it)
                 },
                 valueRange = 100f..400f,
                 steps = 9,
                 resetButtonContentDescription = stringResource(R.string.reset_to_default),
                 onReset = {
-                    width = 250f
-                    setWidgetWidth(context, width)
+                    viewModel.setWidgetWidth(250f)
                 },
                 isBottomOfGroup = true
             )

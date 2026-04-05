@@ -1,6 +1,7 @@
 package com.geecee.escapelauncher.core.data.datastore
 
 import androidx.datastore.preferences.core.booleanPreferencesKey
+import androidx.datastore.preferences.core.floatPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 
 object PreferencesKeys {
@@ -20,4 +21,9 @@ object PreferencesKeys {
     val FIRST_TIME_HELP = booleanPreferencesKey(name = "first_time_help")
     val HOME_V_ALIGNMENT = stringPreferencesKey(name = "home_v_alignment")
     val HOME_ALIGNMENT = stringPreferencesKey(name = "home_alignment")
+
+    //Widget
+    val WIDGET_OFFSET = floatPreferencesKey(name = "widget_offset")
+    val WIDGET_HEIGHT = floatPreferencesKey(name = "widget_height")
+    val WIDGET_WIDTH = floatPreferencesKey(name = "widget_width")
 }

@@ -39,4 +39,8 @@ class NewHomeScreenViewModel @Inject constructor(
             else -> Arrangement.Bottom
         }
     }
-}
+
+    val widgetOffset = repository.widgetOffset
+    val widgetHeight = repository.widgetHeight
+    val widgetWidth = repository.widgetWidth
+    }

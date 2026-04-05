@@ -121,4 +121,31 @@ class SettingsRepositoryImpl @Inject constructor(
     override suspend fun setHomeAlignment(alignment: String) {
         dataStore.edit { preferences -> preferences[PreferencesKeys.HOME_ALIGNMENT] = alignment }
     }
-}
+
+    override val widgetOffset: Flow<Float>
+        get() = dataStore.data.map { preferences ->
+            preferences[PreferencesKeys.WIDGET_OFFSET] ?: 0f
+        }
+
+    override suspend fun setWidgetOffset(offset: Float) {
+        dataStore.edit { preferences -> preferences[PreferencesKeys.WIDGET_OFFSET] = offset }
+    }
+
+    override val widgetHeight: Flow<Float>
+        get() = dataStore.data.map { preferences ->
+            preferences[PreferencesKeys.WIDGET_HEIGHT] ?: 125f
+        }
+
+    override suspend fun setWidgetHeight(height: Float) {
+        dataStore.edit { preferences -> preferences[PreferencesKeys.WIDGET_HEIGHT] = height }
+    }
+
+    override val widgetWidth: Flow<Float>
+        get() = dataStore.data.map { preferences ->
+            preferences[PreferencesKeys.WIDGET_WIDTH] ?: 250f
+        }
+
+    override suspend fun setWidgetWidth(width: Float) {
+        dataStore.edit { preferences -> preferences[PreferencesKeys.WIDGET_WIDTH] = width }
+    }
+    }
