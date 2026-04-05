@@ -7,6 +7,7 @@ import com.geecee.escapelauncher.core.domain.repository.SettingsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import jakarta.inject.Inject
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
 @HiltViewModel
@@ -77,7 +78,41 @@ class MainSettingsPageViewModel @Inject constructor(
         }
     }
 
+    val homeAlignment = repository.homeAlignment.map { alignment ->
+        when (alignment) {
+            "Left" -> 0
+            "Center" -> 1
+            else -> 2
+        }
+    }
+    fun setHomeAlignment(index: Int) {
+        val value = when (index) {
+            0 -> "Left"
+            1 -> "Center"
+            else -> "Right"
+        }
+        viewModelScope.launch {
+            repository.setHomeAlignment(value)
+        }
+    }
 
+    val homeVAlignment = repository.homeVAlignment.map { alignment ->
+        when (alignment) {
+            "Top" -> 0
+            "Center" -> 1
+            else -> 2
+        }
+    }
+    fun setHomeVAlignment(index: Int) {
+        val value = when (index) {
+            0 -> "Top"
+            1 -> "Center"
+            else -> "Bottom"
+        }
+        viewModelScope.launch {
+            repository.setHomeVAlignment(value)
+        }
+    }
 }
 
 

@@ -103,4 +103,22 @@ class SettingsRepositoryImpl @Inject constructor(
     override suspend fun setFirstTimeHelp(enabled: Boolean) {
         dataStore.edit { preferences -> preferences[PreferencesKeys.FIRST_TIME_HELP] = enabled }
     }
+
+    override val homeVAlignment: Flow<String>
+        get() = dataStore.data.map { preferences ->
+            preferences[PreferencesKeys.HOME_V_ALIGNMENT] ?: "Center"
+        }
+
+    override suspend fun setHomeVAlignment(alignment: String) {
+        dataStore.edit { preferences -> preferences[PreferencesKeys.HOME_V_ALIGNMENT] = alignment }
+    }
+
+    override val homeAlignment: Flow<String>
+        get() = dataStore.data.map { preferences ->
+            preferences[PreferencesKeys.HOME_ALIGNMENT] ?: "Center"
+        }
+
+    override suspend fun setHomeAlignment(alignment: String) {
+        dataStore.edit { preferences -> preferences[PreferencesKeys.HOME_ALIGNMENT] = alignment }
+    }
 }

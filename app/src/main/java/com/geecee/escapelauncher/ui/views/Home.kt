@@ -31,6 +31,7 @@ import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
@@ -57,8 +58,6 @@ import com.geecee.escapelauncher.utils.AppUtils.formatScreenTime
 import com.geecee.escapelauncher.utils.AppUtils.resetHome
 import com.geecee.escapelauncher.utils.WidgetsScreen
 import com.geecee.escapelauncher.utils.analyticsProxy
-import com.geecee.escapelauncher.utils.getHomeAlignment
-import com.geecee.escapelauncher.utils.getHomeVAlignment
 import com.geecee.escapelauncher.utils.getStringSetting
 import com.geecee.escapelauncher.utils.getWidgetHeight
 import com.geecee.escapelauncher.utils.getWidgetOffset
@@ -93,6 +92,8 @@ fun HomeScreen(
     val showWeather by homeScreenViewModel.showWeather.collectAsState(initial = false)
     val showScreenTimeApp by homeScreenViewModel.showScreenTimeApp.collectAsState(initial = false)
     val firstTimeHelp by homeScreenViewModel.firstTimeHelp.collectAsState(initial = true)
+    val homeAlignment by homeScreenViewModel.homeAlignment.collectAsState(initial = Alignment.CenterHorizontally)
+    val homeVAlignment by homeScreenViewModel.homeVAlignment.collectAsState(initial = Arrangement.Center)
     val (hour, minute, _) = timeParts
 
     LaunchedEffect(twelveHourClock) {
@@ -139,8 +140,8 @@ fun HomeScreen(
 
     LazyColumn(
         state = scrollState,
-        verticalArrangement = getHomeVAlignment(mainAppModel.getContext()),
-        horizontalAlignment = getHomeAlignment(mainAppModel.getContext()),
+        verticalArrangement = homeVAlignment,
+        horizontalAlignment = homeAlignment,
         modifier = Modifier
             .fillMaxSize()
             .padding(30.dp, 0.dp)
@@ -158,7 +159,7 @@ fun HomeScreen(
                     hour = hour,
                     minute = minute,
                     bigClock = bigClock,
-                    homeAlignment = getHomeAlignment(mainAppModel.getContext()),
+                    homeAlignment = homeAlignment,
                     onClockClick = {
                         try {
                             val intent = Intent(AlarmClock.ACTION_SHOW_ALARMS).apply {
@@ -178,9 +179,6 @@ fun HomeScreen(
             FlowRow (
                 horizontalArrangement = Arrangement.spacedBy(10.dp),
             ) {
-                val context = mainAppModel.getContext()
-                val homeAlignment = getHomeAlignment(context)
-
                 if (showDate) {
                     val dateFormat = remember { SimpleDateFormat("EEE d MMM", Locale.getDefault()) }
                     var dateText by remember { mutableStateOf(dateFormat.format(Date())) }
@@ -299,21 +297,14 @@ fun HomeScreen(
         //Widgets
         item {
             // Find out offset of widget
-            var widgetOffset by remember { mutableIntStateOf(0) }
-            widgetOffset = if (getStringSetting(
-                    mainAppModel.getContext(), "HomeAlignment", "Center"
-                ) == "Left"
-            ) {
-                -8
-            } else if (getStringSetting(
-                    mainAppModel.getContext(), "HomeAlignment", "Center"
-                ) == "Right"
-            ) {
-                8
-            } else {
-                0
+            val widgetOffset = remember(homeAlignment) {
+                val alignmentOffset = when (homeAlignment) {
+                    Alignment.Start -> -8
+                    Alignment.End -> 8
+                    else -> 0
+                }
+                alignmentOffset + getWidgetOffset(mainAppModel.getContext()).toInt()
             }
-            widgetOffset += getWidgetOffset(mainAppModel.getContext()).toInt()
 
             WidgetsScreen(
                 context = mainAppModel.getContext(), modifier = Modifier
@@ -363,7 +354,7 @@ fun HomeScreen(
                 },
                 showScreenTime = showScreenTimeApp,
                 modifier = Modifier,
-                alignment = getHomeAlignment(mainAppModel.getContext())
+                alignment = homeAlignment
             )
         }
 

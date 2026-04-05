@@ -118,12 +118,8 @@ import com.geecee.escapelauncher.utils.CustomWidgetPicker
 import com.geecee.escapelauncher.utils.EscapeAccessibilityService
 import com.geecee.escapelauncher.utils.WIDGET_HOST_ID
 import com.geecee.escapelauncher.utils.changeAppsAlignment
-import com.geecee.escapelauncher.utils.changeHomeAlignment
-import com.geecee.escapelauncher.utils.changeHomeVAlignment
 import com.geecee.escapelauncher.utils.getAppsAlignmentAsInt
 import com.geecee.escapelauncher.utils.getBooleanSetting
-import com.geecee.escapelauncher.utils.getHomeAlignmentAsInt
-import com.geecee.escapelauncher.utils.getHomeVAlignmentAsInt
 import com.geecee.escapelauncher.utils.getIntSetting
 import com.geecee.escapelauncher.utils.getSavedWidgetId
 import com.geecee.escapelauncher.utils.getWidgetHeight
@@ -365,6 +361,8 @@ fun MainSettingsPage(
     val showScreenTimeApp by mainSettingsPageViewModel.showScreenTimeApp.collectAsState(initial = false)
     val showScreenTimeHome by mainSettingsPageViewModel.showScreenTimeHome.collectAsState(initial = false)
     val hapticFeedbackEnabled by mainSettingsPageViewModel.hapticFeedBackEnabled.collectAsState(initial = true)
+    val homeHorizontalIndex by mainSettingsPageViewModel.homeAlignment.collectAsState(initial = 1)
+    val homeVerticalIndex by mainSettingsPageViewModel.homeVAlignment.collectAsState(initial = 1)
 
 
 
@@ -540,14 +538,13 @@ fun MainSettingsPage(
                 stringResource(R.string.center),
                 stringResource(R.string.right)
             )
-            val selectedHomeHorizontalIndex = getHomeAlignmentAsInt(mainAppModel.getContext())
 
             SettingsSingleChoiceSegmentedButtons(
                 label = stringResource(id = R.string.home),
                 options = homeHorizontalOptions,
-                selectedIndex = selectedHomeHorizontalIndex,
+                selectedIndex = homeHorizontalIndex,
                 onSelectedIndexChange = { newIndex ->
-                    changeHomeAlignment(mainAppModel.getContext(), newIndex)
+                    mainSettingsPageViewModel.setHomeAlignment(newIndex)
                 },
                 isTopOfGroup = true // First item in this section
             )
@@ -559,14 +556,13 @@ fun MainSettingsPage(
                 stringResource(R.string.center),
                 stringResource(R.string.bottom)
             )
-            val selectedHomeVerticalIndex = getHomeVAlignmentAsInt(mainAppModel.getContext())
 
             SettingsSingleChoiceSegmentedButtons(
                 label = "",
                 options = homeVerticalOptions,
-                selectedIndex = selectedHomeVerticalIndex,
+                selectedIndex = homeVerticalIndex,
                 onSelectedIndexChange = { newIndex ->
-                    changeHomeVAlignment(mainAppModel.getContext(), newIndex)
+                    mainSettingsPageViewModel.setHomeVAlignment(newIndex)
                 })
         }
 

@@ -1,11 +1,14 @@
 package com.geecee.escapelauncher
 
 import android.content.Context
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.ui.Alignment
 import androidx.lifecycle.ViewModel
 import com.geecee.escapelauncher.core.domain.repository.SettingsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import jakarta.inject.Inject
+import kotlinx.coroutines.flow.map
 
 @HiltViewModel
 class NewHomeScreenViewModel @Inject constructor(
@@ -20,4 +23,20 @@ class NewHomeScreenViewModel @Inject constructor(
     val showWeather = repository.showWeather
     val showScreenTimeApp = repository.showScreenTimeApp
     val firstTimeHelp = repository.firstTimeHelp
+
+    val homeAlignment = repository.homeAlignment.map { alignment ->
+        when (alignment) {
+            "Left" -> Alignment.Start
+            "Center" -> Alignment.CenterHorizontally
+            else -> Alignment.End
+        }
+    }
+
+    val homeVAlignment = repository.homeVAlignment.map { alignment ->
+        when (alignment) {
+            "Top" -> Arrangement.Top
+            "Center" -> Arrangement.Center
+            else -> Arrangement.Bottom
+        }
+    }
 }

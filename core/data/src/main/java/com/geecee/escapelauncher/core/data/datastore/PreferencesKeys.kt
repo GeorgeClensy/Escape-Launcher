@@ -1,6 +1,7 @@
 package com.geecee.escapelauncher.core.data.datastore
 
 import androidx.datastore.preferences.core.booleanPreferencesKey
+import androidx.datastore.preferences.core.stringPreferencesKey
 
 object PreferencesKeys {
     val HAPTIC_FEEDBACK = booleanPreferencesKey(name = "haptic_feedback")
@@ -17,4 +18,6 @@ object PreferencesKeys {
     val SHOW_WEATHER = booleanPreferencesKey(name = "show_weather")
     val SHOW_SCREEN_TIME_APP = booleanPreferencesKey(name = "show_screen_time_app")
     val FIRST_TIME_HELP = booleanPreferencesKey(name = "first_time_help")
+    val HOME_V_ALIGNMENT = stringPreferencesKey(name = "home_v_alignment")
+    val HOME_ALIGNMENT = stringPreferencesKey(name = "home_alignment")
 }

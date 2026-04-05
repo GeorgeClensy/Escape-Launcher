@@ -34,4 +34,10 @@ interface SettingsRepository {
 
     val firstTimeHelp: Flow<Boolean>
     suspend fun setFirstTimeHelp(enabled: Boolean)
+
+    val homeVAlignment: Flow<String>
+    suspend fun setHomeVAlignment(alignment: String)
+
+    val homeAlignment: Flow<String>
+    suspend fun setHomeAlignment(alignment: String)
 }
