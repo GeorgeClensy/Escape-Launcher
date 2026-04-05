@@ -48,6 +48,7 @@ import com.geecee.escapelauncher.core.ui.composables.Clock
 import com.geecee.escapelauncher.core.ui.composables.GlanceWidget
 import com.geecee.escapelauncher.core.ui.composables.HomeScreenItem
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.geecee.escapelauncher.NewHomeScreenViewModel
 import com.geecee.escapelauncher.core.ui.composables.FirstTimeHelp
 import com.geecee.escapelauncher.feature.homescreen.ClockViewModel
 import com.geecee.escapelauncher.utils.AppUtils
@@ -78,16 +79,18 @@ import com.geecee.escapelauncher.MainAppViewModel as MainAppModel
  */
 @Composable
 fun HomeScreen(
-    mainAppModel: MainAppModel, homeScreenModel: HomeScreenModel, clockViewModel: ClockViewModel = hiltViewModel()
+    mainAppModel: MainAppModel,
+    homeScreenModel: HomeScreenModel,
+    clockViewModel: ClockViewModel = hiltViewModel(),
+    homeScreenViewModel: NewHomeScreenViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
     val timeParts by clockViewModel.timeParts.collectAsState()
+    val twelveHourClock by homeScreenViewModel.twelveHourClock.collectAsState(initial = false)
     val (hour, minute, _) = timeParts
 
-    val twelveHourClockSetting = stringResource(R.string.twelve_hour_clock)
-    LaunchedEffect(Unit) {
-        val twelveHourFormat = getBooleanSetting(context, twelveHourClockSetting,false)
-        clockViewModel.startTicker(twelveHourFormat)
+    LaunchedEffect(twelveHourClock) {
+        clockViewModel.startTicker(twelveHourClock)
     }
 
     val scrollState = rememberLazyListState()

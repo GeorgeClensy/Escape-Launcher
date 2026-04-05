@@ -62,8 +62,6 @@ fun SettingsSwitch(
     isTopOfGroup: Boolean = false,
     isBottomOfGroup: Boolean = false
 ) {
-    var isChecked by remember { mutableStateOf(checked) }
-
     // Define the base corner size
     val groupEdgeCornerRadius = 24.dp
     val defaultCornerRadius = 8.dp
@@ -77,8 +75,7 @@ fun SettingsSwitch(
         modifier = Modifier
             .padding(vertical = 1.dp)
             .clickable {
-                isChecked = !isChecked
-                onCheckedChange(isChecked)
+                onCheckedChange(!checked)
             }, shape = RoundedCornerShape(
             topStart = topStartRadius,
             topEnd = topEndRadius,
@@ -103,9 +100,8 @@ fun SettingsSwitch(
                 style = MaterialTheme.typography.bodyMedium
             )
             Switch(
-                checked = isChecked, onCheckedChange = {
-                    isChecked = it
-                    onCheckedChange(isChecked)
+                checked = checked, onCheckedChange = {
+                    onCheckedChange(it)
                 })
         }
     }

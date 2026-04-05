@@ -61,6 +61,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
@@ -80,13 +81,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.geecee.escapelauncher.BuildConfig
 import com.geecee.escapelauncher.HomeScreenModel
+import com.geecee.escapelauncher.MainSettingsPageViewModel
 import com.geecee.escapelauncher.R
+import com.geecee.escapelauncher.SettingsViewModel
 import com.geecee.escapelauncher.core.common.InstalledApp
 import com.geecee.escapelauncher.core.ui.composables.BulkManager
 import com.geecee.escapelauncher.core.ui.composables.SettingsButton
@@ -162,6 +166,7 @@ fun Settings(
     homeScreenModel: HomeScreenModel,
     goBack: () -> Unit,
     activity: Activity,
+    settingsViewModel: SettingsViewModel = hiltViewModel()
 ) {
     val showPolicyDialog = remember { mutableStateOf(false) }
 
@@ -345,10 +350,14 @@ fun MainSettingsPage(
     navController: NavController,
     mainAppModel: MainAppModel,
     activity: Activity,
-    homeScreenModel: HomeScreenModel
+    homeScreenModel: HomeScreenModel,
+    mainSettingsPageViewModel: MainSettingsPageViewModel = hiltViewModel()
 ) {
     var showWeatherAppPicker by remember { mutableStateOf(false) }
     val view = LocalView.current
+
+    val twelveHourClock by mainSettingsPageViewModel.twelveHourClock.collectAsState(initial = false)
+
 
 
     LazyColumn(
@@ -413,15 +422,9 @@ fun MainSettingsPage(
         item {
             SettingsSwitch(
                 label = stringResource(id = R.string.twelve_hour_clock_setting),
-                checked = getBooleanSetting(
-                    mainAppModel.getContext(), stringResource(R.string.twelve_hour_clock), false
-                ),
+                checked = twelveHourClock,
                 onCheckedChange = {
-                    toggleBooleanSetting(
-                        mainAppModel.getContext(),
-                        it,
-                        mainAppModel.getContext().resources.getString(R.string.twelve_hour_clock)
-                    )
+                    mainSettingsPageViewModel.setTwelveHourClock(it)
                 })
         }
 

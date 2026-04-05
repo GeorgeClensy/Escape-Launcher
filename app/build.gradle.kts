@@ -90,6 +90,7 @@ dependencies {
     implementation(project(":core:ui"))
     implementation(project(":core:model"))
     implementation(project(":core:common"))
+    implementation(project(":core:domain"))
     implementation(project(":feature:homescreen"))
     implementation(project(":feature:workapps"))
     implementation(project(":feature:privatespace"))

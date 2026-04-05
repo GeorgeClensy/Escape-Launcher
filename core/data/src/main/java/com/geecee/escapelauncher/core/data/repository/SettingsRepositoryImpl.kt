@@ -21,6 +21,7 @@ class SettingsRepositoryImpl @Inject constructor(
         dataStore.edit { preferences -> preferences[PreferencesKeys.HAPTIC_FEEDBACK] = enabld }
     }
 
+    //Private Space
     override val hidePrivateSpace: Flow<Boolean>
         get() = dataStore.data.map { preferences ->
             preferences[PreferencesKeys.HIDE_PRIVATE_SPACE] ?: true
@@ -28,5 +29,15 @@ class SettingsRepositoryImpl @Inject constructor(
 
     override suspend fun setHidePrivateSpace(enabled: Boolean) {
         dataStore.edit { preferences -> preferences[PreferencesKeys.HIDE_PRIVATE_SPACE] = enabled }
+    }
+
+    //Home Screen
+    override val twelveHourClock: Flow<Boolean>
+        get() = dataStore.data.map { preferences ->
+            preferences[PreferencesKeys.TWELVE_HOUR_CLOCK] ?: false
+        }
+
+    override suspend fun setTwelveHourClock(enabled: Boolean) {
+        dataStore.edit { preferences -> preferences[PreferencesKeys.TWELVE_HOUR_CLOCK] = enabled }
     }
 }
