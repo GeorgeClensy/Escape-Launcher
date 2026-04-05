@@ -72,6 +72,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
@@ -87,6 +88,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.geecee.escapelauncher.BuildConfig
+import com.geecee.escapelauncher.DevOptionsPageViewModel
 import com.geecee.escapelauncher.HomeScreenModel
 import com.geecee.escapelauncher.MainSettingsPageViewModel
 import com.geecee.escapelauncher.R
@@ -241,7 +243,6 @@ fun Settings(
                 exitTransition = { fadeOut(tween(300)) }) {
                 DevOptions(
                     mainAppModel = mainAppModel,
-                    context = mainAppModel.getContext()
                 ) { navController.popBackStack() }
             }
             composable(
@@ -357,6 +358,13 @@ fun MainSettingsPage(
     val view = LocalView.current
 
     val twelveHourClock by mainSettingsPageViewModel.twelveHourClock.collectAsState(initial = false)
+    val showClock by mainSettingsPageViewModel.showClock.collectAsState(initial = true)
+    val bigClock by mainSettingsPageViewModel.bigClock.collectAsState(initial = false)
+    val showDate by mainSettingsPageViewModel.showDate.collectAsState(initial = false)
+    val showWeather by mainSettingsPageViewModel.showWeather.collectAsState(initial = false)
+    val showScreenTimeApp by mainSettingsPageViewModel.showScreenTimeApp.collectAsState(initial = false)
+    val showScreenTimeHome by mainSettingsPageViewModel.showScreenTimeHome.collectAsState(initial = false)
+    val hapticFeedbackEnabled by mainSettingsPageViewModel.hapticFeedBackEnabled.collectAsState(initial = true)
 
 
 
@@ -393,8 +401,9 @@ fun MainSettingsPage(
             SettingsSwitch(
                 label = stringResource(id = R.string.haptic_feedback),
                 isBottomOfGroup = true,
-                checked = view.isHapticFeedbackEnabled,
+                checked = hapticFeedbackEnabled,
                 onCheckedChange = {
+                    mainSettingsPageViewModel.setHapticFeedback(it)
                     view.isHapticFeedbackEnabled = it
                 })
         }
@@ -405,15 +414,9 @@ fun MainSettingsPage(
         item {
             SettingsSwitch(
                 label = stringResource(id = R.string.show_clock),
-                checked = getBooleanSetting(
-                    mainAppModel.getContext(), stringResource(R.string.ShowClock), true
-                ),
+                checked = showClock,
                 onCheckedChange = {
-                    toggleBooleanSetting(
-                        mainAppModel.getContext(),
-                        it,
-                        mainAppModel.getContext().resources.getString(R.string.ShowClock)
-                    )
+                    mainSettingsPageViewModel.setShowClock(it)
                 },
                 isTopOfGroup = true
             )
@@ -430,41 +433,23 @@ fun MainSettingsPage(
 
         item {
             SettingsSwitch(
-                label = stringResource(id = R.string.big_clock), checked = getBooleanSetting(
-                    mainAppModel.getContext(), stringResource(R.string.BigClock)
-                ), onCheckedChange = {
-                    toggleBooleanSetting(
-                        mainAppModel.getContext(),
-                        it,
-                        mainAppModel.getContext().resources.getString(R.string.BigClock)
-                    )
+                label = stringResource(id = R.string.big_clock), checked = bigClock, onCheckedChange = {
+                    mainSettingsPageViewModel.setBigClock(it)
                 })
         }
 
         item {
             SettingsSwitch(
-                label = stringResource(id = R.string.date), checked = getBooleanSetting(
-                    mainAppModel.getContext(), stringResource(R.string.show_date), false
-                ), onCheckedChange = {
-                    toggleBooleanSetting(
-                        mainAppModel.getContext(),
-                        it,
-                        mainAppModel.getContext().resources.getString(R.string.show_date)
-                    )
+                label = stringResource(id = R.string.date), checked = showDate, onCheckedChange = {
+                    mainSettingsPageViewModel.setShowDate(it)
                 })
         }
 
         item {
             if (!BuildConfig.IS_FOSS) {
                 SettingsSwitch(
-                    label = stringResource(id = R.string.show_weather), checked = getBooleanSetting(
-                        mainAppModel.getContext(), stringResource(R.string.show_weather), false
-                    ), onCheckedChange = {
-                        toggleBooleanSetting(
-                            mainAppModel.getContext(),
-                            it,
-                            mainAppModel.getContext().resources.getString(R.string.show_weather)
-                        )
+                    label = stringResource(id = R.string.show_weather), checked = showWeather, onCheckedChange = {
+                        mainSettingsPageViewModel.setShowWeather(it)
                     })
             }
         }
@@ -668,16 +653,10 @@ fun MainSettingsPage(
         item {
             SettingsSwitch(
                 label = stringResource(id = R.string.screen_time_on_app),
-                checked = getBooleanSetting(
-                    mainAppModel.getContext(), stringResource(R.string.ScreenTimeOnApp)
-                ),
+                checked = showScreenTimeApp,
                 isTopOfGroup = true,
                 onCheckedChange = {
-                    toggleBooleanSetting(
-                        mainAppModel.getContext(),
-                        it,
-                        mainAppModel.getContext().resources.getString(R.string.ScreenTimeOnApp)
-                    )
+                    mainSettingsPageViewModel.setShowScreenTimeApp(it)
                 })
         }
 
@@ -699,16 +678,10 @@ fun MainSettingsPage(
         item {
             SettingsSwitch(
                 label = stringResource(id = R.string.screen_time_on_home_screen),
-                checked = getBooleanSetting(
-                    mainAppModel.getContext(), stringResource(R.string.ScreenTimeOnHome)
-                ),
+                checked = showScreenTimeHome,
                 isBottomOfGroup = true,
                 onCheckedChange = {
-                    toggleBooleanSetting(
-                        mainAppModel.getContext(),
-                        it,
-                        mainAppModel.getContext().resources.getString(R.string.ScreenTimeOnHome)
-                    )
+                    mainSettingsPageViewModel.setShowScreenTimeHome(it)
                 })
         }
 
@@ -1435,7 +1408,14 @@ fun ChooseFont(context: Context, activity: Activity, goBack: () -> Unit) {
  * Developer options in settings
  */
 @Composable
-fun DevOptions(mainAppModel: MainAppModel, context: Context, goBack: () -> Unit) {
+fun DevOptions(
+    mainAppModel: MainAppModel,
+    viewModel: DevOptionsPageViewModel = hiltViewModel(),
+    goBack: () -> Unit
+) {
+    val context = LocalContext.current
+    val firstTimeHelp by viewModel.firstTimeHelp.collectAsState(initial = true)
+
     LazyColumn(
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.Start,
@@ -1446,14 +1426,9 @@ fun DevOptions(mainAppModel: MainAppModel, context: Context, goBack: () -> Unit)
         item {
             SettingsSwitch(
                 "First time",
-                getBooleanSetting(context, "FirstTime", false),
+                firstTimeHelp,
                 onCheckedChange = {
-                    setBooleanSetting(context, "FirstTime", it)
-                    setBooleanSetting(
-                        context,
-                        mainAppModel.getContext().resources.getString(R.string.FirstTimeAppDrawHelp),
-                        it
-                    )
+                    viewModel.setFirstTimeHelp(it)
                 },
                 isTopOfGroup = true
             )
@@ -1469,10 +1444,11 @@ fun DevOptions(mainAppModel: MainAppModel, context: Context, goBack: () -> Unit)
         }
 
         item {
+            val settingString = stringResource(R.string.weather_app_package)
             SettingsButton(
                 label = "Clear weather app",
                 onClick = {
-                    setStringSetting(context, context.getString(R.string.weather_app_package), "")
+                    setStringSetting(context, settingString, "")
                     Toast.makeText(context, "Weather app cleared", Toast.LENGTH_SHORT).show()
                 }
             )

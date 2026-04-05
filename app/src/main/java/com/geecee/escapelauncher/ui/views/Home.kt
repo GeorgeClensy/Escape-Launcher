@@ -57,7 +57,6 @@ import com.geecee.escapelauncher.utils.AppUtils.formatScreenTime
 import com.geecee.escapelauncher.utils.AppUtils.resetHome
 import com.geecee.escapelauncher.utils.WidgetsScreen
 import com.geecee.escapelauncher.utils.analyticsProxy
-import com.geecee.escapelauncher.utils.getBooleanSetting
 import com.geecee.escapelauncher.utils.getHomeAlignment
 import com.geecee.escapelauncher.utils.getHomeVAlignment
 import com.geecee.escapelauncher.utils.getStringSetting
@@ -87,6 +86,13 @@ fun HomeScreen(
     val context = LocalContext.current
     val timeParts by clockViewModel.timeParts.collectAsState()
     val twelveHourClock by homeScreenViewModel.twelveHourClock.collectAsState(initial = false)
+    val showClock by homeScreenViewModel.showClock.collectAsState(initial = true)
+    val bigClock by homeScreenViewModel.bigClock.collectAsState(initial = false)
+    val showDate by homeScreenViewModel.showDate.collectAsState(initial = false)
+    val showScreenTimeHome by homeScreenViewModel.showScreenTimeHome.collectAsState(initial = false)
+    val showWeather by homeScreenViewModel.showWeather.collectAsState(initial = false)
+    val showScreenTimeApp by homeScreenViewModel.showScreenTimeApp.collectAsState(initial = false)
+    val firstTimeHelp by homeScreenViewModel.firstTimeHelp.collectAsState(initial = true)
     val (hour, minute, _) = timeParts
 
     LaunchedEffect(twelveHourClock) {
@@ -147,18 +153,11 @@ fun HomeScreen(
 
         //Clock
         item {
-            if (getBooleanSetting(
-                    mainAppModel.getContext(), stringResource(R.string.ShowClock), true
-                )
-            ) {
+            if (showClock) {
                 Clock(
                     hour = hour,
                     minute = minute,
-                    bigClock = getBooleanSetting(
-                        context = mainAppModel.getContext(),
-                        stringResource(R.string.BigClock),
-                        false
-                    ),
+                    bigClock = bigClock,
                     homeAlignment = getHomeAlignment(mainAppModel.getContext()),
                     onClockClick = {
                         try {
@@ -182,7 +181,7 @@ fun HomeScreen(
                 val context = mainAppModel.getContext()
                 val homeAlignment = getHomeAlignment(context)
 
-                if (getBooleanSetting(context, stringResource(R.string.show_date), false)) {
+                if (showDate) {
                     val dateFormat = remember { SimpleDateFormat("EEE d MMM", Locale.getDefault()) }
                     var dateText by remember { mutableStateOf(dateFormat.format(Date())) }
 
@@ -222,7 +221,7 @@ fun HomeScreen(
 
                 }
 
-                if (getBooleanSetting(context, stringResource(R.string.ScreenTimeOnHome), false)) {
+                if (showScreenTimeHome) {
                     val todayUsage = remember { mutableLongStateOf(0L) }
                     LaunchedEffect(mainAppModel.shouldReloadScreenTime.value) {
                         withContext(Dispatchers.IO) {
@@ -244,7 +243,7 @@ fun HomeScreen(
 
                 }
 
-                if (getBooleanSetting(context, stringResource(R.string.show_weather), false)) {
+                if (showWeather) {
                     @Suppress("KotlinConstantConditions")
                     if (!BuildConfig.IS_FOSS) {
                         LaunchedEffect(Unit) {
@@ -362,22 +361,14 @@ fun HomeScreen(
                     homeScreenModel.updateSelectedApp(app)
                     doHapticFeedBack(hapticFeedback = haptics)
                 },
-                showScreenTime = getBooleanSetting(
-                    context = mainAppModel.getContext(),
-                    setting = stringResource(R.string.ScreenTimeOnApp)
-                ),
+                showScreenTime = showScreenTimeApp,
                 modifier = Modifier,
                 alignment = getHomeAlignment(mainAppModel.getContext())
             )
         }
 
         //First time help
-        if (getBooleanSetting(
-                mainAppModel.getContext(),
-                mainAppModel.getContext().resources.getString(R.string.FirstTimeAppDrawHelp),
-                true
-            )
-        ) {
+        if (firstTimeHelp) {
             item {
                 Spacer(Modifier.height(15.dp))
             }

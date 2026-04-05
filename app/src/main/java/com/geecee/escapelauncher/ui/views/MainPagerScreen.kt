@@ -20,6 +20,7 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.geecee.escapelauncher.HomeScreenModel
 import com.geecee.escapelauncher.R
 import com.geecee.escapelauncher.core.common.goToAppInfo
@@ -33,11 +34,11 @@ import com.geecee.escapelauncher.utils.EscapeAccessibilityService
 import com.geecee.escapelauncher.utils.getAppShortcuts
 import com.geecee.escapelauncher.utils.getBooleanSetting
 import com.geecee.escapelauncher.utils.managers.OpenChallenge
-import com.geecee.escapelauncher.utils.setBooleanSetting
 import com.geecee.escapelauncher.utils.startShortcut
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import com.geecee.escapelauncher.MainAppViewModel as MainAppModel
+import com.geecee.escapelauncher.MainPagerScreenViewModel
 
 /**
  *  Main composable for home screen:
@@ -48,9 +49,10 @@ import com.geecee.escapelauncher.MainAppViewModel as MainAppModel
     ExperimentalFoundationApi::class
 )
 @Composable
-fun HomeScreenPageManager(
+fun MainPagerScreen(
     mainAppModel: MainAppModel,
     homeScreenModel: HomeScreenModel,
+    viewModel: MainPagerScreenViewModel = hiltViewModel(),
     onOpenSettings: () -> Unit
 ) {
     val focusManager = LocalFocusManager.current
@@ -102,11 +104,7 @@ fun HomeScreenPageManager(
                 onClick = {}, onLongClickLabel = "",
                 onLongClick = {
                     onOpenSettings()
-                    setBooleanSetting(
-                        mainAppModel.getContext(),
-                        mainAppModel.getContext().resources.getString(R.string.FirstTimeAppDrawHelp),
-                        false
-                    )
+                    viewModel.setFirstTimeHelp(false)
                 },
                 indication = null, interactionSource = homeScreenModel.interactionSource,
                 onDoubleClick = {

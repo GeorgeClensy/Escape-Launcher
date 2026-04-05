@@ -40,4 +40,67 @@ class SettingsRepositoryImpl @Inject constructor(
     override suspend fun setTwelveHourClock(enabled: Boolean) {
         dataStore.edit { preferences -> preferences[PreferencesKeys.TWELVE_HOUR_CLOCK] = enabled }
     }
+
+    override val showClock: Flow<Boolean>
+        get() = dataStore.data.map { preferences ->
+            preferences[PreferencesKeys.SHOW_CLOCK] ?: true
+        }
+
+    override suspend fun setShowClock(enabled: Boolean) {
+        dataStore.edit { preferences -> preferences[PreferencesKeys.SHOW_CLOCK] = enabled }
+    }
+
+    override val bigClock: Flow<Boolean>
+        get() = dataStore.data.map { preferences ->
+            preferences[PreferencesKeys.BIG_CLOCK] ?: false
+        }
+
+    override suspend fun setBigClock(enabled: Boolean) {
+        dataStore.edit { preferences -> preferences[PreferencesKeys.BIG_CLOCK] = enabled }
+    }
+
+    override val showDate: Flow<Boolean>
+        get() = dataStore.data.map { preferences ->
+            preferences[PreferencesKeys.SHOW_DATE] ?: false
+        }
+
+    override suspend fun setShowDate(enabled: Boolean) {
+        dataStore.edit { preferences -> preferences[PreferencesKeys.SHOW_DATE] = enabled }
+    }
+
+    override val showScreenTimeHome: Flow<Boolean>
+        get() = dataStore.data.map { preferences ->
+            preferences[PreferencesKeys.SHOW_SCREEN_TIME_HOME] ?: false
+        }
+
+    override suspend fun setShowScreenTimeHome(enabled: Boolean) {
+        dataStore.edit { preferences -> preferences[PreferencesKeys.SHOW_SCREEN_TIME_HOME] = enabled }
+    }
+
+    override val showWeather: Flow<Boolean>
+        get() = dataStore.data.map { preferences ->
+            preferences[PreferencesKeys.SHOW_WEATHER] ?: false
+        }
+
+    override suspend fun setShowWeather(enabled: Boolean) {
+        dataStore.edit { preferences -> preferences[PreferencesKeys.SHOW_WEATHER] = enabled }
+    }
+
+    override val showScreenTimeApp: Flow<Boolean>
+        get() = dataStore.data.map { preferences ->
+            preferences[PreferencesKeys.SHOW_SCREEN_TIME_APP] ?: false
+        }
+
+    override suspend fun setShowScreenTimeApp(enabled: Boolean) {
+        dataStore.edit { preferences -> preferences[PreferencesKeys.SHOW_SCREEN_TIME_APP] = enabled }
+    }
+
+    override val firstTimeHelp: Flow<Boolean>
+        get() = dataStore.data.map { preferences ->
+            preferences[PreferencesKeys.FIRST_TIME_HELP] ?: true
+        }
+
+    override suspend fun setFirstTimeHelp(enabled: Boolean) {
+        dataStore.edit { preferences -> preferences[PreferencesKeys.FIRST_TIME_HELP] = enabled }
+    }
 }

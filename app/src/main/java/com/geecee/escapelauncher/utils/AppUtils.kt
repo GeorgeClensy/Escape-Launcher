@@ -340,8 +340,18 @@ object AppUtils {
     /**
      * Performs haptic feedback
      */
-    fun doHapticFeedBack(hapticFeedback: HapticFeedback) {
-        hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
+    fun doHapticFeedBack(hapticFeedback: HapticFeedback, context: Context? = null) {
+        val enabled = if (context != null) {
+            // This is a temporary measure while we migrate to DataStore.
+            // In a real world scenario, we'd inject the repository here or pass the state.
+            //todo: fix
+            getBooleanSetting(context, "HapticFeedback", true)
+        } else {
+            true
+        }
+        if (enabled) {
+            hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
+        }
     }
 
     /**
