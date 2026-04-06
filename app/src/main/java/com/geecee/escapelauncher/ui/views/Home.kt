@@ -40,16 +40,17 @@ import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.geecee.escapelauncher.BuildConfig
 import com.geecee.escapelauncher.HomeScreenModel
 import com.geecee.escapelauncher.R
 import com.geecee.escapelauncher.core.ui.composables.Clock
 import com.geecee.escapelauncher.core.ui.composables.GlanceWidget
 import com.geecee.escapelauncher.core.ui.composables.HomeScreenItem
-import androidx.hilt.navigation.compose.hiltViewModel
 import com.geecee.escapelauncher.NewHomeScreenViewModel
 import com.geecee.escapelauncher.core.ui.composables.FirstTimeHelp
 import com.geecee.escapelauncher.feature.homescreen.ClockViewModel
@@ -60,7 +61,6 @@ import com.geecee.escapelauncher.utils.AppUtils.formatScreenTime
 import com.geecee.escapelauncher.utils.AppUtils.resetHome
 import com.geecee.escapelauncher.utils.WidgetsScreen
 import com.geecee.escapelauncher.utils.analyticsProxy
-import com.geecee.escapelauncher.utils.getStringSetting
 import com.geecee.escapelauncher.utils.managers.getTotalUsageForDate
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -79,8 +79,7 @@ fun HomeScreen(
     mainAppModel: MainAppModel,
     homeScreenModel: HomeScreenModel,
     clockViewModel: ClockViewModel = hiltViewModel(),
-    homeScreenViewModel: NewHomeScreenViewModel = hiltViewModel(),
-    weatherViewModel: WeatherViewModel = hiltViewModel(LocalActivity.current as ComponentActivity)
+    homeScreenViewModel: NewHomeScreenViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
     val timeParts by clockViewModel.timeParts.collectAsState()
@@ -94,8 +93,6 @@ fun HomeScreen(
     val firstTimeHelp by homeScreenViewModel.firstTimeHelp.collectAsState(initial = true)
     val homeAlignment by homeScreenViewModel.homeAlignment.collectAsState(initial = Alignment.CenterHorizontally)
     val homeVAlignment by homeScreenViewModel.homeVAlignment.collectAsState(initial = Arrangement.Center)
-    val useFahrenheit by homeScreenViewModel.useFahrenheit.collectAsState(initial = false)
-
     val widgetOffsetPref by homeScreenViewModel.widgetOffset.collectAsState(initial = 0f)
     val widgetHeight by homeScreenViewModel.widgetHeight.collectAsState(initial = 125f)
     val widgetWidth by homeScreenViewModel.widgetWidth.collectAsState(initial = 250f)
@@ -248,44 +245,9 @@ fun HomeScreen(
                 }
 
                 if (showWeather) {
-                    @Suppress("KotlinConstantConditions") // This is to stop the IS_FOSS is always true cuz its a foss sync in android studio
+                    @Suppress("KotlinConstantConditions") // This is to stop the IS_FOSS is always true cuz it's a foss sync in android studio
                     if (!BuildConfig.IS_FOSS) {
-                        AnimatedVisibility(
-                            weatherViewModel.weatherText.value != "",
-                            enter = fadeIn(),
-                            exit = fadeOut()
-                        ) {
-                            GlanceWidget(
-                                text = weatherViewModel.weatherText.value,
-                                icon = Icons.Default.WbSunny,
-                                iconContentDescription = "Weather",
-                                homeAlignment = homeAlignment,
-                                small = true,
-                                onClick = {
-                                    val weatherAppPackage = getStringSetting(
-                                        context,
-                                        context.getString(R.string.weather_app_package),
-                                        ""
-                                    )
-                                    if (weatherAppPackage.isNotEmpty()) {
-                                        val launchIntent =
-                                            context.packageManager.getLaunchIntentForPackage(
-                                                weatherAppPackage
-                                            )
-                                        launchIntent?.let {
-                                            it.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                                            context.startActivity(it)
-                                        }
-                                    } else {
-                                        Toast.makeText(
-                                            context,
-                                            context.getString(R.string.set_weather_app_in_settings),
-                                            Toast.LENGTH_SHORT
-                                        ).show()
-                                    }
-                                }
-                            )
-                        }
+                        HomeWeatherImpl(alignment = homeAlignment)
                     }
                 }
             }
@@ -376,5 +338,49 @@ fun HomeScreen(
         item {
             Spacer(Modifier.height(90.dp))
         }
+    }
+}
+
+@Composable
+fun HomeWeatherImpl(
+    alignment: Alignment.Horizontal,
+    weatherViewModel: WeatherViewModel = hiltViewModel(LocalActivity.current as ComponentActivity)
+) {
+    val context = LocalContext.current
+    val resources = LocalResources.current
+    val weatherAppPackage by weatherViewModel.weatherAppPackage.collectAsState(initial = "")
+
+    AnimatedVisibility(
+        weatherViewModel.weatherText.value != "",
+        enter = fadeIn(),
+        exit = fadeOut()
+    ) {
+        GlanceWidget(
+            text = weatherViewModel.weatherText.value,
+            icon = Icons.Default.WbSunny,
+            iconContentDescription = "Weather",
+            homeAlignment = alignment,
+            small = true,
+            onClick = {
+                if (weatherAppPackage.isNotEmpty()) {
+                    //todo: use OpenApp() here so it's tracked
+
+                    val launchIntent =
+                        context.packageManager.getLaunchIntentForPackage(
+                            weatherAppPackage
+                        )
+                    launchIntent?.let {
+                        it.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        context.startActivity(it)
+                    }
+                } else {
+                    Toast.makeText(
+                        context,
+                        resources.getString(R.string.set_weather_app_in_settings),
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
+        )
     }
 }

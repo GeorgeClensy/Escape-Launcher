@@ -330,7 +330,7 @@ fun Settings(
  *
  * @param goBack When back button is pressed
  * @param showPolicyDialog When the show privacy policy button is pressed
- * @param navController Settings nav controller with "personalization", "hiddenApps", "openChallenges"
+ * @param navController Settings nav controller with "personalisation", "hiddenApps", "openChallenges"
  * @param mainAppModel This is required for settings to be changed
  *
  * @see Settings
@@ -362,8 +362,6 @@ fun MainSettingsPage(
     val hapticFeedbackEnabled by mainSettingsPageViewModel.hapticFeedBackEnabled.collectAsState(initial = true)
     val homeHorizontalIndex by mainSettingsPageViewModel.homeAlignment.collectAsState(initial = 1)
     val homeVerticalIndex by mainSettingsPageViewModel.homeVAlignment.collectAsState(initial = 1)
-
-
 
     LazyColumn(
         verticalArrangement = Arrangement.Top,
@@ -776,11 +774,7 @@ fun MainSettingsPage(
         WeatherAppPicker(
             apps = homeScreenModel.installedApps,
             onAppSelected = { app ->
-                setStringSetting(
-                    mainAppModel.getContext(),
-                    mainAppModel.getContext().getString(R.string.weather_app_package),
-                    app.packageName
-                )
+                mainSettingsPageViewModel.setWeatherAppPackage(app.packageName)
                 showWeatherAppPicker = false
             },
             onDismiss = { showWeatherAppPicker = false }
@@ -824,7 +818,7 @@ fun ThemeOptions(
 
     val isDark = isSystemInDarkTheme()
 
-    // Initialize selection states based on settings
+    // Initialise selection states based on settings
     LaunchedEffect(Unit) {
         if (!getBooleanSetting(context, autoThemeChange, false)) {
             currentSelectedDTheme = -1
@@ -1020,7 +1014,7 @@ fun WidgetOptions(
         goBack()
     }
 
-    // Shows the widget permission dialog
+    // Shows the widget permission dialogue
     val bindWidgetPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
     ) { result ->
@@ -1432,11 +1426,10 @@ fun DevOptions(
         }
 
         item {
-            val settingString = stringResource(R.string.weather_app_package)
             SettingsButton(
                 label = "Clear weather app",
                 onClick = {
-                    setStringSetting(context, settingString, "")
+                    viewModel.setWeatherAppPackage("")
                     Toast.makeText(context, "Weather app cleared", Toast.LENGTH_SHORT).show()
                 }
             )
@@ -1484,7 +1477,7 @@ fun DevOptions(
  * Privacy Policy dialog
  *
  * @param mainAppModel Needed for context
- * @param showPolicyDialog Pass the MutableState<Boolean> your using to show and hide this dialog so that it can be hidden from within it
+ * @param showPolicyDialog Pass the MutableState<Boolean> your using to show and hide this dialogue so that it can be hidden from within it
  */
 @Composable
 fun PrivacyPolicyDialog(mainAppModel: MainAppModel, showPolicyDialog: MutableState<Boolean>) {

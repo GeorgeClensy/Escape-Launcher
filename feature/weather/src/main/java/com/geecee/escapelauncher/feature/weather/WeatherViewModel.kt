@@ -17,6 +17,8 @@ import kotlinx.coroutines.launch
 class WeatherViewModel @Inject constructor(
     @ApplicationContext private val context: Context, private val repository: SettingsRepository
 ) : ViewModel() {
+    val weatherAppPackage = repository.weatherAppPackage
+
     val weatherText = mutableStateOf("")
     private val delayTime = 30 * 60 * 1000L // 30 Mins
 

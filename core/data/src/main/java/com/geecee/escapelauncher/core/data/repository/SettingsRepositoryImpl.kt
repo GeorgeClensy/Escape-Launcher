@@ -157,4 +157,13 @@ class SettingsRepositoryImpl @Inject constructor(
     override suspend fun setWidgetWidth(width: Float) {
         dataStore.edit { preferences -> preferences[PreferencesKeys.WIDGET_WIDTH] = width }
     }
+
+    override val weatherAppPackage: Flow<String>
+        get() = dataStore.data.map {  preferences ->
+            preferences[PreferencesKeys.WEATHER_APP_PACKAGE] ?: ""
+        }
+
+    override suspend fun setWeatherAppPackage(value: String) {
+        dataStore.edit { preferences -> preferences[PreferencesKeys.WEATHER_APP_PACKAGE] = value }
     }
+}

@@ -147,6 +147,13 @@ class MainSettingsPageViewModel @Inject constructor(
             repository.setHomeVAlignment(value)
         }
     }
+
+    val weatherAppPackage = repository.weatherAppPackage
+    fun setWeatherAppPackage(value: String) {
+        viewModelScope.launch {
+            repository.setWeatherAppPackage(value)
+        }
+    }
 }
 
 
@@ -159,6 +166,13 @@ class DevOptionsPageViewModel @Inject constructor(
     fun setFirstTimeHelp(value: Boolean) {
         viewModelScope.launch {
             repository.setFirstTimeHelp(value)
+        }
+    }
+
+    val weatherAppPackage = repository.weatherAppPackage
+    fun setWeatherAppPackage(value: String) {
+        viewModelScope.launch {
+            repository.setWeatherAppPackage(value)
         }
     }
 }

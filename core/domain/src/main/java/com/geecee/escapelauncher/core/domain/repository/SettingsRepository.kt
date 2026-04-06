@@ -52,4 +52,7 @@ interface SettingsRepository {
 
     val widgetWidth: Flow<Float>
     suspend fun setWidgetWidth(width: Float)
+
+    val weatherAppPackage: Flow<String>
+    suspend fun setWeatherAppPackage(value: String)
     }
