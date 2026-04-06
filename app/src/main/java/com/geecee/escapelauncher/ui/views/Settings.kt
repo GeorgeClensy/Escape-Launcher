@@ -352,6 +352,7 @@ fun MainSettingsPage(
     val bigClock by mainSettingsPageViewModel.bigClock.collectAsState(initial = false)
     val showDate by mainSettingsPageViewModel.showDate.collectAsState(initial = false)
     val showWeather by mainSettingsPageViewModel.showWeather.collectAsState(initial = false)
+    val useFahrenheit by mainSettingsPageViewModel.useFahrenheit.collectAsState(initial = false)
     val showScreenTimeApp by mainSettingsPageViewModel.showScreenTimeApp.collectAsState(initial = false)
     val showScreenTimeHome by mainSettingsPageViewModel.showScreenTimeHome.collectAsState(initial = false)
     val hapticFeedbackEnabled by mainSettingsPageViewModel.hapticFeedBackEnabled.collectAsState(initial = true)
@@ -449,14 +450,8 @@ fun MainSettingsPage(
         item {
             if (!BuildConfig.IS_FOSS) {
                 SettingsSwitch(
-                    label = stringResource(id = R.string.use_farenhight), checked = getBooleanSetting(
-                        mainAppModel.getContext(), stringResource(R.string.UseFahrenheit), false
-                    ), onCheckedChange = {
-                        toggleBooleanSetting(
-                            mainAppModel.getContext(),
-                            it,
-                            mainAppModel.getContext().resources.getString(R.string.UseFahrenheit)
-                        )
+                    label = stringResource(id = R.string.use_farenhight), checked = useFahrenheit, onCheckedChange = {
+                        mainSettingsPageViewModel.setUseFahrenheit(it)
                         mainAppModel.forceUpdateWeather()
                     })
             }

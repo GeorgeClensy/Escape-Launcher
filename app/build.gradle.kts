@@ -95,6 +95,7 @@ dependencies {
     implementation(project(":feature:workapps"))
     implementation(project(":feature:privatespace"))
     implementation(project(":feature:securefolder"))
+    implementation(project(":feature:weather"))
 
     implementation(libs.androidx.hilt.navigation.compose)
 }

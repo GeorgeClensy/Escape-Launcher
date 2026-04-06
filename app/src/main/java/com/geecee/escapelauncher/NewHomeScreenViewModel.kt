@@ -21,6 +21,7 @@ class NewHomeScreenViewModel @Inject constructor(
     val showDate = repository.showDate
     val showScreenTimeHome = repository.showScreenTimeHome
     val showWeather = repository.showWeather
+    val useFahrenheit = repository.useFahrenheit
     val showScreenTimeApp = repository.showScreenTimeApp
     val firstTimeHelp = repository.firstTimeHelp
 
@@ -43,4 +44,4 @@ class NewHomeScreenViewModel @Inject constructor(
     val widgetOffset = repository.widgetOffset
     val widgetHeight = repository.widgetHeight
     val widgetWidth = repository.widgetWidth
-    }
+}

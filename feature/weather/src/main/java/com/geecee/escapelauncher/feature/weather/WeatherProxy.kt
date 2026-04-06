@@ -1,4 +1,4 @@
-package com.geecee.escapelauncher.utils
+package com.geecee.escapelauncher.feature.weather
 
 import android.content.Context
 

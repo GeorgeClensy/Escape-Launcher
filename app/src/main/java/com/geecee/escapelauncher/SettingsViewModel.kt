@@ -98,6 +98,13 @@ class MainSettingsPageViewModel @Inject constructor(
         }
     }
 
+    val useFahrenheit = repository.useFahrenheit
+    fun setUseFahrenheit(value: Boolean) {
+        viewModelScope.launch {
+            repository.setUseFahrenheit(value)
+        }
+    }
+
     val showScreenTimeApp = repository.showScreenTimeApp
     fun setShowScreenTimeApp(value: Boolean) {
         viewModelScope.launch {

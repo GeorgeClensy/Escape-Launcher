@@ -29,6 +29,9 @@ interface SettingsRepository {
     val showWeather: Flow<Boolean>
     suspend fun setShowWeather(enabled: Boolean)
 
+    val useFahrenheit: Flow<Boolean>
+    suspend fun setUseFahrenheit(enabled: Boolean)
+
     val showScreenTimeApp: Flow<Boolean>
     suspend fun setShowScreenTimeApp(enabled: Boolean)
 

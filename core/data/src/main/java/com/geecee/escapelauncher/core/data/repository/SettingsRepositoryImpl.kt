@@ -86,6 +86,15 @@ class SettingsRepositoryImpl @Inject constructor(
         dataStore.edit { preferences -> preferences[PreferencesKeys.SHOW_WEATHER] = enabled }
     }
 
+    override val useFahrenheit: Flow<Boolean>
+        get() = dataStore.data.map { preferences ->
+            preferences[PreferencesKeys.USE_FAHRENHEIT] ?: false
+        }
+
+    override suspend fun setUseFahrenheit(enabled: Boolean) {
+        dataStore.edit { preferences -> preferences[PreferencesKeys.USE_FAHRENHEIT] = enabled }
+    }
+
     override val showScreenTimeApp: Flow<Boolean>
         get() = dataStore.data.map { preferences ->
             preferences[PreferencesKeys.SHOW_SCREEN_TIME_APP] ?: false

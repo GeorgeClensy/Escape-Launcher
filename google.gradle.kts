@@ -2,8 +2,8 @@ dependencies {
     // Google version uses Google fonts, otherwise bundle fonts
     add("googleImplementation", "androidx.compose.ui:ui-text-google-fonts:1.10.5")
 
-    // These plugins are only meant to be on an :app module so we just check if the thing its being applied to has android.application
-    if (project.plugins.hasPlugin("com.android.application")) {
+    // These plugins are only meant to be on an :app module so we just check if the thing its being applied to has android.application or android.library
+    if (project.plugins.hasPlugin("com.android.application") || project.plugins.hasPlugin("com.android.library")) {
         add("googleImplementation", platform("com.google.fire" + "base:fire" + "base-bom:34.8.0"))
         add("googleImplementation", "com.google.fire" + "base:fire" + "base-analytics")
         add("googleImplementation", "com.google.fire" + "base:fire" + "base-crash" + "lytics")
