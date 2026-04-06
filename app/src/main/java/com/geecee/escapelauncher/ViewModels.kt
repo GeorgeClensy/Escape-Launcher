@@ -24,7 +24,6 @@ import androidx.lifecycle.viewModelScope
 import com.geecee.escapelauncher.core.ui.theme.AppTheme
 import com.geecee.escapelauncher.utils.AppUtils
 import com.geecee.escapelauncher.core.common.InstalledApp
-import com.geecee.escapelauncher.feature.weather.weatherProxy
 import com.geecee.escapelauncher.utils.getBooleanSetting
 import com.geecee.escapelauncher.utils.managers.ChallengesManager
 import com.geecee.escapelauncher.utils.managers.FavoriteAppsManager
@@ -381,49 +380,4 @@ class MainAppViewModel(application: Application) : AndroidViewModel(application)
     fun getCachedScreenTime(packageName: String): Long {
         return screenTimeCache[packageName] ?: 0L
     } // Non-suspend function that just returns the cached value without fetching
-
-    // Weather
-    val weatherText = mutableStateOf("")
-
-    private var lastWeatherUpdate = 0L
-
-    fun updateWeather() {
-        val currentTime = System.currentTimeMillis()
-        val useFahrenheit =
-            getBooleanSetting(appContext, appContext.getString(R.string.UseFahrenheit))
-        // Update weather if it's been more than 30 minutes or if it's empty
-        if (currentTime - lastWeatherUpdate > 30 * 60 * 1000 || weatherText.value.isEmpty()) {
-            viewModelScope.launch(Dispatchers.IO) {
-                weatherProxy.getWeather(appContext, useFahrenheit) { result ->
-                    viewModelScope.launch(Dispatchers.Main) {
-                        weatherText.value = result
-                        // Only update the last update time if we got a valid-looking result
-                        if (!result.contains("error", ignoreCase = true) &&
-                            !result.contains("unavailable", ignoreCase = true)
-                        ) {
-                            lastWeatherUpdate = System.currentTimeMillis()
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    fun forceUpdateWeather() {
-        val useFahrenheit =
-            getBooleanSetting(appContext, appContext.getString(R.string.UseFahrenheit))
-        viewModelScope.launch(Dispatchers.IO) {
-            weatherProxy.getWeather(appContext, useFahrenheit) { result ->
-                viewModelScope.launch(Dispatchers.Main) {
-                    weatherText.value = result
-                    // Only update the last update time if we got a valid-looking result
-                    if (!result.contains("error", ignoreCase = true) &&
-                        !result.contains("unavailable", ignoreCase = true)
-                    ) {
-                        lastWeatherUpdate = System.currentTimeMillis()
-                    }
-                }
-            }
-        }
-    }
 }

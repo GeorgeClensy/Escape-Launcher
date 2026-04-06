@@ -14,6 +14,8 @@ import android.os.Build
 import android.provider.Settings
 import android.util.Log
 import android.widget.Toast
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.LocalActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
@@ -111,6 +113,7 @@ import com.geecee.escapelauncher.core.ui.theme.ContentColor
 import com.geecee.escapelauncher.core.ui.theme.primaryContentColor
 import com.geecee.escapelauncher.core.ui.theme.resolveColorScheme
 import com.geecee.escapelauncher.core.ui.theme.transparentHalf
+import com.geecee.escapelauncher.feature.weather.WeatherViewModel
 import com.geecee.escapelauncher.ui.theme.getFontFamily
 import com.geecee.escapelauncher.utils.AppUtils
 import com.geecee.escapelauncher.utils.AppUtils.loadTextFromAssets
@@ -342,7 +345,8 @@ fun MainSettingsPage(
     mainAppModel: MainAppModel,
     activity: Activity,
     homeScreenModel: HomeScreenModel,
-    mainSettingsPageViewModel: MainSettingsPageViewModel = hiltViewModel()
+    mainSettingsPageViewModel: MainSettingsPageViewModel = hiltViewModel(),
+    weatherViewModel: WeatherViewModel = hiltViewModel(LocalActivity.current as ComponentActivity)
 ) {
     var showWeatherAppPicker by remember { mutableStateOf(false) }
     val view = LocalView.current
@@ -452,7 +456,7 @@ fun MainSettingsPage(
                 SettingsSwitch(
                     label = stringResource(id = R.string.use_farenhight), checked = useFahrenheit, onCheckedChange = {
                         mainSettingsPageViewModel.setUseFahrenheit(it)
-                        mainAppModel.forceUpdateWeather()
+                        weatherViewModel.forceUpdate()
                     })
             }
         }

@@ -5,6 +5,8 @@ import android.content.Intent
 import android.provider.AlarmClock
 import android.util.Log
 import android.widget.Toast
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.LocalActivity
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -51,6 +53,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.geecee.escapelauncher.NewHomeScreenViewModel
 import com.geecee.escapelauncher.core.ui.composables.FirstTimeHelp
 import com.geecee.escapelauncher.feature.homescreen.ClockViewModel
+import com.geecee.escapelauncher.feature.weather.WeatherViewModel
 import com.geecee.escapelauncher.utils.AppUtils
 import com.geecee.escapelauncher.utils.AppUtils.doHapticFeedBack
 import com.geecee.escapelauncher.utils.AppUtils.formatScreenTime
@@ -76,7 +79,8 @@ fun HomeScreen(
     mainAppModel: MainAppModel,
     homeScreenModel: HomeScreenModel,
     clockViewModel: ClockViewModel = hiltViewModel(),
-    homeScreenViewModel: NewHomeScreenViewModel = hiltViewModel()
+    homeScreenViewModel: NewHomeScreenViewModel = hiltViewModel(),
+    weatherViewModel: WeatherViewModel = hiltViewModel(LocalActivity.current as ComponentActivity)
 ) {
     val context = LocalContext.current
     val timeParts by clockViewModel.timeParts.collectAsState()
@@ -90,6 +94,7 @@ fun HomeScreen(
     val firstTimeHelp by homeScreenViewModel.firstTimeHelp.collectAsState(initial = true)
     val homeAlignment by homeScreenViewModel.homeAlignment.collectAsState(initial = Alignment.CenterHorizontally)
     val homeVAlignment by homeScreenViewModel.homeVAlignment.collectAsState(initial = Arrangement.Center)
+    val useFahrenheit by homeScreenViewModel.useFahrenheit.collectAsState(initial = false)
 
     val widgetOffsetPref by homeScreenViewModel.widgetOffset.collectAsState(initial = 0f)
     val widgetHeight by homeScreenViewModel.widgetHeight.collectAsState(initial = 125f)
@@ -243,19 +248,15 @@ fun HomeScreen(
                 }
 
                 if (showWeather) {
-                    @Suppress("KotlinConstantConditions")
+                    @Suppress("KotlinConstantConditions") // This is to stop the IS_FOSS is always true cuz its a foss sync in android studio
                     if (!BuildConfig.IS_FOSS) {
-                        LaunchedEffect(Unit) {
-                            mainAppModel.updateWeather()
-                        }
-
                         AnimatedVisibility(
-                            mainAppModel.weatherText.value != "",
+                            weatherViewModel.weatherText.value != "",
                             enter = fadeIn(),
                             exit = fadeOut()
                         ) {
                             GlanceWidget(
-                                text = mainAppModel.weatherText.value,
+                                text = weatherViewModel.weatherText.value,
                                 icon = Icons.Default.WbSunny,
                                 iconContentDescription = "Weather",
                                 homeAlignment = homeAlignment,
@@ -284,7 +285,6 @@ fun HomeScreen(
                                     }
                                 }
                             )
-
                         }
                     }
                 }
