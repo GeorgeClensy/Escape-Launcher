@@ -49,15 +49,21 @@ class WeatherImpl : WeatherProxy {
                 }
 
                 override fun onResponse(call: Call, response: Response) {
-                    response.body.string().let { json ->
-                        val obj = JSONObject(json)
-                        val weather = obj.optJSONObject("current_weather")
-                        if (weather != null) {
-                            val temp = weather.optDouble("temperature", Double.NaN)
-                            callback("${temp.toInt()}${unitSymbol}")
-                        } else {
-                            callback("No weather data")
+                    try {
+                        response.body.string().let { json ->
+                            val obj = JSONObject(json)
+                            val weather = obj.optJSONObject("current_weather")
+                            if (weather != null) {
+                                val temp = weather.optDouble("temperature", Double.NaN)
+                                callback("${temp.toInt()}${unitSymbol}")
+                            } else {
+                                callback("No weather data")
+                            }
                         }
+                    }
+                    catch (e: Exception) {
+                        Log.e("Weather", "Error getting weather", e)
+                        callback("~~")
                     }
                 }
             })
