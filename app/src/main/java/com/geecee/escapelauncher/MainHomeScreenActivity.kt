@@ -187,8 +187,7 @@ class MainHomeScreenActivity : ComponentActivity() {
                 screenTimeViewModel.onAppClosed(packageName)
 
                 // Reset state
-                homeScreenModel.currentSelectedApp =
-                    mutableStateOf(InstalledApp("", "", ComponentName("", "")))
+                homeScreenModel.currentSelectedApp.value = InstalledApp("", "", ComponentName("", ""))
             }
             viewModel.isAppOpened = false
         }

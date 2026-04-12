@@ -24,6 +24,9 @@ object PreferencesKeys {
     val HOME_ALIGNMENT = stringPreferencesKey(name = "home_alignment")
     val WEATHER_APP_PACKAGE = stringPreferencesKey(name = "weather_app_package")
 
+    //Apps List
+    val APPS_ALIGNMENT = stringPreferencesKey(name = "apps_alignment")
+
     //Widget
     val WIDGET_OFFSET = floatPreferencesKey(name = "widget_offset")
     val WIDGET_HEIGHT = floatPreferencesKey(name = "widget_height")

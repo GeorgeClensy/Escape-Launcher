@@ -166,4 +166,14 @@ class SettingsRepositoryImpl @Inject constructor(
     override suspend fun setWeatherAppPackage(value: String) {
         dataStore.edit { preferences -> preferences[PreferencesKeys.WEATHER_APP_PACKAGE] = value }
     }
+
+    //Apps list
+    override val appsAlignment: Flow<String>
+        get() = dataStore.data.map { preferences ->
+            preferences[PreferencesKeys.APPS_ALIGNMENT] ?: "Center"
+        }
+
+    override suspend fun setAppsAlignment(alignment: String) {
+        dataStore.edit { preferences -> preferences[PreferencesKeys.APPS_ALIGNMENT] = alignment }
+    }
 }

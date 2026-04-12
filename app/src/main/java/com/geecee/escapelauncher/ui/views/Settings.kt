@@ -121,8 +121,6 @@ import com.geecee.escapelauncher.utils.AppUtils.resetHome
 import com.geecee.escapelauncher.utils.CustomWidgetPicker
 import com.geecee.escapelauncher.utils.EscapeAccessibilityService
 import com.geecee.escapelauncher.utils.WIDGET_HOST_ID
-import com.geecee.escapelauncher.utils.changeAppsAlignment
-import com.geecee.escapelauncher.utils.getAppsAlignmentAsInt
 import com.geecee.escapelauncher.utils.getBooleanSetting
 import com.geecee.escapelauncher.utils.getIntSetting
 import com.geecee.escapelauncher.utils.getSavedWidgetId
@@ -361,6 +359,7 @@ fun MainSettingsPage(
     val showScreenTimeHome by mainSettingsPageViewModel.showScreenTimeHome.collectAsState(initial = false)
     val hapticFeedbackEnabled by mainSettingsPageViewModel.hapticFeedBackEnabled.collectAsState(initial = true)
     val homeHorizontalIndex by mainSettingsPageViewModel.homeAlignment.collectAsState(initial = 1)
+    val appsHorizontalIndex by mainSettingsPageViewModel.appsAlignment.collectAsState(initial = 1)
     val homeVerticalIndex by mainSettingsPageViewModel.homeVAlignment.collectAsState(initial = 1)
 
     LazyColumn(
@@ -563,14 +562,13 @@ fun MainSettingsPage(
                 stringResource(R.string.center),
                 stringResource(R.string.right)
             )
-            val selectedAppsAlignmentIndex = getAppsAlignmentAsInt(mainAppModel.getContext())
 
             SettingsSingleChoiceSegmentedButtons(
                 label = stringResource(id = R.string.apps),
                 options = appsAlignmentOptions,
-                selectedIndex = selectedAppsAlignmentIndex,
+                selectedIndex = appsHorizontalIndex,
                 onSelectedIndexChange = { newIndex ->
-                    changeAppsAlignment(mainAppModel.getContext(), newIndex)
+                    mainSettingsPageViewModel.setAppsAlignment(newIndex)
                 },
                 isBottomOfGroup = true // Last item in this section before any potential new sections
             )

@@ -55,4 +55,8 @@ interface SettingsRepository {
 
     val weatherAppPackage: Flow<String>
     suspend fun setWeatherAppPackage(value: String)
-    }
+
+    //Apps list
+    val appsAlignment: Flow<String>
+    suspend fun setAppsAlignment(alignment: String)
+}

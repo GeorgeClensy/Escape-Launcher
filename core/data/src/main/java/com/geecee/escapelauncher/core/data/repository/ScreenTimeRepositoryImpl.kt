@@ -4,10 +4,10 @@ import android.util.Log
 import com.geecee.escapelauncher.core.data.database.AppUsageDao
 import com.geecee.escapelauncher.core.data.entity.AppUsageEntity
 import java.text.SimpleDateFormat
+import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -46,10 +46,13 @@ class ScreenTimeRepositoryImpl @Inject constructor(
     }
 
     override suspend fun clearOldData() {
-        val retentionThreshold: String = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-            .format(Date(System.currentTimeMillis() - TimeUnit.DAYS.toMillis(2)))
+        val today = getCurrentDate()
+        val calendar = Calendar.getInstance()
+        calendar.add(Calendar.DAY_OF_YEAR, -1)
+        val yesterday = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(calendar.time)
+
         try {
-            appUsageDao.clearOldData("%$retentionThreshold%")
+            appUsageDao.deleteOldDataExcept("%-$today", "%-$yesterday")
         } catch (e: Exception) {
             Log.e("ScreenTimeRepository", "Error clearing old data: ${e.message}")
         }

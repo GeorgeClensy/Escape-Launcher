@@ -28,6 +28,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.LocalActivity
 import androidx.compose.runtime.collectAsState
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.geecee.escapelauncher.AppsListViewModel
 import com.geecee.escapelauncher.HomeScreenModel
 import com.geecee.escapelauncher.R
 import com.geecee.escapelauncher.core.common.doesPrivateSpaceExist
@@ -51,7 +52,6 @@ import com.geecee.escapelauncher.utils.AppUtils.doHapticFeedBack
 import com.geecee.escapelauncher.utils.AppUtils.formatScreenTime
 import com.geecee.escapelauncher.utils.AppUtils.openApp
 import com.geecee.escapelauncher.utils.AppUtils.resetHome
-import com.geecee.escapelauncher.utils.getAppsAlignment
 import com.geecee.escapelauncher.utils.getBooleanSetting
 import com.geecee.escapelauncher.feature.screentime.ScreenTimeViewModel
 import com.geecee.escapelauncher.MainAppViewModel as MainAppModel
@@ -61,12 +61,15 @@ import com.geecee.escapelauncher.MainAppViewModel as MainAppModel
  */
 @Composable
 fun AppsList(
-    mainAppModel: MainAppModel, 
+    mainAppModel: MainAppModel,
     homeScreenModel: HomeScreenModel,
+    appsViewModel: AppsListViewModel = hiltViewModel(),
     screenTimeViewModel: ScreenTimeViewModel = hiltViewModel(LocalActivity.current as ComponentActivity)
 ) {
     val haptics = LocalHapticFeedback.current
     val appUsageList by screenTimeViewModel.appUsageList.collectAsState()
+    val showScreenTimeApp by appsViewModel.showScreenTimeApp.collectAsState(initial = false)
+    val appsListAlignment by appsViewModel.appsAlignment.collectAsState(initial = Alignment.CenterHorizontally)
 
     val bottomSearch = getBooleanSetting(
         mainAppModel.getContext(),
@@ -176,7 +179,7 @@ fun AppsList(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(30.dp, 0.dp),
-            horizontalAlignment = getAppsAlignment(mainAppModel.getContext()),
+            horizontalAlignment = appsListAlignment,
         ) {
             // Apps list title
             item {
@@ -229,12 +232,9 @@ fun AppsList(
                         homeScreenModel.updateSelectedApp(app)
                         doHapticFeedBack(haptics)
                     },
-                    showScreenTime = getBooleanSetting(
-                        context = mainAppModel.getContext(),
-                        setting = stringResource(R.string.ScreenTimeOnApp)
-                    ),
+                    showScreenTime = showScreenTimeApp,
                     modifier = Modifier,
-                    alignment = getAppsAlignment(mainAppModel.getContext())
+                    alignment = appsListAlignment
                 )
 
             }
@@ -329,7 +329,7 @@ fun AppsList(
                 .align(alignment = Alignment.BottomCenter)
                 .padding(30.dp, 25.dp)
                 .fillMaxWidth(),
-            horizontalAlignment = getAppsAlignment(mainAppModel.getContext())
+            horizontalAlignment = appsListAlignment
         ) {
             if (showSearch && bottomSearch
             ) {

@@ -55,11 +55,9 @@ class ScreenTimeViewModel @Inject constructor(
         screenTimeRepository.onAppOpened(packageName)
     }
 
-    fun onAppClosed(packageName: String) {
-        viewModelScope.launch {
-            screenTimeRepository.onAppClosed(packageName)
-            loadData() // Refresh after close
-        }
+    suspend fun onAppClosed(packageName: String) {
+        screenTimeRepository.onAppClosed(packageName)
+        loadData() // Refresh after close
     }
 
     fun getScreenTime(packageName: String): Long {

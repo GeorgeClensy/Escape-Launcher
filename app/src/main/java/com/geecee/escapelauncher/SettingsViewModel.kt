@@ -154,6 +154,24 @@ class MainSettingsPageViewModel @Inject constructor(
             repository.setWeatherAppPackage(value)
         }
     }
+
+    val appsAlignment = repository.appsAlignment.map { alignment ->
+        when (alignment) {
+            "Left" -> 0
+            "Center" -> 1
+            else -> 2
+        }
+    }
+    fun setAppsAlignment(index: Int) {
+        val value = when (index) {
+            0 -> "Left"
+            1 -> "Center"
+            else -> "Right"
+        }
+        viewModelScope.launch {
+            repository.setAppsAlignment(value)
+        }
+    }
 }
 
 
