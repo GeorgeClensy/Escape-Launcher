@@ -10,12 +10,12 @@ By selecting consent to analytics, you agree to the collection and use of inform
 We do not collect any personally identifiable information (PII) from users. The App uses the Firebase Analytics SDK, which may collect certain data automatically to help us understand how users interact with the App. This data includes:
 Device Information: Type of device, operating system version, app version, and language preference.
 Usage Data: How users interact with the App, such as clicks, scrolls, and other actions.
-Firebase Analytics data is anonymized and used solely for performance optimization, usage analysis, and to improve the user experience of the App.
+Firebase Analytics data is anonymised and used solely for performance optimisation, usage analysis, and to improve the user experience of the App.
 
 2.Analytics and Performance Monitoring
 The App uses Firebase Analytics and Firebase Performance Monitoring to collect anonymous data about app usage. This data is used to:
-Understand user behavior and improve app functionality.
-Optimize app performance.
+Understand user behaviour and improve app functionality.
+Optimise app performance.
 You can disable Firebase Analytics and Performance Monitoring by turning off data collection in your app settings at any time.
 
 3.Crash Reporting
