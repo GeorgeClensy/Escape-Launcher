@@ -13,5 +13,11 @@ android {
 //be needed in this module
 dependencies {
     implementation(libs.androidx.datastore.preferences)
+    implementation(project(":core:model"))
     implementation(project(":core:domain"))
+
+    implementation(libs.androidx.work.runtime.ktx)
+    implementation(libs.hilt.android)
+    implementation(libs.androidx.hilt.common)
+    ksp(libs.hilt.compiler)
 }

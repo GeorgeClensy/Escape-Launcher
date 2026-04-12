@@ -2,7 +2,9 @@ package com.geecee.escapelauncher.ui.views
 
 import android.os.Build
 import android.widget.Toast
+import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.LocalActivity
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -35,6 +37,7 @@ import com.geecee.escapelauncher.utils.getAppShortcuts
 import com.geecee.escapelauncher.utils.getBooleanSetting
 import com.geecee.escapelauncher.utils.managers.OpenChallenge
 import com.geecee.escapelauncher.utils.startShortcut
+import com.geecee.escapelauncher.feature.screentime.ScreenTimeViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import com.geecee.escapelauncher.MainAppViewModel as MainAppModel
@@ -53,6 +56,7 @@ fun MainPagerScreen(
     mainAppModel: MainAppModel,
     homeScreenModel: HomeScreenModel,
     viewModel: MainPagerScreenViewModel = hiltViewModel(),
+    screenTimeViewModel: ScreenTimeViewModel = hiltViewModel(LocalActivity.current as ComponentActivity),
     onOpenSettings: () -> Unit
 ) {
     val focusManager = LocalFocusManager.current
@@ -150,10 +154,7 @@ fun MainPagerScreen(
             }
         } else {
             when (page) {
-                0 -> ScreenTimeDashboard(
-                    context = mainAppModel.getContext(),
-                    mainAppModel = mainAppModel
-                )
+                0 -> ScreenTimeDashboard()
 
                 1 -> HomeScreen(
                     mainAppModel = mainAppModel,
@@ -285,7 +286,8 @@ fun MainPagerScreen(
                     mainAppModel,
                     homeScreenModel,
                     true,
-                    null
+                    null,
+                    onAppOpened = { screenTimeViewModel.onAppOpened(it) }
                 )
                 homeScreenModel.coroutineScope.launch {
                     delay(1000)

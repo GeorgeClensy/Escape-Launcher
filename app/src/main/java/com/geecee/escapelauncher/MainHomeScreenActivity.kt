@@ -44,8 +44,8 @@ import com.geecee.escapelauncher.utils.AppUtils.configureAnalytics
 import com.geecee.escapelauncher.core.common.InstalledApp
 import com.geecee.escapelauncher.utils.ScreenOffReceiver
 import com.geecee.escapelauncher.utils.getBooleanSetting
-import com.geecee.escapelauncher.utils.managers.ScreenTimeManager
-import com.geecee.escapelauncher.utils.managers.scheduleDailyCleanup
+import com.geecee.escapelauncher.feature.screentime.ScreenTimeViewModel
+import com.geecee.escapelauncher.core.data.worker.ClearOldDataWorker
 import com.geecee.escapelauncher.utils.messagingInitializer
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
@@ -55,6 +55,8 @@ import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class MainHomeScreenActivity : ComponentActivity() {
+    private val screenTimeViewModel: ScreenTimeViewModel by viewModels()
+
     private lateinit var screenOffReceiver: ScreenOffReceiver
     private lateinit var packageChangeReceiver: BroadcastReceiver
 
@@ -107,12 +109,11 @@ class MainHomeScreenActivity : ComponentActivity() {
         enableEdgeToEdge()
         AppUtils.configureFullScreenMode(window)
 
-        // Set up the screen time tracking
-        ScreenTimeManager.initialize(this)
-        scheduleDailyCleanup(this)
+        // Set up the screen time tracking cleanup
+        ClearOldDataWorker.scheduleDailyCleanup(this)
 
-        // Efficient bulk load of screen time
-        viewModel.reloadScreenTimeCache()
+        // Mark screen time as loaded (now handled by ScreenTimeViewModel)
+        viewModel.isScreenTimeLoaded.value = true
 
         // Set up the application content
         setContent {
@@ -130,18 +131,12 @@ class MainHomeScreenActivity : ComponentActivity() {
             if (viewModel.isAppOpened) {
                 lifecycleScope.launch(Dispatchers.IO) {
                     val packageName = homeScreenModel.currentSelectedApp.value.packageName
-                    ScreenTimeManager.onAppClosed(packageName)
-
-                    // Update screen time for just this app in the cache
-                    viewModel.updateAppScreenTime(packageName)
-
-                    // Trigger UI refresh
-                    viewModel.shouldReloadScreenTime.value++
+                    screenTimeViewModel.onAppClosed(packageName)
 
                     Log.i(
                         "INFO",
-                        "Screen turned off with app " + homeScreenModel.currentSelectedApp.value.packageName + " open, stopping screen time counting at " + AppUtils.formatScreenTime(
-                            viewModel.getCachedScreenTime(homeScreenModel.currentSelectedApp.value.packageName)
+                        "Screen turned off with app " + packageName + " open, stopping screen time counting at " + AppUtils.formatScreenTime(
+                            screenTimeViewModel.getScreenTime(packageName)
                         )
                     )
 
@@ -189,13 +184,7 @@ class MainHomeScreenActivity : ComponentActivity() {
         if (viewModel.isAppOpened) {
             lifecycleScope.launch(Dispatchers.IO) {
                 val packageName = homeScreenModel.currentSelectedApp.value.packageName
-                ScreenTimeManager.onAppClosed(packageName)
-
-                // Update screen time for just this app in the cache
-                viewModel.updateAppScreenTime(packageName)
-
-                // Trigger UI refresh
-                viewModel.shouldReloadScreenTime.value++
+                screenTimeViewModel.onAppClosed(packageName)
 
                 // Reset state
                 homeScreenModel.currentSelectedApp =

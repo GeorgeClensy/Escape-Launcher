@@ -17,14 +17,17 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.mutableLongStateOf
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.LocalActivity
+import androidx.compose.runtime.collectAsState
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.geecee.escapelauncher.HomeScreenModel
 import com.geecee.escapelauncher.R
 import com.geecee.escapelauncher.core.common.doesPrivateSpaceExist
@@ -50,6 +53,7 @@ import com.geecee.escapelauncher.utils.AppUtils.openApp
 import com.geecee.escapelauncher.utils.AppUtils.resetHome
 import com.geecee.escapelauncher.utils.getAppsAlignment
 import com.geecee.escapelauncher.utils.getBooleanSetting
+import com.geecee.escapelauncher.feature.screentime.ScreenTimeViewModel
 import com.geecee.escapelauncher.MainAppViewModel as MainAppModel
 
 /**
@@ -57,9 +61,12 @@ import com.geecee.escapelauncher.MainAppViewModel as MainAppModel
  */
 @Composable
 fun AppsList(
-    mainAppModel: MainAppModel, homeScreenModel: HomeScreenModel
+    mainAppModel: MainAppModel, 
+    homeScreenModel: HomeScreenModel,
+    screenTimeViewModel: ScreenTimeViewModel = hiltViewModel(LocalActivity.current as ComponentActivity)
 ) {
     val haptics = LocalHapticFeedback.current
+    val appUsageList by screenTimeViewModel.appUsageList.collectAsState()
 
     val bottomSearch = getBooleanSetting(
         mainAppModel.getContext(),
@@ -115,7 +122,8 @@ fun AppsList(
                         overrideOpenChallenge = false,
                         openChallengeShow = homeScreenModel.showOpenChallenge,
                         mainAppModel = mainAppModel,
-                        homeScreenModel = homeScreenModel
+                        homeScreenModel = homeScreenModel,
+                        onAppOpened = { screenTimeViewModel.onAppOpened(it) }
                     )
                     resetHome(homeScreenModel)
                 }
@@ -142,7 +150,8 @@ fun AppsList(
                         overrideOpenChallenge = false,
                         openChallengeShow = homeScreenModel.showOpenChallenge,
                         mainAppModel = mainAppModel,
-                        homeScreenModel = homeScreenModel
+                        homeScreenModel = homeScreenModel,
+                        onAppOpened = { screenTimeViewModel.onAppOpened(it) }
                     )
                     resetHome(homeScreenModel)
                 }
@@ -194,18 +203,13 @@ fun AppsList(
             items(homeScreenModel.filteredApps, key = { app -> app.packageName })
             { app ->
 
-                val screenTime =
-                    remember { mutableLongStateOf(mainAppModel.getCachedScreenTime(app.packageName)) }
-
-                // Update screen time when app changes or shouldReloadScreenTime changes
-                LaunchedEffect(app.packageName, mainAppModel.shouldReloadScreenTime.value) {
-                    val time = mainAppModel.getScreenTimeAsync(app.packageName)
-                    screenTime.longValue = time
+                val screenTime = remember(appUsageList) {
+                    screenTimeViewModel.getScreenTime(app.packageName)
                 }
 
                 HomeScreenItem(
                     appName = app.displayName,
-                    screenTime = formatScreenTime(screenTime.longValue),
+                    screenTime = formatScreenTime(screenTime),
                     onAppClick = {
                         homeScreenModel.updateSelectedApp(app)
 
@@ -214,7 +218,8 @@ fun AppsList(
                             overrideOpenChallenge = false,
                             openChallengeShow = homeScreenModel.showOpenChallenge,
                             mainAppModel = mainAppModel,
-                            homeScreenModel = homeScreenModel
+                            homeScreenModel = homeScreenModel,
+                            onAppOpened = { screenTimeViewModel.onAppOpened(it) }
                         )
 
                         resetHome(homeScreenModel)

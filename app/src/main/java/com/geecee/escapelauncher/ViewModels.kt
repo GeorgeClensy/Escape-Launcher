@@ -14,7 +14,6 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.AndroidViewModel
@@ -28,8 +27,6 @@ import com.geecee.escapelauncher.utils.getBooleanSetting
 import com.geecee.escapelauncher.utils.managers.ChallengesManager
 import com.geecee.escapelauncher.utils.managers.FavoriteAppsManager
 import com.geecee.escapelauncher.utils.managers.HiddenAppsManager
-import com.geecee.escapelauncher.utils.managers.getScreenTimeListSorted
-import com.geecee.escapelauncher.utils.managers.getUsageForApp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -37,9 +34,6 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.text.Normalizer
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
 
 /**
  * Home Screen View Model - Used for holding UI state for the home screen pages
@@ -329,55 +323,4 @@ class MainAppViewModel(application: Application) : AndroidViewModel(application)
 
     val shouldGoHomeOnResume: MutableState<Boolean> =
         mutableStateOf(false) // This is to check whether to go back to the first page of the home screen the next time onResume is called, It is only ever used once in AllApps when you come back from signing in to private space
-
-    // Screen time related things
-
-    private val dateFormat =
-        SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()) // Format for the date
-
-    fun getToday(): String {
-        return dateFormat.format(Date())
-    } // Returns the current date
-
-    val screenTimeCache =
-        mutableStateMapOf<String, Long>() // Cache mapping package name to screen time
-
-    val shouldReloadScreenTime: MutableState<Int> =
-        mutableIntStateOf(0) // This exists because the screen time is retrieved in LaunchedEffects so it'll reload when the value of this is changed
-
-    fun updateAppScreenTime(packageName: String) {
-        viewModelScope.launch(Dispatchers.IO) {
-            val screenTime = getUsageForApp(packageName, getToday())
-            screenTimeCache[packageName] = screenTime
-        }
-    } // Function to update a single app's cached screen time
-
-    fun reloadScreenTimeCache() {
-        Log.d("Loading", "ReloadScreenTimeCache started")
-
-        viewModelScope.launch(Dispatchers.IO) {
-            val usageList = getScreenTimeListSorted(getToday())
-            val usageMap = usageList.associate { it.packageName to it.totalTime }
-
-            withContext(Dispatchers.Main) {
-                screenTimeCache.clear()
-                screenTimeCache.putAll(usageMap)
-                shouldReloadScreenTime.value++
-                isScreenTimeLoaded.value = true
-            }
-        }
-    } // Reloads the screen times efficiently
-
-    suspend fun getScreenTimeAsync(packageName: String, forceRefresh: Boolean = false): Long {
-        if (forceRefresh || !screenTimeCache.containsKey(packageName)) {
-            val screenTime = getUsageForApp(packageName, getToday())
-            screenTimeCache[packageName] = screenTime
-            return screenTime
-        }
-        return screenTimeCache[packageName] ?: 0L
-    } // Function to get screen time from cache or compute if missing
-
-    fun getCachedScreenTime(packageName: String): Long {
-        return screenTimeCache[packageName] ?: 0L
-    } // Non-suspend function that just returns the cached value without fetching
 }

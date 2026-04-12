@@ -28,7 +28,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -61,10 +60,8 @@ import com.geecee.escapelauncher.utils.AppUtils.formatScreenTime
 import com.geecee.escapelauncher.utils.AppUtils.resetHome
 import com.geecee.escapelauncher.utils.WidgetsScreen
 import com.geecee.escapelauncher.utils.analyticsProxy
-import com.geecee.escapelauncher.utils.managers.getTotalUsageForDate
-import kotlinx.coroutines.Dispatchers
+import com.geecee.escapelauncher.feature.screentime.ScreenTimeViewModel
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -79,7 +76,8 @@ fun HomeScreen(
     mainAppModel: MainAppModel,
     homeScreenModel: HomeScreenModel,
     clockViewModel: ClockViewModel = hiltViewModel(),
-    homeScreenViewModel: NewHomeScreenViewModel = hiltViewModel()
+    homeScreenViewModel: NewHomeScreenViewModel = hiltViewModel(),
+    screenTimeViewModel: ScreenTimeViewModel = hiltViewModel(LocalActivity.current as ComponentActivity)
 ) {
     val context = LocalContext.current
     val timeParts by clockViewModel.timeParts.collectAsState()
@@ -96,6 +94,7 @@ fun HomeScreen(
     val widgetOffsetPref by homeScreenViewModel.widgetOffset.collectAsState(initial = 0f)
     val widgetHeight by homeScreenViewModel.widgetHeight.collectAsState(initial = 125f)
     val widgetWidth by homeScreenViewModel.widgetWidth.collectAsState(initial = 250f)
+    val appUsageList by screenTimeViewModel.appUsageList.collectAsState()
 
     val (hour, minute, _) = timeParts
 
@@ -223,18 +222,10 @@ fun HomeScreen(
                 }
 
                 if (showScreenTimeHome) {
-                    val todayUsage = remember { mutableLongStateOf(0L) }
-                    LaunchedEffect(mainAppModel.shouldReloadScreenTime.value) {
-                        withContext(Dispatchers.IO) {
-                            val usage = getTotalUsageForDate(mainAppModel.getToday())
-                            withContext(Dispatchers.Main) {
-                                todayUsage.longValue = usage
-                            }
-                        }
-                    }
+                    val todayUsage by screenTimeViewModel.totalUsage.collectAsState()
 
                     GlanceWidget(
-                        text = formatScreenTime(todayUsage.longValue),
+                        text = formatScreenTime(todayUsage),
                         icon = Icons.Default.Timer,
                         iconContentDescription = "Screen Time",
                         homeAlignment = homeAlignment,
@@ -285,18 +276,13 @@ fun HomeScreen(
 
         //Apps
         items(homeScreenModel.favoriteApps, key = { app -> app.packageName }) { app ->
-            val screenTime =
-                remember { mutableLongStateOf(mainAppModel.getCachedScreenTime(app.packageName)) }
-
-            // Update screen time when app changes or shouldReloadScreenTime changes
-            LaunchedEffect(app.packageName, mainAppModel.shouldReloadScreenTime.value) {
-                val time = mainAppModel.getScreenTimeAsync(app.packageName)
-                screenTime.longValue = time
+            val screenTime = remember(appUsageList) {
+                screenTimeViewModel.getScreenTime(app.packageName)
             }
 
             HomeScreenItem(
                 appName = app.displayName,
-                screenTime = formatScreenTime(screenTime.longValue),
+                screenTime = formatScreenTime(screenTime),
                 onAppClick = {
                     homeScreenModel.updateSelectedApp(app)
 
@@ -305,7 +291,8 @@ fun HomeScreen(
                         overrideOpenChallenge = false,
                         openChallengeShow = homeScreenModel.showOpenChallenge,
                         mainAppModel = mainAppModel,
-                        homeScreenModel = homeScreenModel
+                        homeScreenModel = homeScreenModel,
+                        onAppOpened = { screenTimeViewModel.onAppOpened(it) }
                     )
 
                     resetHome(homeScreenModel)

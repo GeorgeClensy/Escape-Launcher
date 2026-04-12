@@ -30,7 +30,6 @@ import com.geecee.escapelauncher.HomeScreenModel
 import com.geecee.escapelauncher.R
 import com.geecee.escapelauncher.core.ui.theme.AppTheme
 import com.geecee.escapelauncher.core.ui.theme.EscapeTheme
-import com.geecee.escapelauncher.utils.managers.ScreenTimeManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -38,9 +37,6 @@ import kotlinx.coroutines.withContext
 import java.io.IOException
 import java.io.InputStream
 import java.text.Normalizer
-import java.text.SimpleDateFormat
-import java.util.Calendar
-import java.util.Locale
 import java.util.concurrent.TimeUnit
 import android.graphics.Color as AndroidColor
 import androidx.compose.ui.graphics.Color as ComposeColor
@@ -74,6 +70,7 @@ object AppUtils {
      * @param overrideOpenChallenge Whether the open challenge should be skipped
      * @param openChallengeShow This is set to true if the app has an open challenge, We recommend having a composable that shows when that's true to act as the open challenge
      * @param mainAppModel Main view model, needed for open challenge manager, package manager, context
+     * @param onAppOpened Callback called when the app is successfully opened for screen time tracking
      *
      * @author George Clensy
      */
@@ -82,7 +79,8 @@ object AppUtils {
         mainAppModel: MainAppModel,
         homeScreenModel: HomeScreenModel,
         overrideOpenChallenge: Boolean,
-        openChallengeShow: MutableState<Boolean>?
+        openChallengeShow: MutableState<Boolean>?,
+        onAppOpened: ((String) -> Unit)? = null
     ) {
         val context = mainAppModel.getContext()
         val launcherApps = context.getSystemService(Context.LAUNCHER_APPS_SERVICE) as LauncherApps
@@ -96,7 +94,7 @@ object AppUtils {
                     Rect(),
                     options.toBundle()
                 )
-                ScreenTimeManager.onAppOpened(app.packageName)
+                onAppOpened?.invoke(app.packageName)
 
                 mainAppModel.isAppOpened = true
                 mainAppModel.shouldGoHomeOnResume.value = true
@@ -108,7 +106,7 @@ object AppUtils {
                     intent?.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                     if (intent != null) {
                         context.startActivity(intent)
-                        ScreenTimeManager.onAppOpened(app.packageName)
+                        onAppOpened?.invoke(app.packageName)
 
                         mainAppModel.isAppOpened = true
                         mainAppModel.shouldGoHomeOnResume.value = true
@@ -322,19 +320,6 @@ object AppUtils {
             homeScreenModel.showWorkApps.value = false
             homeScreenModel.showWorkBottomSheet.value = false
         }
-    }
-
-    /**
-     * Returns the date yesterday as a string
-     *
-     * @return String formatted yyyy-MM-dd
-     */
-    fun getYesterday(): String {
-        val calendar = Calendar.getInstance()
-        calendar.add(Calendar.DAY_OF_YEAR, -1)
-        val yesterdayDate =
-            SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(calendar.time)
-        return yesterdayDate
     }
 
     /**

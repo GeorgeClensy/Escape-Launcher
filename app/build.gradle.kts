@@ -96,6 +96,7 @@ dependencies {
     implementation(project(":feature:privatespace"))
     implementation(project(":feature:securefolder"))
     implementation(project(":feature:weather"))
+    implementation(project(":feature:screentime"))
 
     implementation(libs.androidx.hilt.navigation.compose)
 }
