@@ -8,7 +8,7 @@ plugins {
     id("escapelauncher.android.room")
 }
 
-val baseVersionCode = "2.4"
+val baseVersionCode = "3.0"
 
 android {
     namespace = "com.geecee.escapelauncher"
@@ -16,7 +16,7 @@ android {
     defaultConfig {
         applicationId = "com.geecee.escapelauncher"
         targetSdk = libs.versions.targetSdk.get().toInt()
-        versionCode = 2
+        versionCode = 3
         versionName = baseVersionCode
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
