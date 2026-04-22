@@ -15,10 +15,10 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 internal fun Project.configureKotlinAndroid(
     commonExtension: ApplicationExtension,
 ) {
-    commonExtension.compileSdk = 36
+    commonExtension.compileSdk = libs.findVersion("compileSdk").get().toString().toInt()
 
     commonExtension.defaultConfig {
-        minSdk = 26
+        minSdk = libs.findVersion("minSdk").get().toString().toInt()
     }
 
     commonExtension.compileOptions {
@@ -32,10 +32,10 @@ internal fun Project.configureKotlinAndroid(
 internal fun Project.configureKotlinAndroid(
     commonExtension: LibraryExtension,
 ) {
-    commonExtension.compileSdk = 36
+    commonExtension.compileSdk = libs.findVersion("compileSdk").get().toString().toInt()
 
     commonExtension.defaultConfig {
-        minSdk = 26
+        minSdk = libs.findVersion("minSdk").get().toString().toInt()
     }
 
     commonExtension.compileOptions {

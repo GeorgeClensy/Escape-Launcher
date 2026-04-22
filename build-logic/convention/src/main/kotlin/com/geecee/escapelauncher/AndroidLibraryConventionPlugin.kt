@@ -16,7 +16,7 @@ class AndroidLibraryConventionPlugin : Plugin<Project> {
             extensions.configure<LibraryExtension> {
                 configureKotlinAndroid(this)
                 lint {
-                    targetSdk = 36
+                    targetSdk = libs.findVersion("targetSdk").get().toString().toInt()
                 }
                 defaultConfig {
                     missingDimensionStrategy("distribution", "foss")

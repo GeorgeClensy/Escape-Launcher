@@ -15,7 +15,7 @@ android {
 
     defaultConfig {
         applicationId = "com.geecee.escapelauncher"
-        targetSdk = 36
+        targetSdk = libs.versions.targetSdk.get().toInt()
         versionCode = 2
         versionName = baseVersionCode
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -36,6 +36,7 @@ android {
         release {
             resValue("string", "app_name", "Escape Launcher")
             isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "../proguard-rules.pro"
