@@ -5,7 +5,7 @@ import androidx.room.PrimaryKey
 
 @Entity(tableName = "modifiedApps")
 data class ModifiedAppEntity(
-    @PrimaryKey val packageName: String,
+    @PrimaryKey val packageId: String,
     val displayName: String?,
     val isHidden: Boolean,
     val isChallenge: Boolean,

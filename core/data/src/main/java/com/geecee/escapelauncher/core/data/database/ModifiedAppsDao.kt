@@ -19,19 +19,19 @@ interface ModifiedAppsDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsert(app: ModifiedAppEntity)
 
-    @Query("SELECT * FROM modifiedApps WHERE packageName = :packageName LIMIT 1")
-    suspend fun getBypackageName(packageName: String): ModifiedAppEntity?
+    @Query("SELECT * FROM modifiedApps WHERE packageId = :packageId LIMIT 1")
+    suspend fun getByPackageId(packageId: String): ModifiedAppEntity?
 
-    @Query("SELECT displayName FROM modifiedApps WHERE packageName = :packageName LIMIT 1")
-    suspend fun getDisplayName(packageName: String): String?
+    @Query("SELECT displayName FROM modifiedApps WHERE packageId = :packageId LIMIT 1")
+    suspend fun getDisplayName(packageId: String): String?
 
     @Transaction
-    suspend fun setDisplayName(packageName: String, displayName: String?) {
-        val current = getBypackageName(packageName)
+    suspend fun setDisplayName(packageId: String, displayName: String?) {
+        val current = getByPackageId(packageId)
         if (current == null) {
             upsert(
                 ModifiedAppEntity(
-                    packageName = packageName,
+                    packageId = packageId,
                     displayName = displayName,
                     isHidden = false,
                     isChallenge = false,
@@ -44,56 +44,56 @@ interface ModifiedAppsDao {
     }
 
     @Transaction
-    suspend fun clearDisplayName(packageName: String) {
-        setDisplayName(packageName, null)
+    suspend fun clearDisplayName(packageId: String) {
+        setDisplayName(packageId, null)
     }
 
-    @Query("UPDATE modifiedApps SET isHidden = :isHidden WHERE packageName = :packageName")
-    suspend fun updateIsHidden(packageName: String, isHidden: Boolean)
+    @Query("UPDATE modifiedApps SET isHidden = :isHidden WHERE packageId = :packageId")
+    suspend fun updateIsHidden(packageId: String, isHidden: Boolean)
 
-    @Query("SELECT isHidden FROM modifiedApps WHERE packageName = :packageName LIMIT 1")
-    suspend fun getIsHidden(packageName: String): Boolean?
+    @Query("SELECT isHidden FROM modifiedApps WHERE packageId = :packageId LIMIT 1")
+    suspend fun getIsHidden(packageId: String): Boolean?
 
-    @Query("UPDATE modifiedApps SET isChallenge = :isChallenge WHERE packageName = :packageName")
-    suspend fun updateIsChallenge(packageName: String, isChallenge: Boolean)
+    @Query("UPDATE modifiedApps SET isChallenge = :isChallenge WHERE packageId = :packageId")
+    suspend fun updateIsChallenge(packageId: String, isChallenge: Boolean)
 
-    @Query("SELECT isChallenge FROM modifiedApps WHERE packageName = :packageName LIMIT 1")
-    suspend fun getIsChallenge(packageName: String): Boolean?
+    @Query("SELECT isChallenge FROM modifiedApps WHERE packageId = :packageId LIMIT 1")
+    suspend fun getIsChallenge(packageId: String): Boolean?
 
-    @Query("UPDATE modifiedApps SET favouritePosition = :favouritePosition WHERE packageName = :packageName")
-    suspend fun updateFavouritePosition(packageName: String, favouritePosition: Double?)
+    @Query("UPDATE modifiedApps SET favouritePosition = :favouritePosition WHERE packageId = :packageId")
+    suspend fun updateFavouritePosition(packageId: String, favouritePosition: Double?)
 
-    @Query("SELECT favouritePosition FROM modifiedApps WHERE packageName = :packageName LIMIT 1")
-    suspend fun getFavouritePosition(packageName: String): Double?
-
-    @Transaction
-    suspend fun setIsHidden(packageName: String, isHidden: Boolean) {
-        ensureRowExists(packageName)
-        updateIsHidden(packageName, isHidden)
-    }
+    @Query("SELECT favouritePosition FROM modifiedApps WHERE packageId = :packageId LIMIT 1")
+    suspend fun getFavouritePosition(packageId: String): Double?
 
     @Transaction
-    suspend fun setIsChallenge(packageName: String, isChallenge: Boolean) {
-        ensureRowExists(packageName)
-        updateIsChallenge(packageName, isChallenge)
+    suspend fun setIsHidden(packageId: String, isHidden: Boolean) {
+        ensureRowExists(packageId)
+        updateIsHidden(packageId, isHidden)
     }
 
     @Transaction
-    suspend fun setFavouritePosition(packageName: String, favouritePosition: Double?) {
-        ensureRowExists(packageName)
-        updateFavouritePosition(packageName, favouritePosition)
+    suspend fun setIsChallenge(packageId: String, isChallenge: Boolean) {
+        ensureRowExists(packageId)
+        updateIsChallenge(packageId, isChallenge)
     }
 
     @Transaction
-    suspend fun clearFavouritePosition(packageName: String) {
-        setFavouritePosition(packageName, null)
+    suspend fun setFavouritePosition(packageId: String, favouritePosition: Double?) {
+        ensureRowExists(packageId)
+        updateFavouritePosition(packageId, favouritePosition)
     }
 
     @Transaction
-    suspend fun ensureRowExists(packageName: String) {
+    suspend fun clearFavouritePosition(packageId: String) {
+        setFavouritePosition(packageId, null)
+    }
+
+    @Transaction
+    suspend fun ensureRowExists(packageId: String) {
         insertIfMissing(
             ModifiedAppEntity(
-                packageName = packageName,
+                packageId = packageId,
                 displayName = null,
                 isHidden = false,
                 isChallenge = false,
@@ -108,42 +108,42 @@ interface ModifiedAppsDao {
         FROM modifiedApps
         WHERE favouritePosition IS NOT NULL
         ORDER BY favouritePosition ASC,
-                 COALESCE(displayName, packageName) COLLATE NOCASE ASC
+                 COALESCE(displayName, packageId) COLLATE NOCASE ASC
         """
     )
     suspend fun getFavouriteAppsInOrder(): List<ModifiedAppEntity>
 
     @Query(
         """
-        SELECT packageName
+        SELECT packageId
         FROM modifiedApps
         WHERE isHidden = 1
-        ORDER BY COALESCE(displayName, packageName) COLLATE NOCASE ASC
+        ORDER BY COALESCE(displayName, packageId) COLLATE NOCASE ASC
         """
     )
-    suspend fun getHiddenpackageNames(): List<String>
+    suspend fun getHiddenPackageIds(): List<String>
 
     @Query(
         """
-        SELECT packageName
+        SELECT packageId
         FROM modifiedApps
         WHERE isChallenge = 1
-        ORDER BY COALESCE(displayName, packageName) COLLATE NOCASE ASC
+        ORDER BY COALESCE(displayName, packageId) COLLATE NOCASE ASC
         """
     )
-    suspend fun getChallengepackageNames(): List<String>
+    suspend fun getChallengePackageIds(): List<String>
 
-    @Query("SELECT EXISTS(SELECT 1 FROM modifiedApps WHERE packageName = :packageName AND isHidden = 1)")
-    suspend fun isHidden(packageName: String): Boolean
+    @Query("SELECT EXISTS(SELECT 1 FROM modifiedApps WHERE packageId = :packageId AND isHidden = 1)")
+    suspend fun isHidden(packageId: String): Boolean
 
-    @Query("SELECT EXISTS(SELECT 1 FROM modifiedApps WHERE packageName = :packageName AND isChallenge = 1)")
-    suspend fun isChallenge(packageName: String): Boolean
+    @Query("SELECT EXISTS(SELECT 1 FROM modifiedApps WHERE packageId = :packageId AND isChallenge = 1)")
+    suspend fun isChallenge(packageId: String): Boolean
 
-    @Query("SELECT EXISTS(SELECT 1 FROM modifiedApps WHERE packageName = :packageName AND favouritePosition IS NOT NULL)")
-    suspend fun isFavourite(packageName: String): Boolean
+    @Query("SELECT EXISTS(SELECT 1 FROM modifiedApps WHERE packageId = :packageId AND favouritePosition IS NOT NULL)")
+    suspend fun isFavourite(packageId: String): Boolean
 
-    @Query("DELETE FROM modifiedApps WHERE packageName = :packageName")
-    suspend fun deleteBypackageName(packageName: String)
+    @Query("DELETE FROM modifiedApps WHERE packageId = :packageId")
+    suspend fun deleteByPackageId(packageId: String)
 
     @Query(
         """
