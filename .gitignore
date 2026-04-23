@@ -17,6 +17,7 @@ captures/
 .cxx/
 app/prod/release/
 crash-reports/
+.kotlin/
 
 # IDE - IntelliJ / Android Studio
 .idea/

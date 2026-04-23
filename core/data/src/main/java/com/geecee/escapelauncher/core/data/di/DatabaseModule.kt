@@ -4,6 +4,8 @@ import android.content.Context
 import androidx.room.Room
 import com.geecee.escapelauncher.core.data.database.AppDatabase
 import com.geecee.escapelauncher.core.data.database.AppUsageDao
+import com.geecee.escapelauncher.core.data.database.ModifiedAppsDao
+import com.geecee.escapelauncher.core.data.database.ModifiedAppsDatabase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -29,5 +31,22 @@ object DatabaseModule {
     @Provides
     fun provideAppUsageDao(database: AppDatabase): AppUsageDao {
         return database.appUsageDao()
+    }
+
+    @Provides
+    @Singleton
+    fun provideModifiedAppsDatabase(
+        @ApplicationContext context: Context
+    ): ModifiedAppsDatabase {
+        return Room.databaseBuilder(
+            context = context,
+            klass = ModifiedAppsDatabase::class.java,
+            "modified_apps_database"
+        ).build()
+    }
+
+    @Provides
+    fun provideModifiedAppsDao(database: ModifiedAppsDatabase): ModifiedAppsDao {
+        return database.modifiedAppsDao()
     }
 }
