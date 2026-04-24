@@ -29,6 +29,7 @@ import androidx.activity.compose.LocalActivity
 import androidx.compose.runtime.collectAsState
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.geecee.escapelauncher.AppsListViewModel
+import com.geecee.escapelauncher.HiddenAppsViewModel
 import com.geecee.escapelauncher.HomeScreenModel
 import com.geecee.escapelauncher.R
 import com.geecee.escapelauncher.core.common.doesPrivateSpaceExist
@@ -64,12 +65,14 @@ fun AppsList(
     mainAppModel: MainAppModel,
     homeScreenModel: HomeScreenModel,
     appsViewModel: AppsListViewModel = hiltViewModel(),
+    hiddenAppsViewModel: HiddenAppsViewModel = hiltViewModel(),
     screenTimeViewModel: ScreenTimeViewModel = hiltViewModel(LocalActivity.current as ComponentActivity)
 ) {
     val haptics = LocalHapticFeedback.current
     val appUsageList by screenTimeViewModel.appUsageList.collectAsState()
     val showScreenTimeApp by appsViewModel.showScreenTimeApp.collectAsState(initial = false)
     val appsListAlignment by appsViewModel.appsAlignment.collectAsState(initial = Alignment.CenterHorizontally)
+    val hiddenPacakgeIds by hiddenAppsViewModel.hiddenPackageIds.collectAsState()
 
     val bottomSearch = getBooleanSetting(
         mainAppModel.getContext(),
@@ -104,7 +107,7 @@ fun AppsList(
 
                 // Get results synchronously for auto-open logic to avoid race conditions with ViewModel update
                 val matchedApps = homeScreenModel.installedApps.filter { app ->
-                    val isHidden = mainAppModel.hiddenAppsManager.isAppHidden(app.packageName)
+                    val isHidden = hiddenPacakgeIds.contains(app.packageName)
                     val matchesQuery = AppUtils.fuzzyMatch(app.displayName, query)
                     matchesQuery && (!isHidden || showHiddenInSearch)
                 }
@@ -139,7 +142,7 @@ fun AppsList(
                 )
 
                 val matchedApps = homeScreenModel.installedApps.filter { app ->
-                    val isHidden = mainAppModel.hiddenAppsManager.isAppHidden(app.packageName)
+                    val isHidden = hiddenPacakgeIds.contains(app.packageName)
                     val matchesQuery = AppUtils.fuzzyMatch(app.displayName, query)
                     matchesQuery && (!isHidden || showHiddenInSearch)
                 }

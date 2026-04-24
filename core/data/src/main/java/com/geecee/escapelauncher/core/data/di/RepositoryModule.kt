@@ -1,5 +1,7 @@
 package com.geecee.escapelauncher.core.data.di
 
+import com.geecee.escapelauncher.core.data.repository.ModifiedAppsRepository
+import com.geecee.escapelauncher.core.data.repository.ModifiedAppsRepositoryImpl
 import com.geecee.escapelauncher.core.data.repository.ScreenTimeRepository
 import com.geecee.escapelauncher.core.data.repository.ScreenTimeRepositoryImpl
 import dagger.Binds
@@ -17,4 +19,10 @@ abstract class RepositoryModule {
     abstract fun bindScreenTimeRepository(
         screenTimeRepositoryImpl: ScreenTimeRepositoryImpl
     ): ScreenTimeRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindModifiedAppsRepository(
+        modifiedAppsRepositoryImpl: ModifiedAppsRepositoryImpl
+    ): ModifiedAppsRepository
 }

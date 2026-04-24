@@ -23,10 +23,12 @@ import androidx.lifecycle.viewModelScope
 import com.geecee.escapelauncher.core.ui.theme.AppTheme
 import com.geecee.escapelauncher.utils.AppUtils
 import com.geecee.escapelauncher.core.common.InstalledApp
+import com.geecee.escapelauncher.core.data.repository.ModifiedAppsRepository
 import com.geecee.escapelauncher.utils.getBooleanSetting
 import com.geecee.escapelauncher.utils.managers.ChallengesManager
 import com.geecee.escapelauncher.utils.managers.FavoriteAppsManager
-import com.geecee.escapelauncher.utils.managers.HiddenAppsManager
+import dagger.hilt.android.lifecycle.HiltViewModel
+import jakarta.inject.Inject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -75,17 +77,18 @@ class HomeScreenModel(application: Application, val mainAppViewModel: MainAppVie
         )
 
         coroutineScope.launch(Dispatchers.Default) {
+            val hiddenApps = mainAppViewModel.modifiedAppsRepository.getHiddenPackageIds().toSet()
+
             val apps = appsSnapshot.filter {
                 it.packageName != context.packageName
             }
 
             val filtered = if (query.isBlank()) {
-                apps.filter { !mainAppViewModel.hiddenAppsManager.isAppHidden(it.packageName) }
+                apps.filter { !hiddenApps.contains(it.packageName) }
             } else {
                 val regexUnaccentPattern = Regex("\\p{M}+")
                 apps.filter { app ->
-                    val isHidden =
-                        mainAppViewModel.hiddenAppsManager.isAppHidden(app.packageName)
+                    val isHidden = hiddenApps.contains(app.packageName)
                     val matchesQuery = AppUtils.fuzzyMatch(app.displayName, query)
                     matchesQuery && (!isHidden || showHiddenInSearch)
                 }.sortedWith(compareBy<InstalledApp> { app ->
@@ -252,7 +255,11 @@ class HomeScreenModelFactory(
 /**
  * Main App View Model - Used for data that needs to be passed around the app
  */
-class MainAppViewModel(application: Application) : AndroidViewModel(application) {
+@HiltViewModel
+class MainAppViewModel @Inject constructor(
+    application: Application,
+    val modifiedAppsRepository: ModifiedAppsRepository
+) : AndroidViewModel(application) {
     private val appContext: Context = application.applicationContext // The app context
 
     private val _navigateHomeEvent = MutableSharedFlow<Unit>(
@@ -296,8 +303,6 @@ class MainAppViewModel(application: Application) : AndroidViewModel(application)
         FavoriteAppsManager(application) // Favorite apps manager
 
     // Hidden Apps
-
-    val hiddenAppsManager: HiddenAppsManager = HiddenAppsManager(application) // Hidden apps manager
 
     val hiddenAppsTrigger = mutableIntStateOf(0)
 

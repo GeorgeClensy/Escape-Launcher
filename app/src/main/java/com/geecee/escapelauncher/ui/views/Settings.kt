@@ -90,6 +90,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.geecee.escapelauncher.BuildConfig
 import com.geecee.escapelauncher.DevOptionsPageViewModel
+import com.geecee.escapelauncher.HiddenAppsViewModel
 import com.geecee.escapelauncher.HomeScreenModel
 import com.geecee.escapelauncher.MainSettingsPageViewModel
 import com.geecee.escapelauncher.R
@@ -159,7 +160,8 @@ fun Settings(
     homeScreenModel: HomeScreenModel,
     goBack: () -> Unit,
     activity: Activity,
-    settingsViewModel: SettingsViewModel = hiltViewModel()
+    settingsViewModel: SettingsViewModel = hiltViewModel(),
+    hiddenAppsViewModel: HiddenAppsViewModel = hiltViewModel()
 ) {
     val showPolicyDialog = remember { mutableStateOf(false) }
 
@@ -254,9 +256,9 @@ fun Settings(
                 "bulkHiddenApps",
                 enterTransition = { fadeIn(tween(300)) },
                 exitTransition = { fadeOut(tween(300)) }) {
-                val hiddenAppsList = remember(mainAppModel.hiddenAppsTrigger.intValue) {
-                    val currentHidden = mainAppModel.hiddenAppsManager.getHiddenApps()
-                    homeScreenModel.installedApps.filter { it.packageName in currentHidden }
+                val hiddenPackageIds by hiddenAppsViewModel.hiddenPackageIds.collectAsState()
+                val hiddenAppsList = remember(hiddenPackageIds, homeScreenModel.installedApps.size) {
+                    homeScreenModel.installedApps.filter { it.packageName in hiddenPackageIds }
                 }
 
                 BulkManager(
@@ -268,9 +270,9 @@ fun Settings(
                     onBackClicked = { navController.popBackStack() },
                     onItemClicked = { app, selected ->
                         if (selected) {
-                            mainAppModel.hiddenAppsManager.removeHiddenApp(app.packageName)
+                            hiddenAppsViewModel.unhideApp(app.packageName)
                         } else {
-                            mainAppModel.hiddenAppsManager.addHiddenApp(app.packageName)
+                            hiddenAppsViewModel.hideApp(app.packageName)
                             resetHome(homeScreenModel, false)
                         }
                         mainAppModel.notifyHiddenAppsChanged()
@@ -1220,12 +1222,13 @@ fun WidgetOptions(
 fun HiddenApps(
     mainAppModel: MainAppModel,
     homeScreenModel: HomeScreenModel,
+    hiddenAppsViewModel: HiddenAppsViewModel = hiltViewModel(),
     goToManageHiddenApps: () -> Unit,
     goBack: () -> Unit
 ) {
     val coroutineScope = rememberCoroutineScope()
     val haptics = LocalHapticFeedback.current
-    var hiddenAppsList by remember { mutableStateOf(mainAppModel.hiddenAppsManager.getHiddenApps()) }
+    val hiddenPackageIds by hiddenAppsViewModel.hiddenPackageIds.collectAsState()
 
     LazyColumn(
         verticalArrangement = Arrangement.Top,
@@ -1270,7 +1273,7 @@ fun HiddenApps(
         }
 
         items(
-            items = hiddenAppsList,
+            items = hiddenPackageIds.toList(),
             key = { it } // use package name as unique key
         ) { appPackageName ->
             // Animate the removal of the item
@@ -1313,13 +1316,12 @@ fun HiddenApps(
                         // Remove from your list after a short delay to let animation run
                         coroutineScope.launch {
                             delay(500)
-                            mainAppModel.hiddenAppsManager.removeHiddenApp(appPackageName)
+                            hiddenAppsViewModel.unhideApp(appPackageName)
                             mainAppModel.notifyHiddenAppsChanged()
-                            hiddenAppsList = mainAppModel.hiddenAppsManager.getHiddenApps()
                         }
                     },
-                    isTopOfGroup = hiddenAppsList.firstOrNull() == appPackageName,
-                    isBottomOfGroup = hiddenAppsList.lastOrNull() == appPackageName,
+                    isTopOfGroup = hiddenPackageIds.firstOrNull() == appPackageName,
+                    isBottomOfGroup = hiddenPackageIds.lastOrNull() == appPackageName,
                     deleteIconContentDescription = stringResource(R.string.remove),
                 )
             }

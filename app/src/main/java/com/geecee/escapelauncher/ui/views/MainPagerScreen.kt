@@ -23,6 +23,7 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.geecee.escapelauncher.HiddenAppsViewModel
 import com.geecee.escapelauncher.HomeScreenModel
 import com.geecee.escapelauncher.R
 import com.geecee.escapelauncher.core.common.goToAppInfo
@@ -56,6 +57,7 @@ fun MainPagerScreen(
     mainAppModel: MainAppModel,
     homeScreenModel: HomeScreenModel,
     viewModel: MainPagerScreenViewModel = hiltViewModel(),
+    hiddenAppsViewModel: HiddenAppsViewModel = hiltViewModel(),
     screenTimeViewModel: ScreenTimeViewModel = hiltViewModel(LocalActivity.current as ComponentActivity),
     onOpenSettings: () -> Unit
 ) {
@@ -230,7 +232,7 @@ fun MainPagerScreen(
                 AppAction(
                     label = stringResource(R.string.hide),
                     onClick = {
-                        mainAppModel.hiddenAppsManager.addHiddenApp(homeScreenModel.currentSelectedApp.value.packageName)
+                        hiddenAppsViewModel.hideApp(homeScreenModel.currentSelectedApp.value.packageName)
                         homeScreenModel.showBottomSheet.value = false
                         mainAppModel.notifyHiddenAppsChanged()
                         resetHome(homeScreenModel, false)
