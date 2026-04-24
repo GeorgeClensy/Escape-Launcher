@@ -1,4 +1,4 @@
-package com.geecee.escapelauncher.utils.managers
+package com.geecee.escapelauncher.core.ui.composables
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
