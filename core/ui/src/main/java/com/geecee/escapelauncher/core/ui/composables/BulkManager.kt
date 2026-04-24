@@ -45,6 +45,7 @@ fun <T> BulkManager(
     id: (T) -> String,
     label: (T) -> String,
     preSelectedItems: List<T> = emptyList(),
+    selectedIdsOverride: Set<String>? = null,
     title: String,
     onBackClicked: () -> Unit,
     onItemClicked: (item: T, selected: Boolean) -> Unit,
@@ -57,8 +58,22 @@ fun <T> BulkManager(
 ) {
     val selectedState = remember { mutableStateListOf<T>().apply { addAll(preSelectedItems) } }
 
-    val selectedIds by remember {
-        derivedStateOf { selectedState.map(id).toSet() }
+    val effectiveSelectedIds by remember(selectedState, selectedIdsOverride) {
+        derivedStateOf {
+            selectedIdsOverride ?: selectedState.map(id).toSet()
+        }
+    }
+
+    val displayedSelectedItems by remember(items, effectiveSelectedIds, selectedState, reorderable) {
+        derivedStateOf {
+            if (reorderable) {
+                // Keep the order from selectedState if reorderable
+                selectedState.filter { effectiveSelectedIds.contains(id(it)) }
+            } else {
+                // Otherwise use the order from items list but only those that are selected
+                items.filter { effectiveSelectedIds.contains(id(it)) }
+            }
+        }
     }
 
     var draggedId by remember { mutableStateOf<String?>(null) }
@@ -66,15 +81,15 @@ fun <T> BulkManager(
     var measuredItemHeight by remember { mutableIntStateOf(0) }
     val lazyListState = rememberLazyListState()
 
-    val combinedItems by remember(items, selectedState) {
+    val combinedItems by remember(items, displayedSelectedItems, effectiveSelectedIds) {
         derivedStateOf {
             buildList {
-                addAll(selectedState.map { ListItem.Entry(it, isInSelectedSection = true) })
-                if (selectedState.isNotEmpty()) {
+                addAll(displayedSelectedItems.map { ListItem.Entry(it, isInSelectedSection = true) })
+                if (displayedSelectedItems.isNotEmpty()) {
                     add(ListItem.Spacer)
                 }
                 // Filter out items already in the selected section to avoid duplicates
-                val available = items.filter { item -> !selectedIds.contains(id(item)) }
+                val available = items.filter { item -> !effectiveSelectedIds.contains(id(item)) }
                 addAll(available.map { ListItem.Entry(it, isInSelectedSection = false) })
             }
         }
@@ -117,20 +132,20 @@ fun <T> BulkManager(
                     val currentItem = listItem.item
                     val currentId = id(currentItem)
                     val currentLabel = label(currentItem)
-                    val isSelected = selectedIds.contains(currentId)
+                    val isSelected = effectiveSelectedIds.contains(currentId)
 
-                    val unselectedItems = remember(items, selectedIds) {
-                        items.filter { !selectedIds.contains(id(it)) }
+                    val unselectedItems = remember(items, effectiveSelectedIds) {
+                        items.filter { !effectiveSelectedIds.contains(id(it)) }
                     }
 
                     val isTopOfGroup = if (listItem.isInSelectedSection) {
-                        selectedState.firstOrNull() == currentItem
+                        displayedSelectedItems.firstOrNull() == currentItem
                     } else {
                         unselectedItems.firstOrNull() == currentItem
                     }
 
                     val isBottomOfGroup = if (listItem.isInSelectedSection) {
-                        selectedState.lastOrNull() == currentItem
+                        displayedSelectedItems.lastOrNull() == currentItem
                     } else {
                         unselectedItems.lastOrNull() == currentItem
                     }
@@ -228,7 +243,7 @@ fun <T> BulkManager(
                 }
 
                 ListItem.Spacer -> AnimatedVisibility(
-                    visible = selectedState.isNotEmpty(),
+                    visible = displayedSelectedItems.isNotEmpty(),
                     enter = expandVertically() + fadeIn(),
                     exit = shrinkVertically() + fadeOut()
                 ) {

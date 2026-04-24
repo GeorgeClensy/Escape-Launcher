@@ -2,6 +2,7 @@ package com.geecee.escapelauncher.core.data.repository
 
 import com.geecee.escapelauncher.core.data.database.ModifiedAppsDao
 import com.geecee.escapelauncher.core.data.entity.ModifiedAppEntity
+import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -9,6 +10,15 @@ import javax.inject.Singleton
 class ModifiedAppsRepositoryImpl @Inject constructor(
     private val modifiedAppsDao: ModifiedAppsDao
 ) : ModifiedAppsRepository {
+    override fun getHiddenPackageIdsFlow(): Flow<List<String>> =
+        modifiedAppsDao.getHiddenPackageIdsFlow()
+
+    override fun getChallengePackageIdsFlow(): Flow<List<String>> =
+        modifiedAppsDao.getChallengePackageIdsFlow()
+
+    override fun getFavouriteAppsInOrderFlow(): Flow<List<ModifiedAppEntity>> =
+        modifiedAppsDao.getFavouriteAppsInOrderFlow()
+
     override suspend fun getByPackageId(packageId: String): ModifiedAppEntity? {
         return modifiedAppsDao.getByPackageId(packageId)
     }

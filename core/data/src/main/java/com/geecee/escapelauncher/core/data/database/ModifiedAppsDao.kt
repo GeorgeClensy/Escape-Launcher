@@ -111,6 +111,37 @@ interface ModifiedAppsDao {
                  COALESCE(displayName, packageId) COLLATE NOCASE ASC
         """
     )
+    fun getFavouriteAppsInOrderFlow(): kotlinx.coroutines.flow.Flow<List<ModifiedAppEntity>>
+
+    @Query(
+        """
+        SELECT packageId
+        FROM modifiedApps
+        WHERE isHidden = 1
+        ORDER BY COALESCE(displayName, packageId) COLLATE NOCASE ASC
+        """
+    )
+    fun getHiddenPackageIdsFlow(): kotlinx.coroutines.flow.Flow<List<String>>
+
+    @Query(
+        """
+        SELECT packageId
+        FROM modifiedApps
+        WHERE isChallenge = 1
+        ORDER BY COALESCE(displayName, packageId) COLLATE NOCASE ASC
+        """
+    )
+    fun getChallengePackageIdsFlow(): kotlinx.coroutines.flow.Flow<List<String>>
+
+    @Query(
+        """
+        SELECT *
+        FROM modifiedApps
+        WHERE favouritePosition IS NOT NULL
+        ORDER BY favouritePosition ASC,
+                 COALESCE(displayName, packageId) COLLATE NOCASE ASC
+        """
+    )
     suspend fun getFavouriteAppsInOrder(): List<ModifiedAppEntity>
 
     @Query(

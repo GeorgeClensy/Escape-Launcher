@@ -257,15 +257,12 @@ fun Settings(
                 enterTransition = { fadeIn(tween(300)) },
                 exitTransition = { fadeOut(tween(300)) }) {
                 val hiddenPackageIds by hiddenAppsViewModel.hiddenPackageIds.collectAsState()
-                val hiddenAppsList = remember(hiddenPackageIds, homeScreenModel.installedApps.size) {
-                    homeScreenModel.installedApps.filter { it.packageName in hiddenPackageIds }
-                }
 
                 BulkManager(
                     items = homeScreenModel.installedApps,
                     id = { it.packageName },
                     label = { it.displayName },
-                    preSelectedItems = hiddenAppsList,
+                    selectedIdsOverride = hiddenPackageIds,
                     title = stringResource(R.string.manage_hidden_apps),
                     onBackClicked = { navController.popBackStack() },
                     onItemClicked = { app, selected ->
@@ -275,7 +272,6 @@ fun Settings(
                             hiddenAppsViewModel.hideApp(app.packageName)
                             resetHome(homeScreenModel, false)
                         }
-                        mainAppModel.notifyHiddenAppsChanged()
                     })
             }
             composable(

@@ -1,8 +1,14 @@
 package com.geecee.escapelauncher.core.data.repository
 
 import com.geecee.escapelauncher.core.data.entity.ModifiedAppEntity
+import kotlinx.coroutines.flow.Flow
 
 interface ModifiedAppsRepository {
+    fun getHiddenPackageIdsFlow(): Flow<List<String>>
+
+    fun getChallengePackageIdsFlow(): Flow<List<String>>
+
+    fun getFavouriteAppsInOrderFlow(): Flow<List<ModifiedAppEntity>>
     suspend fun getByPackageId(packageId: String): ModifiedAppEntity?
 
     suspend fun setDisplayName(packageId: String, displayName: String?)

@@ -180,8 +180,13 @@ class HomeScreenModel(application: Application, val mainAppViewModel: MainAppVie
     init {
         loadApps()
         coroutineScope.launch {
+            mainAppViewModel.modifiedAppsRepository.getHiddenPackageIdsFlow().collect {
+                updateFilteredApps()
+            }
+        }
+        coroutineScope.launch {
             androidx.compose.runtime.snapshotFlow {
-                Triple(searchText.value, mainAppViewModel.hiddenAppsTrigger.intValue, Unit)
+                searchText.value
             }.collect {
                 updateFilteredApps()
             }
@@ -302,12 +307,10 @@ class MainAppViewModel @Inject constructor(
     val favoriteAppsManager: FavoriteAppsManager =
         FavoriteAppsManager(application) // Favorite apps manager
 
-    // Hidden Apps
-
-    val hiddenAppsTrigger = mutableIntStateOf(0)
+    // Hidden Apps - Deprecated: Using modifiedAppsRepository.getHiddenPackageIdsFlow() directly in HomeScreenModel
 
     fun notifyHiddenAppsChanged() {
-        hiddenAppsTrigger.intValue++
+        // No longer needed but kept for binary compatibility if needed, though better to remove if possible
     }
 
     // Open Countdown
