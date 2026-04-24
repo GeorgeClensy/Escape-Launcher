@@ -51,9 +51,8 @@ import com.geecee.escapelauncher.privatespace.PrivateSpace
 import com.geecee.escapelauncher.utils.AppUtils
 import com.geecee.escapelauncher.utils.AppUtils.doHapticFeedBack
 import com.geecee.escapelauncher.utils.AppUtils.formatScreenTime
-import com.geecee.escapelauncher.utils.AppUtils.openApp
-import com.geecee.escapelauncher.utils.AppUtils.resetHome
 import com.geecee.escapelauncher.utils.getBooleanSetting
+import com.geecee.escapelauncher.utils.AppUtils.resetHome
 import com.geecee.escapelauncher.feature.screentime.ScreenTimeViewModel
 import com.geecee.escapelauncher.MainAppViewModel as MainAppModel
 
@@ -122,16 +121,11 @@ fun AppsList(
 
                 if (autoOpen && sortedResults.size == 1) {
                     val appInfo = sortedResults.first()
-                    homeScreenModel.updateSelectedApp(appInfo)
-                    openApp(
+                    homeScreenModel.openApp(
                         app = appInfo,
-                        overrideOpenChallenge = false,
-                        openChallengeShow = homeScreenModel.showOpenChallenge,
-                        mainAppModel = mainAppModel,
-                        homeScreenModel = homeScreenModel,
+                        overrideChallenge = false,
                         onAppOpened = { screenTimeViewModel.onAppOpened(it) }
                     )
-                    resetHome(homeScreenModel)
                 }
             },
             onSearchDone = { query: String ->
@@ -150,16 +144,11 @@ fun AppsList(
 
                 if (sortedResults.isNotEmpty()) {
                     val firstAppInfo = sortedResults.first()
-                    homeScreenModel.updateSelectedApp(firstAppInfo)
-                    openApp(
+                    homeScreenModel.openApp(
                         app = firstAppInfo,
-                        overrideOpenChallenge = false,
-                        openChallengeShow = homeScreenModel.showOpenChallenge,
-                        mainAppModel = mainAppModel,
-                        homeScreenModel = homeScreenModel,
+                        overrideChallenge = false,
                         onAppOpened = { screenTimeViewModel.onAppOpened(it) }
                     )
-                    resetHome(homeScreenModel)
                 }
             },
             modifier = Modifier,
@@ -217,18 +206,11 @@ fun AppsList(
                     appName = app.displayName,
                     screenTime = formatScreenTime(screenTime),
                     onAppClick = {
-                        homeScreenModel.updateSelectedApp(app)
-
-                        openApp(
+                        homeScreenModel.openApp(
                             app = app,
-                            overrideOpenChallenge = false,
-                            openChallengeShow = homeScreenModel.showOpenChallenge,
-                            mainAppModel = mainAppModel,
-                            homeScreenModel = homeScreenModel,
+                            overrideChallenge = false,
                             onAppOpened = { screenTimeViewModel.onAppOpened(it) }
                         )
-
-                        resetHome(homeScreenModel)
                     },
                     onAppLongClick = {
                         homeScreenModel.showBottomSheet.value = true

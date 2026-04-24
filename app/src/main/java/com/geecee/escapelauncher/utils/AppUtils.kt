@@ -16,7 +16,6 @@ import android.os.Process.myUserHandle
 import android.util.Log
 import android.view.Window
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.ui.hapticfeedback.HapticFeedback
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalConfiguration
@@ -27,6 +26,7 @@ import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import com.geecee.escapelauncher.HomeScreenModel
+import com.geecee.escapelauncher.MainAppViewModel
 import com.geecee.escapelauncher.R
 import com.geecee.escapelauncher.core.ui.theme.AppTheme
 import com.geecee.escapelauncher.core.ui.theme.EscapeTheme
@@ -40,7 +40,6 @@ import java.text.Normalizer
 import java.util.concurrent.TimeUnit
 import android.graphics.Color as AndroidColor
 import androidx.compose.ui.graphics.Color as ComposeColor
-import com.geecee.escapelauncher.MainAppViewModel as MainAppModel
 import com.geecee.escapelauncher.core.common.InstalledApp
 
 /**
@@ -63,67 +62,52 @@ class ScreenOffReceiver(private val onScreenOff: () -> Unit) : BroadcastReceiver
  */
 object AppUtils {
     /**
-     * Function to open app.
-     * [openChallengeShow] will be set to true if the app has a challenge in the challenge manager. This is so you can use the OpenChallenge function with this, if you do not want to use open challenges set this to null and [overrideOpenChallenge] to true
+     * Function to launch an app.
      *
+     * @param context Context
      * @param app The app info being opened
-     * @param overrideOpenChallenge Whether the open challenge should be skipped
-     * @param openChallengeShow This is set to true if the app has an open challenge, We recommend having a composable that shows when that's true to act as the open challenge
-     * @param mainAppModel Main view model, needed for open challenge manager, package manager, context
      * @param onAppOpened Callback called when the app is successfully opened for screen time tracking
      *
-     * @author George Clensy
+     * @return Boolean true if the app was launched successfully
      */
-    fun openApp(
+    fun launchApp(
+        context: Context,
         app: InstalledApp,
-        mainAppModel: MainAppModel,
-        homeScreenModel: HomeScreenModel,
-        overrideOpenChallenge: Boolean,
-        openChallengeShow: MutableState<Boolean>?,
         onAppOpened: ((String) -> Unit)? = null
-    ) {
-        val context = mainAppModel.getContext()
+    ): Boolean {
         val launcherApps = context.getSystemService(Context.LAUNCHER_APPS_SERVICE) as LauncherApps
         val options = ActivityOptions.makeBasic()
 
-        if (!mainAppModel.challengesManager.doesAppHaveChallenge(app.packageName) || overrideOpenChallenge) {
+        return try {
+            launcherApps.startMainActivity(
+                app.componentName,
+                myUserHandle(),
+                Rect(),
+                options.toBundle()
+            )
+            onAppOpened?.invoke(app.packageName)
+            true
+        } catch (e: SecurityException) {
+            Log.e("AppUtils", "SecurityException opening app: ${e.message}")
             try {
-                launcherApps.startMainActivity(
-                    app.componentName,
-                    myUserHandle(),
-                    Rect(),
-                    options.toBundle()
-                )
-                onAppOpened?.invoke(app.packageName)
-
-                mainAppModel.isAppOpened = true
-                mainAppModel.shouldGoHomeOnResume.value = true
-                homeScreenModel.updateSelectedApp(app)
-            } catch (e: SecurityException) {
-                Log.e("AppUtils", "SecurityException opening app: ${e.message}")
-                try {
-                    val intent = context.packageManager.getLaunchIntentForPackage(app.packageName)
-                    intent?.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                    if (intent != null) {
-                        context.startActivity(intent)
-                        onAppOpened?.invoke(app.packageName)
-
-                        mainAppModel.isAppOpened = true
-                        mainAppModel.shouldGoHomeOnResume.value = true
-                        homeScreenModel.updateSelectedApp(app)
-                    }
-                } catch (fallbackException: Exception) {
-                    Log.e("AppUtils", "Failed to launch app even with fallback", fallbackException)
-                    analyticsProxy.logCustomKey("app_launch_error", app.packageName)
-                    analyticsProxy.recordException(fallbackException)
+                val intent = context.packageManager.getLaunchIntentForPackage(app.packageName)
+                intent?.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                if (intent != null) {
+                    context.startActivity(intent)
+                    onAppOpened?.invoke(app.packageName)
+                    true
+                } else {
+                    false
                 }
-            } catch (e: Exception) {
-                Log.e("AppUtils", "Error opening app", e)
+            } catch (fallbackException: Exception) {
+                Log.e("AppUtils", "Failed to launch app even with fallback", fallbackException)
+                analyticsProxy.logCustomKey("app_launch_error", app.packageName)
+                analyticsProxy.recordException(fallbackException)
+                false
             }
-        } else {
-            if (openChallengeShow != null) {
-                openChallengeShow.value = true
-            }
+        } catch (e: Exception) {
+            Log.e("AppUtils", "Error opening app", e)
+            false
         }
     }
 
@@ -438,7 +422,7 @@ object AppUtils {
      * Sets up theme by retrieving theme that should be used and then passing it and the content into an EscapeTheme composable
      */
     @Composable
-    fun SetUpTheme(content: @Composable () -> Unit, viewModel: MainAppModel) {
+    fun SetUpTheme(content: @Composable () -> Unit, viewModel: MainAppViewModel) {
         val context = LocalContext.current
         val config = LocalConfiguration.current
         val resources = LocalResources.current

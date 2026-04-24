@@ -54,10 +54,8 @@ import com.geecee.escapelauncher.NewHomeScreenViewModel
 import com.geecee.escapelauncher.core.ui.composables.FirstTimeHelp
 import com.geecee.escapelauncher.feature.homescreen.ClockViewModel
 import com.geecee.escapelauncher.feature.weather.WeatherViewModel
-import com.geecee.escapelauncher.utils.AppUtils
 import com.geecee.escapelauncher.utils.AppUtils.doHapticFeedBack
 import com.geecee.escapelauncher.utils.AppUtils.formatScreenTime
-import com.geecee.escapelauncher.utils.AppUtils.resetHome
 import com.geecee.escapelauncher.utils.WidgetsScreen
 import com.geecee.escapelauncher.utils.analyticsProxy
 import com.geecee.escapelauncher.feature.screentime.ScreenTimeViewModel
@@ -284,18 +282,11 @@ fun HomeScreen(
                 appName = app.displayName,
                 screenTime = formatScreenTime(screenTime),
                 onAppClick = {
-                    homeScreenModel.updateSelectedApp(app)
-
-                    AppUtils.openApp(
+                    homeScreenModel.openApp(
                         app = app,
-                        overrideOpenChallenge = false,
-                        openChallengeShow = homeScreenModel.showOpenChallenge,
-                        mainAppModel = mainAppModel,
-                        homeScreenModel = homeScreenModel,
+                        overrideChallenge = false,
                         onAppOpened = { screenTimeViewModel.onAppOpened(it) }
                     )
-
-                    resetHome(homeScreenModel)
                 },
                 onAppLongClick = {
                     homeScreenModel.showBottomSheet.value = true

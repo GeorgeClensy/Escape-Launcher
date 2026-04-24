@@ -16,6 +16,8 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
@@ -31,7 +33,6 @@ import com.geecee.escapelauncher.core.common.uninstallApp
 import com.geecee.escapelauncher.core.ui.composables.AppAction
 import com.geecee.escapelauncher.core.ui.composables.HomeScreenBottomSheet
 import com.geecee.escapelauncher.utils.AppShortcut
-import com.geecee.escapelauncher.utils.AppUtils
 import com.geecee.escapelauncher.utils.AppUtils.resetHome
 import com.geecee.escapelauncher.utils.EscapeAccessibilityService
 import com.geecee.escapelauncher.utils.getAppShortcuts
@@ -43,6 +44,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import com.geecee.escapelauncher.MainAppViewModel as MainAppModel
 import com.geecee.escapelauncher.MainPagerScreenViewModel
+import com.geecee.escapelauncher.OpenChallengeViewModel
 
 /**
  *  Main composable for home screen:
@@ -58,6 +60,7 @@ fun MainPagerScreen(
     homeScreenModel: HomeScreenModel,
     viewModel: MainPagerScreenViewModel = hiltViewModel(),
     hiddenAppsViewModel: HiddenAppsViewModel = hiltViewModel(),
+    openChallengeViewModel: OpenChallengeViewModel = hiltViewModel(),
     screenTimeViewModel: ScreenTimeViewModel = hiltViewModel(LocalActivity.current as ComponentActivity),
     onOpenSettings: () -> Unit
 ) {
@@ -234,7 +237,6 @@ fun MainPagerScreen(
                     onClick = {
                         hiddenAppsViewModel.hideApp(homeScreenModel.currentSelectedApp.value.packageName)
                         homeScreenModel.showBottomSheet.value = false
-                        mainAppModel.notifyHiddenAppsChanged()
                         resetHome(homeScreenModel, false)
                     }
                 )
@@ -250,15 +252,17 @@ fun MainPagerScreen(
             )
         )
 
-        if (!homeScreenModel.isCurrentAppChallenged && homeScreenModel.currentSelectedApp.value.user == android.os.Process.myUserHandle()) {
+        val challengeAppIds by openChallengeViewModel.challengeAppIds.collectAsState()
+        val hasChallenge = challengeAppIds.contains(homeScreenModel.currentSelectedApp.value.packageName)
+
+        if (!hasChallenge && homeScreenModel.currentSelectedApp.value.user == android.os.Process.myUserHandle()) {
             actions = actions +
                     AppAction(
                         label = stringResource(R.string.add_open_challenge),
                         onClick = {
-                            mainAppModel.challengesManager.addChallengeApp(
+                            openChallengeViewModel.addChallengeToApp(
                                 homeScreenModel.currentSelectedApp.value.packageName
                             )
-                            mainAppModel.notifyChallengesChanged()
                             homeScreenModel.showBottomSheet.value = false
                         }
                     )
@@ -283,12 +287,9 @@ fun MainPagerScreen(
         OpenChallenge(
             haptics = LocalHapticFeedback.current,
             openApp = {
-                AppUtils.openApp(
-                    homeScreenModel.currentSelectedApp.value,
-                    mainAppModel,
-                    homeScreenModel,
-                    true,
-                    null,
+                homeScreenModel.openApp(
+                    app = homeScreenModel.currentSelectedApp.value,
+                    overrideChallenge = true,
                     onAppOpened = { screenTimeViewModel.onAppOpened(it) }
                 )
                 homeScreenModel.coroutineScope.launch {

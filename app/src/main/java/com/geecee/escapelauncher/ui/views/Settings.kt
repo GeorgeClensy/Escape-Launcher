@@ -93,6 +93,7 @@ import com.geecee.escapelauncher.DevOptionsPageViewModel
 import com.geecee.escapelauncher.HiddenAppsViewModel
 import com.geecee.escapelauncher.HomeScreenModel
 import com.geecee.escapelauncher.MainSettingsPageViewModel
+import com.geecee.escapelauncher.OpenChallengeViewModel
 import com.geecee.escapelauncher.R
 import com.geecee.escapelauncher.SettingsViewModel
 import com.geecee.escapelauncher.WidgetOptionsPageViewModel
@@ -161,7 +162,8 @@ fun Settings(
     goBack: () -> Unit,
     activity: Activity,
     settingsViewModel: SettingsViewModel = hiltViewModel(),
-    hiddenAppsViewModel: HiddenAppsViewModel = hiltViewModel()
+    hiddenAppsViewModel: HiddenAppsViewModel = hiltViewModel(),
+    openChallengeViewModel: OpenChallengeViewModel = hiltViewModel()
 ) {
     val showPolicyDialog = remember { mutableStateOf(false) }
 
@@ -203,25 +205,21 @@ fun Settings(
                 "openChallenges",
                 enterTransition = { fadeIn(tween(300)) },
                 exitTransition = { fadeOut(tween(300)) }) {
-                val challengeApps = remember(mainAppModel.challengesTrigger.intValue) {
-                    val currentChallenges = mainAppModel.challengesManager.getChallengeApps()
-                    homeScreenModel.installedApps.filter { it.packageName in currentChallenges }
-                }
+                val openChallegeAppIds by openChallengeViewModel.challengeAppIds.collectAsState()
 
                 BulkManager(
                     items = homeScreenModel.installedApps,
                     id = { it.packageName },
                     label = { it.displayName },
-                    preSelectedItems = challengeApps,
+                    selectedIdsOverride = openChallegeAppIds,
                     title = stringResource(R.string.manage_open_challenges),
                     onBackClicked = { navController.popBackStack() },
                     onItemClicked = { app, selected ->
                         if (selected) {
-                            mainAppModel.challengesManager.removeChallengeApp(app.packageName)
+                            openChallengeViewModel.removeChallengeFromApp(app.packageName)
                         } else {
-                            mainAppModel.challengesManager.addChallengeApp(app.packageName)
+                            openChallengeViewModel.addChallengeToApp(app.packageName)
                         }
-                        mainAppModel.notifyChallengesChanged()
                     })
             }
             composable(
@@ -1293,16 +1291,11 @@ fun HiddenApps(
                                 )
 
                         app?.let {
-                            AppUtils.openApp(
+                            homeScreenModel.openApp(
                                 app = it,
-                                overrideOpenChallenge = false,
-                                openChallengeShow = homeScreenModel.showOpenChallenge,
-                                mainAppModel = mainAppModel,
-                                homeScreenModel = homeScreenModel
+                                overrideChallenge = false
                             )
                         }
-
-                        resetHome(homeScreenModel)
                     },
                     onDeleteClick = {
                         // Trigger haptic feedback
@@ -1313,7 +1306,6 @@ fun HiddenApps(
                         coroutineScope.launch {
                             delay(500)
                             hiddenAppsViewModel.unhideApp(appPackageName)
-                            mainAppModel.notifyHiddenAppsChanged()
                         }
                     },
                     isTopOfGroup = hiddenPackageIds.firstOrNull() == appPackageName,

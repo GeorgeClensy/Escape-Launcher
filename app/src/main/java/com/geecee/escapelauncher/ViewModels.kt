@@ -13,7 +13,6 @@ import androidx.compose.foundation.pager.PagerState
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.AndroidViewModel
@@ -25,7 +24,6 @@ import com.geecee.escapelauncher.utils.AppUtils
 import com.geecee.escapelauncher.core.common.InstalledApp
 import com.geecee.escapelauncher.core.data.repository.ModifiedAppsRepository
 import com.geecee.escapelauncher.utils.getBooleanSetting
-import com.geecee.escapelauncher.utils.managers.ChallengesManager
 import com.geecee.escapelauncher.utils.managers.FavoriteAppsManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
@@ -43,10 +41,7 @@ import java.text.Normalizer
 class HomeScreenModel(application: Application, val mainAppViewModel: MainAppViewModel) :
     AndroidViewModel(application) {
     var currentSelectedApp = mutableStateOf(InstalledApp("", "", ComponentName("", "")))
-    val isCurrentAppChallenged by derivedStateOf {
-        mainAppViewModel.challengesTrigger.intValue
-        mainAppViewModel.challengesManager.doesAppHaveChallenge(currentSelectedApp.value.packageName)
-    }
+
     val isCurrentAppFavorite by derivedStateOf {
         favoriteApps.contains(currentSelectedApp.value)
     }
@@ -242,6 +237,45 @@ class HomeScreenModel(application: Application, val mainAppViewModel: MainAppVie
     fun updateSelectedApp(app: InstalledApp) {
         currentSelectedApp.value = app
     }
+
+    /**
+     * Logic to handle what happens when an app is launched
+     */
+    fun onAppLaunched(app: InstalledApp) {
+        mainAppViewModel.isAppOpened = true
+        mainAppViewModel.shouldGoHomeOnResume.value = true
+        updateSelectedApp(app)
+    }
+
+    /**
+     * High-level function to open an app, handling challenge checks asynchronously
+     */
+    fun openApp(
+        app: InstalledApp,
+        overrideChallenge: Boolean = false,
+        onAppOpened: ((String) -> Unit)? = null
+    ) {
+        viewModelScope.launch {
+            val hasChallenge = if (overrideChallenge) {
+                false
+            } else {
+                mainAppViewModel.modifiedAppsRepository.isChallenge(app.packageName)
+            }
+
+            if (hasChallenge) {
+                showOpenChallenge.value = true
+                updateSelectedApp(app)
+            } else {
+                if (AppUtils.launchApp(getApplication(), app, onAppOpened)) {
+                    onAppLaunched(app)
+                    if (overrideChallenge) {
+                        showOpenChallenge.value = false
+                    }
+                }
+                AppUtils.resetHome(this@HomeScreenModel)
+            }
+        }
+    }
 }
 
 class HomeScreenModelFactory(
@@ -307,22 +341,6 @@ class MainAppViewModel @Inject constructor(
     val favoriteAppsManager: FavoriteAppsManager =
         FavoriteAppsManager(application) // Favorite apps manager
 
-    // Hidden Apps - Deprecated: Using modifiedAppsRepository.getHiddenPackageIdsFlow() directly in HomeScreenModel
-
-    fun notifyHiddenAppsChanged() {
-        // No longer needed but kept for binary compatibility if needed, though better to remove if possible
-    }
-
-    // Open Countdown
-
-    val challengesManager: ChallengesManager =
-        ChallengesManager(application) // Manager for challenges
-
-    val challengesTrigger = mutableIntStateOf(0)
-
-    fun notifyChallengesChanged() {
-        challengesTrigger.intValue++
-    }
 
     // Other stuff
 
