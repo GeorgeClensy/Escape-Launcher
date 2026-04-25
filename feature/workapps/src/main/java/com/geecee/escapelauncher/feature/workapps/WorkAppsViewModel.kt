@@ -3,7 +3,7 @@ package com.geecee.escapelauncher.feature.workapps
 import android.content.Context
 import android.os.Build
 import androidx.lifecycle.ViewModel
-import com.geecee.escapelauncher.core.common.InstalledApp
+import com.geecee.escapelauncher.core.model.InstalledApp
 import com.geecee.escapelauncher.core.common.getWorkApps
 import com.geecee.escapelauncher.core.common.isDefaultLauncher
 import com.geecee.escapelauncher.core.common.isWorkProfileUnlocked

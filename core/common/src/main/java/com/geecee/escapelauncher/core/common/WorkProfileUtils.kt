@@ -13,6 +13,7 @@ import android.os.UserManager.USER_TYPE_PROFILE_MANAGED
 import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat.getSystemService
 import androidx.core.net.toUri
+import com.geecee.escapelauncher.core.model.InstalledApp
 
 /**
  * BroadcastReceiver that listens for Work Profile state changes (locked/unlocked).

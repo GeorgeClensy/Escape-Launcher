@@ -1,7 +1,7 @@
-package com.geecee.escapelauncher.core.common
+package com.geecee.escapelauncher.core.model
 
 import android.content.ComponentName
-import android.os.Process.myUserHandle
+import android.os.Process
 import android.os.UserHandle
 
 /**
@@ -11,5 +11,5 @@ data class InstalledApp(
     var displayName: String,
     var packageName: String,
     var componentName: ComponentName,
-    val user: UserHandle = myUserHandle()
+    val user: UserHandle = Process.myUserHandle()
 )

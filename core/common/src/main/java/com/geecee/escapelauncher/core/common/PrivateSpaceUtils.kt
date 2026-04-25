@@ -16,6 +16,7 @@ import android.os.UserManager
 import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat.getSystemService
 import androidx.core.net.toUri
+import com.geecee.escapelauncher.core.model.InstalledApp
 
 const val PRIVATE_SPACE_USER_TYPE = "android.os.usertype.profile.PRIVATE"
 

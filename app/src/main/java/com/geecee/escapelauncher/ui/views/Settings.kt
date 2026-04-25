@@ -97,7 +97,7 @@ import com.geecee.escapelauncher.OpenChallengeViewModel
 import com.geecee.escapelauncher.R
 import com.geecee.escapelauncher.SettingsViewModel
 import com.geecee.escapelauncher.WidgetOptionsPageViewModel
-import com.geecee.escapelauncher.core.common.InstalledApp
+import com.geecee.escapelauncher.core.model.InstalledApp
 import com.geecee.escapelauncher.core.ui.composables.BulkManager
 import com.geecee.escapelauncher.core.ui.composables.EscapeHeader
 import com.geecee.escapelauncher.core.ui.composables.EscapeSubhead

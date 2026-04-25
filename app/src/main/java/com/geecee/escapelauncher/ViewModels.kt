@@ -21,7 +21,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.geecee.escapelauncher.core.ui.theme.AppTheme
 import com.geecee.escapelauncher.utils.AppUtils
-import com.geecee.escapelauncher.core.common.InstalledApp
+import com.geecee.escapelauncher.core.model.InstalledApp
 import com.geecee.escapelauncher.core.data.repository.ModifiedAppsRepository
 import com.geecee.escapelauncher.utils.getBooleanSetting
 import dagger.hilt.android.lifecycle.HiltViewModel

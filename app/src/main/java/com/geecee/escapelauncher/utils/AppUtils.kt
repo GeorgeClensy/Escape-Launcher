@@ -40,7 +40,7 @@ import java.text.Normalizer
 import java.util.concurrent.TimeUnit
 import android.graphics.Color as AndroidColor
 import androidx.compose.ui.graphics.Color as ComposeColor
-import com.geecee.escapelauncher.core.common.InstalledApp
+import com.geecee.escapelauncher.core.model.InstalledApp
 
 /**
  * Broadcast receiver to detect when the screen turns off,

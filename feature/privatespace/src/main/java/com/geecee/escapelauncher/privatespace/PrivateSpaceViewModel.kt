@@ -6,7 +6,7 @@ import android.content.IntentFilter
 import android.os.Build
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.geecee.escapelauncher.core.common.InstalledApp
+import com.geecee.escapelauncher.core.model.InstalledApp
 import com.geecee.escapelauncher.core.common.PrivateSpaceStateReceiver
 import com.geecee.escapelauncher.core.common.getPrivateSpaceApps
 import com.geecee.escapelauncher.core.common.isDefaultLauncher

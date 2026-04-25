@@ -6,6 +6,7 @@ import android.content.Intent
 import android.content.pm.LauncherApps
 import android.graphics.Rect
 import androidx.core.net.toUri
+import com.geecee.escapelauncher.core.model.InstalledApp
 
 fun uninstallApp(context: Context, app: InstalledApp) {
     val intent = Intent(Intent.ACTION_DELETE).apply {
