@@ -24,13 +24,14 @@ import com.geecee.escapelauncher.utils.AppUtils
 import com.geecee.escapelauncher.core.common.InstalledApp
 import com.geecee.escapelauncher.core.data.repository.ModifiedAppsRepository
 import com.geecee.escapelauncher.utils.getBooleanSetting
-import com.geecee.escapelauncher.utils.managers.FavoriteAppsManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.text.Normalizer
@@ -186,13 +187,29 @@ class HomeScreenModel(application: Application, val mainAppViewModel: MainAppVie
                 updateFilteredApps()
             }
         }
+        coroutineScope.launch {
+            // Wait for apps to be loaded to resolve package names to InstalledApp objects
+            androidx.compose.runtime.snapshotFlow { mainAppViewModel.isAppsLoaded.value }
+                .filter { it }
+                .first()
+
+            mainAppViewModel.modifiedAppsRepository.getFavouriteAppsInOrderFlow().collect { entities ->
+                val newFavoriteApps = entities.mapNotNull { entity ->
+                    installedApps.find { it.packageName == entity.packageId }
+                }
+                withContext(Dispatchers.Main) {
+                    favoriteApps.clear()
+                    favoriteApps.addAll(newFavoriteApps)
+                    mainAppViewModel.isFavoritesLoaded.value = true
+                }
+            }
+        }
     }
 
     fun loadApps() {
         Log.d("Loading", "LoadApps started")
         coroutineScope.launch {
             suspendLoadApps()
-            suspendReloadFavouriteApps()
         }
     }
 
@@ -208,29 +225,6 @@ class HomeScreenModel(application: Application, val mainAppViewModel: MainAppVie
             installedApps.addAll(apps)
             updateFilteredApps()
             mainAppViewModel.isAppsLoaded.value = true
-        }
-    }
-
-    fun reloadFavouriteApps() {
-        coroutineScope.launch {
-            suspendReloadFavouriteApps()
-        }
-    }
-
-    private suspend fun suspendReloadFavouriteApps() {
-        Log.d("Loading", "SuspendReloadFavouriteApps started")
-
-        val favoritePackageNames = withContext(Dispatchers.IO) {
-            mainAppViewModel.favoriteAppsManager.getFavoriteApps()
-        }
-
-        withContext(Dispatchers.Main) {
-            val newFavoriteApps = favoritePackageNames.mapNotNull { packageName ->
-                installedApps.find { it.packageName == packageName }
-            }
-            favoriteApps.clear()
-            favoriteApps.addAll(newFavoriteApps)
-            mainAppViewModel.isFavoritesLoaded.value = true
         }
     }
 
@@ -335,11 +329,6 @@ class MainAppViewModel @Inject constructor(
     val isReady by derivedStateOf {
         isAppsLoaded.value && isFavoritesLoaded.value && isThemeLoaded.value && isScreenTimeLoaded.value
     }
-
-    // Managers
-
-    val favoriteAppsManager: FavoriteAppsManager =
-        FavoriteAppsManager(application) // Favorite apps manager
 
 
     // Other stuff

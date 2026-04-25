@@ -276,30 +276,31 @@ fun Settings(
                 "bulkFavouriteApps",
                 enterTransition = { fadeIn(tween(300)) },
                 exitTransition = { fadeOut(tween(300)) }) {
-                val preSelectedFavoriteApps = remember(homeScreenModel.favoriteApps.size) {
-                    val favoritePackages = mainAppModel.favoriteAppsManager.getFavoriteApps()
-                    favoritePackages.mapNotNull { pkg -> homeScreenModel.installedApps.find { it.packageName == pkg } }
-                }
-
                 BulkManager(
                     items = homeScreenModel.installedApps,
                     id = { it.packageName },
                     label = { it.displayName },
-                    preSelectedItems = preSelectedFavoriteApps,
+                    preSelectedItems = homeScreenModel.favoriteApps,
                     title = stringResource(R.string.manage_favourite_apps),
                     reorderable = true,
                     onItemMoved = { fromIndex, toIndex ->
-                        mainAppModel.favoriteAppsManager.reorderFavoriteApps(fromIndex, toIndex)
-                        homeScreenModel.reloadFavouriteApps()
+                        val app = homeScreenModel.favoriteApps[fromIndex]
+                        homeScreenModel.coroutineScope.launch {
+                            mainAppModel.modifiedAppsRepository.reorderFavouriteApp(
+                                app.packageName,
+                                fromIndex,
+                                toIndex
+                            )
+                        }
                     },
                     onBackClicked = { navController.popBackStack() },
                     onItemClicked = { app, selected ->
-                        if (selected) {
-                            mainAppModel.favoriteAppsManager.removeFavoriteApp(app.packageName)
-                            homeScreenModel.reloadFavouriteApps()
-                        } else {
-                            mainAppModel.favoriteAppsManager.addFavoriteApp(app.packageName)
-                            homeScreenModel.reloadFavouriteApps()
+                        homeScreenModel.coroutineScope.launch {
+                            if (selected) {
+                                mainAppModel.modifiedAppsRepository.removeFavourite(app.packageName)
+                            } else {
+                                mainAppModel.modifiedAppsRepository.addFavourite(app.packageName)
+                            }
                         }
                     })
             }

@@ -489,8 +489,14 @@ fun FavoritesSelectionScreen(
                 title = stringResource(R.string.choose_your_favourite_apps),
                 reorderable = true,
                 onItemMoved = { fromIndex, toIndex ->
-                    mainAppModel.favoriteAppsManager.reorderFavoriteApps(fromIndex, toIndex)
-                    homeScreenModel.reloadFavouriteApps()
+                    val app = homeScreenModel.favoriteApps[fromIndex]
+                    homeScreenModel.coroutineScope.launch {
+                        mainAppModel.modifiedAppsRepository.reorderFavouriteApp(
+                            app.packageName,
+                            fromIndex,
+                            toIndex
+                        )
+                    }
                 },
                 onBackClicked = { },
                 hideTitle = false,
@@ -498,12 +504,12 @@ fun FavoritesSelectionScreen(
                 topPadding = false,
                 titleColor = primaryContentColor,
                 onItemClicked = { app, selected ->
-                    if (selected) {
-                        mainAppModel.favoriteAppsManager.removeFavoriteApp(app.packageName)
-                        homeScreenModel.reloadFavouriteApps()
-                    } else {
-                        mainAppModel.favoriteAppsManager.addFavoriteApp(app.packageName)
-                        homeScreenModel.reloadFavouriteApps()
+                    homeScreenModel.coroutineScope.launch {
+                        if (selected) {
+                            mainAppModel.modifiedAppsRepository.removeFavourite(app.packageName)
+                        } else {
+                            mainAppModel.modifiedAppsRepository.addFavourite(app.packageName)
+                        }
                     }
                 })
         }

@@ -300,7 +300,6 @@ object AppUtils {
             homeScreenModel.searchText.value = ""
             homeScreenModel.showBottomSheet.value = false
 //            homeScreenModel.loadApps()
-            homeScreenModel.reloadFavouriteApps()
             homeScreenModel.showWorkApps.value = false
             homeScreenModel.showWorkBottomSheet.value = false
         }

@@ -33,6 +33,14 @@ interface ModifiedAppsRepository {
 
     suspend fun isFavourite(packageId: String): Boolean
 
+    suspend fun addFavourite(packageId: String)
+
+    suspend fun removeFavourite(packageId: String)
+
+    suspend fun reorderFavouriteApp(packageId: String, fromIndex: Int, toIndex: Int)
+
+    suspend fun tidyFavouritePositions()
+
     suspend fun getFavouriteAppsInOrder(): List<ModifiedAppEntity>
 
     suspend fun getHiddenPackageIds(): List<String>

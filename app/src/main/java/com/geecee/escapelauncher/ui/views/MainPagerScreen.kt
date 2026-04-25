@@ -214,14 +214,11 @@ fun MainPagerScreen(
                     label = stringResource(if (homeScreenModel.isCurrentAppFavorite) R.string.rem_from_fav else R.string.add_to_fav),
                     onClick = {
                         val selectedApp = homeScreenModel.currentSelectedApp.value
-                        if (homeScreenModel.isCurrentAppFavorite) {
-                            mainAppModel.favoriteAppsManager.removeFavoriteApp(selectedApp.packageName)
-                            homeScreenModel.favoriteApps.remove(selectedApp)
-                        } else {
-                            mainAppModel.favoriteAppsManager.addFavoriteApp(selectedApp.packageName)
-                            homeScreenModel.favoriteApps.add(selectedApp)
-
-                            homeScreenModel.coroutineScope.launch {
+                        homeScreenModel.coroutineScope.launch {
+                            if (homeScreenModel.isCurrentAppFavorite) {
+                                mainAppModel.modifiedAppsRepository.removeFavourite(selectedApp.packageName)
+                            } else {
+                                mainAppModel.modifiedAppsRepository.addFavourite(selectedApp.packageName)
                                 homeScreenModel.goToMainPage()
                             }
                         }

@@ -14,10 +14,13 @@ interface ModifiedAppsDao {
     suspend fun insertIfMissing(app: ModifiedAppEntity): Long
 
     @Update
-    suspend fun update(app: ModifiedAppEntity)
+    suspend fun updateAll(apps: List<ModifiedAppEntity>)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsert(app: ModifiedAppEntity)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun upsertAll(apps: List<ModifiedAppEntity>)
 
     @Query("SELECT * FROM modifiedApps WHERE packageId = :packageId LIMIT 1")
     suspend fun getByPackageId(packageId: String): ModifiedAppEntity?

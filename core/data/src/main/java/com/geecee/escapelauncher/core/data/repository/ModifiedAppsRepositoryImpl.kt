@@ -67,6 +67,59 @@ class ModifiedAppsRepositoryImpl @Inject constructor(
         return modifiedAppsDao.isFavourite(packageId)
     }
 
+    override suspend fun addFavourite(packageId: String) {
+        val lastPos = modifiedAppsDao.getFavouriteAppsInOrder().lastOrNull()?.favouritePosition ?: -1.0
+        modifiedAppsDao.setFavouritePosition(packageId, lastPos + 1.0)
+    }
+
+    override suspend fun removeFavourite(packageId: String) {
+        modifiedAppsDao.clearFavouritePosition(packageId)
+    }
+
+    override suspend fun reorderFavouriteApp(packageId: String, fromIndex: Int, toIndex: Int) {
+        val favorites = modifiedAppsDao.getFavouriteAppsInOrder()
+        if (fromIndex !in favorites.indices || toIndex !in favorites.indices) return // Ensure indices are within bounds to avoid IndexOutOfBoundsException if the list changed concurrently
+        if (fromIndex == toIndex) return
+
+        val otherFavorites = favorites.filter { it.packageId != packageId }
+
+        val newPosition: Double = when {
+            toIndex == 0 -> {
+                (otherFavorites.firstOrNull()?.favouritePosition ?: 0.0) - 1.0
+            }
+            toIndex >= otherFavorites.size -> {
+                (otherFavorites.lastOrNull()?.favouritePosition ?: 0.0) + 1.0
+            }
+            else -> {
+                val prevPos = otherFavorites[toIndex - 1].favouritePosition ?: 0.0
+                val nextPos = otherFavorites[toIndex].favouritePosition ?: 0.0
+
+                val gap = nextPos - prevPos
+                if (gap < 1e-10) {
+                    // If the gap is too small, we should tidy first and then recalculate
+                    tidyFavouritePositions()
+                    val freshFavorites = modifiedAppsDao.getFavouriteAppsInOrder()
+                    val freshOther = freshFavorites.filter { it.packageId != packageId }
+                    val freshPrev = freshOther[toIndex - 1].favouritePosition ?: 0.0
+                    val freshNext = freshOther[toIndex].favouritePosition ?: 0.0
+                    (freshPrev + freshNext) / 2.0
+                } else {
+                    prevPos + (gap / 2.0)
+                }
+            }
+        }
+
+        modifiedAppsDao.setFavouritePosition(packageId, newPosition)
+    }
+
+    override suspend fun tidyFavouritePositions() {
+        val favorites = modifiedAppsDao.getFavouriteAppsInOrder()
+        val tidied = favorites.mapIndexed { index, app ->
+            app.copy(favouritePosition = index.toDouble())
+        }
+        modifiedAppsDao.upsertAll(tidied)
+    }
+
     override suspend fun getFavouriteAppsInOrder(): List<ModifiedAppEntity> {
         return modifiedAppsDao.getFavouriteAppsInOrder()
     }
