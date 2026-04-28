@@ -98,6 +98,7 @@ dependencies {
     implementation(project(":feature:securefolder"))
     implementation(project(":feature:weather"))
     implementation(project(":feature:screentime"))
+    implementation(project(":core:theme"))
 
     implementation(libs.androidx.hilt.navigation.compose)
 }

@@ -27,7 +27,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -98,6 +97,14 @@ import com.geecee.escapelauncher.R
 import com.geecee.escapelauncher.SettingsViewModel
 import com.geecee.escapelauncher.WidgetOptionsPageViewModel
 import com.geecee.escapelauncher.core.model.InstalledApp
+import com.geecee.escapelauncher.core.theme.AppColourScheme
+import com.geecee.escapelauncher.core.theme.CardContainerColor
+import com.geecee.escapelauncher.core.theme.ContentColor
+import com.geecee.escapelauncher.core.theme.ThemeViewModel
+import com.geecee.escapelauncher.core.theme.getFontFamily
+import com.geecee.escapelauncher.core.theme.primaryContentColor
+import com.geecee.escapelauncher.core.theme.resolveColorScheme
+import com.geecee.escapelauncher.core.theme.transparentHalf
 import com.geecee.escapelauncher.core.ui.composables.BulkManager
 import com.geecee.escapelauncher.core.ui.composables.EscapeHeader
 import com.geecee.escapelauncher.core.ui.composables.EscapeSubhead
@@ -109,14 +116,8 @@ import com.geecee.escapelauncher.core.ui.composables.SettingsSlider
 import com.geecee.escapelauncher.core.ui.composables.SettingsSpacer
 import com.geecee.escapelauncher.core.ui.composables.SettingsSwipeableButton
 import com.geecee.escapelauncher.core.ui.composables.SettingsSwitch
-import com.geecee.escapelauncher.core.ui.theme.AppTheme
-import com.geecee.escapelauncher.core.ui.theme.CardContainerColor
-import com.geecee.escapelauncher.core.ui.theme.ContentColor
-import com.geecee.escapelauncher.core.ui.theme.primaryContentColor
-import com.geecee.escapelauncher.core.ui.theme.resolveColorScheme
-import com.geecee.escapelauncher.core.ui.theme.transparentHalf
+import com.geecee.escapelauncher.core.ui.composables.nameResFromId
 import com.geecee.escapelauncher.feature.weather.WeatherViewModel
-import com.geecee.escapelauncher.ui.theme.getFontFamily
 import com.geecee.escapelauncher.utils.AppUtils
 import com.geecee.escapelauncher.utils.AppUtils.loadTextFromAssets
 import com.geecee.escapelauncher.utils.AppUtils.resetHome
@@ -124,17 +125,13 @@ import com.geecee.escapelauncher.utils.CustomWidgetPicker
 import com.geecee.escapelauncher.utils.EscapeAccessibilityService
 import com.geecee.escapelauncher.utils.WIDGET_HOST_ID
 import com.geecee.escapelauncher.utils.getBooleanSetting
-import com.geecee.escapelauncher.utils.getIntSetting
 import com.geecee.escapelauncher.utils.getSavedWidgetId
 import com.geecee.escapelauncher.utils.isDefaultLauncher
 import com.geecee.escapelauncher.utils.isWidgetConfigurable
 import com.geecee.escapelauncher.utils.launchWidgetConfiguration
 import com.geecee.escapelauncher.utils.removeWidget
-import com.geecee.escapelauncher.utils.resetActivity
 import com.geecee.escapelauncher.utils.saveWidgetId
 import com.geecee.escapelauncher.utils.setBooleanSetting
-import com.geecee.escapelauncher.utils.setIntSetting
-import com.geecee.escapelauncher.utils.setStringSetting
 import com.geecee.escapelauncher.utils.showLauncherSelector
 import com.geecee.escapelauncher.utils.showLauncherSettingsMenu
 import com.geecee.escapelauncher.utils.toggleBooleanSetting
@@ -240,9 +237,7 @@ fun Settings(
                 "theme",
                 enterTransition = { fadeIn(tween(300)) },
                 exitTransition = { fadeOut(tween(300)) }) {
-                ThemeOptions(
-                    mainAppModel, mainAppModel.getContext()
-                ) { navController.popBackStack() }
+                ThemeOptions(goBack = { navController.popBackStack() })
             }
             composable(
                 "widget",
@@ -354,7 +349,9 @@ fun MainSettingsPage(
     val useFahrenheit by mainSettingsPageViewModel.useFahrenheit.collectAsState(initial = false)
     val showScreenTimeApp by mainSettingsPageViewModel.showScreenTimeApp.collectAsState(initial = false)
     val showScreenTimeHome by mainSettingsPageViewModel.showScreenTimeHome.collectAsState(initial = false)
-    val hapticFeedbackEnabled by mainSettingsPageViewModel.hapticFeedBackEnabled.collectAsState(initial = true)
+    val hapticFeedbackEnabled by mainSettingsPageViewModel.hapticFeedBackEnabled.collectAsState(
+        initial = true
+    )
     val homeHorizontalIndex by mainSettingsPageViewModel.homeAlignment.collectAsState(initial = 1)
     val appsHorizontalIndex by mainSettingsPageViewModel.appsAlignment.collectAsState(initial = 1)
     val homeVerticalIndex by mainSettingsPageViewModel.homeVAlignment.collectAsState(initial = 1)
@@ -424,7 +421,9 @@ fun MainSettingsPage(
 
         item {
             SettingsSwitch(
-                label = stringResource(id = R.string.big_clock), checked = bigClock, onCheckedChange = {
+                label = stringResource(id = R.string.big_clock),
+                checked = bigClock,
+                onCheckedChange = {
                     mainSettingsPageViewModel.setBigClock(it)
                 })
         }
@@ -439,7 +438,9 @@ fun MainSettingsPage(
         item {
             if (!BuildConfig.IS_FOSS) {
                 SettingsSwitch(
-                    label = stringResource(id = R.string.show_weather), checked = showWeather, onCheckedChange = {
+                    label = stringResource(id = R.string.show_weather),
+                    checked = showWeather,
+                    onCheckedChange = {
                         mainSettingsPageViewModel.setShowWeather(it)
                     })
             }
@@ -448,7 +449,9 @@ fun MainSettingsPage(
         item {
             if (!BuildConfig.IS_FOSS) {
                 SettingsSwitch(
-                    label = stringResource(id = R.string.use_farenhight), checked = useFahrenheit, onCheckedChange = {
+                    label = stringResource(id = R.string.use_farenhight),
+                    checked = useFahrenheit,
+                    onCheckedChange = {
                         mainSettingsPageViewModel.setUseFahrenheit(it)
                         weatherViewModel.forceUpdate()
                     })
@@ -780,200 +783,108 @@ fun MainSettingsPage(
 /**
  * Theme options in settings
  *
- * @param mainAppModel Main app model for theme updates
- * @param context Needed to run some functions used within ThemeOptions
  * @param goBack When back button is pressed
  *
  * @see Settings
  */
 @OptIn(ExperimentalFoundationApi::class)
-@Suppress("AssignedValueIsNeverRead")
 @Composable
 fun ThemeOptions(
-    mainAppModel: MainAppModel, context: Context, goBack: () -> Unit
+    goBack: () -> Unit,
+    themeViewModel: ThemeViewModel = hiltViewModel()
 ) {
-    val settingToChange = stringResource(R.string.theme)
-    val autoThemeChange = stringResource(R.string.autoThemeSwitch)
-    val dSettingToChange = stringResource(R.string.dTheme)
-    val lSettingToChange = stringResource(R.string.lTheme)
+    val context = LocalContext.current
 
-    // Current highlighted theme card
-    var currentHighlightedThemeCard by remember { mutableIntStateOf(-1) }
-
-    // Current selected themes
-    var currentSelectedTheme by remember {
-        mutableIntStateOf(getIntSetting(context, settingToChange, -1))
-    }
-    var currentSelectedDTheme by remember {
-        mutableIntStateOf(getIntSetting(context, dSettingToChange, -1))
-    }
-    var currentSelectedLTheme by remember {
-        mutableIntStateOf(getIntSetting(context, lSettingToChange, -1))
-    }
+    val scheme by themeViewModel.theme.collectAsState()
+    val lScheme by themeViewModel.ltheme.collectAsState()
+    val dScheme by themeViewModel.dtheme.collectAsState()
+    val syncTheme by themeViewModel.syncTheme.collectAsState(false)
 
     val isDark = isSystemInDarkTheme()
-
-    // Initialise selection states based on settings
-    LaunchedEffect(Unit) {
-        if (!getBooleanSetting(context, autoThemeChange, false)) {
-            currentSelectedDTheme = -1
-            currentSelectedLTheme = -1
-        } else {
-            currentSelectedTheme = -1
-        }
-    }
-
-    val backgroundInteractionSource = remember { MutableInteractionSource() }
+    var highlightedThemeId by remember { mutableIntStateOf(-1) }
 
     val themeIds = listOf(11, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12)
 
-    LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .combinedClickable(
-                onClick = {
-                    currentHighlightedThemeCard = -1
-                },
-                indication = null,
-                onLongClick = {},
-                interactionSource = backgroundInteractionSource
-            )
-    ) {
+    LazyColumn(Modifier.fillMaxSize()) {
+
         item {
             EscapeHeader(goBack, stringResource(R.string.theme))
         }
+
         item {
             SettingsSwitch(
-                stringResource(R.string.syncLightDark), getBooleanSetting(
-                    context, context.getString(R.string.autoThemeSwitch), false
-                ), isTopOfGroup = true, onCheckedChange = { switch ->
-                    // Disable normal selection box or set it correctly
-                    currentSelectedTheme = if (switch) {
-                        -1
-                    } else {
-                        getIntSetting(context, settingToChange, 11)
-                    }
-
-                    if (switch) {
-                        currentSelectedDTheme =
-                            getIntSetting(context, dSettingToChange, -1)
-                        currentSelectedLTheme =
-                            getIntSetting(context, lSettingToChange, -1)
-                    } else {
-                        currentSelectedDTheme = -1
-                        currentSelectedLTheme = -1
-                    }
-
-                    // Remove the light dark button
-                    currentHighlightedThemeCard = -1
-
-                    if (switch) {
-                        currentSelectedTheme = -1
-
-                        currentSelectedDTheme =
-                            getIntSetting(context, dSettingToChange, -1)
-                        currentSelectedLTheme =
-                            getIntSetting(context, lSettingToChange, -1)
-
-
-                        val newThemeId = if (isDark) {
-                            currentSelectedDTheme
-                        } else {
-                            currentSelectedLTheme
-                        }
-
-                        if (newThemeId != -1) {
-                            mainAppModel.appTheme.value = AppTheme.fromId(newThemeId)
-                        }
-
-                    } else {
-                        currentSelectedTheme =
-                            getIntSetting(context, settingToChange, 11)
-
-                        currentSelectedDTheme = -1
-                        currentSelectedLTheme = -1
-
-                        if (currentSelectedTheme != -1) {
-                            mainAppModel.appTheme.value =
-                                AppTheme.fromId(currentSelectedTheme)
-                        }
-                    }
-
-                    currentHighlightedThemeCard = -1
-
-                    setBooleanSetting(
-                        context,
-                        context.getString(R.string.autoThemeSwitch),
-                        switch
-                    )
-                })
+                stringResource(R.string.syncLightDark),
+                syncTheme,
+                isTopOfGroup = true,
+                onCheckedChange = {
+                    highlightedThemeId = -1
+                    themeViewModel.setSyncTheme(it)
+                }
+            )
         }
+
         item {
-            val backgroundColor = mainAppModel.appTheme.value.resolveColorScheme().background
+            val activeTheme = if (syncTheme) {
+                if (isDark) dScheme else lScheme
+            } else scheme
+
+            val colour = activeTheme.resolveColorScheme().background
+
             SettingsButton(
                 label = stringResource(R.string.match_system_wallpaper),
                 isBottomOfGroup = true,
                 onClick = {
                     AppUtils.setSolidColorWallpaperHomeScreen(
-                        mainAppModel.getContext(), backgroundColor
+                        context,
+                        colour
                     )
-                })
+                }
+            )
         }
-        item {
-            SettingsSpacer()
-        }
-        itemsIndexed(themeIds, key = { _, themeId -> themeId }) { index, themeId ->
-            val isSelected = currentSelectedTheme == themeId
-            val isDSelected = currentSelectedDTheme == themeId
-            val isLSelected = currentSelectedLTheme == themeId
-            val showLightDarkPicker = currentHighlightedThemeCard == themeId
+
+        item { SettingsSpacer() }
+
+        itemsIndexed(themeIds, key = { _, id -> id }) { index, themeId ->
+
+            val isSelected = !syncTheme && scheme.id == themeId
+            val isLight = syncTheme && lScheme.id == themeId
+            val isDarkSel = syncTheme && dScheme.id == themeId
+            val showPicker = highlightedThemeId == themeId
 
             ThemeCard(
                 theme = themeId,
-                showLightDarkPicker = remember(showLightDarkPicker) {
-                    mutableStateOf(
-                        showLightDarkPicker
-                    )
+
+                showLightDarkPicker = showPicker,
+                isSelected = isSelected,
+                isLSelected = isLight,
+                isDSelected = isDarkSel,
+
+                updateLTheme = {
+                    themeViewModel.setLTheme(AppColourScheme.fromId(themeId))
+                    highlightedThemeId = -1
                 },
-                isSelected = remember(isSelected) { mutableStateOf(isSelected) },
-                isDSelected = remember(isDSelected) { mutableStateOf(isDSelected) },
-                isLSelected = remember(isLSelected) { mutableStateOf(isLSelected) },
-                updateLTheme = { theme ->
-                    setIntSetting(context, context.getString(R.string.lTheme), theme)
-                    mainAppModel.appTheme.value = AppTheme.fromId(themeId)
-                    currentSelectedLTheme = theme
-                    currentHighlightedThemeCard = -1
+
+                updateDTheme = {
+                    themeViewModel.setDTheme(AppColourScheme.fromId(themeId))
+                    highlightedThemeId = -1
                 },
-                updateDTheme = { theme ->
-                    setIntSetting(context, context.getString(R.string.dTheme), theme)
-                    mainAppModel.appTheme.value = AppTheme.fromId(themeId)
-                    currentSelectedDTheme = theme
-                    currentHighlightedThemeCard = -1
-                },
+
                 modifier = Modifier.fillMaxWidth(),
                 isTopOfGroup = index == 0,
                 isBottomOfGroup = index == themeIds.size - 1,
-                onClick = { theme ->
-                    if (getBooleanSetting(
-                            context, context.getString(R.string.autoThemeSwitch), false
-                        )
-                    ) {
-                        // For auto theme mode, show light/dark picker
-                        currentHighlightedThemeCard = theme
+
+                onClick = {
+                    if (syncTheme) {
+                        highlightedThemeId = themeId
                     } else {
-                        // For single theme mode, just set the theme
-                        setIntSetting(context, context.getString(R.string.theme), theme)
-                        mainAppModel.appTheme.value = AppTheme.fromId(themeId)
-                        currentSelectedTheme = theme
+                        themeViewModel.setTheme(AppColourScheme.fromId(themeId))
                     }
-                })
+                }
+            )
         }
-        item {
-            SettingsSpacer()
-        }
-        item {
-            SettingsSpacer()
-        }
+
+        item { SettingsSpacer() }
+        item { SettingsSpacer() }
     }
 }
 
@@ -1336,7 +1247,14 @@ fun HiddenApps(
  */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun ChooseFont(context: Context, activity: Activity, goBack: () -> Unit) {
+fun ChooseFont(
+    context: Context,
+    activity: Activity,
+    themeViewModel: ThemeViewModel = hiltViewModel(),
+    goBack: () -> Unit
+) {
+    val selectedFont by themeViewModel.font.collectAsState(initial = "Jost")
+
     val fontNames = listOf(
         "Jost",
         "Inter",
@@ -1362,14 +1280,15 @@ fun ChooseFont(context: Context, activity: Activity, goBack: () -> Unit) {
             SettingsButton(
                 label = fontName,
                 onClick = {
-                    setStringSetting(context, context.resources.getString(R.string.Font), fontName)
-                    resetActivity(context, activity)
+                    themeViewModel.setFont(fontName)
                 },
                 isTopOfGroup = index == 0,
                 isBottomOfGroup = index == fontNames.lastIndex,
-                fontFamily = getFontFamily(context, fontName)
+                fontFamily = getFontFamily(context, fontName),
+                isSelected = fontName == selectedFont
             )
         }
+
         item { SettingsSpacer() }
         item { SettingsSpacer() }
     }
@@ -1621,15 +1540,15 @@ fun WeatherAppPicker(
  *
  * @param theme The theme ID number (see: Theme.kt)
  *
- * @see com.geecee.escapelauncher.core.ui.theme.EscapeTheme
+ * @see com.geecee.escapelauncher.core.theme.EscapeTheme
  */
 @Composable
 fun ThemeCard(
     theme: Int,
-    showLightDarkPicker: MutableState<Boolean>,
-    isSelected: MutableState<Boolean>,
-    isDSelected: MutableState<Boolean>,
-    isLSelected: MutableState<Boolean>,
+    showLightDarkPicker: Boolean,
+    isSelected: Boolean,
+    isDSelected: Boolean,
+    isLSelected: Boolean,
     updateLTheme: (Int) -> Unit,
     updateDTheme: (Int) -> Unit,
     modifier: Modifier,
@@ -1637,202 +1556,125 @@ fun ThemeCard(
     isTopOfGroup: Boolean = false,
     isBottomOfGroup: Boolean = false
 ) {
+    val scheme = AppColourScheme.fromId(theme)
+    val colors = scheme.resolveColorScheme()
+
     val groupEdgeCornerRadius = 24.dp
     val defaultCornerRadius = 8.dp
 
-    val topStartRadius = if (isTopOfGroup) groupEdgeCornerRadius else defaultCornerRadius
-    val topEndRadius = if (isTopOfGroup) groupEdgeCornerRadius else defaultCornerRadius
-    val bottomStartRadius = if (isBottomOfGroup) groupEdgeCornerRadius else defaultCornerRadius
-    val bottomEndRadius = if (isBottomOfGroup) groupEdgeCornerRadius else defaultCornerRadius
+    val shape = RoundedCornerShape(
+        topStart = if (isTopOfGroup) groupEdgeCornerRadius else defaultCornerRadius,
+        topEnd = if (isTopOfGroup) groupEdgeCornerRadius else defaultCornerRadius,
+        bottomStart = if (isBottomOfGroup) groupEdgeCornerRadius else defaultCornerRadius,
+        bottomEnd = if (isBottomOfGroup) groupEdgeCornerRadius else defaultCornerRadius
+    )
 
     Box(Modifier.padding(vertical = 1.dp)) {
         Box(
             modifier
-                .clip(
-                    RoundedCornerShape(
-                        topStart = topStartRadius,
-                        topEnd = topEndRadius,
-                        bottomEnd = bottomEndRadius,
-                        bottomStart = bottomStartRadius
-                    )
-                )
-                .clickable {
-                    onClick(theme)
-                }
-                .background(AppTheme.fromId(theme).resolveColorScheme().background)
-                .height(72.dp)) {
+                .clip(shape)
+                .clickable { onClick(theme) }
+                .background(colors.background)
+                .height(72.dp)
+        ) {
+            val showCheck = isSelected && !showLightDarkPicker
+            val showMoon = isDSelected && !showLightDarkPicker
+            val showSun = isLSelected && !showLightDarkPicker
+
             AnimatedVisibility(
-                isSelected.value && !showLightDarkPicker.value && !showLightDarkPicker.value,
+                visible = showCheck || showMoon || showSun,
                 enter = fadeIn(),
                 exit = fadeOut()
             ) {
                 Box(
                     Modifier
                         .fillMaxSize()
-                        .border(
-                            2.dp,
-                            AppTheme.fromId(theme).resolveColorScheme().onPrimaryContainer,
-                            RoundedCornerShape(
-                                topStart = topStartRadius,
-                                topEnd = topEndRadius,
-                                bottomEnd = bottomEndRadius,
-                                bottomStart = bottomStartRadius
-                            )
-                        )
+                        .border(2.dp, colors.onPrimaryContainer, shape)
                 ) {
-                    Box(
-                        Modifier
-                            .align(Alignment.BottomEnd)
-                            .padding(10.dp)
-                    ) {
-                        Icon(
-                            Icons.Default.CheckCircle,
-                            "",
-                            tint = AppTheme.fromId(theme).resolveColorScheme().onPrimaryContainer
-                        )
-                    }
-                }
-            }
 
-            AnimatedVisibility(
-                isSelected.value && !showLightDarkPicker.value, enter = fadeIn(), exit = fadeOut()
-            ) {
-                Box(
-                    Modifier
-                        .fillMaxSize()
-                        .border(
-                            2.dp,
-                            AppTheme.fromId(theme).resolveColorScheme().onPrimaryContainer,
-                            RoundedCornerShape(
-                                topStart = topStartRadius,
-                                topEnd = topEndRadius,
-                                bottomEnd = bottomEndRadius,
-                                bottomStart = bottomStartRadius
+                    when {
+                        showCheck -> {
+                            Icon(
+                                Icons.Default.CheckCircle,
+                                contentDescription = null,
+                                tint = colors.onPrimaryContainer,
+                                modifier = Modifier
+                                    .align(Alignment.BottomEnd)
+                                    .padding(10.dp)
                             )
-                        )
-                ) {
-                    Box(
-                        Modifier
-                            .align(Alignment.BottomEnd)
-                            .padding(10.dp)
-                    ) {
-                        Icon(
-                            Icons.Default.CheckCircle,
-                            "",
-                            tint = AppTheme.fromId(theme).resolveColorScheme().onPrimaryContainer
-                        )
-                    }
-                }
-            }
+                        }
 
-            AnimatedVisibility(
-                isDSelected.value && !showLightDarkPicker.value, enter = fadeIn(), exit = fadeOut()
-            ) {
-                Box(
-                    Modifier
-                        .fillMaxSize()
-                        .border(
-                            2.dp,
-                            AppTheme.fromId(theme).resolveColorScheme().onPrimaryContainer,
-                            RoundedCornerShape(
-                                topStart = topStartRadius,
-                                topEnd = topEndRadius,
-                                bottomEnd = bottomEndRadius,
-                                bottomStart = bottomStartRadius
+                        showMoon -> {
+                            Icon(
+                                painterResource(R.drawable.dark_mode),
+                                contentDescription = null,
+                                tint = colors.onPrimaryContainer,
+                                modifier = Modifier
+                                    .align(Alignment.BottomEnd)
+                                    .padding(10.dp)
                             )
-                        )
-                ) {
-                    Box(
-                        Modifier
-                            .align(Alignment.BottomEnd)
-                            .padding(10.dp)
-                    ) {
-                        Icon(
-                            painterResource(R.drawable.dark_mode),
-                            "",
-                            tint = AppTheme.fromId(theme).resolveColorScheme().onPrimaryContainer
-                        )
+                        }
+
+                        showSun -> {
+                            Icon(
+                                painterResource(R.drawable.light_mode),
+                                contentDescription = null,
+                                tint = colors.onPrimaryContainer,
+                                modifier = Modifier
+                                    .align(Alignment.TopEnd)
+                                    .padding(10.dp)
+                            )
+                        }
                     }
                 }
             }
 
             Text(
-                stringResource(AppTheme.nameResFromId(theme)),
-                Modifier
-                    .align(Alignment.Center)
-                    .padding(horizontal = 24.dp, vertical = 12.dp),
-                AppTheme.fromId(theme).resolveColorScheme().onPrimaryContainer,
+                text = stringResource(AppColourScheme.nameResFromId(theme)),
+                color = colors.onPrimaryContainer,
                 style = MaterialTheme.typography.bodyMedium,
-                textAlign = TextAlign.Center
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .padding(horizontal = 24.dp, vertical = 12.dp)
             )
 
             AnimatedVisibility(
-                isLSelected.value && !showLightDarkPicker.value, enter = fadeIn(), exit = fadeOut()
+                visible = showLightDarkPicker,
+                enter = fadeIn(),
+                exit = fadeOut()
             ) {
-                Box(
-                    Modifier
-                        .fillMaxSize()
-                        .border(
-                            2.dp,
-                            AppTheme.fromId(theme).resolveColorScheme().onPrimaryContainer,
-                            RoundedCornerShape(
-                                topStart = topStartRadius,
-                                topEnd = topEndRadius,
-                                bottomEnd = bottomEndRadius,
-                                bottomStart = bottomStartRadius
-                            )
-                        )
-                ) {
-                    Box(
-                        Modifier
-                            .align(Alignment.TopEnd)
-                            .padding(10.dp)
-                    ) {
-                        Icon(
-                            painterResource(R.drawable.light_mode),
-                            "",
-                            tint = AppTheme.fromId(theme).resolveColorScheme().onPrimaryContainer
-                        )
-                    }
-                }
-            }
-
-            AnimatedVisibility(showLightDarkPicker.value, enter = fadeIn(), exit = fadeOut()) {
                 Row(
                     Modifier
                         .fillMaxSize()
                         .background(transparentHalf)
                 ) {
                     Button(
-                        onClick = {
-                            updateLTheme(theme)
-                        },
+                        onClick = { updateLTheme(theme) },
                         modifier = Modifier
                             .weight(1f)
                             .fillMaxHeight()
                             .padding(20.dp, 5.dp, 5.dp, 5.dp),
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = AppTheme.fromId(theme).resolveColorScheme().primary,
-                            contentColor = AppTheme.fromId(theme).resolveColorScheme().onPrimary
+                            containerColor = colors.primary,
+                            contentColor = colors.onPrimary
                         )
                     ) {
-                        Text(stringResource(com.geecee.escapelauncher.core.ui.R.string.light))
+                        Text(stringResource(R.string.light))
                     }
 
                     Button(
-                        onClick = {
-                            updateDTheme(theme)
-                        },
+                        onClick = { updateDTheme(theme) },
                         modifier = Modifier
                             .weight(1f)
                             .fillMaxHeight()
                             .padding(5.dp, 5.dp, 20.dp, 5.dp),
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = AppTheme.fromId(theme).resolveColorScheme().primary,
-                            contentColor = AppTheme.fromId(theme).resolveColorScheme().onPrimary
+                            containerColor = colors.primary,
+                            contentColor = colors.onPrimary
                         )
                     ) {
-                        Text(stringResource(com.geecee.escapelauncher.core.ui.R.string.dark))
+                        Text(stringResource(R.string.dark))
                     }
                 }
             }

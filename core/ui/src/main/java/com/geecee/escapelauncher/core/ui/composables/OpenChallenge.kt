@@ -33,8 +33,8 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.geecee.escapelauncher.core.ui.theme.CardContainerColor
-import com.geecee.escapelauncher.core.ui.theme.ContentColor
+import com.geecee.escapelauncher.core.theme.CardContainerColor
+import com.geecee.escapelauncher.core.theme.ContentColor
 import kotlinx.coroutines.delay
 
 @Composable

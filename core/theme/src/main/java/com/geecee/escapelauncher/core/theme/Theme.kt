@@ -1,0 +1,55 @@
+package com.geecee.escapelauncher.core.theme
+
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalContext
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+
+@Composable
+fun EscapeTheme(
+    theme: AppColourScheme? = null,
+    fontName: String? = null,
+    themeViewModel: ThemeViewModel = hiltViewModel(),
+    content: @Composable (() -> Unit)
+) {
+    val context = LocalContext.current
+    val colorScheme by themeViewModel.theme.collectAsState(AppColourScheme.OFF_LIGHT)
+    val lScheme by themeViewModel.ltheme.collectAsState(AppColourScheme.OFF_LIGHT)
+    val dScheme by themeViewModel.dtheme.collectAsState(AppColourScheme.DARK)
+    val syncTheme by themeViewModel.syncTheme.collectAsState(false)
+    val font by themeViewModel.font.collectAsState("Jost")
+
+    val fontFamily = remember(fontName, font) {
+        getFontFamily(
+            context = context,
+            fontName = fontName ?: font
+        )
+    }
+
+    MaterialTheme(
+        colorScheme =
+            theme?.resolveColorScheme()
+                ?: if (syncTheme) {
+                    if (isSystemInDarkTheme()) {
+                        dScheme.resolveColorScheme()
+                    } else {
+                        lScheme.resolveColorScheme()
+                    }
+                } else {
+                    colorScheme.resolveColorScheme()
+                },
+        typography = escapeType(fontFamily),
+        content = content
+    )
+}
+
+@Composable
+fun EscapeThemePreview(content: @Composable (() -> Unit)) {
+    MaterialTheme(
+        colorScheme = offLightScheme, content = content
+    )
+}

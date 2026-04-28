@@ -24,7 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.geecee.escapelauncher.core.ui.theme.ContentColor
+import com.geecee.escapelauncher.core.theme.ContentColor
 
 
 /**

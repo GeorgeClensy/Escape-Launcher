@@ -176,4 +176,49 @@ class SettingsRepositoryImpl @Inject constructor(
     override suspend fun setAppsAlignment(alignment: String) {
         dataStore.edit { preferences -> preferences[PreferencesKeys.APPS_ALIGNMENT] = alignment }
     }
+
+    override val theme: Flow<Int>
+        get() = dataStore.data.map { preferences ->
+            preferences[PreferencesKeys.THEME] ?: 11
+        }
+
+    override suspend fun setTheme(theme: Int) {
+        dataStore.edit { preferences -> preferences[PreferencesKeys.THEME] = theme }
+    }
+
+    override val ltheme: Flow<Int>
+        get() = dataStore.data.map { preferences ->
+            preferences[PreferencesKeys.LTHEME] ?: 11
+        }
+
+    override suspend fun setLTheme(theme: Int) {
+        dataStore.edit { preferences -> preferences[PreferencesKeys.LTHEME] = theme }
+    }
+
+    override val dtheme: Flow<Int>
+        get() = dataStore.data.map { preferences ->
+            preferences[PreferencesKeys.DTHEME] ?: 11
+        }
+
+    override suspend fun setDTheme(theme: Int) {
+        dataStore.edit { preferences -> preferences[PreferencesKeys.DTHEME] = theme }
+    }
+
+    override val syncTheme: Flow<Boolean>
+        get() = dataStore.data.map { preferences ->
+            preferences[PreferencesKeys.SYNC_THEME] ?: false
+        }
+
+    override suspend fun setSyncTheme(value: Boolean) {
+        dataStore.edit { preferences -> preferences[PreferencesKeys.SYNC_THEME] = value }
+    }
+
+    override val font: Flow<String>
+        get() = dataStore.data.map { preferences ->
+            preferences[PreferencesKeys.FONT] ?: "Jost"
+        }
+
+    override suspend fun setFont(value: String) {
+        dataStore.edit { preferences -> preferences[PreferencesKeys.FONT] = value }
+    }
 }

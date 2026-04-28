@@ -42,7 +42,7 @@ import com.geecee.escapelauncher.core.ui.composables.AppsListHeader
 import com.geecee.escapelauncher.core.ui.composables.HomeScreenItem
 import com.geecee.escapelauncher.core.ui.composables.ListGradient
 import com.geecee.escapelauncher.core.ui.composables.SettingsSpacer
-import com.geecee.escapelauncher.core.ui.theme.transparentHalf
+import com.geecee.escapelauncher.core.theme.transparentHalf
 import com.geecee.escapelauncher.feature.securefolder.SecureFolderButton
 import com.geecee.escapelauncher.feature.securefolder.canUseSecureFolder
 import com.geecee.escapelauncher.feature.workapps.WorkApps

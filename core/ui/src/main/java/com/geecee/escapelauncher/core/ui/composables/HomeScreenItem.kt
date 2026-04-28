@@ -13,7 +13,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.unit.dp
-import com.geecee.escapelauncher.core.ui.theme.primaryContentColor
+import com.geecee.escapelauncher.core.theme.primaryContentColor
 
 
 /**

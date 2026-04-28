@@ -34,8 +34,8 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
-import com.geecee.escapelauncher.core.ui.theme.BackgroundColor
-import com.geecee.escapelauncher.core.ui.theme.primaryContentColor
+import com.geecee.escapelauncher.core.theme.BackgroundColor
+import com.geecee.escapelauncher.core.theme.primaryContentColor
 
 /**
  * Search Bar for apps list that collapses into a pill

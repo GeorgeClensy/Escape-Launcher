@@ -17,7 +17,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.geecee.escapelauncher.core.ui.theme.primaryContentColor
+import com.geecee.escapelauncher.core.theme.primaryContentColor
 
 /**
  * A composable that displays a small information widget with an optional icon and text.

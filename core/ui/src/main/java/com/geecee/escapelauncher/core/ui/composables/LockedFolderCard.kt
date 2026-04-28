@@ -8,10 +8,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import com.geecee.escapelauncher.core.ui.theme.CardContainerColor
-import com.geecee.escapelauncher.core.ui.theme.CardContainerColorDisabled
-import com.geecee.escapelauncher.core.ui.theme.ContentColor
-import com.geecee.escapelauncher.core.ui.theme.ContentColorDisabled
+import com.geecee.escapelauncher.core.theme.CardContainerColor
+import com.geecee.escapelauncher.core.theme.CardContainerColorDisabled
+import com.geecee.escapelauncher.core.theme.ContentColor
+import com.geecee.escapelauncher.core.theme.ContentColorDisabled
 
 
 /**

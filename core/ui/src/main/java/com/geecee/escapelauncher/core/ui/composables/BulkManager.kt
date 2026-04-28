@@ -36,7 +36,7 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
-import com.geecee.escapelauncher.core.ui.theme.ContentColor
+import com.geecee.escapelauncher.core.theme.ContentColor
 import kotlin.math.roundToInt
 
 @Composable

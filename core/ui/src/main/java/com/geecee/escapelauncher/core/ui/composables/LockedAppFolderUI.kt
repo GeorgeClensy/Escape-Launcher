@@ -16,9 +16,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.geecee.escapelauncher.core.ui.theme.ContentColor
-import com.geecee.escapelauncher.core.ui.theme.EscapePreviewTheme
-import com.geecee.escapelauncher.core.ui.theme.SecondaryCardContainerColor
+import com.geecee.escapelauncher.core.theme.ContentColor
+import com.geecee.escapelauncher.core.theme.EscapeThemePreview
+import com.geecee.escapelauncher.core.theme.SecondaryCardContainerColor
 
 /**
  * UI for a locked folder to be used at the bottom of the apps list.
@@ -73,7 +73,7 @@ fun LockedAppFolderUI(
 @Preview
 @Composable
 fun LockedAppFolderUIPreview() {
-    EscapePreviewTheme {
+    EscapeThemePreview {
         LockedAppFolderUI(
             text = "Private Space",
             iconContentDescription = "Lock Private Space",
@@ -85,7 +85,7 @@ fun LockedAppFolderUIPreview() {
 @Preview
 @Composable
 fun LockedAppFolderUIPreviewWithBackgroundCard() {
-    EscapePreviewTheme {
+    EscapeThemePreview {
         LockedFolderCard  {
             LockedAppFolderUI(
                 text = "Private Space",

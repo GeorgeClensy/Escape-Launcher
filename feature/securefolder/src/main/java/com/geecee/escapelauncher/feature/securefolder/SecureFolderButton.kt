@@ -7,7 +7,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.geecee.escapelauncher.core.ui.R
 import com.geecee.escapelauncher.core.ui.composables.LockedAppFolderUI
 import com.geecee.escapelauncher.core.ui.composables.LockedFolderCard
-import com.geecee.escapelauncher.core.ui.theme.EscapePreviewTheme
+import com.geecee.escapelauncher.core.theme.EscapeThemePreview
 
 /**
  * Button to launch the secure folder on samsung phones.
@@ -31,7 +31,7 @@ fun SecureFolderButton() {
 @Preview
 @Composable
 fun SecureFolderButtonPreview() {
-    EscapePreviewTheme {
+    EscapeThemePreview {
         SecureFolderButton()
     }
 }

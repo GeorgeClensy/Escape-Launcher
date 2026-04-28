@@ -31,21 +31,18 @@ import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.geecee.escapelauncher.core.ui.theme.CardContainerColor
-import com.geecee.escapelauncher.core.ui.theme.CardContainerColorDisabled
-import com.geecee.escapelauncher.core.ui.theme.ContentColor
-import com.geecee.escapelauncher.core.ui.theme.ContentColorDisabled
-import com.geecee.escapelauncher.core.ui.theme.ErrorContainerColor
-import com.geecee.escapelauncher.core.ui.theme.ErrorContentColor
+import com.geecee.escapelauncher.core.theme.CardContainerColor
+import com.geecee.escapelauncher.core.theme.CardContainerColorDisabled
+import com.geecee.escapelauncher.core.theme.ContentColor
+import com.geecee.escapelauncher.core.theme.ContentColorDisabled
+import com.geecee.escapelauncher.core.theme.ErrorContainerColor
+import com.geecee.escapelauncher.core.theme.ErrorContentColor
 
 /**
  * Switch for setting with a label on the left
@@ -201,7 +198,8 @@ fun SettingsButton(
     isBottomOfGroup: Boolean = false,
     fontFamily: FontFamily? = MaterialTheme.typography.bodyMedium.fontFamily,
     isDisabled: Boolean = false,
-    useAutoResize: Boolean = true
+    useAutoResize: Boolean = true,
+    isSelected: Boolean = false
 ) {
     // Define the base corner size
     val groupEdgeCornerRadius = 24.dp
@@ -225,7 +223,7 @@ fun SettingsButton(
     )
 
     val animatedContainerColor by animateColorAsState(
-        targetValue = if (!isDisabled) CardContainerColor else CardContainerColorDisabled,
+        targetValue = if (isDisabled) CardContainerColorDisabled else if (isSelected) CardContainerColorDisabled else CardContainerColor,
         animationSpec = tween(durationMillis = 300),
         label = "containerColor"
     )

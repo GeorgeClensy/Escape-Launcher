@@ -15,25 +15,15 @@ import android.os.Build
 import android.os.Process.myUserHandle
 import android.util.Log
 import android.view.Window
-import androidx.compose.runtime.Composable
 import androidx.compose.ui.hapticfeedback.HapticFeedback
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalResources
 import androidx.core.graphics.createBitmap
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import com.geecee.escapelauncher.HomeScreenModel
-import com.geecee.escapelauncher.MainAppViewModel
-import com.geecee.escapelauncher.R
-import com.geecee.escapelauncher.core.ui.theme.AppTheme
-import com.geecee.escapelauncher.core.ui.theme.EscapeTheme
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import java.io.IOException
 import java.io.InputStream
 import java.text.Normalizer
@@ -415,57 +405,5 @@ object AppUtils {
             WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
 
         controller.hide(WindowInsetsCompat.Type.systemBars())
-    }
-
-    /**
-     * Sets up theme by retrieving theme that should be used and then passing it and the content into an EscapeTheme composable
-     */
-    @Composable
-    fun SetUpTheme(content: @Composable () -> Unit, viewModel: MainAppViewModel) {
-        val context = LocalContext.current
-        val config = LocalConfiguration.current
-        val resources = LocalResources.current
-
-        androidx.compose.runtime.LaunchedEffect(Unit) {
-            withContext(Dispatchers.IO) {
-                Log.d("Loading","Theme loading started")
-
-                var settingToChange = resources.getString(R.string.Theme)
-
-                if (getBooleanSetting(
-                        context,
-                        resources.getString(R.string.autoThemeSwitch),
-                        false
-                    )
-                ) {
-                    val isDark = (config.uiMode and
-                            android.content.res.Configuration.UI_MODE_NIGHT_MASK) ==
-                            android.content.res.Configuration.UI_MODE_NIGHT_YES
-
-                    settingToChange = if (isDark) {
-                        resources.getString(R.string.dTheme)
-                    } else {
-                        resources.getString(R.string.lTheme)
-                    }
-                }
-
-                // Get theme ID
-                val themeId = getIntSetting(context, settingToChange, 11)
-
-                withContext(Dispatchers.Main) {
-                    viewModel.appTheme.value = AppTheme.fromId(themeId)
-                    viewModel.isThemeLoaded.value = true
-                }
-            }
-        }
-
-
-
-        EscapeTheme(
-            theme = viewModel.appTheme.value,
-            fontName = getStringSetting(context, resources.getString(R.string.Font), "Jost")
-        ) {
-            content()
-        }
     }
 }

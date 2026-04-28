@@ -7,7 +7,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.geecee.escapelauncher.core.ui.theme.primaryContentColor
+import com.geecee.escapelauncher.core.theme.primaryContentColor
 
 /**
  * Apps List title

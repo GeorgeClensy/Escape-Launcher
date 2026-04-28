@@ -60,10 +60,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.edit
 import androidx.core.graphics.drawable.toBitmap
-import com.geecee.escapelauncher.core.ui.theme.BackgroundColor
-import com.geecee.escapelauncher.core.ui.theme.ContentColor
-import com.geecee.escapelauncher.core.ui.theme.primaryContentColor
-import com.geecee.escapelauncher.utils.managers.Migration
+import com.geecee.escapelauncher.core.theme.BackgroundColor
+import com.geecee.escapelauncher.core.theme.ContentColor
+import com.geecee.escapelauncher.core.theme.primaryContentColor
 
 // Constants for SharedPreferences used in widget saving/loading
 private const val WIDGET_PREFS_NAME = "widget_prefs"
@@ -653,114 +652,4 @@ fun getSavedWidgetId(context: Context): Int {
  */
 fun removeWidget(context: Context) {
     saveWidgetId(context, INVALID_WIDGET_ID)
-}
-
-//
-// Widget Settings
-//
-
-/**
- * Sets the widget's horizontal offset on the screen.
- * This value is saved in the shared preferences file defined by Migration.UNIFIED_PREFS_NAME.
- * The specific key used for storing the offset is "WidgetOffset".
- *
- * @author George Clensy
- * @param context The application context.
- * @param sliderPosition The new horizontal offset for the widget.
- */
-fun setWidgetOffset(context: Context, sliderPosition: Float) {
-    val sharedPreferences = context.getSharedPreferences(
-        Migration.UNIFIED_PREFS_NAME, Context.MODE_PRIVATE
-    )
-    sharedPreferences.edit {
-        putFloat("WidgetOffset", sliderPosition)
-    }
-}
-
-/**
- * Retrieves the widget's horizontal offset from shared preferences.
- * This value is stored in the shared preferences file defined by Migration.UNIFIED_PREFS_NAME.
- * The specific key used for storing the offset is "WidgetOffset".
- * If no value is found, it defaults to 0f.
- *
- * @author George Clensy
- * @param context The application context.
- * @return The widget's horizontal offset, or 0f if not set.
- */
-fun getWidgetOffset(context: Context): Float {
-    val sharedPreferences = context.getSharedPreferences(
-        Migration.UNIFIED_PREFS_NAME, Context.MODE_PRIVATE
-    )
-    return sharedPreferences.getFloat("WidgetOffset", 0f)
-}
-
-/**
- * Sets the widget's height.
- * This value is saved in the shared preferences file defined by Migration.UNIFIED_PREFS_NAME.
- * The specific key used for storing the height is "WidgetHeight".
- *
- * @author George Clensy
- * @param context The application context.
- * @param sliderPosition The new height for the widget.
- */
-fun setWidgetHeight(context: Context, sliderPosition: Float) {
-    val sharedPreferences = context.getSharedPreferences(
-        Migration.UNIFIED_PREFS_NAME, Context.MODE_PRIVATE
-    )
-    sharedPreferences.edit {
-        putFloat("WidgetHeight", sliderPosition)
-    }
-}
-
-/**
- * Retrieves the widget's width from shared preferences.
- * This value is stored in the shared preferences file defined by Migration.UNIFIED_PREFS_NAME.
- * The specific key used for storing the width is "WidgetWidth".
- * If no value is found, it defaults to 150f.
- *
- * @author George Clensy
- * @param context The application context.
- * @return The widget's width, or 150f if not set.
- */
-fun getWidgetWidth(context: Context): Float {
-    val sharedPreferences = context.getSharedPreferences(
-        Migration.UNIFIED_PREFS_NAME, Context.MODE_PRIVATE
-    )
-
-    return sharedPreferences.getFloat("WidgetWidth", 150f)
-}
-
-/**
- * Sets the widget's width.
- * This value is saved in the shared preferences file defined by Migration.UNIFIED_PREFS_NAME.
- * The specific key used for storing the width is "WidgetWidth".
- *
- * @author George Clensy
- * @param context The application context.
- * @param sliderPosition The new width for the widget.
- */
-fun setWidgetWidth(context: Context, sliderPosition: Float) {
-    val sharedPreferences = context.getSharedPreferences(
-        Migration.UNIFIED_PREFS_NAME, Context.MODE_PRIVATE
-    )
-    sharedPreferences.edit {
-        putFloat("WidgetWidth", sliderPosition)
-    }
-}
-
-/**
- * Retrieves the widget's height from shared preferences.
- * This value is stored in the shared preferences file defined by Migration.UNIFIED_PREFS_NAME.
- * The specific key used for storing the height is "WidgetHeight".
- * If no value is found, it defaults to 125f.
- *
- * @author George Clensy
- * @param context The application context.
- * @return The widget's height, or 125f if not set.
- */
-fun getWidgetHeight(context: Context): Float {
-    val sharedPreferences = context.getSharedPreferences(
-        Migration.UNIFIED_PREFS_NAME, Context.MODE_PRIVATE
-    )
-    return sharedPreferences.getFloat("WidgetHeight", 125f)
 }

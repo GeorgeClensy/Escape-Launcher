@@ -2,6 +2,7 @@ package com.geecee.escapelauncher.core.data.datastore
 
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.floatPreferencesKey
+import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 
 object PreferencesKeys {
@@ -31,4 +32,12 @@ object PreferencesKeys {
     val WIDGET_OFFSET = floatPreferencesKey(name = "widget_offset")
     val WIDGET_HEIGHT = floatPreferencesKey(name = "widget_height")
     val WIDGET_WIDTH = floatPreferencesKey(name = "widget_width")
+
+    //Theme
+    val THEME = intPreferencesKey(name = "theme")
+    val DTHEME = intPreferencesKey(name = "dtheme")
+    val LTHEME = intPreferencesKey(name = "ltheme")
+    val SYNC_THEME = booleanPreferencesKey(name = "sync_theme")
+
+    val FONT = stringPreferencesKey(name = "font")
 }

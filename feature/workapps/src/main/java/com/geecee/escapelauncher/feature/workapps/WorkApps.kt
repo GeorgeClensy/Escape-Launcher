@@ -41,10 +41,10 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.geecee.escapelauncher.core.model.InstalledApp
 import com.geecee.escapelauncher.core.ui.R
 import com.geecee.escapelauncher.core.ui.composables.LockedFolderCard
-import com.geecee.escapelauncher.core.ui.theme.BackgroundColor
-import com.geecee.escapelauncher.core.ui.theme.ContentColor
-import com.geecee.escapelauncher.core.ui.theme.SecondaryCardContainerColor
-import com.geecee.escapelauncher.core.ui.theme.primaryContentColor
+import com.geecee.escapelauncher.core.theme.BackgroundColor
+import com.geecee.escapelauncher.core.theme.ContentColor
+import com.geecee.escapelauncher.core.theme.SecondaryCardContainerColor
+import com.geecee.escapelauncher.core.theme.primaryContentColor
 
 // IMPORTANT TODO: Fix that the app doesn't track the work apps state for example if you uninstall an app escape will still show it until it has been restarted which can cause it to crash if you then tap on the app
 

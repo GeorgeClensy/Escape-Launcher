@@ -19,7 +19,6 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.geecee.escapelauncher.core.ui.theme.AppTheme
 import com.geecee.escapelauncher.utils.AppUtils
 import com.geecee.escapelauncher.core.model.InstalledApp
 import com.geecee.escapelauncher.core.data.repository.ModifiedAppsRepository
@@ -318,18 +317,10 @@ class MainAppViewModel @Inject constructor(
 
     fun getWindow(): Window? = window
 
-    var appTheme: MutableState<AppTheme> = mutableStateOf(AppTheme.OFF_LIGHT) // App material theme
-
     // Loading states for splash screen
     val isAppsLoaded = mutableStateOf(false)
     val isFavoritesLoaded = mutableStateOf(false)
-    val isThemeLoaded = mutableStateOf(false)
     val isScreenTimeLoaded = mutableStateOf(false)
-
-    val isReady by derivedStateOf {
-        isAppsLoaded.value && isFavoritesLoaded.value && isThemeLoaded.value && isScreenTimeLoaded.value
-    }
-
 
     // Other stuff
 

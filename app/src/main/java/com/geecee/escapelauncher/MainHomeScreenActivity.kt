@@ -35,7 +35,6 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.geecee.escapelauncher.core.ui.theme.BackgroundColor
 import com.geecee.escapelauncher.ui.views.MainPagerScreen
 import com.geecee.escapelauncher.ui.views.Onboarding
 import com.geecee.escapelauncher.ui.views.Settings
@@ -46,6 +45,8 @@ import com.geecee.escapelauncher.utils.ScreenOffReceiver
 import com.geecee.escapelauncher.utils.getBooleanSetting
 import com.geecee.escapelauncher.feature.screentime.ScreenTimeViewModel
 import com.geecee.escapelauncher.core.data.worker.ClearOldDataWorker
+import com.geecee.escapelauncher.core.theme.BackgroundColor
+import com.geecee.escapelauncher.core.theme.EscapeTheme
 import com.geecee.escapelauncher.utils.messagingInitializer
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
@@ -99,17 +100,14 @@ class MainHomeScreenActivity : ComponentActivity() {
         )
 
         // Setup Splashscreen
-        val splashScreen = installSplashScreen()
+        installSplashScreen()
         super.onCreate(savedInstanceState)
-        splashScreen.setKeepOnScreenCondition {
-            !viewModel.isReady
-        }
 
         // Make full screen
         enableEdgeToEdge()
         AppUtils.configureFullScreenMode(window)
 
-        // Set up the screen time tracking cleanup
+        // Set up the screen time tracking clean-up
         ClearOldDataWorker.scheduleDailyCleanup(this)
 
         // Mark screen time as loaded (now handled by ScreenTimeViewModel)
@@ -117,9 +115,9 @@ class MainHomeScreenActivity : ComponentActivity() {
 
         // Set up the application content
         setContent {
-            AppUtils.SetUpTheme(viewModel = viewModel, content = {
+            EscapeTheme {
                 SetupNavHost(determineStartDestination(LocalContext.current))
-            })
+            }
         }
 
         // Assign window
@@ -135,7 +133,7 @@ class MainHomeScreenActivity : ComponentActivity() {
 
                     Log.i(
                         "INFO",
-                        "Screen turned off with app " + packageName + " open, stopping screen time counting at " + AppUtils.formatScreenTime(
+                        "Screen turned off with app $packageName open, stopping screen time counting at " + AppUtils.formatScreenTime(
                             screenTimeViewModel.getScreenTime(packageName)
                         )
                     )

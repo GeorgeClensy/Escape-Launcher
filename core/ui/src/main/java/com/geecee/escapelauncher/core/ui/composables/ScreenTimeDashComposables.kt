@@ -28,10 +28,10 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.geecee.escapelauncher.core.ui.theme.CardContainerColor
-import com.geecee.escapelauncher.core.ui.theme.escapeGreen
-import com.geecee.escapelauncher.core.ui.theme.escapeRed
-import com.geecee.escapelauncher.core.ui.theme.primaryContentColor
+import com.geecee.escapelauncher.core.theme.CardContainerColor
+import com.geecee.escapelauncher.core.theme.escapeGreen
+import com.geecee.escapelauncher.core.theme.escapeRed
+import com.geecee.escapelauncher.core.theme.primaryContentColor
 
 /**
  * Screen time with an arrow indicating whether it's increased or decreased

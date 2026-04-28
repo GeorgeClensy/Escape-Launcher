@@ -33,8 +33,8 @@ import com.geecee.escapelauncher.core.ui.R
 import com.geecee.escapelauncher.core.ui.composables.LockedAppFolderUI
 import com.geecee.escapelauncher.core.ui.composables.LockedFolderCard
 import com.geecee.escapelauncher.core.ui.composables.SettingsSwitch
-import com.geecee.escapelauncher.core.ui.theme.ContentColor
-import com.geecee.escapelauncher.core.ui.theme.SecondaryCardContainerColor
+import com.geecee.escapelauncher.core.theme.ContentColor
+import com.geecee.escapelauncher.core.theme.SecondaryCardContainerColor
 
 /**
  * Android 15+ Private space UI with apps, settings button and lock button

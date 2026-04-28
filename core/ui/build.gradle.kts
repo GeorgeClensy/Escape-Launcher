@@ -12,4 +12,5 @@ android {
 
 dependencies {
     implementation(libs.androidx.appcompat)
+    implementation(project(":core:theme"))
 }
