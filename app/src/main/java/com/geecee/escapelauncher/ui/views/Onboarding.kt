@@ -67,6 +67,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.geecee.escapelauncher.BuildConfig
+import com.geecee.escapelauncher.GlobalViewModel
 import com.geecee.escapelauncher.HomeScreenModel
 import com.geecee.escapelauncher.MainAppViewModel
 import com.geecee.escapelauncher.R
@@ -94,6 +95,7 @@ fun Onboarding(
     mainAppNavController: NavHostController,
     mainAppViewModel: MainAppViewModel,
     homeScreenModel: HomeScreenModel,
+    globalViewModel: GlobalViewModel,
     activity: Activity
 ) {
     @Suppress("KotlinConstantConditions") val pages =
@@ -145,6 +147,7 @@ fun Onboarding(
                 OnboardingPage("analytics") { onNext, onPrev ->
                     AnalyticsConsentScreen(
                         mainAppViewModel,
+                        globalViewModel,
                         onPrev = {
                             onPrev()
                         },
@@ -614,7 +617,10 @@ fun DefaultLauncherScreen(
 
 @Composable
 fun AnalyticsConsentScreen(
-    mainAppModel: MainAppViewModel, onNext: () -> Unit, onPrev: () -> Unit
+    mainAppModel: MainAppViewModel,
+    globalViewModel: GlobalViewModel,
+    onNext: () -> Unit,
+    onPrev: () -> Unit
 ) {
     val showPolicyDialog = remember { mutableStateOf(false) }
     val scrollState = rememberLazyListState()
@@ -688,24 +694,14 @@ fun AnalyticsConsentScreen(
             NextButton(
                 text = stringResource(R.string.deny), outline = true
             ) {
-                setBooleanSetting(
-                    mainAppModel.getContext(),
-                    mainAppModel.getContext().resources.getString(R.string.Analytics),
-                    false
-                )
-                configureAnalytics(mainAppModel.getContext(), false)
+                globalViewModel.setAllowAnalytics(false)
                 onNext()
             }
 
             Spacer(Modifier.width(15.dp))
 
             NextButton(text = stringResource(R.string.allow)) {
-                setBooleanSetting(
-                    mainAppModel.getContext(),
-                    mainAppModel.getContext().resources.getString(R.string.Analytics),
-                    true
-                )
-                configureAnalytics(mainAppModel.getContext(), true)
+                globalViewModel.setAllowAnalytics(true)
                 onNext()
             }
         }

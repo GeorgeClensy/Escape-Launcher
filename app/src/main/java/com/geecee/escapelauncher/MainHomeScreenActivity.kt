@@ -56,16 +56,15 @@ import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class MainHomeScreenActivity : ComponentActivity() {
-    private val screenTimeViewModel: ScreenTimeViewModel by viewModels()
+    private val globalViewModel: GlobalViewModel by viewModels()
 
+    private val screenTimeViewModel: ScreenTimeViewModel by viewModels()
     private lateinit var screenOffReceiver: ScreenOffReceiver
     private lateinit var packageChangeReceiver: BroadcastReceiver
-
     private val homeScreenModel by viewModels<HomeScreenModel> {
         HomeScreenModelFactory(application, viewModel)
     }
     private val viewModel: MainAppViewModel by viewModels()
-
     private val pushNotificationPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { _ ->
@@ -89,19 +88,16 @@ class MainHomeScreenActivity : ComponentActivity() {
      * Main Entry point
      */
     override fun onCreate(savedInstanceState: Bundle?) {
-        // Setup analytics
-        configureAnalytics(
-            this,
-            getBooleanSetting(
-                this,
-                this.resources.getString(R.string.Analytics),
-                false
-            )
-        )
-
         // Setup Splashscreen
         installSplashScreen()
         super.onCreate(savedInstanceState)
+
+        // Setup analytics
+        lifecycleScope.launch {
+            globalViewModel.allowAnalytics.collect { enabled ->
+                configureAnalytics(this@MainHomeScreenActivity, enabled)
+            }
+        }
 
         // Make full screen
         enableEdgeToEdge()
@@ -343,6 +339,7 @@ class MainHomeScreenActivity : ComponentActivity() {
                         mainAppNavController = navController,
                         mainAppViewModel = viewModel,
                         homeScreenModel = homeScreenModel,
+                        globalViewModel = globalViewModel,
                         activity = this@MainHomeScreenActivity
                     )
                 }

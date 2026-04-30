@@ -319,6 +319,7 @@ object AppUtils {
      */
     fun configureAnalytics(context: Context, enabled: Boolean) {
         analyticsProxy.configureAnalytics(context, enabled)
+        Log.d("Analytics", "Anayitcs are $enabled")
     }
 
     /**

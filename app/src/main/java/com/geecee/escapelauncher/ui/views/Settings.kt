@@ -89,6 +89,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.geecee.escapelauncher.BuildConfig
 import com.geecee.escapelauncher.DevOptionsPageViewModel
+import com.geecee.escapelauncher.GlobalViewModel
 import com.geecee.escapelauncher.HiddenAppsViewModel
 import com.geecee.escapelauncher.HomeScreenModel
 import com.geecee.escapelauncher.MainSettingsPageViewModel
@@ -336,6 +337,7 @@ fun MainSettingsPage(
     activity: Activity,
     homeScreenModel: HomeScreenModel,
     mainSettingsPageViewModel: MainSettingsPageViewModel = hiltViewModel(),
+    globalViewModel: GlobalViewModel = hiltViewModel(),
     weatherViewModel: WeatherViewModel = hiltViewModel(LocalActivity.current as ComponentActivity)
 ) {
     var showWeatherAppPicker by remember { mutableStateOf(false) }
@@ -355,6 +357,7 @@ fun MainSettingsPage(
     val homeHorizontalIndex by mainSettingsPageViewModel.homeAlignment.collectAsState(initial = 1)
     val appsHorizontalIndex by mainSettingsPageViewModel.appsAlignment.collectAsState(initial = 1)
     val homeVerticalIndex by mainSettingsPageViewModel.homeVAlignment.collectAsState(initial = 1)
+    val allowAnalytics by globalViewModel.allowAnalytics.collectAsState(initial = false)
 
     LazyColumn(
         verticalArrangement = Arrangement.Top,
@@ -713,15 +716,12 @@ fun MainSettingsPage(
         if (!BuildConfig.IS_FOSS) {
             item {
                 SettingsSwitch(
-                    label = stringResource(id = R.string.Analytics), checked = getBooleanSetting(
-                        mainAppModel.getContext(), stringResource(R.string.Analytics), true
-                    ), onCheckedChange = {
-                        toggleBooleanSetting(
-                            mainAppModel.getContext(),
-                            it,
-                            mainAppModel.getContext().resources.getString(R.string.Analytics)
-                        )
-                    })
+                    label = stringResource(id = R.string.Analytics),
+                    checked = allowAnalytics,
+                    onCheckedChange = {
+                        globalViewModel.setAllowAnalytics(it)
+                    }
+                )
             }
         }
 

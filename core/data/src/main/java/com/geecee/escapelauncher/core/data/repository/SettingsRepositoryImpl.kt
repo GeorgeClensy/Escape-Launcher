@@ -21,7 +21,6 @@ class SettingsRepositoryImpl @Inject constructor(
         dataStore.edit { preferences -> preferences[PreferencesKeys.HAPTIC_FEEDBACK] = enabld }
     }
 
-    //Private Space
     override val hidePrivateSpace: Flow<Boolean>
         get() = dataStore.data.map { preferences ->
             preferences[PreferencesKeys.HIDE_PRIVATE_SPACE] ?: true
@@ -31,7 +30,6 @@ class SettingsRepositoryImpl @Inject constructor(
         dataStore.edit { preferences -> preferences[PreferencesKeys.HIDE_PRIVATE_SPACE] = enabled }
     }
 
-    //Home Screen
     override val twelveHourClock: Flow<Boolean>
         get() = dataStore.data.map { preferences ->
             preferences[PreferencesKeys.TWELVE_HOUR_CLOCK] ?: false
@@ -167,7 +165,6 @@ class SettingsRepositoryImpl @Inject constructor(
         dataStore.edit { preferences -> preferences[PreferencesKeys.WEATHER_APP_PACKAGE] = value }
     }
 
-    //Apps list
     override val appsAlignment: Flow<String>
         get() = dataStore.data.map { preferences ->
             preferences[PreferencesKeys.APPS_ALIGNMENT] ?: "Center"
@@ -220,5 +217,14 @@ class SettingsRepositoryImpl @Inject constructor(
 
     override suspend fun setFont(value: String) {
         dataStore.edit { preferences -> preferences[PreferencesKeys.FONT] = value }
+    }
+
+    override val allowAnalyitics: Flow<Boolean>
+        get() = dataStore.data.map { preferences ->
+            preferences[PreferencesKeys.ALLOW_ANALYTICS] ?: false
+        }
+
+    override suspend fun setAllowAnalytics(value: Boolean) {
+        dataStore.edit { preferences -> preferences[PreferencesKeys.ALLOW_ANALYTICS] = value }
     }
 }

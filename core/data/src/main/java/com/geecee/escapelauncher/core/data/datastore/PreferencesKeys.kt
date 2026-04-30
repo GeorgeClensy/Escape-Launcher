@@ -6,11 +6,11 @@ import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 
 object PreferencesKeys {
+    val ALLOW_ANALYTICS = booleanPreferencesKey(name = "allow_analytics")
     val HAPTIC_FEEDBACK = booleanPreferencesKey(name = "haptic_feedback")
 
     //Private Space
     val HIDE_PRIVATE_SPACE = booleanPreferencesKey(name = "hidden_private_space")
-
     //Home Screen
     val TWELVE_HOUR_CLOCK = booleanPreferencesKey(name = "twelve_hour_clock")
     val SHOW_CLOCK = booleanPreferencesKey(name = "show_clock")
@@ -23,6 +23,8 @@ object PreferencesKeys {
     val FIRST_TIME_HELP = booleanPreferencesKey(name = "first_time_help")
     val HOME_V_ALIGNMENT = stringPreferencesKey(name = "home_v_alignment")
     val HOME_ALIGNMENT = stringPreferencesKey(name = "home_alignment")
+
+    //Weather
     val WEATHER_APP_PACKAGE = stringPreferencesKey(name = "weather_app_package")
 
     //Apps List
@@ -38,6 +40,5 @@ object PreferencesKeys {
     val DTHEME = intPreferencesKey(name = "dtheme")
     val LTHEME = intPreferencesKey(name = "ltheme")
     val SYNC_THEME = booleanPreferencesKey(name = "sync_theme")
-
     val FONT = stringPreferencesKey(name = "font")
 }
