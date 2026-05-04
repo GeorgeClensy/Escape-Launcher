@@ -36,7 +36,6 @@ import com.geecee.escapelauncher.utils.AppShortcut
 import com.geecee.escapelauncher.utils.AppUtils.resetHome
 import com.geecee.escapelauncher.utils.EscapeAccessibilityService
 import com.geecee.escapelauncher.utils.getAppShortcuts
-import com.geecee.escapelauncher.utils.getBooleanSetting
 import com.geecee.escapelauncher.core.ui.composables.OpenChallenge
 import com.geecee.escapelauncher.utils.startShortcut
 import com.geecee.escapelauncher.feature.screentime.ScreenTimeViewModel
@@ -64,16 +63,12 @@ fun MainPagerScreen(
     screenTimeViewModel: ScreenTimeViewModel = hiltViewModel(LocalActivity.current as ComponentActivity),
     onOpenSettings: () -> Unit
 ) {
+    val hideScreenTimePage by viewModel.hideScreenTimePage.collectAsState(initial = false)
+    val autoOpenAppsInSearch by viewModel.automaticallyOpenAppsInSearch.collectAsState(initial = false)
+    val doubleTapToLock by viewModel.doubleTapToLock.collectAsState(initial = false)
     val focusManager = LocalFocusManager.current
     val keyboardController = LocalSoftwareKeyboardController.current
-
-    val appsListPage = if (getBooleanSetting(
-            context = mainAppModel.getContext(),
-            setting = mainAppModel.getContext().resources.getString(R.string.hideScreenTimePage),
-            defaultValue = false
-        )
-    ) 1 else 2
-
+    val appsListPage = if (hideScreenTimePage) 1 else 2
     val coroutineScope = rememberCoroutineScope()
 
     // Control if the user can go back or not depending upon the page
@@ -93,12 +88,7 @@ fun MainPagerScreen(
             keyboardController?.hide()
         } else {
             // If we are on the apps list page and auto search is enabled, open it
-            if (getBooleanSetting(
-                    mainAppModel.getContext(),
-                    mainAppModel.getContext().getString(R.string.appsListAutoSearch),
-                    false
-                )
-            ) {
+            if (autoOpenAppsInSearch) {
                 homeScreenModel.searchExpanded.value = true
             }
         }
@@ -119,12 +109,7 @@ fun MainPagerScreen(
                 onDoubleClick = {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
                         val context = mainAppModel.getContext()
-                        val doubleTapEnabled = getBooleanSetting(
-                            context,
-                            context.getString(R.string.DoubleTapToLock),
-                            false
-                        )
-                        if (doubleTapEnabled) {
+                        if (doubleTapToLock) {
                             val service = EscapeAccessibilityService.instance
                             if (service != null) {
                                 service.lockScreen()
@@ -140,12 +125,7 @@ fun MainPagerScreen(
                 }
             )
     ) { page ->
-        if (getBooleanSetting(
-                context = mainAppModel.getContext(),
-                setting = mainAppModel.getContext().resources.getString(R.string.hideScreenTimePage),
-                defaultValue = false
-            )
-        ) {
+        if (hideScreenTimePage) {
             when (page) {
                 0 -> HomeScreen(
                     mainAppModel = mainAppModel,

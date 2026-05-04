@@ -20,4 +20,10 @@ class AppsListViewModel @Inject constructor(
             else -> Alignment.End
         }
     }
+
+    val showSearchBox = repository.showSearchBox
+    val searchAutoOpen = repository.searchAutoOpen
+    val bottomSearch = repository.bottomSearch
+    val automaticallyOpenAppsInSearch = repository.automaticallyOpenAppsInSearch
+    val hiddenAppsInSearch = repository.showHiddenAppsInSearch
 }

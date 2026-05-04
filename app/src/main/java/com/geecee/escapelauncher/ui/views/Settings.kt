@@ -125,17 +125,14 @@ import com.geecee.escapelauncher.utils.AppUtils.resetHome
 import com.geecee.escapelauncher.utils.CustomWidgetPicker
 import com.geecee.escapelauncher.utils.EscapeAccessibilityService
 import com.geecee.escapelauncher.utils.WIDGET_HOST_ID
-import com.geecee.escapelauncher.utils.getBooleanSetting
 import com.geecee.escapelauncher.utils.getSavedWidgetId
 import com.geecee.escapelauncher.utils.isDefaultLauncher
 import com.geecee.escapelauncher.utils.isWidgetConfigurable
 import com.geecee.escapelauncher.utils.launchWidgetConfiguration
 import com.geecee.escapelauncher.utils.removeWidget
 import com.geecee.escapelauncher.utils.saveWidgetId
-import com.geecee.escapelauncher.utils.setBooleanSetting
 import com.geecee.escapelauncher.utils.showLauncherSelector
 import com.geecee.escapelauncher.utils.showLauncherSettingsMenu
-import com.geecee.escapelauncher.utils.toggleBooleanSetting
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.system.exitProcess
@@ -359,6 +356,13 @@ fun MainSettingsPage(
     val homeVerticalIndex by mainSettingsPageViewModel.homeVAlignment.collectAsState(initial = 1)
     val allowAnalytics by globalViewModel.allowAnalytics.collectAsState(initial = false)
 
+    val doubleTapToLock by mainSettingsPageViewModel.doubleTapToLock.collectAsState(initial = false)
+    val showSearchBox by mainSettingsPageViewModel.showSearchBox.collectAsState(initial = true)
+    val searchAutoOpen by mainSettingsPageViewModel.searchAutoOpen.collectAsState(initial = false)
+    val bottomSearch by mainSettingsPageViewModel.bottomSearch.collectAsState(initial = false)
+    val automaticallyOpenAppsInSearch by mainSettingsPageViewModel.automaticallyOpenAppsInSearch.collectAsState(initial = false)
+    val hideScreenTimePage by mainSettingsPageViewModel.hideScreenTimePage.collectAsState(initial = false)
+
     LazyColumn(
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.Start,
@@ -492,15 +496,9 @@ fun MainSettingsPage(
             item {
                 SettingsSwitch(
                     label = stringResource(id = R.string.double_tap_to_lock),
-                    checked = getBooleanSetting(
-                        mainAppModel.getContext(), stringResource(R.string.DoubleTapToLock), false
-                    ),
+                    checked = doubleTapToLock,
                     onCheckedChange = {
-                        setBooleanSetting(
-                            mainAppModel.getContext(),
-                            mainAppModel.getContext().resources.getString(R.string.DoubleTapToLock),
-                            it
-                        )
+                        mainSettingsPageViewModel.setDoubleTapToLock(it)
                     },
                     isBottomOfGroup = EscapeAccessibilityService.instance != null
                 )
@@ -582,56 +580,32 @@ fun MainSettingsPage(
 
         item {
             SettingsSwitch(
-                label = stringResource(id = R.string.search_box), checked = getBooleanSetting(
-                    mainAppModel.getContext(), stringResource(R.string.ShowSearchBox), true
-                ), isTopOfGroup = true, onCheckedChange = {
-                    toggleBooleanSetting(
-                        mainAppModel.getContext(),
-                        it,
-                        mainAppModel.getContext().resources.getString(R.string.ShowSearchBox)
-                    )
+                label = stringResource(id = R.string.search_box), checked = showSearchBox, isTopOfGroup = true, onCheckedChange = {
+                    mainSettingsPageViewModel.setShowSearchBox(it)
                 })
         }
 
         item {
             SettingsSwitch(
-                label = stringResource(id = R.string.auto_open), checked = getBooleanSetting(
-                    mainAppModel.getContext(), stringResource(R.string.SearchAutoOpen)
-                ), isBottomOfGroup = false, onCheckedChange = {
-                    toggleBooleanSetting(
-                        mainAppModel.getContext(),
-                        it,
-                        mainAppModel.getContext().resources.getString(R.string.SearchAutoOpen)
-                    )
+                label = stringResource(id = R.string.auto_open), checked = automaticallyOpenAppsInSearch, isBottomOfGroup = false, onCheckedChange = {
+                    mainSettingsPageViewModel.setAutomaticallyOpenAppsInSearch(it)
                 })
         }
 
         item {
             SettingsSwitch(
-                label = stringResource(id = R.string.search_at_bottom), checked = getBooleanSetting(
-                    mainAppModel.getContext(), stringResource(R.string.bottomSearch), false
-                ), isBottomOfGroup = false, onCheckedChange = {
-                    toggleBooleanSetting(
-                        mainAppModel.getContext(),
-                        it,
-                        mainAppModel.getContext().resources.getString(R.string.bottomSearch)
-                    )
+                label = stringResource(id = R.string.search_at_bottom), checked = bottomSearch, isBottomOfGroup = false, onCheckedChange = {
+                    mainSettingsPageViewModel.setBottomSearch(it)
                 })
         }
 
         item {
             SettingsSwitch(
                 label = stringResource(id = R.string.apps_list_auto_search),
-                checked = getBooleanSetting(
-                    mainAppModel.getContext(), stringResource(R.string.appsListAutoSearch), false
-                ),
+                checked = searchAutoOpen,
                 isBottomOfGroup = true,
                 onCheckedChange = {
-                    toggleBooleanSetting(
-                        mainAppModel.getContext(),
-                        it,
-                        mainAppModel.getContext().resources.getString(R.string.appsListAutoSearch)
-                    )
+                    mainSettingsPageViewModel.setSearchAutoOpen(it)
                 })
         }
 
@@ -651,15 +625,9 @@ fun MainSettingsPage(
         item {
             SettingsSwitch(
                 label = stringResource(id = R.string.hide_screen_time_page),
-                checked = getBooleanSetting(
-                    mainAppModel.getContext(), stringResource(R.string.hideScreenTimePage)
-                ),
+                checked = hideScreenTimePage,
                 onCheckedChange = {
-                    toggleBooleanSetting(
-                        mainAppModel.getContext(),
-                        it,
-                        mainAppModel.getContext().resources.getString(R.string.hideScreenTimePage)
-                    )
+                    mainSettingsPageViewModel.setHideScreenTimePage(it)
                 })
         }
 
@@ -1135,6 +1103,7 @@ fun HiddenApps(
     val coroutineScope = rememberCoroutineScope()
     val haptics = LocalHapticFeedback.current
     val hiddenPackageIds by hiddenAppsViewModel.hiddenPackageIds.collectAsState()
+    val showHiddenAppsInSearch by hiddenAppsViewModel.showHiddenAppsInSearch.collectAsState(initial = false)
 
     LazyColumn(
         verticalArrangement = Arrangement.Top,
@@ -1158,17 +1127,9 @@ fun HiddenApps(
         item {
             SettingsSwitch(
                 label = stringResource(R.string.show_hidden_apps_in_search),
-                checked = getBooleanSetting(
-                    mainAppModel.getContext(),
-                    stringResource(R.string.showHiddenAppsInSearch),
-                    false
-                ),
+                checked = showHiddenAppsInSearch,
                 onCheckedChange = {
-                    toggleBooleanSetting(
-                        mainAppModel.getContext(),
-                        it,
-                        mainAppModel.getContext().resources.getString(R.string.showHiddenAppsInSearch)
-                    )
+                    hiddenAppsViewModel.setShowHiddenAppsInSearch(it)
                 },
                 isBottomOfGroup = true
             )
@@ -1305,6 +1266,7 @@ fun DevOptions(
 ) {
     val context = LocalContext.current
     val firstTimeHelp by viewModel.firstTimeHelp.collectAsState(initial = true)
+    val doubleTapToLock by viewModel.doubleTapToLock.collectAsState(initial = false)
 
     LazyColumn(
         verticalArrangement = Arrangement.Top,
@@ -1358,12 +1320,7 @@ fun DevOptions(
                 isBottomOfGroup = true,
                 onClick = {
                     val context = mainAppModel.getContext()
-                    val doubleTapEnabled = getBooleanSetting(
-                        context,
-                        context.getString(R.string.DoubleTapToLock),
-                        false
-                    )
-                    if (doubleTapEnabled) {
+                    if (doubleTapToLock) {
                         val service = EscapeAccessibilityService.instance
                         if (service != null) {
                             service.lockScreen()

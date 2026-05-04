@@ -172,6 +172,48 @@ class MainSettingsPageViewModel @Inject constructor(
             repository.setAppsAlignment(value)
         }
     }
+
+    val doubleTapToLock = repository.doubleTapToLock
+    fun setDoubleTapToLock(value: Boolean) {
+        viewModelScope.launch {
+            repository.setDoubleTapToLock(value)
+        }
+    }
+
+    val showSearchBox = repository.showSearchBox
+    fun setShowSearchBox(value: Boolean) {
+        viewModelScope.launch {
+            repository.setShowSearchBox(value)
+        }
+    }
+
+    val searchAutoOpen = repository.searchAutoOpen
+    fun setSearchAutoOpen(value: Boolean) {
+        viewModelScope.launch {
+            repository.setSearchAutoOpen(value)
+        }
+    }
+
+    val bottomSearch = repository.bottomSearch
+    fun setBottomSearch(value: Boolean) {
+        viewModelScope.launch {
+            repository.setBottomSearch(value)
+        }
+    }
+
+    val automaticallyOpenAppsInSearch = repository.automaticallyOpenAppsInSearch
+    fun setAutomaticallyOpenAppsInSearch(value: Boolean) {
+        viewModelScope.launch {
+            repository.setAutomaticallyOpenAppsInSearch(value)
+        }
+    }
+
+    val hideScreenTimePage = repository.hideScreenTimePage
+    fun setHideScreenTimePage(value: Boolean) {
+        viewModelScope.launch {
+            repository.setHideScreenTimePage(value)
+        }
+    }
 }
 
 
@@ -193,4 +235,6 @@ class DevOptionsPageViewModel @Inject constructor(
             repository.setWeatherAppPackage(value)
         }
     }
+
+    val doubleTapToLock = repository.doubleTapToLock
 }

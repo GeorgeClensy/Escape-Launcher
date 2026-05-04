@@ -51,4 +51,25 @@ interface SettingsRepository {
     suspend fun setFont(value: String)
     val allowAnalyitics: Flow<Boolean>
     suspend fun setAllowAnalytics(value: Boolean)
+
+    val doubleTapToLock: Flow<Boolean>
+    suspend fun setDoubleTapToLock(enabled: Boolean)
+
+    val showSearchBox: Flow<Boolean>
+    suspend fun setShowSearchBox(enabled: Boolean)
+
+    val searchAutoOpen: Flow<Boolean>
+    suspend fun setSearchAutoOpen(enabled: Boolean)
+
+    val bottomSearch: Flow<Boolean>
+    suspend fun setBottomSearch(enabled: Boolean)
+
+    val automaticallyOpenAppsInSearch: Flow<Boolean>
+    suspend fun setAutomaticallyOpenAppsInSearch(enabled: Boolean)
+
+    val hideScreenTimePage: Flow<Boolean>
+    suspend fun setHideScreenTimePage(enabled: Boolean)
+
+    val showHiddenAppsInSearch: Flow<Boolean>
+    suspend fun setShowHiddenAppsInSearch(enabled: Boolean)
 }

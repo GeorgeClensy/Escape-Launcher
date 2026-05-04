@@ -41,4 +41,15 @@ object PreferencesKeys {
     val LTHEME = intPreferencesKey(name = "ltheme")
     val SYNC_THEME = booleanPreferencesKey(name = "sync_theme")
     val FONT = stringPreferencesKey(name = "font")
+
+    //Search
+    val SHOW_SEARCH_BOX = booleanPreferencesKey(name = "show_search_box")
+    val SEARCH_AUTO_OPEN = booleanPreferencesKey(name = "search_auto_open")
+    val BOTTOM_SEARCH = booleanPreferencesKey(name = "bottom_search")
+    val AUTOMATICALLY_OPEN_APPS_IN_SEARCH = booleanPreferencesKey(name = "automatically_open_apps_in_search")
+
+    //Misc
+    val DOUBLE_TAP_TO_LOCK = booleanPreferencesKey(name = "double_tap_to_lock")
+    val HIDE_SCREEN_TIME_PAGE = booleanPreferencesKey(name = "hide_screen_time_page")
+    val SHOW_HIDDEN_APPS_IN_SEARCH = booleanPreferencesKey(name = "show_hidden_apps_in_search")
 }

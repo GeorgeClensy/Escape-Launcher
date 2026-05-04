@@ -227,4 +227,67 @@ class SettingsRepositoryImpl @Inject constructor(
     override suspend fun setAllowAnalytics(value: Boolean) {
         dataStore.edit { preferences -> preferences[PreferencesKeys.ALLOW_ANALYTICS] = value }
     }
+
+    override val doubleTapToLock: Flow<Boolean>
+        get() = dataStore.data.map { preferences ->
+            preferences[PreferencesKeys.DOUBLE_TAP_TO_LOCK] ?: false
+        }
+
+    override suspend fun setDoubleTapToLock(enabled: Boolean) {
+        dataStore.edit { preferences -> preferences[PreferencesKeys.DOUBLE_TAP_TO_LOCK] = enabled }
+    }
+
+    override val showSearchBox: Flow<Boolean>
+        get() = dataStore.data.map { preferences ->
+            preferences[PreferencesKeys.SHOW_SEARCH_BOX] ?: true
+        }
+
+    override suspend fun setShowSearchBox(enabled: Boolean) {
+        dataStore.edit { preferences -> preferences[PreferencesKeys.SHOW_SEARCH_BOX] = enabled }
+    }
+
+    override val searchAutoOpen: Flow<Boolean>
+        get() = dataStore.data.map { preferences ->
+            preferences[PreferencesKeys.SEARCH_AUTO_OPEN] ?: false
+        }
+
+    override suspend fun setSearchAutoOpen(enabled: Boolean) {
+        dataStore.edit { preferences -> preferences[PreferencesKeys.SEARCH_AUTO_OPEN] = enabled }
+    }
+
+    override val bottomSearch: Flow<Boolean>
+        get() = dataStore.data.map { preferences ->
+            preferences[PreferencesKeys.BOTTOM_SEARCH] ?: false
+        }
+
+    override suspend fun setBottomSearch(enabled: Boolean) {
+        dataStore.edit { preferences -> preferences[PreferencesKeys.BOTTOM_SEARCH] = enabled }
+    }
+
+    override val automaticallyOpenAppsInSearch: Flow<Boolean>
+        get() = dataStore.data.map { preferences ->
+            preferences[PreferencesKeys.AUTOMATICALLY_OPEN_APPS_IN_SEARCH] ?: false
+        }
+
+    override suspend fun setAutomaticallyOpenAppsInSearch(enabled: Boolean) {
+        dataStore.edit { preferences -> preferences[PreferencesKeys.AUTOMATICALLY_OPEN_APPS_IN_SEARCH] = enabled }
+    }
+
+    override val hideScreenTimePage: Flow<Boolean>
+        get() = dataStore.data.map { preferences ->
+            preferences[PreferencesKeys.HIDE_SCREEN_TIME_PAGE] ?: false
+        }
+
+    override suspend fun setHideScreenTimePage(enabled: Boolean) {
+        dataStore.edit { preferences -> preferences[PreferencesKeys.HIDE_SCREEN_TIME_PAGE] = enabled }
+    }
+
+    override val showHiddenAppsInSearch: Flow<Boolean>
+        get() = dataStore.data.map { preferences ->
+            preferences[PreferencesKeys.SHOW_HIDDEN_APPS_IN_SEARCH] ?: false
+        }
+
+    override suspend fun setShowHiddenAppsInSearch(enabled: Boolean) {
+        dataStore.edit { preferences -> preferences[PreferencesKeys.SHOW_HIDDEN_APPS_IN_SEARCH] = enabled }
+    }
 }

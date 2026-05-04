@@ -51,7 +51,6 @@ import com.geecee.escapelauncher.privatespace.PrivateSpace
 import com.geecee.escapelauncher.utils.AppUtils
 import com.geecee.escapelauncher.utils.AppUtils.doHapticFeedBack
 import com.geecee.escapelauncher.utils.AppUtils.formatScreenTime
-import com.geecee.escapelauncher.utils.getBooleanSetting
 import com.geecee.escapelauncher.utils.AppUtils.resetHome
 import com.geecee.escapelauncher.feature.screentime.ScreenTimeViewModel
 import com.geecee.escapelauncher.MainAppViewModel as MainAppModel
@@ -63,26 +62,20 @@ import com.geecee.escapelauncher.MainAppViewModel as MainAppModel
 fun AppsList(
     mainAppModel: MainAppModel,
     homeScreenModel: HomeScreenModel,
-    appsViewModel: AppsListViewModel = hiltViewModel(),
+    appsListViewModel: AppsListViewModel = hiltViewModel(),
     hiddenAppsViewModel: HiddenAppsViewModel = hiltViewModel(),
     screenTimeViewModel: ScreenTimeViewModel = hiltViewModel(LocalActivity.current as ComponentActivity)
 ) {
     val haptics = LocalHapticFeedback.current
     val appUsageList by screenTimeViewModel.appUsageList.collectAsState()
-    val showScreenTimeApp by appsViewModel.showScreenTimeApp.collectAsState(initial = false)
-    val appsListAlignment by appsViewModel.appsAlignment.collectAsState(initial = Alignment.CenterHorizontally)
+    val showScreenTimeApp by appsListViewModel.showScreenTimeApp.collectAsState(initial = false)
+    val appsListAlignment by appsListViewModel.appsAlignment.collectAsState(initial = Alignment.CenterHorizontally)
     val hiddenPacakgeIds by hiddenAppsViewModel.hiddenPackageIds.collectAsState()
-
-    val bottomSearch = getBooleanSetting(
-        mainAppModel.getContext(),
-        stringResource(R.string.bottomSearch),
-        false
-    )
-    val showSearch = getBooleanSetting(
-        mainAppModel.getContext(),
-        stringResource(R.string.ShowSearchBox),
-        true
-    )
+    val showSearchBox by appsListViewModel.showSearchBox.collectAsState(initial = true)
+    val bottomSearchBox by appsListViewModel.bottomSearch.collectAsState(initial = false)
+    val showHiddenAppsInSerach by appsListViewModel.hiddenAppsInSearch.collectAsState(initial = false)
+    val autoOpenSearch by appsListViewModel.searchAutoOpen.collectAsState(initial = false)
+    val autoOpenAppInSearch by appsListViewModel.automaticallyOpenAppsInSearch.collectAsState(initial = false)
 
     @Composable
     fun SearchBox() {
@@ -98,28 +91,15 @@ fun AppsList(
 
                 if (query.isBlank()) return@AnimatedPillSearchBar
 
-                val showHiddenInSearch = getBooleanSetting(
-                    mainAppModel.getContext(),
-                    mainAppModel.getContext().getString(R.string.showHiddenAppsInSearch),
-                    false
-                )
-
                 // Get results synchronously for auto-open logic to avoid race conditions with ViewModel update
                 val matchedApps = homeScreenModel.installedApps.filter { app ->
                     val isHidden = hiddenPacakgeIds.contains(app.packageName)
                     val matchesQuery = AppUtils.fuzzyMatch(app.displayName, query)
-                    matchesQuery && (!isHidden || showHiddenInSearch)
+                    matchesQuery && (!isHidden || showHiddenAppsInSerach)
                 }
                 val sortedResults = AppUtils.sortAppsByRelevance(matchedApps, query)
 
-                // If autoOpen is enabled then open the app like you would normally
-                val autoOpen = getBooleanSetting(
-                    mainAppModel.getContext(),
-                    mainAppModel.getContext().resources.getString(R.string.SearchAutoOpen),
-                    false
-                )
-
-                if (autoOpen && sortedResults.size == 1) {
+                if (autoOpenAppInSearch && sortedResults.size == 1) {
                     val appInfo = sortedResults.first()
                     homeScreenModel.openApp(
                         app = appInfo,
@@ -129,16 +109,10 @@ fun AppsList(
                 }
             },
             onSearchDone = { query: String ->
-                val showHiddenInSearch = getBooleanSetting(
-                    mainAppModel.getContext(),
-                    mainAppModel.getContext().getString(R.string.showHiddenAppsInSearch),
-                    false
-                )
-
                 val matchedApps = homeScreenModel.installedApps.filter { app ->
                     val isHidden = hiddenPacakgeIds.contains(app.packageName)
                     val matchesQuery = AppUtils.fuzzyMatch(app.displayName, query)
-                    matchesQuery && (!isHidden || showHiddenInSearch)
+                    matchesQuery && (!isHidden || showHiddenAppsInSerach)
                 }
                 val sortedResults = AppUtils.sortAppsByRelevance(matchedApps, query)
 
@@ -153,11 +127,7 @@ fun AppsList(
             },
             modifier = Modifier,
             initialText = homeScreenModel.searchText.value,
-            autoFocus = getBooleanSetting(
-                mainAppModel.getContext(),
-                stringResource(R.string.appsListAutoSearch),
-                false
-            )
+            autoFocus = autoOpenSearch
         )
     }
 
@@ -180,12 +150,7 @@ fun AppsList(
 
             // Search box
             item {
-                if (getBooleanSetting(
-                        mainAppModel.getContext(),
-                        stringResource(R.string.ShowSearchBox),
-                        true
-                    ) && !bottomSearch
-                ) {
+                if (showSearchBox && !bottomSearchBox) {
                     Spacer(modifier = Modifier.height(15.dp))
 
                     SearchBox()
@@ -316,8 +281,7 @@ fun AppsList(
                 .fillMaxWidth(),
             horizontalAlignment = appsListAlignment
         ) {
-            if (showSearch && bottomSearch
-            ) {
+            if (showSearchBox && bottomSearchBox) {
                 Spacer(modifier = Modifier.height(15.dp))
 
                 SearchBox()
