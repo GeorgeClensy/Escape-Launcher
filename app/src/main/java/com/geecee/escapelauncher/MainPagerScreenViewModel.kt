@@ -22,6 +22,6 @@ class MainPagerScreenViewModel @Inject constructor(
     }
 
     val hideScreenTimePage = repository.hideScreenTimePage
-    val automaticallyOpenAppsInSearch = repository.automaticallyOpenAppsInSearch
+    val automaticallyOpenSearch = repository.searchAutoOpen
     val doubleTapToLock = repository.doubleTapToLock
 }

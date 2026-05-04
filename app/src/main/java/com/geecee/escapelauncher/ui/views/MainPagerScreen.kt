@@ -64,7 +64,7 @@ fun MainPagerScreen(
     onOpenSettings: () -> Unit
 ) {
     val hideScreenTimePage by viewModel.hideScreenTimePage.collectAsState(initial = false)
-    val autoOpenAppsInSearch by viewModel.automaticallyOpenAppsInSearch.collectAsState(initial = false)
+    val automaticallyOpenSearch by viewModel.automaticallyOpenSearch.collectAsState(initial = false)
     val doubleTapToLock by viewModel.doubleTapToLock.collectAsState(initial = false)
     val focusManager = LocalFocusManager.current
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -87,8 +87,7 @@ fun MainPagerScreen(
             focusManager.clearFocus()
             keyboardController?.hide()
         } else {
-            // If we are on the apps list page and auto search is enabled, open it
-            if (autoOpenAppsInSearch) {
+            if (automaticallyOpenSearch) {
                 homeScreenModel.searchExpanded.value = true
             }
         }

@@ -99,7 +99,7 @@ fun AppsList(
                 }
                 val sortedResults = AppUtils.sortAppsByRelevance(matchedApps, query)
 
-                if (autoOpenAppInSearch && sortedResults.size == 1) {
+                if (autoOpenAppInSearch && query.length >= 2 && sortedResults.size == 1) {
                     val appInfo = sortedResults.first()
                     homeScreenModel.openApp(
                         app = appInfo,
