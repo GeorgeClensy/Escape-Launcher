@@ -71,6 +71,7 @@ import com.geecee.escapelauncher.GlobalViewModel
 import com.geecee.escapelauncher.HomeScreenModel
 import com.geecee.escapelauncher.MainAppViewModel
 import com.geecee.escapelauncher.R
+import com.geecee.escapelauncher.core.common.configureFullScreenMode
 import com.geecee.escapelauncher.core.ui.composables.AutoResizingText
 import com.geecee.escapelauncher.core.ui.composables.BulkManager
 import com.geecee.escapelauncher.core.ui.composables.SettingsSpacer
@@ -282,7 +283,7 @@ fun Onboarding(
                         )
 
                         mainAppViewModel.getWindow()?.let {
-                            AppUtils.configureFullScreenMode(it)
+                            configureFullScreenMode(it)
                         }
                     }
                 },
