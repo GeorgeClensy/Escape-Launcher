@@ -48,6 +48,7 @@ import com.geecee.escapelauncher.core.data.worker.ClearOldDataWorker
 import com.geecee.escapelauncher.core.theme.BackgroundColor
 import com.geecee.escapelauncher.core.theme.EscapeTheme
 import com.geecee.escapelauncher.utils.messagingInitializer
+import com.geecee.escapelauncher.core.common.configureFullScreenMode
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -101,7 +102,7 @@ class MainHomeScreenActivity : ComponentActivity() {
 
         // Make full screen
         enableEdgeToEdge()
-        AppUtils.configureFullScreenMode(window)
+        configureFullScreenMode(window)
 
         // Set up the screen time tracking clean-up
         ClearOldDataWorker.scheduleDailyCleanup(this)
@@ -307,7 +308,7 @@ class MainHomeScreenActivity : ComponentActivity() {
                         homeScreenModel
                     ) { navController.navigate("settings") }
 
-                    AppUtils.configureFullScreenMode(window)
+                    configureFullScreenMode(window)
                 }
                 composable(
                     "settings",
@@ -327,7 +328,7 @@ class MainHomeScreenActivity : ComponentActivity() {
                         this@MainHomeScreenActivity,
                     )
 
-                    AppUtils.configureFullScreenMode(window)
+                    configureFullScreenMode(window)
                 }
                 composable(
                     "onboarding",

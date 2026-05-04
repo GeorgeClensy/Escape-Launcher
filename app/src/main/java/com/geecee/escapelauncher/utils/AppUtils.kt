@@ -11,7 +11,6 @@ import android.content.pm.LauncherApps
 import android.content.pm.PackageManager
 import android.graphics.Paint
 import android.graphics.Rect
-import android.os.Build
 import android.os.Process.myUserHandle
 import android.util.Log
 import android.view.Window
@@ -381,22 +380,7 @@ object AppUtils {
         }
     }
 
-    /**
-     * Puts the app into full screen
-     */
-    @Suppress("DEPRECATION")
-    fun configureFullScreenMode(window: Window) {
-        WindowCompat.setDecorFitsSystemWindows(window, false)
-        val controller = WindowInsetsControllerCompat(window, window.decorView)
-        controller.show(WindowInsetsCompat.Type.navigationBars()) // Show navigation bars
-        controller.hide(WindowInsetsCompat.Type.statusBars()) // hide status bar only
-        controller.systemBarsBehavior =
-            WindowInsetsControllerCompat.BEHAVIOR_DEFAULT
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            window.setNavigationBarContrastEnforced(false)
-        }
-    }
 
     fun configureOnboardingFullScreen(window: Window) {
         WindowCompat.setDecorFitsSystemWindows(window, false)
