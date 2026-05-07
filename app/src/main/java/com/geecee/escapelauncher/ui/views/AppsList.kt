@@ -76,6 +76,7 @@ fun AppsList(
     val showHiddenAppsInSerach by appsListViewModel.hiddenAppsInSearch.collectAsState(initial = false)
     val autoOpenSearch by appsListViewModel.searchAutoOpen.collectAsState(initial = false)
     val autoOpenAppInSearch by appsListViewModel.automaticallyOpenAppsInSearch.collectAsState(initial = false)
+    val apps by appsListViewModel.apps.collectAsState()
 
     @Composable
     fun SearchBox() {
@@ -160,9 +161,8 @@ fun AppsList(
             }
 
             // Apps
-            items(homeScreenModel.filteredApps, key = { app -> app.packageName })
+            items(apps, key = { app -> app.packageName })
             { app ->
-
                 val screenTime = remember(appUsageList) {
                     screenTimeViewModel.getScreenTime(app.packageName)
                 }
