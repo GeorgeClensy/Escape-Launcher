@@ -145,28 +145,6 @@ class MainHomeScreenActivity : ComponentActivity() {
         val filter = IntentFilter(Intent.ACTION_SCREEN_OFF)
         registerReceiver(screenOffReceiver, filter)
 
-        // Package change receiver
-        packageChangeReceiver = object : BroadcastReceiver() {
-            override fun onReceive(context: Context, intent: Intent) {
-                when (intent.action) {
-                    Intent.ACTION_PACKAGE_ADDED,
-                    Intent.ACTION_PACKAGE_REMOVED,
-                    Intent.ACTION_PACKAGE_REPLACED -> {
-                        Log.i("INFO", "Package changed: ${intent.action}")
-                        lifecycleScope.launch(Dispatchers.Default) {
-                            homeScreenModel.loadApps()
-                        }
-                    }
-                }
-            }
-        }
-        val packageFilter = IntentFilter().apply {
-            addAction(Intent.ACTION_PACKAGE_ADDED)
-            addAction(Intent.ACTION_PACKAGE_REMOVED)
-            addAction(Intent.ACTION_PACKAGE_REPLACED)
-            addDataScheme("package")
-        }
-        registerReceiver(packageChangeReceiver, packageFilter)
 
         // Subscribe to notifications via flavor-specific initializer
         messagingInitializer.initialize(this)

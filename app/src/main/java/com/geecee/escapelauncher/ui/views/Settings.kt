@@ -160,6 +160,7 @@ fun Settings(
     hiddenAppsViewModel: HiddenAppsViewModel = hiltViewModel(),
     openChallengeViewModel: OpenChallengeViewModel = hiltViewModel()
 ) {
+    val installedApps by settingsViewModel.installedApps.collectAsState()
     val showPolicyDialog = remember { mutableStateOf(false) }
 
     Box(
@@ -180,8 +181,7 @@ fun Settings(
                     { showPolicyDialog.value = true },
                     navController,
                     mainAppModel,
-                    activity,
-                    homeScreenModel
+                    activity
                 )
             }
             composable(
@@ -203,7 +203,7 @@ fun Settings(
                 val openChallegeAppIds by openChallengeViewModel.challengeAppIds.collectAsState()
 
                 BulkManager(
-                    items = homeScreenModel.installedApps,
+                    items = installedApps,
                     id = { it.packageName },
                     label = { it.displayName },
                     selectedIdsOverride = openChallegeAppIds,
@@ -250,7 +250,7 @@ fun Settings(
                 val hiddenPackageIds by hiddenAppsViewModel.hiddenPackageIds.collectAsState()
 
                 BulkManager(
-                    items = homeScreenModel.installedApps,
+                    items = installedApps,
                     id = { it.packageName },
                     label = { it.displayName },
                     selectedIdsOverride = hiddenPackageIds,
@@ -270,7 +270,7 @@ fun Settings(
                 enterTransition = { fadeIn(tween(300)) },
                 exitTransition = { fadeOut(tween(300)) }) {
                 BulkManager(
-                    items = homeScreenModel.installedApps,
+                    items = installedApps,
                     id = { it.packageName },
                     label = { it.displayName },
                     preSelectedItems = homeScreenModel.favoriteApps,
@@ -332,11 +332,12 @@ fun MainSettingsPage(
     navController: NavController,
     mainAppModel: MainAppModel,
     activity: Activity,
-    homeScreenModel: HomeScreenModel,
     mainSettingsPageViewModel: MainSettingsPageViewModel = hiltViewModel(),
     globalViewModel: GlobalViewModel = hiltViewModel(),
     weatherViewModel: WeatherViewModel = hiltViewModel(LocalActivity.current as ComponentActivity)
 ) {
+    val installedApps by mainSettingsPageViewModel.installedApps.collectAsState()
+
     var showWeatherAppPicker by remember { mutableStateOf(false) }
     val view = LocalView.current
 
@@ -738,7 +739,7 @@ fun MainSettingsPage(
 
     if (showWeatherAppPicker) {
         WeatherAppPicker(
-            apps = homeScreenModel.installedApps,
+            apps = installedApps,
             onAppSelected = { app ->
                 mainSettingsPageViewModel.setWeatherAppPackage(app.packageName)
                 showWeatherAppPicker = false
@@ -1100,6 +1101,7 @@ fun HiddenApps(
     goToManageHiddenApps: () -> Unit,
     goBack: () -> Unit
 ) {
+    val installedApps by hiddenAppsViewModel.installedApps.collectAsState()
     val coroutineScope = rememberCoroutineScope()
     val haptics = LocalHapticFeedback.current
     val hiddenPackageIds by hiddenAppsViewModel.hiddenPackageIds.collectAsState()
@@ -1157,7 +1159,7 @@ fun HiddenApps(
                     ),
                     onClick = {
                         val app =
-                            homeScreenModel.installedApps.find { it.packageName == appPackageName }
+                            installedApps.find { it.packageName == appPackageName }
                                 ?: AppUtils.getInstalledAppFromPackageName(
                                     mainAppModel.getContext(),
                                     appPackageName

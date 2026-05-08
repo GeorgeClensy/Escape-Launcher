@@ -2,8 +2,6 @@ package com.geecee.escapelauncher
 
 import android.app.Application
 import android.content.ComponentName
-import android.content.Context
-import android.util.Log
 import android.view.Window
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
@@ -13,15 +11,16 @@ import androidx.compose.foundation.pager.PagerState
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.geecee.escapelauncher.utils.AppUtils
-import com.geecee.escapelauncher.core.model.InstalledApp
+import com.geecee.escapelauncher.core.data.repository.AppsRepository
 import com.geecee.escapelauncher.core.data.repository.ModifiedAppsRepository
+import com.geecee.escapelauncher.core.model.InstalledApp
+import com.geecee.escapelauncher.utils.AppUtils
 import com.geecee.escapelauncher.utils.getBooleanSetting
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
@@ -29,11 +28,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.text.Normalizer
 
 /**
  * Home Screen View Model - Used for holding UI state for the home screen pages
@@ -49,65 +46,8 @@ class HomeScreenModel(application: Application, val mainAppViewModel: MainAppVie
     var showOpenChallenge = mutableStateOf(false)
     var showBottomSheet = mutableStateOf(false)
 
-    var searchText = mutableStateOf("")
-    var searchExpanded = mutableStateOf(false)
-
     val coroutineScope = viewModelScope
     val interactionSource = MutableInteractionSource()
-
-    val installedApps = mutableStateListOf<InstalledApp>()
-
-    val filteredApps = mutableStateListOf<InstalledApp>()
-
-    fun updateFilteredApps() {
-        // Take a snapshot of the list and other state on the main thread to avoid ConcurrentModificationException
-        // when iterating on Dispatchers.Default while the original list is being modified.
-        val appsSnapshot = installedApps.toList()
-        val query = searchText.value.trim()
-        val context = mainAppViewModel.getContext()
-        val showHiddenInSearch = getBooleanSetting(
-            context,
-            context.resources.getString(R.string.showHiddenAppsInSearch),
-            false
-        )
-
-        coroutineScope.launch(Dispatchers.Default) {
-            val hiddenApps = mainAppViewModel.modifiedAppsRepository.getHiddenPackageIds().toSet()
-
-            val apps = appsSnapshot.filter {
-                it.packageName != context.packageName
-            }
-
-            val filtered = if (query.isBlank()) {
-                apps.filter { !hiddenApps.contains(it.packageName) }
-            } else {
-                val regexUnaccentPattern = Regex("\\p{M}+")
-                apps.filter { app ->
-                    val isHidden = hiddenApps.contains(app.packageName)
-                    val matchesQuery = AppUtils.fuzzyMatch(app.displayName, query)
-                    matchesQuery && (!isHidden || showHiddenInSearch)
-                }.sortedWith(compareBy<InstalledApp> { app ->
-                    val normalizedQuery = Normalizer.normalize(query, Normalizer.Form.NFD)
-                        .replace(regexUnaccentPattern, "")
-                        .lowercase()
-
-                    val normalizedName = Normalizer.normalize(app.displayName, Normalizer.Form.NFD)
-                        .replace(regexUnaccentPattern, "")
-                        .lowercase()
-
-                    when {
-                        normalizedName.startsWith(normalizedQuery) -> 0
-                        normalizedName.contains(normalizedQuery) -> 1
-                        else -> 2
-                    }
-                }.thenBy { it.displayName.lowercase() })
-            }
-            withContext(Dispatchers.Main) {
-                filteredApps.clear()
-                filteredApps.addAll(filtered)
-            }
-        }
-    }
 
     val favoriteApps = mutableStateListOf<InstalledApp>()
 
@@ -173,29 +113,15 @@ class HomeScreenModel(application: Application, val mainAppViewModel: MainAppVie
     var showWorkApps = mutableStateOf(false)
 
     init {
-        loadApps()
         coroutineScope.launch {
-            mainAppViewModel.modifiedAppsRepository.getHiddenPackageIdsFlow().collect {
-                updateFilteredApps()
-            }
-        }
-        coroutineScope.launch {
-            androidx.compose.runtime.snapshotFlow {
-                searchText.value
-            }.collect {
-                updateFilteredApps()
-            }
-        }
-        coroutineScope.launch {
-            // Wait for apps to be loaded to resolve package names to InstalledApp objects
-            androidx.compose.runtime.snapshotFlow { mainAppViewModel.isAppsLoaded.value }
-                .filter { it }
-                .first()
-
-            mainAppViewModel.modifiedAppsRepository.getFavouriteAppsInOrderFlow().collect { entities ->
-                val newFavoriteApps = entities.mapNotNull { entity ->
-                    installedApps.find { it.packageName == entity.packageId }
+            combine(
+                mainAppViewModel.appsRepository.mainUserApps,
+                mainAppViewModel.modifiedAppsRepository.getFavouriteAppsInOrderFlow()
+            ) { apps, entities ->
+                entities.mapNotNull { entity ->
+                    apps.find { it.packageName == entity.packageId }
                 }
+            }.collect { newFavoriteApps ->
                 withContext(Dispatchers.Main) {
                     favoriteApps.clear()
                     favoriteApps.addAll(newFavoriteApps)
@@ -203,27 +129,14 @@ class HomeScreenModel(application: Application, val mainAppViewModel: MainAppVie
                 }
             }
         }
-    }
 
-    fun loadApps() {
-        Log.d("Loading", "LoadApps started")
+        // Keep isAppsLoaded in sync with repository
         coroutineScope.launch {
-            suspendLoadApps()
-        }
-    }
-
-    private suspend fun suspendLoadApps() {
-        Log.d("Loading", "SuspendLoadApps started")
-        val apps = withContext(Dispatchers.IO) {
-            AppUtils.getAllInstalledApps(mainAppViewModel.getContext()).sortedBy {
-                it.displayName.lowercase()
+            mainAppViewModel.appsRepository.installedApps.collect {
+                if (it.isNotEmpty()) {
+                    mainAppViewModel.isAppsLoaded.value = true
+                }
             }
-        }
-        withContext(Dispatchers.Main) {
-            installedApps.clear()
-            installedApps.addAll(apps)
-            updateFilteredApps()
-            mainAppViewModel.isAppsLoaded.value = true
         }
     }
 
@@ -290,9 +203,10 @@ class HomeScreenModelFactory(
 @HiltViewModel
 class MainAppViewModel @Inject constructor(
     application: Application,
-    val modifiedAppsRepository: ModifiedAppsRepository
+    val modifiedAppsRepository: ModifiedAppsRepository,
+    val appsRepository: AppsRepository
 ) : AndroidViewModel(application) {
-    private val appContext: Context = application.applicationContext // The app context
+    private val appContext: android.content.Context = application.applicationContext // The app context
 
     private val _navigateHomeEvent = MutableSharedFlow<Unit>(
         replay = 0,
@@ -307,7 +221,7 @@ class MainAppViewModel @Inject constructor(
         }
     }
 
-    fun getContext(): Context = appContext // Returns the context
+    fun getContext(): android.content.Context = appContext // Returns the context
 
     private var window: Window? = null
 

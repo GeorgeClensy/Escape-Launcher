@@ -1,6 +1,8 @@
 package com.geecee.escapelauncher.ui.views
 
 import android.os.Build
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.LocalActivity
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -17,6 +19,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -24,12 +28,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.LocalActivity
-import androidx.compose.runtime.collectAsState
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.geecee.escapelauncher.AppsListViewModel
-import com.geecee.escapelauncher.HiddenAppsViewModel
 import com.geecee.escapelauncher.HomeScreenModel
 import com.geecee.escapelauncher.R
 import com.geecee.escapelauncher.core.common.doesPrivateSpaceExist
@@ -37,22 +37,21 @@ import com.geecee.escapelauncher.core.common.doesWorkProfileExist
 import com.geecee.escapelauncher.core.common.isDefaultLauncher
 import com.geecee.escapelauncher.core.common.openPrivateSpaceApp
 import com.geecee.escapelauncher.core.common.openWorkApp
+import com.geecee.escapelauncher.core.theme.transparentHalf
 import com.geecee.escapelauncher.core.ui.composables.AnimatedPillSearchBar
 import com.geecee.escapelauncher.core.ui.composables.AppsListHeader
 import com.geecee.escapelauncher.core.ui.composables.HomeScreenItem
 import com.geecee.escapelauncher.core.ui.composables.ListGradient
 import com.geecee.escapelauncher.core.ui.composables.SettingsSpacer
-import com.geecee.escapelauncher.core.theme.transparentHalf
+import com.geecee.escapelauncher.feature.screentime.ScreenTimeViewModel
 import com.geecee.escapelauncher.feature.securefolder.SecureFolderButton
 import com.geecee.escapelauncher.feature.securefolder.canUseSecureFolder
 import com.geecee.escapelauncher.feature.workapps.WorkApps
 import com.geecee.escapelauncher.feature.workapps.WorkAppsFab
 import com.geecee.escapelauncher.privatespace.PrivateSpace
-import com.geecee.escapelauncher.utils.AppUtils
 import com.geecee.escapelauncher.utils.AppUtils.doHapticFeedBack
 import com.geecee.escapelauncher.utils.AppUtils.formatScreenTime
 import com.geecee.escapelauncher.utils.AppUtils.resetHome
-import com.geecee.escapelauncher.feature.screentime.ScreenTimeViewModel
 import com.geecee.escapelauncher.MainAppViewModel as MainAppModel
 
 /**
@@ -63,73 +62,29 @@ fun AppsList(
     mainAppModel: MainAppModel,
     homeScreenModel: HomeScreenModel,
     appsListViewModel: AppsListViewModel = hiltViewModel(),
-    hiddenAppsViewModel: HiddenAppsViewModel = hiltViewModel(),
-    screenTimeViewModel: ScreenTimeViewModel = hiltViewModel(LocalActivity.current as ComponentActivity)
+    screenTimeViewModel: ScreenTimeViewModel = hiltViewModel(LocalActivity.current as ComponentActivity),
+    isBeingShown: Boolean
 ) {
     val haptics = LocalHapticFeedback.current
     val appUsageList by screenTimeViewModel.appUsageList.collectAsState()
     val showScreenTimeApp by appsListViewModel.showScreenTimeApp.collectAsState(initial = false)
     val appsListAlignment by appsListViewModel.appsAlignment.collectAsState(initial = Alignment.CenterHorizontally)
-    val hiddenPacakgeIds by hiddenAppsViewModel.hiddenPackageIds.collectAsState()
     val showSearchBox by appsListViewModel.showSearchBox.collectAsState(initial = true)
     val bottomSearchBox by appsListViewModel.bottomSearch.collectAsState(initial = false)
-    val showHiddenAppsInSerach by appsListViewModel.hiddenAppsInSearch.collectAsState(initial = false)
     val autoOpenSearch by appsListViewModel.searchAutoOpen.collectAsState(initial = false)
-    val autoOpenAppInSearch by appsListViewModel.automaticallyOpenAppsInSearch.collectAsState(initial = false)
+    val autoOpenAppInSearch by appsListViewModel.automaticallyOpenAppsInSearch.collectAsState(
+        initial = false
+    )
     val apps by appsListViewModel.apps.collectAsState()
+    val searchText by appsListViewModel.searchText.collectAsState()
+    val searchExpanded by appsListViewModel.searchExpanded.collectAsState()
 
-    @Composable
-    fun SearchBox() {
-        AnimatedPillSearchBar(
-            closedText = stringResource(R.string.search),
-            isExpanded = homeScreenModel.searchExpanded.value,
-            onExpandedChange = { it: Boolean ->
-                homeScreenModel.searchExpanded.value = it
-                homeScreenModel.searchText.value = ""
-            },
-            onSearchTextChanged = { query: String ->
-                homeScreenModel.searchText.value = query
-
-                if (query.isBlank()) return@AnimatedPillSearchBar
-
-                // Get results synchronously for auto-open logic to avoid race conditions with ViewModel update
-                val matchedApps = homeScreenModel.installedApps.filter { app ->
-                    val isHidden = hiddenPacakgeIds.contains(app.packageName)
-                    val matchesQuery = AppUtils.fuzzyMatch(app.displayName, query)
-                    matchesQuery && (!isHidden || showHiddenAppsInSerach)
-                }
-                val sortedResults = AppUtils.sortAppsByRelevance(matchedApps, query)
-
-                if (autoOpenAppInSearch && query.length >= 2 && sortedResults.size == 1) {
-                    val appInfo = sortedResults.first()
-                    homeScreenModel.openApp(
-                        app = appInfo,
-                        overrideChallenge = false,
-                        onAppOpened = { screenTimeViewModel.onAppOpened(it) }
-                    )
-                }
-            },
-            onSearchDone = { query: String ->
-                val matchedApps = homeScreenModel.installedApps.filter { app ->
-                    val isHidden = hiddenPacakgeIds.contains(app.packageName)
-                    val matchesQuery = AppUtils.fuzzyMatch(app.displayName, query)
-                    matchesQuery && (!isHidden || showHiddenAppsInSerach)
-                }
-                val sortedResults = AppUtils.sortAppsByRelevance(matchedApps, query)
-
-                if (sortedResults.isNotEmpty()) {
-                    val firstAppInfo = sortedResults.first()
-                    homeScreenModel.openApp(
-                        app = firstAppInfo,
-                        overrideChallenge = false,
-                        onAppOpened = { screenTimeViewModel.onAppOpened(it) }
-                    )
-                }
-            },
-            modifier = Modifier,
-            initialText = homeScreenModel.searchText.value,
-            autoFocus = autoOpenSearch
-        )
+    LaunchedEffect(isBeingShown) {
+        if (!isBeingShown) {
+            appsListViewModel.onSearchExpandedChanged(false)
+        } else if (autoOpenSearch) {
+            appsListViewModel.onSearchExpandedChanged(true)
+        }
     }
 
     Box(
@@ -154,7 +109,40 @@ fun AppsList(
                 if (showSearchBox && !bottomSearchBox) {
                     Spacer(modifier = Modifier.height(15.dp))
 
-                    SearchBox()
+                    AnimatedPillSearchBar(
+                        closedText = stringResource(R.string.search),
+                        searchText = searchText,
+                        isExpanded = searchExpanded,
+                        autoFocus = autoOpenSearch,
+                        onExpandedChange = {
+                            appsListViewModel.onSearchExpandedChanged(it)
+                            doHapticFeedBack(haptics)
+                        },
+                        onSearchTextChanged = { query ->
+                            appsListViewModel.onSearchTextChanged(query)
+                            if (autoOpenAppInSearch && query.length >= 2 && apps.size == 1) {
+                                homeScreenModel.openApp(
+                                    app = apps.first(),
+                                    overrideChallenge = false,
+                                    onAppOpened = { screenTimeViewModel.onAppOpened(it) }
+                                )
+                                appsListViewModel.onSearchExpandedChanged(false)
+                            }
+                        },
+                        onSearchDone = { text, keboardController ->
+                            if (apps.isNotEmpty()) {
+                                keboardController?.hide()
+                                homeScreenModel.openApp(
+                                    app = apps.first(),
+                                    overrideChallenge = false,
+                                    onAppOpened = { screenTimeViewModel.onAppOpened(text) }
+                                )
+                                appsListViewModel.onSearchExpandedChanged(false)
+                            } else {
+                                doHapticFeedBack(haptics)
+                            }
+                        }
+                    )
 
                     Spacer(modifier = Modifier.height(15.dp))
                 }
@@ -176,6 +164,8 @@ fun AppsList(
                             overrideChallenge = false,
                             onAppOpened = { screenTimeViewModel.onAppOpened(it) }
                         )
+                        appsListViewModel.onSearchExpandedChanged(false)
+                        doHapticFeedBack(haptics)
                     },
                     onAppLongClick = {
                         homeScreenModel.showBottomSheet.value = true
@@ -284,7 +274,40 @@ fun AppsList(
             if (showSearchBox && bottomSearchBox) {
                 Spacer(modifier = Modifier.height(15.dp))
 
-                SearchBox()
+                AnimatedPillSearchBar(
+                    closedText = stringResource(R.string.search),
+                    searchText = searchText,
+                    isExpanded = searchExpanded,
+                    autoFocus = autoOpenSearch,
+                    onExpandedChange = {
+                        appsListViewModel.onSearchExpandedChanged(it)
+                        doHapticFeedBack(haptics)
+                    },
+                    onSearchTextChanged = { query ->
+                        appsListViewModel.onSearchTextChanged(query)
+                        if (autoOpenAppInSearch && query.length >= 2 && apps.size == 1) {
+                            homeScreenModel.openApp(
+                                app = apps.first(),
+                                overrideChallenge = false,
+                                onAppOpened = { screenTimeViewModel.onAppOpened(it) }
+                            )
+                            appsListViewModel.onSearchExpandedChanged(false)
+                        }
+                    },
+                    onSearchDone = { text, keboardController ->
+                        if (apps.isNotEmpty()) {
+                            keboardController?.hide()
+                            homeScreenModel.openApp(
+                                app = apps.first(),
+                                overrideChallenge = false,
+                                onAppOpened = { screenTimeViewModel.onAppOpened(text) }
+                            )
+                            appsListViewModel.onSearchExpandedChanged(false)
+                        } else {
+                            doHapticFeedBack(haptics)
+                        }
+                    }
+                )
 
                 SettingsSpacer()
             }

@@ -2,6 +2,7 @@ package com.geecee.escapelauncher
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.geecee.escapelauncher.core.data.repository.AppsRepository
 import com.geecee.escapelauncher.core.data.repository.ModifiedAppsRepository
 import com.geecee.escapelauncher.core.domain.repository.SettingsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -15,7 +16,8 @@ import kotlinx.coroutines.launch
 @HiltViewModel
 class HiddenAppsViewModel @Inject constructor(
     private val modifiedAppsRepository: ModifiedAppsRepository,
-    private val settingsRepository: SettingsRepository
+    private val settingsRepository: SettingsRepository,
+    appsRepository: AppsRepository
 ) : ViewModel() {
     val hiddenPackageIds: StateFlow<Set<String>> = modifiedAppsRepository.getHiddenPackageIdsFlow()
         .map { it.toSet() }
@@ -43,4 +45,6 @@ class HiddenAppsViewModel @Inject constructor(
             modifiedAppsRepository.setHidden(packageId, false)
         }
     }
+
+    val installedApps = appsRepository.mainUserApps
 }

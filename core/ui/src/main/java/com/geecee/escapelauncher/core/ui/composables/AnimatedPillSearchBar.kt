@@ -31,6 +31,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.platform.SoftwareKeyboardController
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
@@ -43,15 +44,22 @@ import com.geecee.escapelauncher.core.theme.primaryContentColor
 @Composable
 fun AnimatedPillSearchBar(
     closedText: String,
+    searchText: String,
     isExpanded: Boolean,
     onExpandedChange: (Boolean) -> Unit,
     onSearchTextChanged: (String) -> Unit,
-    onSearchDone: (String) -> Unit,
+    onSearchDone: (String, SoftwareKeyboardController?) -> Unit,
     modifier: Modifier = Modifier,
-    initialText: String = "",
     autoFocus: Boolean = false
 ) {
-    var searchText by remember { mutableStateOf(TextFieldValue(initialText)) }
+    var textFieldValue by remember { mutableStateOf(TextFieldValue(searchText)) }
+
+    // Sync internal state with external searchText
+    LaunchedEffect(searchText) {
+        if (searchText != textFieldValue.text) {
+            textFieldValue = textFieldValue.copy(text = searchText)
+        }
+    }
 
     // Animation Specs
     val width by animateDpAsState(
@@ -104,9 +112,9 @@ fun AnimatedPillSearchBar(
                 )
             } else {
                 BasicTextField(
-                    value = searchText,
+                    value = textFieldValue,
                     onValueChange = {
-                        searchText = it
+                        textFieldValue = it
                         onSearchTextChanged(it.text)
                     },
                     modifier = Modifier
@@ -117,8 +125,7 @@ fun AnimatedPillSearchBar(
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
                     keyboardActions = KeyboardActions(onDone = {
-                        keyboardController?.hide()
-                        onSearchDone(searchText.text.trim())
+                        onSearchDone(textFieldValue.text.trim(), keyboardController)
                     }),
                     textStyle = MaterialTheme.typography.bodyMedium.copy(
                         color = BackgroundColor

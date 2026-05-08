@@ -15,14 +15,11 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalHapticFeedback
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.geecee.escapelauncher.HiddenAppsViewModel
@@ -64,32 +61,13 @@ fun MainPagerScreen(
     onOpenSettings: () -> Unit
 ) {
     val hideScreenTimePage by viewModel.hideScreenTimePage.collectAsState(initial = false)
-    val automaticallyOpenSearch by viewModel.automaticallyOpenSearch.collectAsState(initial = false)
     val doubleTapToLock by viewModel.doubleTapToLock.collectAsState(initial = false)
-    val focusManager = LocalFocusManager.current
-    val keyboardController = LocalSoftwareKeyboardController.current
-    val appsListPage = if (hideScreenTimePage) 1 else 2
     val coroutineScope = rememberCoroutineScope()
 
     // Control if the user can go back or not depending upon the page
     BackHandler(enabled = true) {
         coroutineScope.launch {
             homeScreenModel.animatedGoToMainPage()
-        }
-    }
-
-    // Add effect to hide keyboard on page change or open search if needed
-    LaunchedEffect(homeScreenModel.pagerState.currentPage) {
-        if (homeScreenModel.pagerState.currentPage != appsListPage) {
-            homeScreenModel.searchText.value = ""
-            homeScreenModel.searchExpanded.value = false
-
-            focusManager.clearFocus()
-            keyboardController?.hide()
-        } else {
-            if (automaticallyOpenSearch) {
-                homeScreenModel.searchExpanded.value = true
-            }
         }
     }
 
@@ -133,7 +111,8 @@ fun MainPagerScreen(
 
                 1 -> AppsList(
                     mainAppModel = mainAppModel,
-                    homeScreenModel = homeScreenModel
+                    homeScreenModel = homeScreenModel,
+                    isBeingShown = homeScreenModel.pagerState.currentPage == 1
                 )
             }
         } else {
@@ -147,7 +126,8 @@ fun MainPagerScreen(
 
                 2 -> AppsList(
                     mainAppModel = mainAppModel,
-                    homeScreenModel = homeScreenModel
+                    homeScreenModel = homeScreenModel,
+                    isBeingShown = homeScreenModel.pagerState.currentPage == 2
                 )
             }
         }

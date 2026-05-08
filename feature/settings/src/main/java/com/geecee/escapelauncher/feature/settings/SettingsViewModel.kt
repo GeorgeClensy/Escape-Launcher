@@ -3,6 +3,7 @@ package com.geecee.escapelauncher.feature.settings
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.geecee.escapelauncher.core.data.repository.AppsRepository
 import com.geecee.escapelauncher.core.domain.repository.SettingsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -13,8 +14,10 @@ import kotlinx.coroutines.launch
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
-    private val repository: SettingsRepository
+    private val repository: SettingsRepository,
+    private val appsRepository: AppsRepository
 ) : ViewModel() {
+    val installedApps = appsRepository.mainUserApps
 }
 
 @HiltViewModel
@@ -47,6 +50,7 @@ class WidgetOptionsPageViewModel @Inject constructor(
 @HiltViewModel
 class MainSettingsPageViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
+    private val appsRepository: AppsRepository,
     private val repository: SettingsRepository
 ) : ViewModel() {
     val hapticFeedBackEnabled = repository.hapticFeedBackEnabled
@@ -214,6 +218,8 @@ class MainSettingsPageViewModel @Inject constructor(
             repository.setHideScreenTimePage(value)
         }
     }
+
+    val installedApps = appsRepository.mainUserApps
 }
 
 

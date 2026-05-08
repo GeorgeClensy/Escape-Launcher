@@ -46,6 +46,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -65,6 +66,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.ViewModel
 import androidx.navigation.NavHostController
 import com.geecee.escapelauncher.BuildConfig
 import com.geecee.escapelauncher.GlobalViewModel
@@ -72,18 +75,19 @@ import com.geecee.escapelauncher.HomeScreenModel
 import com.geecee.escapelauncher.MainAppViewModel
 import com.geecee.escapelauncher.R
 import com.geecee.escapelauncher.core.common.configureFullScreenMode
-import com.geecee.escapelauncher.core.ui.composables.AutoResizingText
-import com.geecee.escapelauncher.core.ui.composables.BulkManager
-import com.geecee.escapelauncher.core.ui.composables.SettingsSpacer
+import com.geecee.escapelauncher.core.data.repository.AppsRepository
 import com.geecee.escapelauncher.core.theme.BackgroundColor
 import com.geecee.escapelauncher.core.theme.CardContainerColor
 import com.geecee.escapelauncher.core.theme.primaryContentColor
-import com.geecee.escapelauncher.utils.AppUtils
-import com.geecee.escapelauncher.utils.AppUtils.configureAnalytics
+import com.geecee.escapelauncher.core.ui.composables.AutoResizingText
+import com.geecee.escapelauncher.core.ui.composables.BulkManager
+import com.geecee.escapelauncher.core.ui.composables.SettingsSpacer
 import com.geecee.escapelauncher.utils.getBooleanSetting
 import com.geecee.escapelauncher.utils.isDefaultLauncher
 import com.geecee.escapelauncher.utils.setBooleanSetting
 import com.geecee.escapelauncher.utils.showLauncherSelector
+import dagger.hilt.android.lifecycle.HiltViewModel
+import jakarta.inject.Inject
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -468,14 +472,25 @@ fun StatisticsScreen(onNext: () -> Unit, onPrev: () -> Unit) {
     }
 }
 
+@HiltViewModel
+class FavouritesSelectionScreenViewModel @Inject constructor(
+    appsRepository: AppsRepository
+) : ViewModel() {
+    val installedApps = appsRepository.mainUserApps
+}
+
+
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun FavoritesSelectionScreen(
     mainAppModel: MainAppViewModel,
     homeScreenModel: HomeScreenModel,
+    favouritesSelectionScreenViewModel: FavouritesSelectionScreenViewModel = hiltViewModel(),
     onNext: () -> Unit,
     onPrev: () -> Unit
 ) {
+    val installedApps by favouritesSelectionScreenViewModel.installedApps.collectAsState()
+
     // Add a small delay before rendering the full list to prevent jank during page transition
     var showList by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) {
@@ -486,7 +501,7 @@ fun FavoritesSelectionScreen(
     Box(Modifier.fillMaxSize().padding(start = 30.dp, end = 30.dp)) {
         if (showList) {
             BulkManager(
-                items = homeScreenModel.installedApps,
+                items = installedApps,
                 id = { it.packageName },
                 label = { it.displayName },
                 preSelectedItems = homeScreenModel.favoriteApps,

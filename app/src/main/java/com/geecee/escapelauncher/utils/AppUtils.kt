@@ -21,6 +21,7 @@ import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import com.geecee.escapelauncher.HomeScreenModel
+import com.geecee.escapelauncher.core.model.InstalledApp
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.io.IOException
@@ -29,7 +30,6 @@ import java.text.Normalizer
 import java.util.concurrent.TimeUnit
 import android.graphics.Color as AndroidColor
 import androidx.compose.ui.graphics.Color as ComposeColor
-import com.geecee.escapelauncher.core.model.InstalledApp
 
 /**
  * Broadcast receiver to detect when the screen turns off,
@@ -167,40 +167,6 @@ object AppUtils {
     }
 
     /**
-     * Returns a list of all installed apps on the device that have a launcher activity.
-     *
-     * @param context Context
-     *
-     * @return InstalledApp list with all installed apps that can be launched.
-     */
-    fun getAllInstalledApps(context: Context): List<InstalledApp> {
-        val packageManager = context.packageManager
-        val mainIntent = Intent(Intent.ACTION_MAIN).apply {
-            addCategory(Intent.CATEGORY_LAUNCHER)
-        }
-
-        // Get all activities that can be launched from a launcher
-        val launchableActivities = packageManager.queryIntentActivities(mainIntent, 0)
-
-        return launchableActivities
-            .mapNotNull { resolveInfo ->
-                val packageName = resolveInfo.activityInfo.packageName
-                val launchIntent = packageManager.getLaunchIntentForPackage(packageName)
-
-                if (launchIntent != null && launchIntent.component != null) {
-                    InstalledApp(
-                        displayName = resolveInfo.loadLabel(packageManager).toString(),
-                        packageName = packageName,
-                        componentName = launchIntent.component!! // Use the component from the launch intent
-                    )
-                } else {
-                    null // Filter out apps that don't have a valid launch intent or component
-                }
-            }
-            .distinctBy { it.packageName } // Ensure only one entry per package
-    }
-
-    /**
      * Formats screen time into string in the style of 5h 3m
      *
      * @param milliseconds The amount of time to return formatted
@@ -285,8 +251,6 @@ object AppUtils {
             if (shouldGoToFirstPage == true) {
                 homeScreenModel.mainAppViewModel.requestToGoHome()
             }
-            homeScreenModel.searchExpanded.value = false
-            homeScreenModel.searchText.value = ""
             homeScreenModel.showBottomSheet.value = false
 //            homeScreenModel.loadApps()
             homeScreenModel.showWorkApps.value = false
@@ -297,15 +261,12 @@ object AppUtils {
     /**
      * Performs haptic feedback
      */
-    fun doHapticFeedBack(hapticFeedback: HapticFeedback, context: Context? = null) {
-        val enabled = if (context != null) {
-            // This is a temporary measure while we migrate to DataStore.
-            // In a real world scenario, we'd inject the repository here or pass the state.
-            //todo: fix
-            getBooleanSetting(context, "HapticFeedback", true)
-        } else {
-            true
-        }
+    fun doHapticFeedBack(hapticFeedback: HapticFeedback) {
+        val enabled = true
+        // This is a temporary measure while we migrate to DataStore.
+        // In a real world scenario, we'd inject the repository here or pass the state.
+        //todo: fix
+
         if (enabled) {
             hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
         }
@@ -379,7 +340,6 @@ object AppUtils {
             null
         }
     }
-
 
 
     fun configureOnboardingFullScreen(window: Window) {
