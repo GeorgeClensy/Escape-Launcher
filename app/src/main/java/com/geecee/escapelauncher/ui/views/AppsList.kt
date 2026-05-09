@@ -25,6 +25,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -52,19 +53,18 @@ import com.geecee.escapelauncher.privatespace.PrivateSpace
 import com.geecee.escapelauncher.utils.AppUtils.doHapticFeedBack
 import com.geecee.escapelauncher.utils.AppUtils.formatScreenTime
 import com.geecee.escapelauncher.utils.AppUtils.resetHome
-import com.geecee.escapelauncher.MainAppViewModel as MainAppModel
 
 /**
  * Parent apps list composable
  */
 @Composable
 fun AppsList(
-    mainAppModel: MainAppModel,
     homeScreenModel: HomeScreenModel,
     appsListViewModel: AppsListViewModel = hiltViewModel(),
     screenTimeViewModel: ScreenTimeViewModel = hiltViewModel(LocalActivity.current as ComponentActivity),
     isBeingShown: Boolean
 ) {
+    val context = LocalContext.current
     val haptics = LocalHapticFeedback.current
     val appUsageList by screenTimeViewModel.appUsageList.collectAsState()
     val showScreenTimeApp by appsListViewModel.showScreenTimeApp.collectAsState(initial = false)
@@ -181,23 +181,21 @@ fun AppsList(
             }
 
             //Secure Folder
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P && canUseSecureFolder(mainAppModel.getContext())) {
-
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P && canUseSecureFolder(context = context)) {
                 item {
                     SecureFolderButton()
                 }
-
             }
             //Private Space
-            else if (isDefaultLauncher(mainAppModel.getContext()) && Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM && doesPrivateSpaceExist(
-                    mainAppModel.getContext()
+            else if (isDefaultLauncher(context = context) && Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM && doesPrivateSpaceExist(
+                    context = context
                 )
             ) {
                 item {
                     PrivateSpace(
                         modifier = Modifier,
                         onAppClick = { app ->
-                            openPrivateSpaceApp(app, mainAppModel.getContext())
+                            openPrivateSpaceApp(installedApp = app, context = context)
                             resetHome(homeScreenModel)
                         },
                         onAppLongClick = { app ->
@@ -222,7 +220,7 @@ fun AppsList(
 
         // Work apps
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) {
-            if (doesWorkProfileExist(mainAppModel.getContext())) {
+            if (doesWorkProfileExist(context = context)) {
                 WorkAppsFab(
                     Modifier
                         .align(Alignment.BottomEnd)
@@ -251,7 +249,7 @@ fun AppsList(
                     WorkApps(
                         modifier = Modifier.align(Alignment.Center),
                         onAppClick = { app ->
-                            openWorkApp(app, mainAppModel.getContext())
+                            openWorkApp(installedApp = app, context = context)
                             resetHome(homeScreenModel)
                         },
                         onAppLongClick = { app ->

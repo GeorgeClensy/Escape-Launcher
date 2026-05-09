@@ -111,7 +111,6 @@ fun MainPagerScreen(
                 )
 
                 1 -> AppsList(
-                    mainAppModel = mainAppModel,
                     homeScreenModel = homeScreenModel,
                     isBeingShown = homeScreenModel.pagerState.currentPage == 1
                 )
@@ -126,7 +125,6 @@ fun MainPagerScreen(
                 )
 
                 2 -> AppsList(
-                    mainAppModel = mainAppModel,
                     homeScreenModel = homeScreenModel,
                     isBeingShown = homeScreenModel.pagerState.currentPage == 2
                 )
