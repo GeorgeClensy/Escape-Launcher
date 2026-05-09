@@ -23,6 +23,7 @@ class NewHomeScreenViewModel @Inject constructor(
     val showWeather = repository.showWeather
     val showScreenTimeApp = repository.showScreenTimeApp
     val firstTimeHelp = repository.firstTimeHelp
+    val hapticFeedBackEnabled = repository.hapticFeedBackEnabled
 
     val homeAlignment = repository.homeAlignment.map { alignment ->
         when (alignment) {

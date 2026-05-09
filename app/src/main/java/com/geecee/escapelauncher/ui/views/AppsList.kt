@@ -69,6 +69,7 @@ fun AppsList(
     val appUsageList by screenTimeViewModel.appUsageList.collectAsState()
     val showScreenTimeApp by appsListViewModel.showScreenTimeApp.collectAsState(initial = false)
     val appsListAlignment by appsListViewModel.appsAlignment.collectAsState(initial = Alignment.CenterHorizontally)
+    val hapticFeedbackEnabled by appsListViewModel.hapticFeedBackEnabled.collectAsState(initial = true)
     val showSearchBox by appsListViewModel.showSearchBox.collectAsState(initial = true)
     val bottomSearchBox by appsListViewModel.bottomSearch.collectAsState(initial = false)
     val autoOpenSearch by appsListViewModel.searchAutoOpen.collectAsState(initial = false)
@@ -116,7 +117,7 @@ fun AppsList(
                         autoFocus = autoOpenSearch,
                         onExpandedChange = {
                             appsListViewModel.onSearchExpandedChanged(it)
-                            doHapticFeedBack(haptics)
+                            doHapticFeedBack(haptics, hapticFeedbackEnabled)
                         },
                         onSearchTextChanged = { query ->
                             appsListViewModel.onSearchTextChanged(query)
@@ -139,7 +140,7 @@ fun AppsList(
                                 )
                                 appsListViewModel.onSearchExpandedChanged(false)
                             } else {
-                                doHapticFeedBack(haptics)
+                                doHapticFeedBack(haptics, hapticFeedbackEnabled)
                             }
                         }
                     )
@@ -165,12 +166,12 @@ fun AppsList(
                             onAppOpened = { screenTimeViewModel.onAppOpened(it) }
                         )
                         appsListViewModel.onSearchExpandedChanged(false)
-                        doHapticFeedBack(haptics)
+                        doHapticFeedBack(haptics, hapticFeedbackEnabled)
                     },
                     onAppLongClick = {
                         homeScreenModel.showBottomSheet.value = true
                         homeScreenModel.updateSelectedApp(app)
-                        doHapticFeedBack(haptics)
+                        doHapticFeedBack(haptics, hapticFeedbackEnabled)
                     },
                     showScreenTime = showScreenTimeApp,
                     modifier = Modifier,
@@ -202,7 +203,7 @@ fun AppsList(
                         onAppLongClick = { app ->
                             homeScreenModel.updateSelectedApp(app)
                             homeScreenModel.showBottomSheet.value = true
-                            doHapticFeedBack(haptics)
+                            doHapticFeedBack(haptics, hapticFeedbackEnabled)
                         }
                     )
                 }
@@ -256,7 +257,7 @@ fun AppsList(
                         onAppLongClick = { app ->
                             homeScreenModel.showBottomSheet.value = true
                             homeScreenModel.updateSelectedApp(app)
-                            doHapticFeedBack(haptics)
+                            doHapticFeedBack(haptics, hapticFeedbackEnabled)
                         }
                     )
                 }
@@ -281,7 +282,7 @@ fun AppsList(
                     autoFocus = autoOpenSearch,
                     onExpandedChange = {
                         appsListViewModel.onSearchExpandedChanged(it)
-                        doHapticFeedBack(haptics)
+                        doHapticFeedBack(haptics, hapticFeedbackEnabled)
                     },
                     onSearchTextChanged = { query ->
                         appsListViewModel.onSearchTextChanged(query)
@@ -304,7 +305,7 @@ fun AppsList(
                             )
                             appsListViewModel.onSearchExpandedChanged(false)
                         } else {
-                            doHapticFeedBack(haptics)
+                            doHapticFeedBack(haptics, hapticFeedbackEnabled)
                         }
                     }
                 )

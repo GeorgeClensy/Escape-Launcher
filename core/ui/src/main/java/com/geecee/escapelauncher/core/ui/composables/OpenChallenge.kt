@@ -38,7 +38,12 @@ import com.geecee.escapelauncher.core.theme.ContentColor
 import kotlinx.coroutines.delay
 
 @Composable
-fun OpenChallenge(haptics: HapticFeedback, openApp: () -> Unit, goBack: () -> Unit) {
+fun OpenChallenge(
+    haptics: HapticFeedback,
+    enabled: Boolean,
+    openApp: () -> Unit,
+    goBack: () -> Unit
+) {
     val steps = listOf("5", "4", "3", "2", "1")
     var stepIndex by rememberSaveable { mutableIntStateOf(0) }
     var showText by rememberSaveable { mutableStateOf(true) }
@@ -58,10 +63,14 @@ fun OpenChallenge(haptics: HapticFeedback, openApp: () -> Unit, goBack: () -> Un
 
             if (stepIndex < steps.size) {
                 showText = true
-                haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                if (enabled) {
+                    haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                }
             } else {
                 nextScreen = true
-                haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                if (enabled) {
+                    haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                }
                 delay(500)
                 openApp()
             }
@@ -105,7 +114,9 @@ fun OpenChallenge(haptics: HapticFeedback, openApp: () -> Unit, goBack: () -> Un
 
                 Button(
                     onClick = {
-                        haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                        if (enabled) {
+                            haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                        }
                         goBack()
                     },
                     Modifier.align(Alignment.CenterHorizontally),

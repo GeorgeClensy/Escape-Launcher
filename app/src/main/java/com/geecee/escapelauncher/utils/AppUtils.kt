@@ -260,13 +260,11 @@ object AppUtils {
 
     /**
      * Performs haptic feedback
+     *
+     * @param hapticFeedback HapticFeedback instance
+     * @param enabled Whether haptic feedback is enabled from settings
      */
-    fun doHapticFeedBack(hapticFeedback: HapticFeedback) {
-        val enabled = true
-        // This is a temporary measure while we migrate to DataStore.
-        // In a real world scenario, we'd inject the repository here or pass the state.
-        //todo: fix
-
+    fun doHapticFeedBack(hapticFeedback: HapticFeedback, enabled: Boolean) {
         if (enabled) {
             hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
         }

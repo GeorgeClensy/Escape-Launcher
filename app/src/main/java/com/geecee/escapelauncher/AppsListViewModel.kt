@@ -37,6 +37,7 @@ class AppsListViewModel @Inject constructor(
     val bottomSearch = settingsRepository.bottomSearch
     val automaticallyOpenAppsInSearch = settingsRepository.automaticallyOpenAppsInSearch
     val hiddenAppsInSearch = settingsRepository.showHiddenAppsInSearch
+    val hapticFeedBackEnabled = settingsRepository.hapticFeedBackEnabled
 
     private val _searchText = MutableStateFlow("")
     val searchText: StateFlow<String> = _searchText.asStateFlow()

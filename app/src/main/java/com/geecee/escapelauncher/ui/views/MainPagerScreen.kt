@@ -62,6 +62,7 @@ fun MainPagerScreen(
 ) {
     val hideScreenTimePage by viewModel.hideScreenTimePage.collectAsState(initial = false)
     val doubleTapToLock by viewModel.doubleTapToLock.collectAsState(initial = false)
+    val hapticFeedbackEnabled by viewModel.hapticFeedBackEnabled.collectAsState(initial = true)
     val coroutineScope = rememberCoroutineScope()
 
     // Control if the user can go back or not depending upon the page
@@ -242,6 +243,7 @@ fun MainPagerScreen(
     ) {
         OpenChallenge(
             haptics = LocalHapticFeedback.current,
+            enabled = hapticFeedbackEnabled,
             openApp = {
                 homeScreenModel.openApp(
                     app = homeScreenModel.currentSelectedApp.value,

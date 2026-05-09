@@ -90,6 +90,7 @@ fun HomeScreen(
     val homeAlignment by homeScreenViewModel.homeAlignment.collectAsState(initial = Alignment.CenterHorizontally)
     val homeVAlignment by homeScreenViewModel.homeVAlignment.collectAsState(initial = Arrangement.Center)
     val widgetOffsetPref by homeScreenViewModel.widgetOffset.collectAsState(initial = 0f)
+    val hapticFeedbackEnabled by homeScreenViewModel.hapticFeedBackEnabled.collectAsState(initial = true)
     val widgetHeight by homeScreenViewModel.widgetHeight.collectAsState(initial = 125f)
     val widgetWidth by homeScreenViewModel.widgetWidth.collectAsState(initial = 250f)
     val appUsageList by screenTimeViewModel.appUsageList.collectAsState()
@@ -291,7 +292,7 @@ fun HomeScreen(
                 onAppLongClick = {
                     homeScreenModel.showBottomSheet.value = true
                     homeScreenModel.updateSelectedApp(app)
-                    doHapticFeedBack(hapticFeedback = haptics)
+                    doHapticFeedBack(hapticFeedback = haptics, enabled = hapticFeedbackEnabled)
                 },
                 showScreenTime = showScreenTimeApp,
                 modifier = Modifier,

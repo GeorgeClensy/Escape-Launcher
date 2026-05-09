@@ -1104,6 +1104,7 @@ fun HiddenApps(
     val installedApps by hiddenAppsViewModel.installedApps.collectAsState()
     val coroutineScope = rememberCoroutineScope()
     val haptics = LocalHapticFeedback.current
+    val hapticFeedbackEnabled by hiddenAppsViewModel.hapticFeedBackEnabled.collectAsState(initial = true)
     val hiddenPackageIds by hiddenAppsViewModel.hiddenPackageIds.collectAsState()
     val showHiddenAppsInSearch by hiddenAppsViewModel.showHiddenAppsInSearch.collectAsState(initial = false)
 
@@ -1174,7 +1175,7 @@ fun HiddenApps(
                     },
                     onDeleteClick = {
                         // Trigger haptic feedback
-                        AppUtils.doHapticFeedBack(haptics)
+                        AppUtils.doHapticFeedBack(haptics, hapticFeedbackEnabled)
                         // Animate item out
                         visible = false
                         // Remove from your list after a short delay to let animation run

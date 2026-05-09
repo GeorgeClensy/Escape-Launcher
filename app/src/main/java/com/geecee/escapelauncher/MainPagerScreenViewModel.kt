@@ -24,4 +24,5 @@ class MainPagerScreenViewModel @Inject constructor(
     val hideScreenTimePage = repository.hideScreenTimePage
     val automaticallyOpenSearch = repository.searchAutoOpen
     val doubleTapToLock = repository.doubleTapToLock
+    val hapticFeedBackEnabled = repository.hapticFeedBackEnabled
 }

@@ -28,6 +28,8 @@ class HiddenAppsViewModel @Inject constructor(
         )
 
     val showHiddenAppsInSearch = settingsRepository.showHiddenAppsInSearch
+    val hapticFeedBackEnabled = settingsRepository.hapticFeedBackEnabled
+
     fun setShowHiddenAppsInSearch(value: Boolean) {
         viewModelScope.launch {
             settingsRepository.setShowHiddenAppsInSearch(value)
