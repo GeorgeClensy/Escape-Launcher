@@ -24,7 +24,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.io.IOException
 import java.io.InputStream
-import java.text.Normalizer
 import android.graphics.Color as AndroidColor
 import androidx.compose.ui.graphics.Color as ComposeColor
 
@@ -95,72 +94,6 @@ object AppUtils {
             Log.e("AppUtils", "Error opening app", e)
             false
         }
-    }
-
-    fun fuzzyMatch(text: String, pattern: String): Boolean {
-        // Case-insensitive contains check (original behavior)
-        if (text.contains(pattern, ignoreCase = true)) {
-            return true
-        }
-
-        val regexUnaccent = "\\p{M}+"
-        val normalizedText = Normalizer.normalize(text, Normalizer.Form.NFD)
-            .replace(Regex(regexUnaccent), "")
-            .lowercase()
-
-        val normalizedPattern = Normalizer.normalize(pattern, Normalizer.Form.NFD)
-            .replace(Regex(regexUnaccent), "")
-            .lowercase()
-
-        // Check for initials match (e.g., "gm" matches "Google Maps")
-        if (pattern.length >= 2) {
-            val words = normalizedText.split(" ")
-            if (words.size > 1) {
-                val initials = words.joinToString("") { it.firstOrNull()?.toString() ?: "" }
-                if (initials.contains(normalizedPattern)) {
-                    return true
-                }
-            }
-        }
-
-        // Check for character sequence match with gaps
-        var textIndex = 0
-        var patternIndex = 0
-        while (textIndex < normalizedText.length && patternIndex < normalizedPattern.length) {
-            if (normalizedText[textIndex] == normalizedPattern[patternIndex]) {
-                patternIndex++
-            }
-            textIndex++
-        }
-
-        // If we matched all characters in pattern, it's a fuzzy match
-        return patternIndex == normalizedPattern.length
-    }
-
-    /**
-     * Sorts a list of apps by relevance to a search query.
-     * 1. Starts with query
-     * 2. Contains query
-     * 3. Fuzzy match
-     * Then alphabetical.
-     */
-    fun sortAppsByRelevance(apps: List<InstalledApp>, query: String): List<InstalledApp> {
-        val regexUnaccent = "\\p{M}+"
-        val normalizedQuery = Normalizer.normalize(query, Normalizer.Form.NFD)
-            .replace(Regex(regexUnaccent), "")
-            .lowercase()
-
-        return apps.sortedWith(compareBy<InstalledApp> { app ->
-            val normalizedName = Normalizer.normalize(app.displayName, Normalizer.Form.NFD)
-                .replace(Regex(regexUnaccent), "")
-                .lowercase()
-
-            when {
-                normalizedName.startsWith(normalizedQuery) -> 0
-                normalizedName.contains(normalizedQuery) -> 1
-                else -> 2
-            }
-        }.thenBy { it.displayName.lowercase() })
     }
 
     /**
