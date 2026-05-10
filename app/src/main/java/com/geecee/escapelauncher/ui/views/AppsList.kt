@@ -41,18 +41,18 @@ import com.geecee.escapelauncher.core.common.doesPrivateSpaceExist
 import com.geecee.escapelauncher.core.common.doesWorkProfileExist
 import com.geecee.escapelauncher.core.common.goToAppInfo
 import com.geecee.escapelauncher.core.common.isDefaultLauncher
-import com.geecee.escapelauncher.core.common.openPrivateSpaceApp
-import com.geecee.escapelauncher.core.common.openWorkApp
+import com.geecee.escapelauncher.core.common.isMainUserApp
+import com.geecee.escapelauncher.core.common.openApp
 import com.geecee.escapelauncher.core.common.uninstallApp
 import com.geecee.escapelauncher.core.model.InstalledApp
 import com.geecee.escapelauncher.core.theme.transparentHalf
 import com.geecee.escapelauncher.core.ui.composables.AnimatedPillSearchBar
-import com.geecee.escapelauncher.core.ui.composables.AppAction
 import com.geecee.escapelauncher.core.ui.composables.AppsListHeader
 import com.geecee.escapelauncher.core.ui.composables.HomeScreenBottomSheet
 import com.geecee.escapelauncher.core.ui.composables.HomeScreenItem
 import com.geecee.escapelauncher.core.ui.composables.ListGradient
 import com.geecee.escapelauncher.core.ui.composables.SettingsSpacer
+import com.geecee.escapelauncher.core.ui.model.AppAction
 import com.geecee.escapelauncher.feature.screentime.ScreenTimeViewModel
 import com.geecee.escapelauncher.feature.securefolder.SecureFolderButton
 import com.geecee.escapelauncher.feature.securefolder.canUseSecureFolder
@@ -202,7 +202,7 @@ fun AppsList(
             ) {
                 item {
                     PrivateSpace(modifier = Modifier, onAppClick = { app ->
-                        openPrivateSpaceApp(installedApp = app, context = context)
+                        openApp(context = context, app = app)
                         onGoHomeRequest()
                     }, onAppLongClick = { app ->
                         appsListViewModel.setBottomSheetVisible(true)
@@ -250,7 +250,7 @@ fun AppsList(
                         .background(transparentHalf)
                 ) {
                     WorkApps(modifier = Modifier.align(Alignment.Center), onAppClick = { app ->
-                        openWorkApp(installedApp = app, context = context)
+                        openApp(context = context, app = app)
                         onGoHomeRequest()
                     }, onAppLongClick = { app ->
                         appsListViewModel.setBottomSheetVisible(true)
@@ -266,7 +266,8 @@ fun AppsList(
             modifier = Modifier
                 .align(alignment = Alignment.BottomCenter)
                 .padding(30.dp, 25.dp)
-                .fillMaxWidth(), horizontalAlignment = appsListAlignment
+                .fillMaxWidth(),
+            horizontalAlignment = appsListAlignment
         ) {
             if (showSearchBox && bottomSearchBox) {
                 Spacer(modifier = Modifier.height(15.dp))
@@ -302,81 +303,70 @@ fun AppsList(
         }
     }
 
-    if (showBottomSheet) {
+    if (showBottomSheet && bottomSheetApp != null) {
         // Get the app shortcuts - these are the bits like that when you long hold an app you see that let you jump to a bit within the app
-        val shortcuts: List<AppShortcut?> =
-            if (bottomSheetApp?.user == android.os.Process.myUserHandle()) {
+        val shortcuts: List<AppShortcut> =
+            if (bottomSheetApp!!.isMainUserApp()) {
                 getAppShortcuts(context, bottomSheetApp!!.packageName)
             } else {
-                listOf(null)
+                emptyList()
             }
 
-        // Take the shortcuts and turn them into app actions that can be displayed on the list
-        val shortcutActions: List<AppAction?> = shortcuts.map { shortcut ->
-            if (shortcut != null) {
-                AppAction(
-                    label = shortcut.label, onClick = {
-                        startShortcut(context, bottomSheetApp!!.packageName, shortcut.id)
-                        appsListViewModel.setBottomSheetVisible(visibility = false)
-                        onGoHomeRequest()
-                    })
-            } else {
-                null
-            }
+        // Take the shortcuts and turn them into app actions so that they can be displayed on the list
+        val shortcutActions: List<AppAction> = shortcuts.map { shortcut ->
+            AppAction(
+                label = shortcut.label,
+                onClick = {
+                    startShortcut(context, bottomSheetApp!!.packageName, shortcut.id)
+                    appsListViewModel.setBottomSheetVisible(visibility = false)
+                    onGoHomeRequest()
+                })
         }
 
         val actions = listOf(
             AppAction(
-                label = stringResource(id = R.string.uninstall), onClick = {
-                    uninstallApp(context, bottomSheetApp!!)
-                }), if (bottomSheetApp!!.user == android.os.Process.myUserHandle()) {
-                AppAction(
-                    label = stringResource(
-                        id = if (isBottomSheetAppFavourite) R.string.rem_from_fav else R.string.add_to_fav
-                    ), onClick = {
-                        if (isBottomSheetAppFavourite) {
-                            appsListViewModel.removeFavourite(bottomSheetApp!!.packageName)
-                        } else {
-                            appsListViewModel.addFavourite(bottomSheetApp!!.packageName)
-                            onGoHomeRequest()
-                        }
-                        appsListViewModel.setBottomSheetVisible(false)
-                    })
-            } else {
-                null
-            }, if (bottomSheetApp!!.user == android.os.Process.myUserHandle()) {
-                AppAction(
-                    label = stringResource(R.string.hide), onClick = {
-                        hiddenAppsViewModel.hideApp(bottomSheetApp!!.packageName)
-                        appsListViewModel.setBottomSheetVisible(false)
-                    })
-            } else {
-                null
-            }, AppAction(
-                label = stringResource(id = R.string.app_info), onClick = {
-                    goToAppInfo(context, bottomSheetApp!!)
+                labelRes = R.string.uninstall,
+                onClick = { app ->
+                    uninstallApp(context, app)
                 }),
-
-            if (!isBottomSheetAppChallenged && bottomSheetApp!!.user == android.os.Process.myUserHandle()) {
-
-                AppAction(
-                    label = stringResource(R.string.add_open_challenge), onClick = {
-                        openChallengeViewModel.addChallengeToApp(
-                            bottomSheetApp!!.packageName
-                        )
-                        appsListViewModel.setBottomSheetVisible(false)
-                    })
-            } else {
-                null
-            }
+            AppAction(
+                labelRes = if (isBottomSheetAppFavourite) R.string.rem_from_fav else R.string.add_to_fav,
+                isVisible = { it.isMainUserApp() },
+                onClick = { app ->
+                    if (isBottomSheetAppFavourite) {
+                        appsListViewModel.removeFavourite(app.packageName)
+                    } else {
+                        appsListViewModel.addFavourite(app.packageName)
+                        onGoHomeRequest()
+                    }
+                    appsListViewModel.setBottomSheetVisible(false)
+                }),
+            AppAction(
+                labelRes = R.string.hide,
+                isVisible = { it.isMainUserApp() },
+                onClick = { app ->
+                    hiddenAppsViewModel.hideApp(app.packageName)
+                    appsListViewModel.setBottomSheetVisible(false)
+                }),
+            AppAction(
+                labelRes = R.string.app_info,
+                onClick = { app ->
+                    goToAppInfo(context, app)
+                }),
+            AppAction(
+                labelRes = R.string.add_open_challenge,
+                isVisible = { it.isMainUserApp() && !isBottomSheetAppChallenged },
+                onClick = { app ->
+                    openChallengeViewModel.addChallengeToApp(app.packageName)
+                    appsListViewModel.setBottomSheetVisible(false)
+                })
         )
 
-
         HomeScreenBottomSheet(
-            title = bottomSheetApp!!.displayName,
-            actions = actions.filterNotNull(),
+            app = bottomSheetApp!!,
+            actions = actions,
             onDismissRequest = { appsListViewModel.setBottomSheetVisible(false) },
-            shortcutActions = shortcutActions.filterNotNull(),
+            shortcutActions = shortcutActions,
             sheetState = rememberModalBottomSheetState()
         )
     }

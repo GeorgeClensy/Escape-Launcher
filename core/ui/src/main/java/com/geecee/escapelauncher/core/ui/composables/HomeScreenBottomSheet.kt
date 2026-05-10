@@ -22,18 +22,12 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalWindowInfo
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.geecee.escapelauncher.core.model.InstalledApp
 import com.geecee.escapelauncher.core.theme.ContentColor
-
-
-/**
- * Action that can be shown in the bottom sheet
- * */
-data class AppAction(
-    val label: String,
-    val onClick: () -> Unit
-)
+import com.geecee.escapelauncher.core.ui.model.AppAction
 
 /**
  * Bottom Sheet home screen
@@ -42,7 +36,7 @@ data class AppAction(
 @Composable
 fun HomeScreenBottomSheet(
     modifier: Modifier = Modifier,
-    title: String,
+    app: InstalledApp,
     actions: List<AppAction>,
     onDismissRequest: () -> Unit,
     sheetState: SheetState,
@@ -72,7 +66,7 @@ fun HomeScreenBottomSheet(
                         .padding(end = 10.dp)
                 )
                 Text(
-                    title,
+                    app.displayName,
                     color = ContentColor,
                     fontSize = 32.sp,
                     style = MaterialTheme.typography.titleMedium
@@ -82,32 +76,32 @@ fun HomeScreenBottomSheet(
 
             // Actions
             Column(Modifier.padding(start = 47.dp, bottom = 50.dp)) {
-                if (!shortcutActions.isEmpty()) {
-                    shortcutActions.forEach { action ->
-                        Text(
-                            text = action.label,
-                            modifier = Modifier
-                                .padding(vertical = 10.dp)
-                                .combinedClickable(onClick = action.onClick),
-                            color = ContentColor,
-                            style = MaterialTheme.typography.bodyMedium
-                        )
+                if (shortcutActions.isNotEmpty()) {
+                    shortcutActions.filter { it.isVisible(app) }.forEach { action ->
+                        AppActionItem(action, app)
                     }
 
                     HorizontalDivider(Modifier.padding(vertical = 15.dp))
                 }
 
-                actions.forEach { action ->
-                    Text(
-                        text = action.label,
-                        modifier = Modifier
-                            .padding(vertical = 10.dp)
-                            .combinedClickable(onClick = action.onClick),
-                        color = ContentColor,
-                        style = MaterialTheme.typography.bodyMedium
-                    )
+                actions.filter { it.isVisible(app) }.forEach { action ->
+                    AppActionItem(action, app)
                 }
             }
         }
     }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+private fun AppActionItem(action: AppAction, app: InstalledApp) {
+    val label = action.label ?: action.labelRes?.let { stringResource(it) } ?: ""
+    Text(
+        text = label,
+        modifier = Modifier
+            .padding(vertical = 10.dp)
+            .combinedClickable(onClick = { action.onClick(app) }),
+        color = ContentColor,
+        style = MaterialTheme.typography.bodyMedium
+    )
 }

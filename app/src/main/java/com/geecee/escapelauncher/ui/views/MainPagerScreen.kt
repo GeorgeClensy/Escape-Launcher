@@ -27,7 +27,6 @@ import com.geecee.escapelauncher.HomeScreenModel
 import com.geecee.escapelauncher.R
 import com.geecee.escapelauncher.core.common.goToAppInfo
 import com.geecee.escapelauncher.core.common.uninstallApp
-import com.geecee.escapelauncher.core.ui.composables.AppAction
 import com.geecee.escapelauncher.core.ui.composables.HomeScreenBottomSheet
 import com.geecee.escapelauncher.utils.AppShortcut
 import com.geecee.escapelauncher.utils.AppUtils.resetHome
@@ -41,6 +40,7 @@ import kotlinx.coroutines.launch
 import com.geecee.escapelauncher.MainAppViewModel as MainAppModel
 import com.geecee.escapelauncher.MainPagerScreenViewModel
 import com.geecee.escapelauncher.OpenChallengeViewModel
+import com.geecee.escapelauncher.core.ui.model.AppAction
 
 /**
  *  Main composable for home screen:
@@ -245,7 +245,7 @@ fun MainPagerScreen(
 
 
         HomeScreenBottomSheet(
-            title = homeScreenModel.currentSelectedApp.value.displayName,
+            app = homeScreenModel.currentSelectedApp.value,
             actions = actions.filterNotNull(),
             onDismissRequest = { homeScreenModel.showBottomSheet.value = false },
             shortcutActions = shortcutActions.filterNotNull(),
