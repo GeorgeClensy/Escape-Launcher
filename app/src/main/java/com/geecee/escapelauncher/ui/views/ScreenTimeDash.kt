@@ -36,6 +36,7 @@ import com.geecee.escapelauncher.core.theme.escapeGreen
 import com.geecee.escapelauncher.core.theme.escapeRed
 import com.geecee.escapelauncher.utils.AppUtils
 import com.geecee.escapelauncher.feature.screentime.ScreenTimeViewModel
+import com.geecee.escapelauncher.core.common.formatScreenTime
 
 /**
  * This function works out if the screen time is over the recommended and if it is finds out how many percent over it is
@@ -78,7 +79,7 @@ fun ScreenTimeDashboard(
         Spacer(Modifier.height(120.dp))
 
         ScreenTime(
-            AppUtils.formatScreenTime(todayUsage),
+            formatScreenTime(todayUsage),
             todayUsage > yesterdayUsage,
             Modifier
         )
@@ -128,7 +129,7 @@ fun ScreenTimeDashboard(
                         AppUsage(
                             appName,
                             usageIncreased,
-                            if (appScreenTime.totalTime > 60000) AppUtils.formatScreenTime(
+                            if (appScreenTime.totalTime > 60000) formatScreenTime(
                                 appScreenTime.totalTime
                             ) else "<1m",
                             Modifier

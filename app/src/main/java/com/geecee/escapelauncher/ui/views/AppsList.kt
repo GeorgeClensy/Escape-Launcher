@@ -36,7 +36,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.geecee.escapelauncher.AppsListViewModel
 import com.geecee.escapelauncher.HiddenAppsViewModel
 import com.geecee.escapelauncher.OpenChallengeViewModel
-import com.geecee.escapelauncher.R
+import com.geecee.escapelauncher.core.ui.R
 import com.geecee.escapelauncher.core.common.doesPrivateSpaceExist
 import com.geecee.escapelauncher.core.common.doesWorkProfileExist
 import com.geecee.escapelauncher.core.common.goToAppInfo
@@ -59,26 +59,26 @@ import com.geecee.escapelauncher.feature.securefolder.canUseSecureFolder
 import com.geecee.escapelauncher.feature.workapps.WorkApps
 import com.geecee.escapelauncher.feature.workapps.WorkAppsFab
 import com.geecee.escapelauncher.privatespace.PrivateSpace
-import com.geecee.escapelauncher.utils.AppShortcut
-import com.geecee.escapelauncher.utils.AppUtils.doHapticFeedBack
-import com.geecee.escapelauncher.utils.AppUtils.formatScreenTime
-import com.geecee.escapelauncher.utils.getAppShortcuts
-import com.geecee.escapelauncher.utils.startShortcut
+import com.geecee.escapelauncher.core.common.AppShortcut
+import com.geecee.escapelauncher.core.ui.utils.doHapticFeedBack
+import com.geecee.escapelauncher.core.common.formatScreenTime
+import com.geecee.escapelauncher.core.common.getAppShortcuts
+import com.geecee.escapelauncher.core.common.startShortcut
 
 /**
- * Parent apps list composable
+ * Main App List composable
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppsList(
     scrollState: LazyListState,
+    isBeingShown: Boolean,
+    onAppOpened: (app: InstalledApp) -> Unit = {},
+    onGoHomeRequest: () -> Unit = {},
     appsListViewModel: AppsListViewModel = hiltViewModel(),
     screenTimeViewModel: ScreenTimeViewModel = hiltViewModel(LocalActivity.current as ComponentActivity),
     hiddenAppsViewModel: HiddenAppsViewModel = hiltViewModel(),
-    openChallengeViewModel: OpenChallengeViewModel = hiltViewModel(),
-    isBeingShown: Boolean,
-    onAppOpened: (app: InstalledApp) -> Unit = {},
-    onGoHomeRequest: () -> Unit = {}
+    openChallengeViewModel: OpenChallengeViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
     val haptics = LocalHapticFeedback.current
@@ -101,6 +101,7 @@ fun AppsList(
     val isBottomSheetAppChallenged by appsListViewModel.doesBottomSheetAppHaveChallenge.collectAsState()
     val showWorkApps by appsListViewModel.showWorkApps.collectAsState()
 
+    // This manages tidying everything when the visibility changes
     LaunchedEffect(isBeingShown) {
         if (!isBeingShown) {
             appsListViewModel.onSearchExpandedChanged(false)
@@ -186,7 +187,6 @@ fun AppsList(
                     modifier = Modifier,
                     alignment = appsListAlignment
                 )
-
             }
 
             //Secure Folder
@@ -303,6 +303,8 @@ fun AppsList(
         }
     }
 
+
+    // Bottom Sheet
     if (showBottomSheet && bottomSheetApp != null) {
         // Get the app shortcuts - these are the bits like that when you long hold an app you see that let you jump to a bit within the app
         val shortcuts: List<AppShortcut> =

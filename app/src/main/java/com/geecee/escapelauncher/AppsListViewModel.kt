@@ -25,6 +25,7 @@ class AppsListViewModel @Inject constructor(
     private val appsRepository: AppsRepository,
     private val modifiedAppsRepository: ModifiedAppsRepository
 ) : ViewModel() {
+    // Settings
     val showScreenTimeApp = settingsRepository.showScreenTimeApp
     val appsAlignment = settingsRepository.appsAlignment.map { alignment ->
         when (alignment) {
@@ -40,18 +41,16 @@ class AppsListViewModel @Inject constructor(
     val hiddenAppsInSearch = settingsRepository.showHiddenAppsInSearch
     val hapticFeedBackEnabled = settingsRepository.hapticFeedBackEnabled
 
+    // Search
     private val _searchText = MutableStateFlow("")
     val searchText: StateFlow<String> = _searchText.asStateFlow()
-
     private val _searchExpanded = MutableStateFlow(false)
     val searchExpanded: StateFlow<Boolean> = _searchExpanded.asStateFlow()
-
     fun onSearchTextChanged(query: String) {
         if (_searchExpanded.value) {
             _searchText.value = query
         }
     }
-
     fun onSearchExpandedChanged(expanded: Boolean) {
         _searchExpanded.value = expanded
         if (!_searchExpanded.value) {
@@ -59,7 +58,7 @@ class AppsListViewModel @Inject constructor(
         }
     }
 
-    //Apps
+    // Apps
     val apps: StateFlow<List<InstalledApp>> = combine(
         appsRepository.mainUserApps,
         modifiedAppsRepository.getHiddenPackageIdsFlow(),
@@ -95,26 +94,21 @@ class AppsListViewModel @Inject constructor(
     fun setBottomSheetVisible(visibility: Boolean) {
         _showBottomSheet.value = visibility
     }
-
     fun setBottomSheetApp(app: InstalledApp?) {
         _bottomSheetApp.value = app
     }
-
     fun addFavourite(packageId: String) {
         viewModelScope.launch {
             modifiedAppsRepository.addFavourite(packageId)
         }
     }
-
     fun removeFavourite(packageId: String) {
         viewModelScope.launch {
             modifiedAppsRepository.removeFavourite(packageId)
         }
     }
-
     private val _bottomSheetApp = MutableStateFlow<InstalledApp?>(null)
     val botttomSheetApp: StateFlow<InstalledApp?> = _bottomSheetApp.asStateFlow()
-
     val isBottomSheetAppFavourite: StateFlow<Boolean> = combine(
         _bottomSheetApp,
         modifiedAppsRepository.getFavouriteAppsInOrderFlow()
@@ -127,7 +121,6 @@ class AppsListViewModel @Inject constructor(
         started = SharingStarted.WhileSubscribed(5000),
         initialValue = false
     )
-
     val doesBottomSheetAppHaveChallenge: StateFlow<Boolean> = combine(
         _bottomSheetApp,
         modifiedAppsRepository.getChallengePackageIdsFlow()

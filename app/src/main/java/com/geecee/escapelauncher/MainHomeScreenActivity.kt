@@ -49,6 +49,7 @@ import com.geecee.escapelauncher.core.theme.BackgroundColor
 import com.geecee.escapelauncher.core.theme.EscapeTheme
 import com.geecee.escapelauncher.utils.messagingInitializer
 import com.geecee.escapelauncher.core.common.configureFullScreenMode
+import com.geecee.escapelauncher.core.common.formatScreenTime
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -130,7 +131,7 @@ class MainHomeScreenActivity : ComponentActivity() {
 
                     Log.i(
                         "INFO",
-                        "Screen turned off with app $packageName open, stopping screen time counting at " + AppUtils.formatScreenTime(
+                        "Screen turned off with app $packageName open, stopping screen time counting at " + formatScreenTime(
                             screenTimeViewModel.getScreenTime(packageName)
                         )
                     )

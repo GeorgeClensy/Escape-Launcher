@@ -137,7 +137,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.system.exitProcess
 import com.geecee.escapelauncher.MainAppViewModel as MainAppModel
-
+import com.geecee.escapelauncher.core.ui.utils.doHapticFeedBack
 
 //
 // MENUS
@@ -1175,7 +1175,7 @@ fun HiddenApps(
                     },
                     onDeleteClick = {
                         // Trigger haptic feedback
-                        AppUtils.doHapticFeedBack(haptics, hapticFeedbackEnabled)
+                        doHapticFeedBack(haptics, hapticFeedbackEnabled)
                         // Animate item out
                         visible = false
                         // Remove from your list after a short delay to let animation run

@@ -14,8 +14,6 @@ import android.graphics.Rect
 import android.os.Process.myUserHandle
 import android.util.Log
 import android.view.Window
-import androidx.compose.ui.hapticfeedback.HapticFeedback
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.core.graphics.createBitmap
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
@@ -27,7 +25,6 @@ import kotlinx.coroutines.launch
 import java.io.IOException
 import java.io.InputStream
 import java.text.Normalizer
-import java.util.concurrent.TimeUnit
 import android.graphics.Color as AndroidColor
 import androidx.compose.ui.graphics.Color as ComposeColor
 
@@ -167,27 +164,6 @@ object AppUtils {
     }
 
     /**
-     * Formats screen time into string in the style of 5h 3m
-     *
-     * @param milliseconds The amount of time to return formatted
-     *
-     * @author George Clensy
-     *
-     * @return Returns a string that looks like this: 5h 3m
-     */
-    fun formatScreenTime(milliseconds: Long): String {
-        val hours = TimeUnit.MILLISECONDS.toHours(milliseconds)
-        val minutes = TimeUnit.MILLISECONDS.toMinutes(milliseconds) % 60
-        val seconds = TimeUnit.MILLISECONDS.toSeconds(milliseconds) % 60
-
-        return when {
-            hours > 0 -> "${hours}h ${minutes}m"
-            minutes > 0 -> "${minutes}m"
-            else -> "${seconds}s"
-        }
-    }
-
-    /**
      *  Cache to store package name to app name mappings
      */
     private val appNameCache = mutableMapOf<String, String>()
@@ -255,18 +231,6 @@ object AppUtils {
 //            homeScreenModel.loadApps()
             homeScreenModel.showWorkApps.value = false
             homeScreenModel.showWorkBottomSheet.value = false
-        }
-    }
-
-    /**
-     * Performs haptic feedback
-     *
-     * @param hapticFeedback HapticFeedback instance
-     * @param enabled Whether haptic feedback is enabled from settings
-     */
-    fun doHapticFeedBack(hapticFeedback: HapticFeedback, enabled: Boolean) {
-        if (enabled) {
-            hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
         }
     }
 

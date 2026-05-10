@@ -1,4 +1,4 @@
-package com.geecee.escapelauncher.utils
+package com.geecee.escapelauncher.core.common
 
 import android.content.Context
 import android.content.pm.LauncherApps
