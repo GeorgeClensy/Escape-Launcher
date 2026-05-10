@@ -17,12 +17,13 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 
 @HiltViewModel
 class AppsListViewModel @Inject constructor(
-    settingsRepository: SettingsRepository,
-    appsRepository: AppsRepository,
-    modifiedAppsRepository: ModifiedAppsRepository
+    private val settingsRepository: SettingsRepository,
+    private val appsRepository: AppsRepository,
+    private val modifiedAppsRepository: ModifiedAppsRepository
 ) : ViewModel() {
     val showScreenTimeApp = settingsRepository.showScreenTimeApp
     val appsAlignment = settingsRepository.appsAlignment.map { alignment ->
@@ -87,4 +88,63 @@ class AppsListViewModel @Inject constructor(
         started = SharingStarted.WhileSubscribed(5000),
         initialValue = emptyList()
     )
+    
+    // Bottom sheet
+    private val _showBottomSheet = MutableStateFlow(false)
+    val showBottomSheet: StateFlow<Boolean> = _showBottomSheet.asStateFlow()
+    fun setBottomSheetVisible(visibility: Boolean) {
+        _showBottomSheet.value = visibility
+    }
+
+    fun setBottomSheetApp(app: InstalledApp?) {
+        _bottomSheetApp.value = app
+    }
+
+    fun addFavourite(packageId: String) {
+        viewModelScope.launch {
+            modifiedAppsRepository.addFavourite(packageId)
+        }
+    }
+
+    fun removeFavourite(packageId: String) {
+        viewModelScope.launch {
+            modifiedAppsRepository.removeFavourite(packageId)
+        }
+    }
+
+    private val _bottomSheetApp = MutableStateFlow<InstalledApp?>(null)
+    val botttomSheetApp: StateFlow<InstalledApp?> = _bottomSheetApp.asStateFlow()
+
+    val isBottomSheetAppFavourite: StateFlow<Boolean> = combine(
+        _bottomSheetApp,
+        modifiedAppsRepository.getFavouriteAppsInOrderFlow()
+    ) { app, favourites ->
+        app?.let { selectedApp ->
+            favourites.any { it.packageId == selectedApp.packageName }
+        } ?: false
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = false
+    )
+
+    val doesBottomSheetAppHaveChallenge: StateFlow<Boolean> = combine(
+        _bottomSheetApp,
+        modifiedAppsRepository.getChallengePackageIdsFlow()
+    ) { app, challenges ->
+        app?.let { selectedApp ->
+            challenges.any { it == selectedApp.packageName }
+        } ?: false
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = false
+    )
+
+    // Work Apps
+    private val _showWorkApps = MutableStateFlow(false)
+    val showWorkApps: StateFlow<Boolean> = _showWorkApps.asStateFlow()
+    fun setShowWorkApps(show: Boolean) {
+        _showWorkApps.value = show
+    }
 }

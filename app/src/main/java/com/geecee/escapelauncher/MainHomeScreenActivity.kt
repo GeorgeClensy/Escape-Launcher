@@ -164,15 +164,6 @@ class MainHomeScreenActivity : ComponentActivity() {
             }
             viewModel.isAppOpened = false
         }
-
-        // Reset home
-        try {
-            //todo: fix private space going home when u try and sign in
-            AppUtils.resetHome(homeScreenModel, viewModel.shouldGoHomeOnResume.value)
-            viewModel.shouldGoHomeOnResume.value = false
-        } catch (ex: Exception) {
-            Log.e("ERROR", ex.toString())
-        }
     }
 
     override fun onDestroy() {
@@ -184,16 +175,6 @@ class MainHomeScreenActivity : ComponentActivity() {
         }
         if (::packageChangeReceiver.isInitialized) {
             unregisterReceiver(packageChangeReceiver)
-        }
-    }
-
-    override fun onPause() {
-        super.onPause()
-
-        try {
-            AppUtils.resetHome(homeScreenModel, true)
-        } catch (ex: Exception) {
-            Log.e("ERROR", ex.toString())
         }
     }
 

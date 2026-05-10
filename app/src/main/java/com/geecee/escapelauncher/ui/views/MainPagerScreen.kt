@@ -111,8 +111,18 @@ fun MainPagerScreen(
                 )
 
                 1 -> AppsList(
-                    homeScreenModel = homeScreenModel,
-                    isBeingShown = homeScreenModel.pagerState.currentPage == 1
+                    scrollState = homeScreenModel.appsListScrollState,
+                    isBeingShown = homeScreenModel.pagerState.currentPage == 1,
+                    onGoHomeRequest = {
+                        mainAppModel.requestToGoHome()
+                    },
+                    onAppOpened = { app ->
+                        homeScreenModel.openApp(
+                            app = app,
+                            overrideChallenge = false,
+                            onAppOpened = { screenTimeViewModel.onAppOpened(it) }
+                        )
+                    }
                 )
             }
         } else {
@@ -125,8 +135,18 @@ fun MainPagerScreen(
                 )
 
                 2 -> AppsList(
-                    homeScreenModel = homeScreenModel,
-                    isBeingShown = homeScreenModel.pagerState.currentPage == 2
+                    scrollState = homeScreenModel.appsListScrollState,
+                    isBeingShown = homeScreenModel.pagerState.currentPage == 2,
+                    onGoHomeRequest = {
+                        mainAppModel.requestToGoHome()
+                    },
+                    onAppOpened = { app ->
+                        homeScreenModel.openApp(
+                            app = app,
+                            overrideChallenge = false,
+                            onAppOpened = { screenTimeViewModel.onAppOpened(it) }
+                        )
+                    }
                 )
             }
         }
