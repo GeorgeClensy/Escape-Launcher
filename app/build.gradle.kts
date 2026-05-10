@@ -99,6 +99,7 @@ dependencies {
     implementation(project(":feature:weather"))
     implementation(project(":feature:screentime"))
     implementation(project(":feature:settings"))
+    implementation(project(":feature:appslist"))
     implementation(project(":core:theme"))
 
     implementation(libs.androidx.hilt.navigation.compose)

@@ -1,4 +1,4 @@
-package com.geecee.escapelauncher
+package com.geecee.escapelauncher.feature.appslist
 
 import android.content.Context
 import androidx.compose.ui.Alignment
@@ -27,6 +27,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import com.geecee.escapelauncher.core.ui.R
 
 @HiltViewModel
 class AppsListViewModel @Inject constructor(

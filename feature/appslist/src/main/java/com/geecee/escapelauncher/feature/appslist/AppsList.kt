@@ -1,7 +1,6 @@
-package com.geecee.escapelauncher.ui.views
+package com.geecee.escapelauncher.feature.appslist
 
 import androidx.activity.ComponentActivity
-import androidx.activity.compose.LocalActivity
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -36,14 +35,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import com.geecee.escapelauncher.AppsListUiEvent
-import com.geecee.escapelauncher.AppsListViewModel
-import com.geecee.escapelauncher.R
+import com.geecee.escapelauncher.core.ui.R
 import com.geecee.escapelauncher.core.common.formatScreenTime
 import com.geecee.escapelauncher.core.common.goToAppInfo
 import com.geecee.escapelauncher.core.common.openApp
 import com.geecee.escapelauncher.core.common.uninstallApp
 import com.geecee.escapelauncher.core.model.InstalledApp
+import com.geecee.escapelauncher.core.theme.BackgroundColor
 import com.geecee.escapelauncher.core.theme.transparentHalf
 import com.geecee.escapelauncher.core.ui.composables.AnimatedPillSearchBar
 import com.geecee.escapelauncher.core.ui.composables.AppsListHeader
@@ -67,7 +65,7 @@ fun AppsList(
     onAppOpened: (app: InstalledApp) -> Unit = {},
     onGoHomeRequest: () -> Unit = {},
     appsListViewModel: AppsListViewModel = hiltViewModel(),
-    screenTimeViewModel: ScreenTimeViewModel = hiltViewModel(LocalActivity.current as ComponentActivity),
+    screenTimeViewModel: ScreenTimeViewModel = hiltViewModel(LocalContext.current as ComponentActivity),
     extraListItems: LazyListScope.(onAppClick: (InstalledApp) -> Unit, onAppLongClick: (InstalledApp) -> Unit) -> Unit = { _, _ -> },
     floatingContent: @Composable BoxScope.(onShowWorkApps: () -> Unit) -> Unit = { _ -> },
     workAppsContent: @Composable BoxScope.(onAppClick: (InstalledApp) -> Unit, onAppLongClick: (InstalledApp) -> Unit) -> Unit = { _, _ -> },
@@ -298,7 +296,7 @@ fun AppsList(
 @Composable
 private fun AppsListPreview() {
     val scrollState = rememberLazyListState()
-    Box(modifier = Modifier.background(com.geecee.escapelauncher.core.theme.BackgroundColor)) {
+    Box(modifier = Modifier.background(BackgroundColor)) {
         AppsList(
             scrollState = scrollState,
             isBeingShown = true,

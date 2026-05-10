@@ -32,6 +32,7 @@ import com.geecee.escapelauncher.core.common.doesPrivateSpaceExist
 import com.geecee.escapelauncher.core.common.doesWorkProfileExist
 import com.geecee.escapelauncher.core.common.isDefaultLauncher
 import com.geecee.escapelauncher.core.ui.composables.OpenChallenge
+import com.geecee.escapelauncher.feature.appslist.AppsList
 import com.geecee.escapelauncher.feature.screentime.ScreenTimeViewModel
 import com.geecee.escapelauncher.feature.securefolder.SecureFolderButton
 import com.geecee.escapelauncher.feature.securefolder.canUseSecureFolder
