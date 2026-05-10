@@ -57,7 +57,7 @@ import com.geecee.escapelauncher.feature.weather.WeatherViewModel
 import com.geecee.escapelauncher.core.ui.utils.doHapticFeedBack
 import com.geecee.escapelauncher.core.common.formatScreenTime
 import com.geecee.escapelauncher.utils.WidgetsScreen
-import com.geecee.escapelauncher.utils.analyticsProxy
+import com.geecee.escapelauncher.core.analytics.analyticsProxy
 import com.geecee.escapelauncher.feature.screentime.ScreenTimeViewModel
 import kotlinx.coroutines.delay
 import java.text.SimpleDateFormat

@@ -26,6 +26,7 @@ import java.io.IOException
 import java.io.InputStream
 import android.graphics.Color as AndroidColor
 import androidx.compose.ui.graphics.Color as ComposeColor
+import com.geecee.escapelauncher.core.analytics.analyticsProxy
 
 /**
  * Broadcast receiver to detect when the screen turns off,

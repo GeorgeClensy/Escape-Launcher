@@ -101,6 +101,7 @@ dependencies {
     implementation(project(":feature:settings"))
     implementation(project(":feature:appslist"))
     implementation(project(":core:theme"))
+    implementation(project(":core:analytics"))
 
     implementation(libs.androidx.hilt.navigation.compose)
 }

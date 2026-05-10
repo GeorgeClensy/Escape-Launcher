@@ -63,6 +63,7 @@ import androidx.core.graphics.drawable.toBitmap
 import com.geecee.escapelauncher.core.theme.BackgroundColor
 import com.geecee.escapelauncher.core.theme.ContentColor
 import com.geecee.escapelauncher.core.theme.primaryContentColor
+import com.geecee.escapelauncher.core.analytics.analyticsProxy
 
 // Constants for SharedPreferences used in widget saving/loading
 private const val WIDGET_PREFS_NAME = "widget_prefs"

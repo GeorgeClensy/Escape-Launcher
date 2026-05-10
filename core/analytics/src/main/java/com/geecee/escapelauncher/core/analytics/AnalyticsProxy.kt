@@ -1,4 +1,4 @@
-package com.geecee.escapelauncher.utils
+package com.geecee.escapelauncher.core.analytics
 
 import android.content.Context
 
