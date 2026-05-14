@@ -25,9 +25,10 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
@@ -42,7 +43,6 @@ import com.geecee.escapelauncher.utils.AppUtils
 import com.geecee.escapelauncher.utils.AppUtils.configureAnalytics
 import com.geecee.escapelauncher.core.model.InstalledApp
 import com.geecee.escapelauncher.utils.ScreenOffReceiver
-import com.geecee.escapelauncher.utils.getBooleanSetting
 import com.geecee.escapelauncher.feature.screentime.ScreenTimeViewModel
 import com.geecee.escapelauncher.core.data.worker.ClearOldDataWorker
 import com.geecee.escapelauncher.core.theme.BackgroundColor
@@ -54,6 +54,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
@@ -91,7 +92,7 @@ class MainHomeScreenActivity : ComponentActivity() {
      */
     override fun onCreate(savedInstanceState: Bundle?) {
         // Setup Splashscreen
-        installSplashScreen()
+        val splashScreen = installSplashScreen()
         super.onCreate(savedInstanceState)
 
         // Setup analytics
@@ -111,10 +112,26 @@ class MainHomeScreenActivity : ComponentActivity() {
         // Mark screen time as loaded (now handled by ScreenTimeViewModel)
         viewModel.isScreenTimeLoaded.value = true
 
+        var startDestination by mutableStateOf<String?>(null)
+
+        // Determine start destination before hiding splash screen
+        lifecycleScope.launch {
+            val isFirstTime = globalViewModel.firstTime.first()
+            startDestination = if (isFirstTime) "onboarding" else "home"
+        }
+
+        // Keep splash screen visible until we know where to go and essential data is loaded
+        splashScreen.setKeepOnScreenCondition {
+            startDestination == null || !viewModel.isAppsLoaded.value || !viewModel.isFavoritesLoaded.value
+        }
+
         // Set up the application content
         setContent {
-            EscapeTheme {
-                SetupNavHost(determineStartDestination(LocalContext.current))
+            val destination = startDestination
+            if (destination != null) {
+                EscapeTheme {
+                    SetupNavHost(destination)
+                }
             }
         }
 
@@ -184,31 +201,14 @@ class MainHomeScreenActivity : ComponentActivity() {
         setIntent(intent)
 
         if (intent.action == Intent.ACTION_MAIN && intent.hasCategory(Intent.CATEGORY_HOME)) {
-            AppUtils.resetHome(homeScreenModel)
-            viewModel.requestToGoHome()
-        }
-    }
-
-    /**
-     * Determines the start location for the NavHost
-     *
-     * @param context The context of the app
-     *
-     * @author George Clensy
-     *
-     * @see Settings
-     *
-     * @return Returns "home" if it is not the first time and "onboarding" if it is
-     */
-    private fun determineStartDestination(context: Context): String {
-        return when {
-            getBooleanSetting(
-                context,
-                context.resources.getString(R.string.FirstTime),
-                true
-            ) -> "onboarding"
-
-            else -> "home"
+            // Only navigate home if we've finished onboarding
+            lifecycleScope.launch {
+                val isFirstTime = globalViewModel.firstTime.first()
+                if (!isFirstTime) {
+                    AppUtils.resetHome(homeScreenModel)
+                    viewModel.requestToGoHome()
+                }
+            }
         }
     }
 

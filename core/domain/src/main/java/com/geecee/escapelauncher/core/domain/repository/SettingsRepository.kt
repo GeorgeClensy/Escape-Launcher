@@ -72,4 +72,7 @@ interface SettingsRepository {
 
     val showHiddenAppsInSearch: Flow<Boolean>
     suspend fun setShowHiddenAppsInSearch(enabled: Boolean)
+
+    val firstTime: Flow<Boolean>
+    suspend fun setFirstTime(enabled: Boolean)
 }

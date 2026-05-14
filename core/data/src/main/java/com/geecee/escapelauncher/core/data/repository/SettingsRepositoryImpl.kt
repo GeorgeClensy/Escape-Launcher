@@ -290,4 +290,13 @@ class SettingsRepositoryImpl @Inject constructor(
     override suspend fun setShowHiddenAppsInSearch(enabled: Boolean) {
         dataStore.edit { preferences -> preferences[PreferencesKeys.SHOW_HIDDEN_APPS_IN_SEARCH] = enabled }
     }
+
+    override val firstTime: Flow<Boolean>
+        get() = dataStore.data.map { preferences ->
+            preferences[PreferencesKeys.FIRST_TIME] ?: true
+        }
+
+    override suspend fun setFirstTime(enabled: Boolean) {
+        dataStore.edit { preferences -> preferences[PreferencesKeys.FIRST_TIME] = enabled }
+    }
 }

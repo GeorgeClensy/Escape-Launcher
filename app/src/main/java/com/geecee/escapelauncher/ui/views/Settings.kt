@@ -1269,6 +1269,7 @@ fun DevOptions(
 ) {
     val context = LocalContext.current
     val firstTimeHelp by viewModel.firstTimeHelp.collectAsState(initial = true)
+    val firstTime by viewModel.firstTime.collectAsState(initial = true)
     val doubleTapToLock by viewModel.doubleTapToLock.collectAsState(initial = false)
 
     LazyColumn(
@@ -1281,9 +1282,10 @@ fun DevOptions(
         item {
             SettingsSwitch(
                 "First time",
-                firstTimeHelp,
+                firstTimeHelp && firstTime,
                 onCheckedChange = {
                     viewModel.setFirstTimeHelp(it)
+                    viewModel.setFirstTime(it)
                 },
                 isTopOfGroup = true
             )

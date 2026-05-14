@@ -7,7 +7,6 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.provider.Settings
-import androidx.core.content.edit
 
 /**
  * Shows the launcher selector
@@ -54,19 +53,3 @@ fun isDefaultLauncher(context: Context): Boolean {
 }
 
 private const val REQUEST_ROLE_HOME_CODE = 678
-
-fun getBooleanSetting(context: Context, setting: String, defaultValue: Boolean): Boolean {
-    val sharedPreferences = context.getSharedPreferences(
-        Migration.UNIFIED_PREFS_NAME, Context.MODE_PRIVATE
-    )
-    return sharedPreferences.getBoolean(setting, defaultValue)
-}
-
-fun setBooleanSetting(context: Context, setting: String, value: Boolean) {
-    val sharedPreferences = context.getSharedPreferences(
-        Migration.UNIFIED_PREFS_NAME, Context.MODE_PRIVATE
-    )
-    sharedPreferences.edit {
-        putBoolean(setting, value)
-    }
-}

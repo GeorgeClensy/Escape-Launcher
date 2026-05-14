@@ -17,4 +17,11 @@ class GlobalViewModel @Inject constructor(
             repository.setAllowAnalytics(value)
         }
     }
+
+    val firstTime = repository.firstTime
+    fun setFirstTime(value: Boolean) {
+        viewModelScope.launch {
+            repository.setFirstTime(value)
+        }
+    }
 }

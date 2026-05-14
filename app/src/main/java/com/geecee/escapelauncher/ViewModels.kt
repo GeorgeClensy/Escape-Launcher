@@ -19,16 +19,18 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.geecee.escapelauncher.core.data.repository.AppsRepository
 import com.geecee.escapelauncher.core.data.repository.ModifiedAppsRepository
+import com.geecee.escapelauncher.core.domain.repository.SettingsRepository
 import com.geecee.escapelauncher.core.model.InstalledApp
 import com.geecee.escapelauncher.utils.AppUtils
-import com.geecee.escapelauncher.utils.getBooleanSetting
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -53,38 +55,21 @@ class HomeScreenModel(application: Application, val mainAppViewModel: MainAppVie
 
     val appsListScrollState = LazyListState()
 
+    val hideScreenTimePage = mainAppViewModel.settingsRepository.hideScreenTimePage.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.Eagerly,
+        initialValue = false
+    )
+
     val pagerState = PagerState(
-        currentPage = if (getBooleanSetting(
-                context = mainAppViewModel.getContext(),
-                setting = mainAppViewModel.getContext().resources.getString(R.string.hideScreenTimePage),
-                defaultValue = false
-            )
-        ) {
-            0
-        } else {
-            1
-        },
+        currentPage = if (hideScreenTimePage.value) 0 else 1,
         currentPageOffsetFraction = 0f
     ) {
-        if (getBooleanSetting(
-                context = mainAppViewModel.getContext(),
-                setting = mainAppViewModel.getContext().resources.getString(R.string.hideScreenTimePage),
-                defaultValue = false
-            )
-        ) {
-            2
-        } else {
-            3
-        }
+        if (hideScreenTimePage.value) 2 else 3
     }
 
     private fun getMainPageIndex(): Int {
-        val hideScreenTime = getBooleanSetting(
-            context = mainAppViewModel.getContext(),
-            setting = mainAppViewModel.getContext().resources.getString(R.string.hideScreenTimePage),
-            defaultValue = false
-        )
-        return if (hideScreenTime) 0 else 1
+        return if (hideScreenTimePage.value) 0 else 1
     }
 
     suspend fun goToMainPage() {
@@ -204,7 +189,8 @@ class HomeScreenModelFactory(
 class MainAppViewModel @Inject constructor(
     application: Application,
     val modifiedAppsRepository: ModifiedAppsRepository,
-    val appsRepository: AppsRepository
+    val appsRepository: AppsRepository,
+    val settingsRepository: SettingsRepository
 ) : AndroidViewModel(application) {
     private val appContext: android.content.Context = application.applicationContext // The app context
 

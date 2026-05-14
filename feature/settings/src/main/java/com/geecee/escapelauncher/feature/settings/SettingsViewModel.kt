@@ -235,7 +235,13 @@ class DevOptionsPageViewModel @Inject constructor(
         }
     }
 
-    val weatherAppPackage = repository.weatherAppPackage
+    val firstTime = repository.firstTime
+    fun setFirstTime(value: Boolean) {
+        viewModelScope.launch {
+            repository.setFirstTime(value)
+        }
+    }
+
     fun setWeatherAppPackage(value: String) {
         viewModelScope.launch {
             repository.setWeatherAppPackage(value)

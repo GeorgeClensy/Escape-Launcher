@@ -82,9 +82,7 @@ import com.geecee.escapelauncher.core.theme.primaryContentColor
 import com.geecee.escapelauncher.core.ui.composables.AutoResizingText
 import com.geecee.escapelauncher.core.ui.composables.BulkManager
 import com.geecee.escapelauncher.core.ui.composables.SettingsSpacer
-import com.geecee.escapelauncher.utils.getBooleanSetting
 import com.geecee.escapelauncher.utils.isDefaultLauncher
-import com.geecee.escapelauncher.utils.setBooleanSetting
 import com.geecee.escapelauncher.utils.showLauncherSelector
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
@@ -183,21 +181,7 @@ fun Onboarding(
 
     val coroutineScope = rememberCoroutineScope()
 
-    // So you go back to the right bit after changing launcher
-    val startIndex = remember {
-        if (
-            getBooleanSetting(
-                mainAppViewModel.getContext(),
-                mainAppViewModel.getContext().getString(R.string.WasChangingLauncher),
-                false
-            )
-        ) {
-            pages.indexOfFirst { it.route == "default_launcher" }.coerceAtLeast(0)
-        } else 0
-    }
-
     val pagerState = rememberPagerState (
-        initialPage = startIndex,
         pageCount = { pages.size }
     )
 
@@ -273,18 +257,7 @@ fun Onboarding(
                             launchSingleTop = true
                         }
 
-                        setBooleanSetting(
-                            mainAppViewModel.getContext(),
-                            mainAppViewModel.getContext()
-                                .resources.getString(R.string.FirstTime),
-                            false
-                        )
-                        setBooleanSetting(
-                            mainAppViewModel.getContext(),
-                            mainAppViewModel.getContext()
-                                .resources.getString(R.string.WasChangingLauncher),
-                            false
-                        )
+                        globalViewModel.setFirstTime(false)
 
                         mainAppViewModel.getWindow()?.let {
                             configureFullScreenMode(it)
@@ -551,7 +524,9 @@ fun FavoritesSelectionScreen(
 
 @Composable
 fun DefaultLauncherScreen(
-    activity: Activity, onNext: () -> Unit, onPrev: () -> Unit
+    activity: Activity,
+    onNext: () -> Unit,
+    onPrev: () -> Unit
 ) {
     Box(Modifier.fillMaxSize().padding(start = 30.dp, end = 30.dp)) {
         Column {
@@ -575,11 +550,6 @@ fun DefaultLauncherScreen(
             if (!isDefaultLauncher(activity)) {
                 Button(
                     onClick = {
-                        setBooleanSetting(
-                            activity,
-                            activity.resources.getString(R.string.WasChangingLauncher),
-                            true
-                        )
                         activity.showLauncherSelector()
                     }, modifier = Modifier, colors = ButtonColors(
                         primaryContentColor, BackgroundColor, primaryContentColor, BackgroundColor
