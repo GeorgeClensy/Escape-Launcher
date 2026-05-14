@@ -102,6 +102,7 @@ dependencies {
     implementation(project(":feature:appslist"))
     implementation(project(":core:theme"))
     implementation(project(":core:analytics"))
+    implementation(project(":core:cloudmessaging"))
 
     implementation(libs.androidx.hilt.navigation.compose)
 }

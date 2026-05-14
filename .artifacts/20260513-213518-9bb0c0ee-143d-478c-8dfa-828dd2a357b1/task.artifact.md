@@ -1,0 +1,22 @@
+# Task Management
+
+- [/] Researching Project Structure and Flavor Configuration
+	- [x] List root directory files
+	- [x] Read `settings.gradle.kts`
+	- [x] Read `app/build.gradle.kts`
+	- [x] Read `FlavoursConventionPlugin.kt`
+	- [x] Read `google.gradle.kts`
+	- [x] Create directory structure for `core:cloudmessaging`
+- [ ] Create Implementation Plan
+- [ ] Move Files and Update Packages
+	- [ ] Move `MessagingInitializer.kt`
+	- [ ] Move `NotificationManager.kt` (and Rename to `MessagingService.kt` if appropriate, but keeping name for now)
+	- [ ] Move `MessagingInitializerImpl.kt` (Google)
+	- [ ] Move `MessagingInitializerImpl.kt` (FOSS)
+- [ ] Update `app` module
+	- [ ] Update `EscapeApplication.kt` imports
+	- [ ] Update `MainHomeScreenActivity.kt` imports
+	- [ ] Update `app/src/google/AndroidManifest.xml`
+	- [ ] Add dependency to `app/build.gradle.kts`
+- [ ] Verification
+	- [ ] Build the project

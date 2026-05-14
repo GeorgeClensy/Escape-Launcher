@@ -2,10 +2,10 @@ package com.geecee.escapelauncher
 
 import android.app.Application
 import com.geecee.escapelauncher.core.analytics.AnalyticsProxyImpl
-import com.geecee.escapelauncher.utils.MessagingInitializerImpl
+import com.geecee.escapelauncher.core.cloudmessaging.MessagingInitializerImpl
 import com.geecee.escapelauncher.core.analytics.analyticsProxy
-import com.geecee.escapelauncher.utils.managers.Migration
-import com.geecee.escapelauncher.utils.messagingInitializer
+import com.geecee.escapelauncher.utils.Migration
+import com.geecee.escapelauncher.core.cloudmessaging.messagingInitializer
 import com.geecee.escapelauncher.feature.weather.WeatherImpl
 import com.geecee.escapelauncher.feature.weather.weatherProxy
 import dagger.hilt.android.HiltAndroidApp

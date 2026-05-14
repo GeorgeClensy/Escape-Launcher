@@ -47,7 +47,7 @@ import com.geecee.escapelauncher.feature.screentime.ScreenTimeViewModel
 import com.geecee.escapelauncher.core.data.worker.ClearOldDataWorker
 import com.geecee.escapelauncher.core.theme.BackgroundColor
 import com.geecee.escapelauncher.core.theme.EscapeTheme
-import com.geecee.escapelauncher.utils.messagingInitializer
+import com.geecee.escapelauncher.core.cloudmessaging.messagingInitializer
 import com.geecee.escapelauncher.core.common.configureFullScreenMode
 import com.geecee.escapelauncher.core.common.formatScreenTime
 import dagger.hilt.android.AndroidEntryPoint
