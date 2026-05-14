@@ -44,3 +44,5 @@ fabric.properties
 *.log
 *.temp
 *.tmp
+
+.artifacts
