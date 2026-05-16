@@ -126,13 +126,13 @@ import com.geecee.escapelauncher.utils.CustomWidgetPicker
 import com.geecee.escapelauncher.utils.EscapeAccessibilityService
 import com.geecee.escapelauncher.utils.WIDGET_HOST_ID
 import com.geecee.escapelauncher.utils.getSavedWidgetId
-import com.geecee.escapelauncher.utils.isDefaultLauncher
+import com.geecee.escapelauncher.core.common.isDefaultLauncher
 import com.geecee.escapelauncher.utils.isWidgetConfigurable
 import com.geecee.escapelauncher.utils.launchWidgetConfiguration
 import com.geecee.escapelauncher.utils.removeWidget
 import com.geecee.escapelauncher.utils.saveWidgetId
-import com.geecee.escapelauncher.utils.showLauncherSelector
-import com.geecee.escapelauncher.utils.showLauncherSettingsMenu
+import com.geecee.escapelauncher.core.common.showLauncherSelector
+import com.geecee.escapelauncher.core.common.showLauncherSettingsMenu
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.system.exitProcess

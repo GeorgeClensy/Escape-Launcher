@@ -82,8 +82,8 @@ import com.geecee.escapelauncher.core.theme.primaryContentColor
 import com.geecee.escapelauncher.core.ui.composables.AutoResizingText
 import com.geecee.escapelauncher.core.ui.composables.BulkManager
 import com.geecee.escapelauncher.core.ui.composables.SettingsSpacer
-import com.geecee.escapelauncher.utils.isDefaultLauncher
-import com.geecee.escapelauncher.utils.showLauncherSelector
+import com.geecee.escapelauncher.core.common.isDefaultLauncher
+import com.geecee.escapelauncher.core.common.showLauncherSelector
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.delay
