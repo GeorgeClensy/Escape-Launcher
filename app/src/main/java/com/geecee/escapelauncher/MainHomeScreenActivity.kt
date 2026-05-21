@@ -47,6 +47,7 @@ import com.geecee.escapelauncher.feature.screentime.ScreenTimeViewModel
 import com.geecee.escapelauncher.core.data.worker.ClearOldDataWorker
 import com.geecee.escapelauncher.core.theme.BackgroundColor
 import com.geecee.escapelauncher.core.theme.EscapeTheme
+import com.geecee.escapelauncher.feature.widgets.getAppWidgetHost
 import com.geecee.escapelauncher.core.cloudmessaging.messagingInitializer
 import com.geecee.escapelauncher.core.common.configureFullScreenMode
 import com.geecee.escapelauncher.core.common.formatScreenTime
@@ -166,6 +167,24 @@ class MainHomeScreenActivity : ComponentActivity() {
 
         // Subscribe to notifications via flavor-specific initializer
         messagingInitializer.initialize(this)
+    }
+
+    override fun onStart() {
+        super.onStart()
+        try {
+            getAppWidgetHost(this).startListening()
+        } catch (e: Exception) {
+            Log.e("Widgets", "Error starting AppWidgetHost in onStart", e)
+        }
+    }
+
+    override fun onStop() {
+        super.onStop()
+        try {
+            getAppWidgetHost(this).stopListening()
+        } catch (e: Exception) {
+            Log.e("Widgets", "Error stopping AppWidgetHost in onStop", e)
+        }
     }
 
     override fun onResume() {

@@ -92,6 +92,9 @@ dependencies {
     implementation(project(":core:model"))
     implementation(project(":core:common"))
     implementation(project(":core:domain"))
+    implementation(project(":core:theme"))
+    implementation(project(":core:analytics"))
+    implementation(project(":core:cloudmessaging"))
     implementation(project(":feature:homescreen"))
     implementation(project(":feature:workapps"))
     implementation(project(":feature:privatespace"))
@@ -100,9 +103,7 @@ dependencies {
     implementation(project(":feature:screentime"))
     implementation(project(":feature:settings"))
     implementation(project(":feature:appslist"))
-    implementation(project(":core:theme"))
-    implementation(project(":core:analytics"))
-    implementation(project(":core:cloudmessaging"))
+    implementation(project(":feature:widgets"))
 
     implementation(libs.androidx.hilt.navigation.compose)
 }

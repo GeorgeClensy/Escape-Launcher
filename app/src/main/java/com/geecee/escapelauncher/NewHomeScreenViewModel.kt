@@ -44,4 +44,5 @@ class NewHomeScreenViewModel @Inject constructor(
     val widgetOffset = repository.widgetOffset
     val widgetHeight = repository.widgetHeight
     val widgetWidth = repository.widgetWidth
+    val widgetId = repository.widgetId
 }

@@ -3,21 +3,14 @@
 package com.geecee.escapelauncher.ui.views
 
 import android.app.Activity
-import android.appwidget.AppWidgetHost
-import android.appwidget.AppWidgetHostView
-import android.appwidget.AppWidgetManager
-import android.appwidget.AppWidgetProviderInfo
 import android.content.Context
 import android.content.Intent
 import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
 import android.os.Build
 import android.provider.Settings
-import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.LocalActivity
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -60,7 +53,6 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -88,15 +80,14 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.geecee.escapelauncher.BuildConfig
-import com.geecee.escapelauncher.feature.settings.DevOptionsPageViewModel
 import com.geecee.escapelauncher.GlobalViewModel
 import com.geecee.escapelauncher.HiddenAppsViewModel
 import com.geecee.escapelauncher.HomeScreenModel
-import com.geecee.escapelauncher.feature.settings.MainSettingsPageViewModel
 import com.geecee.escapelauncher.OpenChallengeViewModel
 import com.geecee.escapelauncher.R
-import com.geecee.escapelauncher.feature.settings.SettingsViewModel
-import com.geecee.escapelauncher.feature.settings.WidgetOptionsPageViewModel
+import com.geecee.escapelauncher.core.common.isDefaultLauncher
+import com.geecee.escapelauncher.core.common.showLauncherSelector
+import com.geecee.escapelauncher.core.common.showLauncherSettingsMenu
 import com.geecee.escapelauncher.core.model.InstalledApp
 import com.geecee.escapelauncher.core.theme.AppColourScheme
 import com.geecee.escapelauncher.core.theme.CardContainerColor
@@ -113,31 +104,24 @@ import com.geecee.escapelauncher.core.ui.composables.FooterBox
 import com.geecee.escapelauncher.core.ui.composables.SettingsButton
 import com.geecee.escapelauncher.core.ui.composables.SettingsNavigationItem
 import com.geecee.escapelauncher.core.ui.composables.SettingsSingleChoiceSegmentedButtons
-import com.geecee.escapelauncher.core.ui.composables.SettingsSlider
 import com.geecee.escapelauncher.core.ui.composables.SettingsSpacer
 import com.geecee.escapelauncher.core.ui.composables.SettingsSwipeableButton
 import com.geecee.escapelauncher.core.ui.composables.SettingsSwitch
 import com.geecee.escapelauncher.core.ui.composables.nameResFromId
+import com.geecee.escapelauncher.core.ui.utils.doHapticFeedBack
+import com.geecee.escapelauncher.feature.settings.DevOptionsPageViewModel
+import com.geecee.escapelauncher.feature.settings.MainSettingsPageViewModel
+import com.geecee.escapelauncher.feature.settings.SettingsViewModel
+import com.geecee.escapelauncher.feature.settings.widget.WidgetOptions
 import com.geecee.escapelauncher.feature.weather.WeatherViewModel
 import com.geecee.escapelauncher.utils.AppUtils
 import com.geecee.escapelauncher.utils.AppUtils.loadTextFromAssets
 import com.geecee.escapelauncher.utils.AppUtils.resetHome
-import com.geecee.escapelauncher.utils.CustomWidgetPicker
 import com.geecee.escapelauncher.utils.EscapeAccessibilityService
-import com.geecee.escapelauncher.utils.WIDGET_HOST_ID
-import com.geecee.escapelauncher.utils.getSavedWidgetId
-import com.geecee.escapelauncher.core.common.isDefaultLauncher
-import com.geecee.escapelauncher.utils.isWidgetConfigurable
-import com.geecee.escapelauncher.utils.launchWidgetConfiguration
-import com.geecee.escapelauncher.utils.removeWidget
-import com.geecee.escapelauncher.utils.saveWidgetId
-import com.geecee.escapelauncher.core.common.showLauncherSelector
-import com.geecee.escapelauncher.core.common.showLauncherSettingsMenu
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.system.exitProcess
 import com.geecee.escapelauncher.MainAppViewModel as MainAppModel
-import com.geecee.escapelauncher.core.ui.utils.doHapticFeedBack
 
 //
 // MENUS
@@ -241,7 +225,7 @@ fun Settings(
                 "widget",
                 enterTransition = { fadeIn(tween(300)) },
                 exitTransition = { fadeOut(tween(300)) }) {
-                WidgetOptions(mainAppModel.getContext()) { navController.popBackStack() }
+                WidgetOptions(onBackClick = { navController.popBackStack() })
             }
             composable(
                 "bulkHiddenApps",
@@ -323,7 +307,6 @@ fun Settings(
  *
  * @see Settings
  */
-@Suppress("AssignedValueIsNeverRead")
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun MainSettingsPage(
@@ -857,231 +840,6 @@ fun ThemeOptions(
     }
 }
 
-/**
- * Widget Setup
- *
- * @param context Context is required for some functions
- * @param goBack When back button is pressed
- *
- * @see Settings
- */
-@Suppress("AssignedValueIsNeverRead", "VariableNeverRead")
-@OptIn(ExperimentalFoundationApi::class)
-@Composable
-fun WidgetOptions(
-    context: Context,
-    viewModel: WidgetOptionsPageViewModel = hiltViewModel(),
-    goBack: () -> Unit
-) {
-    val appWidgetManager = AppWidgetManager.getInstance(context)
-    val appWidgetHost = remember { AppWidgetHost(context, WIDGET_HOST_ID) }
-    var appWidgetId by remember { mutableIntStateOf(getSavedWidgetId(context)) }
-    var appWidgetHostView by remember { mutableStateOf<AppWidgetHostView?>(null) }
-    var showCustomPicker by remember { mutableStateOf(false) }
-
-    val widgetOffset by viewModel.widgetOffset.collectAsState(initial = 0f)
-    val widgetHeight by viewModel.widgetHeight.collectAsState(initial = 125f)
-    val widgetWidth by viewModel.widgetWidth.collectAsState(initial = 250f)
-
-    // Called whenever the widget cannot be loaded or bound
-    fun widgetCouldNotBind(message: String) {
-        Log.e("Widgets", "Widget could not bind: $message")
-        goBack()
-    }
-
-    // Shows the widget permission dialogue
-    val bindWidgetPermissionLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.StartActivityForResult()
-    ) { result ->
-        if (result.resultCode != Activity.RESULT_OK) {
-            widgetCouldNotBind("User denied widget bind permission")
-        } else {
-            // Re-attempt to bind the widget after permission is granted
-            val tempId = appWidgetHost.allocateAppWidgetId()
-            val dummyProviders = appWidgetManager.installedProviders
-            val testProvider = dummyProviders.firstOrNull()
-
-            if (testProvider != null) {
-                try {
-                    if (appWidgetManager.bindAppWidgetIdIfAllowed(tempId, testProvider.provider)) {
-                        // Widget bound, now proceed with setup if needed or just acknowledge
-                        // For now, we just acknowledge and let the user select a widget from the picker
-                    } else {
-                        widgetCouldNotBind("Widget binding still not allowed after permission grant.")
-                    }
-                } catch (e: Exception) {
-                    widgetCouldNotBind("Failed to re-bind widget after permission grant: ${e.message}")
-                }
-            } else {
-                widgetCouldNotBind("No available widget providers found after permission grant.")
-            }
-        }
-    }
-
-    LaunchedEffect(Unit) {
-        val tempId = appWidgetHost.allocateAppWidgetId()
-        val dummyProviders = appWidgetManager.installedProviders
-        val testProvider = dummyProviders.firstOrNull()
-
-        if (testProvider != null) {
-            val alreadyAllowed =
-                appWidgetManager.bindAppWidgetIdIfAllowed(tempId, testProvider.provider)
-
-            if (!alreadyAllowed) {
-                val bindIntent = Intent(AppWidgetManager.ACTION_APPWIDGET_BIND).apply {
-                    putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, tempId)
-                    putExtra(AppWidgetManager.EXTRA_APPWIDGET_PROVIDER, testProvider.provider)
-                }
-                try {
-                    bindWidgetPermissionLauncher.launch(bindIntent)
-                } catch (e: Exception) {
-                    widgetCouldNotBind("Failed to launch widget bind request: ${e.message}")
-                }
-            }
-        } else {
-            widgetCouldNotBind("No available widget providers found to check permission")
-        }
-    }
-
-    // Common setup logic for binding/creating widget
-    fun setupWidget(widgetId: Int, info: AppWidgetProviderInfo?) {
-        if (widgetId == -1) {
-            widgetCouldNotBind("Invalid widget ID (-1)")
-            return
-        }
-        if (info == null) {
-            widgetCouldNotBind("AppWidgetProviderInfo was null")
-            return
-        }
-
-        appWidgetId = widgetId
-        saveWidgetId(context, widgetId)
-
-        if (isWidgetConfigurable(context, widgetId)) {
-            try {
-                launchWidgetConfiguration(context, info, widgetId)
-            } catch (e: Exception) {
-                widgetCouldNotBind("Failed to launch widget configuration: ${e.message}")
-            }
-        } else {
-            try {
-                appWidgetHostView = appWidgetHost.createView(context, widgetId, info).apply {
-                    setAppWidget(widgetId, info)
-                }
-            } catch (e: Exception) {
-                widgetCouldNotBind("Failed to create widget view: ${e.message}")
-            }
-        }
-    }
-
-    if (showCustomPicker) {
-        CustomWidgetPicker(
-            onWidgetSelected = { info ->
-                val newId = appWidgetHost.allocateAppWidgetId()
-
-                try {
-                    if (appWidgetManager.bindAppWidgetIdIfAllowed(newId, info.provider)) {
-                        setupWidget(newId, info)
-                        showCustomPicker = false
-                    } else {
-                        widgetCouldNotBind("AppWidgetManager refused to bind the selected widget")
-                    }
-                } catch (e: Exception) {
-                    widgetCouldNotBind("Exception while trying to bind widget: ${e.message}")
-                }
-            },
-            onDismiss = { showCustomPicker = false }
-        )
-    }
-
-
-    LazyColumn(
-        verticalArrangement = Arrangement.Top,
-        horizontalAlignment = Alignment.Start,
-        modifier = Modifier.fillMaxSize()
-    )
-    {
-        item { EscapeHeader(goBack, stringResource(R.string.widget)) }
-
-        item {
-            SettingsButton(
-                label = stringResource(R.string.remove_widget),
-                isTopOfGroup = true,
-                onClick = {
-                    removeWidget(context)
-                    appWidgetHostView = null
-                    appWidgetId = -1
-                }
-            )
-        }
-
-        item {
-            SettingsButton(
-                label = stringResource(R.string.select_widget),
-                isBottomOfGroup = true,
-                onClick = { showCustomPicker = true }
-            )
-        }
-
-        item { SettingsSpacer() }
-
-        // Offset slider
-        item {
-            SettingsSlider(
-                label = stringResource(R.string.offset),
-                value = widgetOffset,
-                onValueChange = {
-                    viewModel.setWidgetOffset(it)
-                },
-                valueRange = -20f..20f,
-                steps = 19,
-                resetButtonContentDescription = stringResource(R.string.reset_to_default),
-                onReset = {
-                    viewModel.setWidgetOffset(0f)
-                },
-                isTopOfGroup = true
-            )
-        }
-
-        // Height slider
-        item {
-            SettingsSlider(
-                label = stringResource(R.string.height),
-                value = widgetHeight,
-                onValueChange = {
-                    viewModel.setWidgetHeight(it)
-                },
-                valueRange = 100f..400f,
-                steps = 9,
-                resetButtonContentDescription = stringResource(R.string.reset_to_default),
-                onReset = {
-                    viewModel.setWidgetHeight(125f)
-                }
-            )
-        }
-
-        // Width slider
-        item {
-            SettingsSlider(
-                label = stringResource(R.string.width),
-                value = widgetWidth,
-                onValueChange = {
-                    viewModel.setWidgetWidth(it)
-                },
-                valueRange = 100f..400f,
-                steps = 9,
-                resetButtonContentDescription = stringResource(R.string.reset_to_default),
-                onReset = {
-                    viewModel.setWidgetWidth(250f)
-                },
-                isBottomOfGroup = true
-            )
-        }
-
-        item { SettingsSpacer() }
-        item { SettingsSpacer() }
-    }
-}
 
 /**
  * Page that lets you manage hidden apps
@@ -1092,7 +850,6 @@ fun WidgetOptions(
  * @see Settings
  */
 @OptIn(ExperimentalFoundationApi::class)
-@Suppress("AssignedValueIsNeverRead")
 @Composable
 fun HiddenApps(
     mainAppModel: MainAppModel,

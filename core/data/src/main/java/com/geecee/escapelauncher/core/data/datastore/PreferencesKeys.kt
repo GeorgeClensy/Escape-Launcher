@@ -34,6 +34,7 @@ object PreferencesKeys {
     val WIDGET_OFFSET = floatPreferencesKey(name = "widget_offset")
     val WIDGET_HEIGHT = floatPreferencesKey(name = "widget_height")
     val WIDGET_WIDTH = floatPreferencesKey(name = "widget_width")
+    val WIDGET_ID = intPreferencesKey(name = "widget_ID")
 
     //Theme
     val THEME = intPreferencesKey(name = "theme")

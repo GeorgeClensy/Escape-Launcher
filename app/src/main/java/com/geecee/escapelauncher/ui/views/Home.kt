@@ -56,7 +56,7 @@ import com.geecee.escapelauncher.feature.homescreen.ClockViewModel
 import com.geecee.escapelauncher.feature.weather.WeatherViewModel
 import com.geecee.escapelauncher.core.ui.utils.doHapticFeedBack
 import com.geecee.escapelauncher.core.common.formatScreenTime
-import com.geecee.escapelauncher.utils.WidgetsScreen
+import com.geecee.escapelauncher.feature.widgets.WidgetsScreen
 import com.geecee.escapelauncher.core.analytics.analyticsProxy
 import com.geecee.escapelauncher.feature.screentime.ScreenTimeViewModel
 import kotlinx.coroutines.delay
@@ -93,6 +93,7 @@ fun HomeScreen(
     val hapticFeedbackEnabled by homeScreenViewModel.hapticFeedBackEnabled.collectAsState(initial = true)
     val widgetHeight by homeScreenViewModel.widgetHeight.collectAsState(initial = 125f)
     val widgetWidth by homeScreenViewModel.widgetWidth.collectAsState(initial = 250f)
+    val widgetId by homeScreenViewModel.widgetId.collectAsState(initial = -1)
     val appUsageList by screenTimeViewModel.appUsageList.collectAsState()
 
     val (hour, minute, _) = timeParts
@@ -260,6 +261,7 @@ fun HomeScreen(
             }
 
             WidgetsScreen(
+                widgetId = widgetId,
                 context = mainAppModel.getContext(), modifier = Modifier
                     .offset {
                         IntOffset(

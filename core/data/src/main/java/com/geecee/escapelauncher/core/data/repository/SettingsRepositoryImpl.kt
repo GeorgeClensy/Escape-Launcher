@@ -299,4 +299,13 @@ class SettingsRepositoryImpl @Inject constructor(
     override suspend fun setFirstTime(enabled: Boolean) {
         dataStore.edit { preferences -> preferences[PreferencesKeys.FIRST_TIME] = enabled }
     }
+
+    override val widgetId: Flow<Int>
+        get() = dataStore.data.map { preferences ->
+            preferences[PreferencesKeys.WIDGET_ID] ?: -1
+        }
+
+    override suspend fun setWidgetId(value: Int) {
+        dataStore.edit { preferences -> preferences[PreferencesKeys.WIDGET_ID] = value }
+    }
 }
