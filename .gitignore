@@ -46,3 +46,4 @@ fabric.properties
 *.tmp
 
 .artifacts
+graphify-out/
