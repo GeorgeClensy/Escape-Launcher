@@ -56,9 +56,9 @@ import com.geecee.escapelauncher.feature.homescreen.ClockViewModel
 import com.geecee.escapelauncher.feature.weather.WeatherViewModel
 import com.geecee.escapelauncher.core.ui.utils.doHapticFeedBack
 import com.geecee.escapelauncher.core.common.formatScreenTime
-import com.geecee.escapelauncher.feature.widgets.WidgetsScreen
 import com.geecee.escapelauncher.core.analytics.analyticsProxy
 import com.geecee.escapelauncher.feature.screentime.ScreenTimeViewModel
+import com.geecee.escapelauncher.feature.newwidgets.WidgetRenderer
 import kotlinx.coroutines.delay
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -94,6 +94,7 @@ fun HomeScreen(
     val widgetHeight by homeScreenViewModel.widgetHeight.collectAsState(initial = 125f)
     val widgetWidth by homeScreenViewModel.widgetWidth.collectAsState(initial = 250f)
     val widgetId by homeScreenViewModel.widgetId.collectAsState(initial = -1)
+    val widgetHostManager = homeScreenViewModel.widgetHostManager
     val appUsageList by screenTimeViewModel.appUsageList.collectAsState()
 
     val (hour, minute, _) = timeParts
@@ -260,9 +261,10 @@ fun HomeScreen(
                 alignmentOffset + widgetOffsetPref.toInt()
             }
 
-            WidgetsScreen(
-                widgetId = widgetId,
-                context = mainAppModel.getContext(), modifier = Modifier
+            WidgetRenderer(
+                appWidgetId = widgetId,
+                widgetHostManager = widgetHostManager,
+                modifier = Modifier
                     .offset {
                         IntOffset(
                             (widgetOffset.dp).toPx().toInt(), 0

@@ -51,7 +51,10 @@
             </intent-filter>
         </activity>
 
-        <activity android:name="com.geecee.escapelauncher.feature.widgets.ConfigureAppWidgetActivity" />
+        <activity
+            android:name="com.geecee.escapelauncher.feature.newwidgets.ConfigureWidgetActivity"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar"
+            android:exported="false" />
 
         <service
             android:name=".utils.EscapeAccessibilityService"

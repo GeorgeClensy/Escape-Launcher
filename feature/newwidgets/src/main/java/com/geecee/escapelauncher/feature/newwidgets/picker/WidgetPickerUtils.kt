@@ -1,29 +1,40 @@
-package com.geecee.escapelauncher.feature.widgets
+package com.geecee.escapelauncher.feature.newwidgets.picker
 
-import android.appwidget.AppWidgetHost
 import android.appwidget.AppWidgetManager
+import android.appwidget.AppWidgetProviderInfo
 import android.content.Context
 import android.content.pm.PackageManager
-
-const val WIDGET_HOST_ID = 44203
-const val NO_WIDGET_ID = -1
-
-private val lock = Any()
-private var sharedAppWidgetHost: AppWidgetHost? = null
+import android.graphics.drawable.Drawable
 
 /**
- * Returns the shared app widget host for the application
+ * Details of an app that has widgets
  *
- * @param context The application context
- * @return The shared AppWidgetHost
+ * @author George Clensy
+ * @param packageName The package name for the app
+ * @param appName The display name of the app
+ * @param icon The apps icon
  */
-fun getAppWidgetHost(context: Context): AppWidgetHost {
-    return sharedAppWidgetHost ?: synchronized(lock) {
-        sharedAppWidgetHost ?: AppWidgetHost(context.applicationContext, WIDGET_HOST_ID).also {
-            sharedAppWidgetHost = it
-        }
-    }
-}
+data class WidgetAppData(
+    val packageName: String,
+    val appName: String,
+    val icon: Drawable?
+)
+
+/**
+ * The information for an individual widget
+ *
+ * @author George Clensy
+ * @param provider The widget provider
+ * @param label The widget label
+ * @param minWidth The widgets minimum width
+ * @param minHeight The widgets maximum height
+ */
+data class WidgetInfo(
+    val provider: AppWidgetProviderInfo,
+    val label: String,
+    val minWidth: Int,
+    val minHeight: Int
+)
 
 /**
  * Returns all available widget grouped by app in a map

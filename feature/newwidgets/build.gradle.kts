@@ -3,7 +3,7 @@ plugins {
 }
 
 android {
-    namespace = "com.geecee.escapelauncher.feature.widgets"
+    namespace = "com.geecee.escapelauncher.feature.newwidgets"
 }
 
 dependencies {

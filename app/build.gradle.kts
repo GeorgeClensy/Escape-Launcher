@@ -103,7 +103,7 @@ dependencies {
     implementation(project(":feature:screentime"))
     implementation(project(":feature:settings"))
     implementation(project(":feature:appslist"))
-    implementation(project(":feature:widgets"))
+    implementation(project(":feature:newwidgets"))
 
     implementation(libs.androidx.hilt.navigation.compose)
 }

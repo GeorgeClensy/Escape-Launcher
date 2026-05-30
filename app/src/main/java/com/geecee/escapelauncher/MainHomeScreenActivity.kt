@@ -47,11 +47,12 @@ import com.geecee.escapelauncher.feature.screentime.ScreenTimeViewModel
 import com.geecee.escapelauncher.core.data.worker.ClearOldDataWorker
 import com.geecee.escapelauncher.core.theme.BackgroundColor
 import com.geecee.escapelauncher.core.theme.EscapeTheme
-import com.geecee.escapelauncher.feature.widgets.getAppWidgetHost
+import com.geecee.escapelauncher.feature.newwidgets.WidgetHostManager
 import com.geecee.escapelauncher.core.cloudmessaging.messagingInitializer
 import com.geecee.escapelauncher.core.common.configureFullScreenMode
 import com.geecee.escapelauncher.core.common.formatScreenTime
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
@@ -69,6 +70,10 @@ class MainHomeScreenActivity : ComponentActivity() {
         HomeScreenModelFactory(application, viewModel)
     }
     private val viewModel: MainAppViewModel by viewModels()
+
+    @Inject
+    lateinit var widgetHostManager: WidgetHostManager
+
     private val pushNotificationPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { _ ->
@@ -172,7 +177,7 @@ class MainHomeScreenActivity : ComponentActivity() {
     override fun onStart() {
         super.onStart()
         try {
-            getAppWidgetHost(this).startListening()
+            widgetHostManager.startListening()
         } catch (e: Exception) {
             Log.e("Widgets", "Error starting AppWidgetHost in onStart", e)
         }
@@ -181,7 +186,7 @@ class MainHomeScreenActivity : ComponentActivity() {
     override fun onStop() {
         super.onStop()
         try {
-            getAppWidgetHost(this).stopListening()
+            widgetHostManager.stopListening()
         } catch (e: Exception) {
             Log.e("Widgets", "Error stopping AppWidgetHost in onStop", e)
         }

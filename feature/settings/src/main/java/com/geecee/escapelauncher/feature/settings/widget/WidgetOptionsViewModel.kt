@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.geecee.escapelauncher.core.domain.repository.SettingsRepository
+import com.geecee.escapelauncher.feature.newwidgets.WidgetHostManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import jakarta.inject.Inject
@@ -12,7 +13,8 @@ import kotlinx.coroutines.launch
 @HiltViewModel
 class WidgetOptionsViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
-    private val repository: SettingsRepository
+    private val repository: SettingsRepository,
+    val widgetHostManager: WidgetHostManager
 ) : ViewModel() {
     val widgetOffset = repository.widgetOffset
     fun setWidgetOffset(value: Float) {

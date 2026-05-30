@@ -1,4 +1,4 @@
-package com.geecee.escapelauncher.feature.widgets
+package com.geecee.escapelauncher.feature.newwidgets.picker
 
 import android.appwidget.AppWidgetProviderInfo
 import androidx.compose.animation.AnimatedVisibility
@@ -25,6 +25,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -55,7 +57,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 /**
- * The widget picker itself
+ * A widget picker
  *
  * @author George Clensy
  * @param onWidgetSelected Unit for when a widget is selected
@@ -99,7 +101,9 @@ fun CustomWidgetPicker(
         ) {
             if (isLoading) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    androidx.compose.material3.CircularProgressIndicator(color = primaryContentColor)
+                    CircularWavyProgressIndicator(
+                        color = primaryContentColor
+                    )
                 }
             } else {
                 LazyColumn(
@@ -122,9 +126,8 @@ fun CustomWidgetPicker(
     }
 }
 
-
 /**
- * A collapse section of the Wiget Picker to list widgets from a specific app
+ * A collapsable section of the Wiget Picker to list widgets from a specific app
  *
  * @author George Clensy
  * @param widgetAppData The app
@@ -138,99 +141,110 @@ fun WidgetAppItem(
     onWidgetSelected: (AppWidgetProviderInfo) -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
-    val rotationState by animateFloatAsState(targetValue = if (expanded) 180f else 0f)
+    val rotationState by animateFloatAsState(targetValue = if (expanded) 180f else 0f) // The rotation of the arrow
 
-    Column(
+    Box (
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp)
+            .clip(RoundedCornerShape(12.dp))
     ) {
-        // App header with icon, name, count, and expand button
-        Row(
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .clickable {
-                    expanded = !expanded
-                }
-                .padding(vertical = 12.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+                .padding(horizontal = 16.dp)
         ) {
+            // App header with icon, name, count, and expand button
             Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.weight(1f)
-            ) {
-                // App Icon
-                val appIcon = remember(widgetAppData.icon) {
-                    try {
-                        widgetAppData.icon?.toBitmap()?.asImageBitmap()
-                    } catch (e: Exception) {
-                        null
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable {
+                        expanded = !expanded
                     }
-                }
+                    .padding(vertical = 12.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.weight(1f)
+                ) {
+                    // App Icon
+                    val appIcon = remember(widgetAppData.icon) {
+                        try {
+                            widgetAppData.icon?.toBitmap()?.asImageBitmap()
+                        } catch (e: Exception) {
+                            analyticsProxy.logCustomKey(
+                                "Widget Picker App Icon loading failed: ",
+                                widgetAppData.packageName
+                            )
+                            analyticsProxy.recordException(e)
+                            null
+                        }
+                    }
 
-                if (appIcon != null) {
-                    Image(
-                        bitmap = appIcon,
-                        contentDescription = null,
-                        modifier = Modifier
-                            .size(40.dp)
-                            .clip(CircleShape)
-                    )
-                } else {
-                    Box(
-                        modifier = Modifier
-                            .size(40.dp)
-                            .background(BackgroundColor, RoundedCornerShape(8.dp)),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Search,
+                    if (appIcon != null) {
+                        Image(
+                            bitmap = appIcon,
                             contentDescription = null,
-                            modifier = Modifier.size(24.dp),
-                            tint = ContentColor
+                            modifier = Modifier
+                                .size(40.dp)
+                                .clip(CircleShape)
+                        )
+                    } else {
+                        Box(
+                            modifier = Modifier
+                                .size(40.dp)
+                                .background(BackgroundColor, RoundedCornerShape(8.dp)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Search,
+                                contentDescription = null,
+                                modifier = Modifier.size(24.dp),
+                                tint = ContentColor
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.width(16.dp))
+
+                    // App name and widget count
+                    Column {
+                        Text(
+                            text = widgetAppData.appName,
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = primaryContentColor
+                        )
+                        Text(
+                            text = "${widgets.size} ${if (widgets.size == 1) "widget" else "widgets"}",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = ContentColor
                         )
                     }
                 }
 
-                Spacer(modifier = Modifier.width(16.dp))
-
-                // App name and widget count
-                Column {
-                    Text(
-                        text = widgetAppData.appName,
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = primaryContentColor
-                    )
-                    Text(
-                        text = "${widgets.size} ${if (widgets.size == 1) "widget" else "widgets"}",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = ContentColor
-                    )
-                }
+                // Expand/collapse icon
+                Icon(
+                    imageVector = Icons.Default.KeyboardArrowDown,
+                    contentDescription = if (expanded) "Collapse" else "Expand",
+                    modifier = Modifier.rotate(rotationState),
+                    tint = ContentColor
+                )
             }
 
-            // Expand/collapse icon
-            Icon(
-                imageVector = Icons.Default.KeyboardArrowDown,
-                contentDescription = if (expanded) "Collapse" else "Expand",
-                modifier = Modifier.rotate(rotationState),
-                tint = ContentColor
-            )
-        }
-
-        // Widget previews when expanded
-        AnimatedVisibility(visible = expanded) {
-            if (widgets.isNotEmpty()) {
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                    modifier = Modifier.padding(bottom = 16.dp)
-                ) {
-                    widgets.forEach { widget ->
-                        WidgetPreview(
-                            widget = widget,
-                            onClick = { onWidgetSelected(widget.provider) }
-                        )
+            // Widget previews when expanded
+            AnimatedVisibility(visible = expanded) {
+                if (widgets.isNotEmpty()) {
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                        modifier = Modifier.padding(bottom = 16.dp)
+                    ) {
+                        widgets.forEach { widget ->
+                            WidgetPreview(
+                                widget = widget,
+                                onClick = { onWidgetSelected(widget.provider) }
+                            )
+                        }
                     }
                 }
             }
@@ -239,7 +253,7 @@ fun WidgetAppItem(
 }
 
 /**
- * The widget preview you click on to select it on the widget picker
+ * A preview of a widget to be shown in the picker
  *
  * @author George Clensy
  * @param widget Widget information to display
@@ -251,6 +265,7 @@ fun WidgetPreview(
     onClick: () -> Unit
 ) {
     val context = LocalContext.current
+
     Surface(
         onClick = onClick,
         shape = RoundedCornerShape(12.dp),
@@ -276,7 +291,7 @@ fun WidgetPreview(
                         }
                     } catch (e: Exception) {
                         analyticsProxy.logCustomKey(
-                            "widget_preview_error_widget",
+                            "Widget Picker Preview failed: ",
                             widget.label + " from app" + widget.provider
                         )
                         analyticsProxy.recordException(e)
@@ -294,7 +309,7 @@ fun WidgetPreview(
                 contentAlignment = Alignment.Center
             ) {
                 if (imageLoading) {
-                    androidx.compose.material3.CircularProgressIndicator(
+                    CircularProgressIndicator(
                         modifier = Modifier.size(24.dp),
                         strokeWidth = 2.dp,
                         color = ContentColor.copy(alpha = 0.3f)

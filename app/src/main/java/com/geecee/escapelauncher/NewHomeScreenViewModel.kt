@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.ui.Alignment
 import androidx.lifecycle.ViewModel
 import com.geecee.escapelauncher.core.domain.repository.SettingsRepository
+import com.geecee.escapelauncher.feature.newwidgets.WidgetHostManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import jakarta.inject.Inject
@@ -13,7 +14,8 @@ import kotlinx.coroutines.flow.map
 @HiltViewModel
 class NewHomeScreenViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
-    private val repository: SettingsRepository
+    repository: SettingsRepository,
+    val widgetHostManager: WidgetHostManager
 ) : ViewModel() {
     val twelveHourClock = repository.twelveHourClock
     val showClock = repository.showClock
