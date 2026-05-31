@@ -1,17 +1,13 @@
 package com.geecee.escapelauncher.utils
 
-import android.app.ActivityOptions
 import android.app.WallpaperManager
 import android.content.BroadcastReceiver
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.pm.ApplicationInfo
-import android.content.pm.LauncherApps
 import android.content.pm.PackageManager
 import android.graphics.Paint
-import android.graphics.Rect
-import android.os.Process.myUserHandle
 import android.util.Log
 import android.view.Window
 import androidx.core.graphics.createBitmap
@@ -19,6 +15,7 @@ import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import com.geecee.escapelauncher.HomeScreenModel
+import com.geecee.escapelauncher.core.analytics.analyticsProxy
 import com.geecee.escapelauncher.core.model.InstalledApp
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -26,7 +23,6 @@ import java.io.IOException
 import java.io.InputStream
 import android.graphics.Color as AndroidColor
 import androidx.compose.ui.graphics.Color as ComposeColor
-import com.geecee.escapelauncher.core.analytics.analyticsProxy
 
 /**
  * Broadcast receiver to detect when the screen turns off,
@@ -47,55 +43,6 @@ class ScreenOffReceiver(private val onScreenOff: () -> Unit) : BroadcastReceiver
  * @author George Clensy
  */
 object AppUtils {
-    /**
-     * Function to launch an app.
-     *
-     * @param context Context
-     * @param app The app info being opened
-     * @param onAppOpened Callback called when the app is successfully opened for screen time tracking
-     *
-     * @return Boolean true if the app was launched successfully
-     */
-    fun launchApp(
-        context: Context,
-        app: InstalledApp,
-        onAppOpened: ((String) -> Unit)? = null
-    ): Boolean {
-        val launcherApps = context.getSystemService(Context.LAUNCHER_APPS_SERVICE) as LauncherApps
-        val options = ActivityOptions.makeBasic()
-
-        return try {
-            launcherApps.startMainActivity(
-                app.componentName,
-                myUserHandle(),
-                Rect(),
-                options.toBundle()
-            )
-            onAppOpened?.invoke(app.packageName)
-            true
-        } catch (e: SecurityException) {
-            Log.e("AppUtils", "SecurityException opening app: ${e.message}")
-            try {
-                val intent = context.packageManager.getLaunchIntentForPackage(app.packageName)
-                intent?.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                if (intent != null) {
-                    context.startActivity(intent)
-                    onAppOpened?.invoke(app.packageName)
-                    true
-                } else {
-                    false
-                }
-            } catch (fallbackException: Exception) {
-                Log.e("AppUtils", "Failed to launch app even with fallback", fallbackException)
-                analyticsProxy.logCustomKey("app_launch_error", app.packageName)
-                analyticsProxy.recordException(fallbackException)
-                false
-            }
-        } catch (e: Exception) {
-            Log.e("AppUtils", "Error opening app", e)
-            false
-        }
-    }
 
     /**
      *  Cache to store package name to app name mappings

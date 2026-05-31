@@ -38,7 +38,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.geecee.escapelauncher.core.ui.R
 import com.geecee.escapelauncher.core.common.formatScreenTime
 import com.geecee.escapelauncher.core.common.goToAppInfo
-import com.geecee.escapelauncher.core.common.openApp
+import com.geecee.escapelauncher.core.common.launchApp
 import com.geecee.escapelauncher.core.common.uninstallApp
 import com.geecee.escapelauncher.core.model.InstalledApp
 import com.geecee.escapelauncher.core.theme.BackgroundColor
@@ -229,7 +229,7 @@ fun AppsList(
             ) {
                 workAppsContent(
                     { app -> // onAppClick
-                        openApp(context = context, app = app)
+                        launchApp(context = context, app = app)
                         onGoHomeRequest()
                     },
                     { app -> // onAppLongClick

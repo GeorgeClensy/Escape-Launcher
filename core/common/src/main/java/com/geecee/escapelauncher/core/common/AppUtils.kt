@@ -6,7 +6,9 @@ import android.content.Intent
 import android.content.pm.LauncherApps
 import android.graphics.Rect
 import android.os.Process
+import android.util.Log
 import androidx.core.net.toUri
+import com.geecee.escapelauncher.core.analytics.analyticsProxy
 import com.geecee.escapelauncher.core.model.InstalledApp
 
 import java.text.Normalizer
@@ -17,24 +19,54 @@ import java.text.Normalizer
 fun InstalledApp.isMainUserApp(): Boolean = this.user == Process.myUserHandle()
 
 /**
- * Opens an app regardless of its profile (Main, Work, or Private).
+ * Function to launch an app.
+ *
+ * @param context Context
+ * @param app The app info being opened
+ * @param onAppOpened Callback called when the app is successfully opened for screen time tracking
+ *
+ * @return Boolean true if the app was launched successfully
  */
-fun openApp(context: Context, app: InstalledApp, sourceBounds: Rect? = null) {
-    val launcherApps = context.getSystemService(Context.LAUNCHER_APPS_SERVICE) as? LauncherApps ?: return
+fun launchApp(
+    context: Context,
+    app: InstalledApp,
+    onAppOpened: ((String) -> Unit)? = null
+): Boolean {
+    val launcherApps = context.getSystemService(Context.LAUNCHER_APPS_SERVICE) as LauncherApps
     val options = ActivityOptions.makeBasic()
-    if (sourceBounds != null) {
-        options.launchBounds = sourceBounds
-    }
-    
-    try {
+
+    return try {
         launcherApps.startMainActivity(
             app.componentName,
             app.user,
-            sourceBounds,
+            Rect(),
             options.toBundle()
         )
+        onAppOpened?.invoke(app.packageName)
+        true
+    } catch (e: SecurityException) {
+        Log.e("AppUtils", "SecurityException opening app: ${e.message}")
+        try {
+            val intent = context.packageManager.getLaunchIntentForPackage(app.packageName)
+            intent?.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            if (intent != null) {
+                context.startActivity(intent)
+                onAppOpened?.invoke(app.packageName)
+                true
+            } else {
+                false
+            }
+        } catch (fallbackException: Exception) {
+            Log.e("AppUtils", "Failed to launch app even with fallback", fallbackException)
+            analyticsProxy.logCustomKey("app_launch_error", app.packageName)
+            analyticsProxy.recordException(fallbackException)
+            false
+        }
     } catch (e: Exception) {
-        // Fallback or logging if needed
+        Log.e("AppUtils", "Error opening app", e)
+        analyticsProxy.logCustomKey("app_launch_error", app.packageName)
+        analyticsProxy.recordException(e)
+        false
     }
 }
 

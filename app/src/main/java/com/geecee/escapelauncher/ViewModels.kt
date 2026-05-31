@@ -17,6 +17,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.geecee.escapelauncher.core.common.launchApp
 import com.geecee.escapelauncher.core.data.repository.AppsRepository
 import com.geecee.escapelauncher.core.data.repository.ModifiedAppsRepository
 import com.geecee.escapelauncher.core.domain.repository.SettingsRepository
@@ -157,7 +158,7 @@ class HomeScreenModel(application: Application, val mainAppViewModel: MainAppVie
                 showOpenChallenge.value = true
                 updateSelectedApp(app)
             } else {
-                if (AppUtils.launchApp(getApplication(), app, onAppOpened)) {
+                if (launchApp(getApplication(), app, onAppOpened)) {
                     onAppLaunched(app)
                     if (overrideChallenge) {
                         showOpenChallenge.value = false
