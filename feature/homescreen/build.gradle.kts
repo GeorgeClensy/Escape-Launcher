@@ -1,5 +1,7 @@
 plugins {
     id("escapelauncher.android.feature")
+    id("escapelauncher.android.compose")
+    id("escapelauncher.android.compose.ui")
 }
 
 android {
@@ -7,7 +9,16 @@ android {
 }
 
 dependencies {
+    implementation(project(":core:common"))
+    implementation(project(":core:domain"))
+    implementation(project(":core:ui"))
+    implementation(project(":core:model"))
+    implementation(project(":core:data"))
+    implementation(project(":core:analytics"))
     implementation(project(":domain:time"))
+    implementation(project(":feature:newwidgets"))
+    implementation(project(":feature:screentime"))
+    implementation(project(":feature:weather"))
 
     implementation(libs.androidx.appcompat)
 }

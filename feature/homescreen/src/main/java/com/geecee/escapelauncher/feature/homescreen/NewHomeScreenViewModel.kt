@@ -1,4 +1,4 @@
-package com.geecee.escapelauncher
+package com.geecee.escapelauncher.feature.homescreen
 
 import android.content.Context
 import androidx.compose.foundation.layout.Arrangement
@@ -13,8 +13,8 @@ import com.geecee.escapelauncher.core.ui.model.AppAction
 import com.geecee.escapelauncher.core.common.getAppShortcuts
 import com.geecee.escapelauncher.core.common.isMainUserApp
 import com.geecee.escapelauncher.core.common.startShortcut
-import com.geecee.escapelauncher.core.ui.R
 import com.geecee.escapelauncher.feature.newwidgets.WidgetHostManager
+import com.geecee.escapelauncher.core.ui.R
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import jakarta.inject.Inject
@@ -28,6 +28,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlin.collections.map
 
 @HiltViewModel
 class NewHomeScreenViewModel @Inject constructor(

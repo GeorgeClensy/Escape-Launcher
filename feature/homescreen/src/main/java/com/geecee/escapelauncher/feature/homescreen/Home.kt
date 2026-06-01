@@ -1,9 +1,10 @@
-package com.geecee.escapelauncher.ui.views
+package com.geecee.escapelauncher.feature.homescreen
 
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.provider.AlarmClock
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.LocalActivity
 import androidx.compose.animation.AnimatedVisibility
@@ -46,10 +47,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import com.geecee.escapelauncher.BuildConfig
-import com.geecee.escapelauncher.HomeUiEvent
-import com.geecee.escapelauncher.NewHomeScreenViewModel
-import com.geecee.escapelauncher.R
 import com.geecee.escapelauncher.core.analytics.analyticsProxy
 import com.geecee.escapelauncher.core.common.formatScreenTime
 import com.geecee.escapelauncher.core.common.goToAppInfo
@@ -61,7 +58,7 @@ import com.geecee.escapelauncher.core.ui.composables.GlanceWidget
 import com.geecee.escapelauncher.core.ui.composables.HomeScreenBottomSheet
 import com.geecee.escapelauncher.core.ui.composables.HomeScreenItem
 import com.geecee.escapelauncher.core.ui.utils.doHapticFeedBack
-import com.geecee.escapelauncher.feature.homescreen.ClockViewModel
+import com.geecee.escapelauncher.core.ui.R
 import com.geecee.escapelauncher.feature.newwidgets.WidgetRenderer
 import com.geecee.escapelauncher.feature.screentime.ScreenTimeViewModel
 import com.geecee.escapelauncher.feature.weather.WeatherViewModel
@@ -72,6 +69,7 @@ import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 import androidx.compose.ui.platform.LocalResources
+import com.geecee.escapelauncher.core.ui.BuildConfig
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -391,10 +389,10 @@ fun HomeWeatherImpl(
                         context.startActivity(it)
                     }
                 } else {
-                    android.widget.Toast.makeText(
+                    Toast.makeText(
                         context,
                         resources.getString(R.string.set_weather_app_in_settings),
-                        android.widget.Toast.LENGTH_SHORT
+                        Toast.LENGTH_SHORT
                     ).show()
                 }
             }
