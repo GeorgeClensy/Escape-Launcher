@@ -4,13 +4,13 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.provider.AlarmClock
 import android.util.Log
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.LocalActivity
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -24,6 +24,9 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material.icons.filled.WbSunny
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.SheetValue
+import androidx.compose.material3.rememberBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -39,40 +42,43 @@ import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
-import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.geecee.escapelauncher.BuildConfig
-import com.geecee.escapelauncher.HomeScreenModel
-import com.geecee.escapelauncher.R
-import com.geecee.escapelauncher.core.ui.composables.Clock
-import com.geecee.escapelauncher.core.ui.composables.GlanceWidget
-import com.geecee.escapelauncher.core.ui.composables.HomeScreenItem
+import com.geecee.escapelauncher.HomeUiEvent
 import com.geecee.escapelauncher.NewHomeScreenViewModel
-import com.geecee.escapelauncher.core.ui.composables.FirstTimeHelp
-import com.geecee.escapelauncher.feature.homescreen.ClockViewModel
-import com.geecee.escapelauncher.feature.weather.WeatherViewModel
-import com.geecee.escapelauncher.core.ui.utils.doHapticFeedBack
-import com.geecee.escapelauncher.core.common.formatScreenTime
+import com.geecee.escapelauncher.R
 import com.geecee.escapelauncher.core.analytics.analyticsProxy
-import com.geecee.escapelauncher.feature.screentime.ScreenTimeViewModel
+import com.geecee.escapelauncher.core.common.formatScreenTime
+import com.geecee.escapelauncher.core.common.goToAppInfo
+import com.geecee.escapelauncher.core.common.uninstallApp
+import com.geecee.escapelauncher.core.model.InstalledApp
+import com.geecee.escapelauncher.core.ui.composables.Clock
+import com.geecee.escapelauncher.core.ui.composables.FirstTimeHelp
+import com.geecee.escapelauncher.core.ui.composables.GlanceWidget
+import com.geecee.escapelauncher.core.ui.composables.HomeScreenBottomSheet
+import com.geecee.escapelauncher.core.ui.composables.HomeScreenItem
+import com.geecee.escapelauncher.core.ui.utils.doHapticFeedBack
+import com.geecee.escapelauncher.feature.homescreen.ClockViewModel
 import com.geecee.escapelauncher.feature.newwidgets.WidgetRenderer
+import com.geecee.escapelauncher.feature.screentime.ScreenTimeViewModel
+import com.geecee.escapelauncher.feature.weather.WeatherViewModel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collectLatest
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
-import com.geecee.escapelauncher.MainAppViewModel as MainAppModel
+import androidx.compose.ui.platform.LocalResources
 
-/**
- * Parent main home screen composable
- */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
-    mainAppModel: MainAppModel,
-    homeScreenModel: HomeScreenModel,
+    modifier: Modifier = Modifier,
+    onAppOpened: (app: InstalledApp) -> Unit = {},
+    onGoHomeRequest: () -> Unit = {},
     clockViewModel: ClockViewModel = hiltViewModel(),
     homeScreenViewModel: NewHomeScreenViewModel = hiltViewModel(),
     screenTimeViewModel: ScreenTimeViewModel = hiltViewModel(LocalActivity.current as ComponentActivity)
@@ -96,6 +102,11 @@ fun HomeScreen(
     val widgetId by homeScreenViewModel.widgetId.collectAsState(initial = -1)
     val widgetHostManager = homeScreenViewModel.widgetHostManager
     val appUsageList by screenTimeViewModel.appUsageList.collectAsState()
+    val favoriteApps by homeScreenViewModel.favoriteApps.collectAsState()
+    val showBottomSheet by homeScreenViewModel.showBottomSheet.collectAsState()
+    val bottomSheetApp by homeScreenViewModel.bottomSheetApp.collectAsState()
+    val bottomSheetActions by homeScreenViewModel.bottomSheetActions.collectAsState()
+    val shortcutActions by homeScreenViewModel.shortcutActions.collectAsState()
 
     val (hour, minute, _) = timeParts
 
@@ -103,9 +114,22 @@ fun HomeScreen(
         clockViewModel.startTicker(twelveHourClock)
     }
 
-    val scrollState = rememberLazyListState()
     val haptics = LocalHapticFeedback.current
 
+    // Handle UI Events from ViewModel
+    LaunchedEffect(Unit) {
+        homeScreenViewModel.uiEvent.collectLatest { event ->
+            when (event) {
+                is HomeUiEvent.NavigateHome -> onGoHomeRequest()
+                is HomeUiEvent.UninstallApp -> uninstallApp(context, event.app)
+                is HomeUiEvent.ShowAppInfo -> goToAppInfo(context, event.app)
+            }
+        }
+    }
+
+    val scrollState = rememberLazyListState()
+
+    // This is for the swipe down to get to quick settings thing
     val nestedScrollConnection = remember {
         object : NestedScrollConnection {
             var totalDrag = 0f
@@ -121,8 +145,7 @@ fun HomeScreen(
                     if (totalDrag > 150f) {
                         try {
                             @SuppressLint("WrongConstant") val service =
-                                mainAppModel.getContext()
-                                    .getSystemService("statusbar") // Use literal string "statusbar"
+                                context.getSystemService("statusbar") // Use literal string "statusbar"
 
                             val statusBarManager = Class.forName("android.app.StatusBarManager")
                             val expand = statusBarManager.getMethod("expandNotificationsPanel")
@@ -141,188 +164,199 @@ fun HomeScreen(
         }
     }
 
-    LazyColumn(
-        state = scrollState,
-        verticalArrangement = homeVAlignment,
-        horizontalAlignment = homeAlignment,
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(30.dp, 0.dp)
-            .nestedScroll(nestedScrollConnection)
-    ) {
-        //Top padding
-        item {
-            Spacer(Modifier.height(90.dp))
-        }
-
-        //Clock
-        item {
-            if (showClock) {
-                Clock(
-                    hour = hour,
-                    minute = minute,
-                    bigClock = bigClock,
-                    homeAlignment = homeAlignment,
-                    onClockClick = {
-                        try {
-                            val intent = Intent(AlarmClock.ACTION_SHOW_ALARMS).apply {
-                                flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                            }
-                            mainAppModel.getContext().startActivity(intent)
-                        } catch (e: Exception) {
-                            Log.e("Error", e.message.orEmpty())
-                        }
-                    }
-                )
+    Box(modifier.fillMaxSize()) {
+        LazyColumn(
+            state = scrollState,
+            verticalArrangement = homeVAlignment,
+            horizontalAlignment = homeAlignment,
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(30.dp, 0.dp)
+                .nestedScroll(nestedScrollConnection)
+        ) {
+            //Top padding
+            item {
+                Spacer(Modifier.height(90.dp))
             }
-        }
 
-        //Glace widgets
-        item {
-            FlowRow (
-                horizontalArrangement = Arrangement.spacedBy(10.dp),
-            ) {
-                if (showDate) {
-                    val dateFormat = remember { SimpleDateFormat("EEE d MMM", Locale.getDefault()) }
-                    var dateText by remember { mutableStateOf(dateFormat.format(Date())) }
-
-                    LaunchedEffect(Unit) {
-                        while (true) {
-                            val calendar = Calendar.getInstance()
-                            val now = calendar.timeInMillis
-                            calendar.add(Calendar.DAY_OF_YEAR, 1)
-                            calendar.set(Calendar.HOUR_OF_DAY, 0)
-                            calendar.set(Calendar.MINUTE, 0)
-                            calendar.set(Calendar.SECOND, 0)
-                            calendar.set(Calendar.MILLISECOND, 0)
-                            val delayMillis = calendar.timeInMillis - now
-                            delay(delayMillis)
-                            dateText = dateFormat.format(Date())
-                        }
-                    }
-
-                    GlanceWidget(
-                        text = dateText,
-                        icon = null,
-                        iconContentDescription = "",
+            //Clock
+            item {
+                if (showClock) {
+                    Clock(
+                        hour = hour,
+                        minute = minute,
+                        bigClock = bigClock,
                         homeAlignment = homeAlignment,
-                        small = true,
-                        onClick = {
+                        onClockClick = {
                             try {
-                                val intent = Intent(Intent.ACTION_MAIN).apply {
-                                    addCategory(Intent.CATEGORY_APP_CALENDAR)
+                                val intent = Intent(AlarmClock.ACTION_SHOW_ALARMS).apply {
                                     flags = Intent.FLAG_ACTIVITY_NEW_TASK
                                 }
                                 context.startActivity(intent)
                             } catch (e: Exception) {
-                                analyticsProxy.recordException(e)
+                                Log.e("Error", e.message.orEmpty())
                             }
                         }
                     )
-
-                }
-
-                if (showScreenTimeHome) {
-                    val todayUsage by screenTimeViewModel.totalUsage.collectAsState()
-
-                    GlanceWidget(
-                        text = formatScreenTime(todayUsage),
-                        icon = Icons.Default.Timer,
-                        iconContentDescription = "Screen Time",
-                        homeAlignment = homeAlignment,
-                        small = true,
-                        onClick = {}
-                    )
-
-                }
-
-                if (showWeather) {
-                    @Suppress("KotlinConstantConditions") // This is to stop the IS_FOSS is always true cuz it's a foss sync in android studio
-                    if (!BuildConfig.IS_FOSS) {
-                        HomeWeatherImpl(alignment = homeAlignment)
-                    }
                 }
             }
-        }
 
-        item {
-            Spacer(Modifier.height(10.dp))
-        }
+            //Glace widgets
+            item {
+                FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(10.dp),
+                ) {
+                    if (showDate) {
+                        val dateFormat = remember { SimpleDateFormat("EEE d MMM", Locale.getDefault()) }
+                        var dateText by remember { mutableStateOf(dateFormat.format(Date())) }
 
-        //Widgets
-        item {
-            // Find out offset of widget
-            val widgetOffset = remember(homeAlignment, widgetOffsetPref) {
-                val alignmentOffset = when (homeAlignment) {
-                    Alignment.Start -> -8
-                    Alignment.End -> 8
-                    else -> 0
-                }
-                alignmentOffset + widgetOffsetPref.toInt()
-            }
+                        LaunchedEffect(Unit) {
+                            while (true) {
+                                val calendar = Calendar.getInstance()
+                                val now = calendar.timeInMillis
+                                calendar.add(Calendar.DAY_OF_YEAR, 1)
+                                calendar.set(Calendar.HOUR_OF_DAY, 0)
+                                calendar.set(Calendar.MINUTE, 0)
+                                calendar.set(Calendar.SECOND, 0)
+                                calendar.set(Calendar.MILLISECOND, 0)
+                                val delayMillis = calendar.timeInMillis - now
+                                delay(delayMillis)
+                                dateText = dateFormat.format(Date())
+                            }
+                        }
 
-            WidgetRenderer(
-                appWidgetId = widgetId,
-                widgetHostManager = widgetHostManager,
-                modifier = Modifier
-                    .offset {
-                        IntOffset(
-                            (widgetOffset.dp).toPx().toInt(), 0
+                        GlanceWidget(
+                            text = dateText,
+                            icon = null,
+                            iconContentDescription = "",
+                            homeAlignment = homeAlignment,
+                            small = true,
+                            onClick = {
+                                try {
+                                    val intent = Intent(Intent.ACTION_MAIN).apply {
+                                        addCategory(Intent.CATEGORY_APP_CALENDAR)
+                                        flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                                    }
+                                    context.startActivity(intent)
+                                } catch (e: Exception) {
+                                    analyticsProxy.recordException(e)
+                                }
+                            }
                         )
+
                     }
-                    .size(
-                        widgetWidth.dp,
-                        widgetHeight.dp
-                    )
-                    .padding(0.dp, 0.dp))
-        }
 
-        //Apps
-        items(homeScreenModel.favoriteApps, key = { app -> app.packageName }) { app ->
-            val screenTime = remember(appUsageList) {
-                screenTimeViewModel.getScreenTime(app.packageName)
-            }
+                    if (showScreenTimeHome) {
+                        val todayUsage by screenTimeViewModel.totalUsage.collectAsState()
 
-            HomeScreenItem(
-                appName = app.displayName,
-                screenTime = formatScreenTime(screenTime),
-                onAppClick = {
-                    homeScreenModel.openApp(
-                        app = app,
-                        overrideChallenge = false,
-                        onAppOpened = { screenTimeViewModel.onAppOpened(it) }
-                    )
-                },
-                onAppLongClick = {
-                    homeScreenModel.showBottomSheet.value = true
-                    homeScreenModel.updateSelectedApp(app)
-                    doHapticFeedBack(hapticFeedback = haptics, enabled = hapticFeedbackEnabled)
-                },
-                showScreenTime = showScreenTimeApp,
-                modifier = Modifier,
-                alignment = homeAlignment
-            )
-        }
+                        GlanceWidget(
+                            text = formatScreenTime(todayUsage),
+                            icon = Icons.Default.Timer,
+                            iconContentDescription = "Screen Time",
+                            homeAlignment = homeAlignment,
+                            small = true,
+                            onClick = {}
+                        )
 
-        //First time help
-        if (firstTimeHelp) {
-            item {
-                Spacer(Modifier.height(15.dp))
+                    }
+
+                    if (showWeather) {
+                        @Suppress("KotlinConstantConditions") // This is to stop the IS_FOSS is always true cuz it's a foss sync in android studio
+                        if (!BuildConfig.IS_FOSS) {
+                            HomeWeatherImpl(alignment = homeAlignment)
+                        }
+                    }
+                }
             }
 
             item {
-                FirstTimeHelp(
-                    swipeForAllAppsText = stringResource(R.string.swipe_for_all_apps),
-                    holdForSettingsText = stringResource(R.string.hold_for_settings)
+                Spacer(Modifier.height(10.dp))
+            }
+
+            //Widgets
+            item {
+                // Find out offset of widget
+                val widgetOffset = remember(homeAlignment, widgetOffsetPref) {
+                    val alignmentOffset = when (homeAlignment) {
+                        Alignment.Start -> -8
+                        Alignment.End -> 8
+                        else -> 0
+                    }
+                    alignmentOffset + widgetOffsetPref.toInt()
+                }
+
+                WidgetRenderer(
+                    appWidgetId = widgetId,
+                    widgetHostManager = widgetHostManager,
+                    modifier = Modifier
+                        .offset {
+                            IntOffset(
+                                (widgetOffset.dp).toPx().toInt(), 0
+                            )
+                        }
+                        .size(
+                            widgetWidth.dp,
+                            widgetHeight.dp
+                        )
+                        .padding(0.dp, 0.dp))
+            }
+
+            //Apps
+            items(favoriteApps, key = { app -> app.packageName }) { app ->
+                val screenTime = remember(appUsageList) {
+                    screenTimeViewModel.getScreenTime(app.packageName)
+                }
+
+                HomeScreenItem(
+                    appName = app.displayName,
+                    screenTime = formatScreenTime(screenTime),
+                    onAppClick = {
+                        onAppOpened(app)
+                        doHapticFeedBack(haptics, hapticFeedbackEnabled)
+                    },
+                    onAppLongClick = {
+                        homeScreenViewModel.setBottomSheetVisible(true)
+                        homeScreenViewModel.setBottomSheetApp(app)
+                        doHapticFeedBack(hapticFeedback = haptics, enabled = hapticFeedbackEnabled)
+                    },
+                    showScreenTime = showScreenTimeApp,
+                    modifier = Modifier,
+                    alignment = homeAlignment
                 )
             }
+
+            //First time help
+            if (firstTimeHelp) {
+                item {
+                    Spacer(Modifier.height(15.dp))
+                }
+
+                item {
+                    FirstTimeHelp(
+                        swipeForAllAppsText = stringResource(R.string.swipe_for_all_apps),
+                        holdForSettingsText = stringResource(R.string.hold_for_settings)
+                    )
+                }
+            }
+
+            item {
+                Spacer(Modifier.height(90.dp))
+            }
         }
 
-        item {
-            Spacer(Modifier.height(90.dp))
+        // Bottom Sheet
+        if (showBottomSheet && bottomSheetApp != null) {
+            HomeScreenBottomSheet(
+                app = bottomSheetApp!!,
+                actions = bottomSheetActions,
+                onDismissRequest = { homeScreenViewModel.setBottomSheetVisible(false) },
+                shortcutActions = shortcutActions,
+                sheetState = rememberBottomSheetState(initialValue = SheetValue.Hidden)
+            )
         }
     }
 }
+
 
 @Composable
 fun HomeWeatherImpl(
@@ -357,10 +391,10 @@ fun HomeWeatherImpl(
                         context.startActivity(it)
                     }
                 } else {
-                    Toast.makeText(
+                    android.widget.Toast.makeText(
                         context,
                         resources.getString(R.string.set_weather_app_in_settings),
-                        Toast.LENGTH_SHORT
+                        android.widget.Toast.LENGTH_SHORT
                     ).show()
                 }
             }

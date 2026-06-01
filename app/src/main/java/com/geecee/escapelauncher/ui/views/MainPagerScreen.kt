@@ -107,8 +107,14 @@ fun MainPagerScreen(
         if (hideScreenTimePage) {
             when (page) {
                 0 -> HomeScreen(
-                    mainAppModel = mainAppModel,
-                    homeScreenModel = homeScreenModel
+                    onAppOpened = { app ->
+                        homeScreenModel.openApp(
+                            app = app,
+                            overrideChallenge = false,
+                            onAppOpened = { screenTimeViewModel.onAppOpened(it) }
+                        )
+                    },
+                    onGoHomeRequest = { mainAppModel.requestToGoHome() }
                 )
 
                 1 -> AppsList(
@@ -172,8 +178,14 @@ fun MainPagerScreen(
                 0 -> ScreenTimeDashboard()
 
                 1 -> HomeScreen(
-                    mainAppModel = mainAppModel,
-                    homeScreenModel = homeScreenModel
+                    onAppOpened = { app ->
+                        homeScreenModel.openApp(
+                            app = app,
+                            overrideChallenge = false,
+                            onAppOpened = { screenTimeViewModel.onAppOpened(it) }
+                        )
+                    },
+                    onGoHomeRequest = { mainAppModel.requestToGoHome() }
                 )
 
                 2 -> AppsList(
