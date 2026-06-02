@@ -1,6 +1,5 @@
-package com.geecee.escapelauncher.ui.views
+package com.geecee.escapelauncher.feature.screentime
 
-import android.content.Context
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.layout.Arrangement
@@ -25,21 +24,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import com.geecee.escapelauncher.R
 import com.geecee.escapelauncher.core.ui.composables.AppUsage
 import com.geecee.escapelauncher.core.ui.composables.AppUsages
 import com.geecee.escapelauncher.core.ui.composables.ScreenTime
 import com.geecee.escapelauncher.core.ui.composables.ScreenTimeInfoBox
 import com.geecee.escapelauncher.core.ui.composables.SettingsSpacer
+import com.geecee.escapelauncher.core.ui.R
 import com.geecee.escapelauncher.core.theme.ContentColor
 import com.geecee.escapelauncher.core.theme.escapeGreen
 import com.geecee.escapelauncher.core.theme.escapeRed
-import com.geecee.escapelauncher.utils.AppUtils
-import com.geecee.escapelauncher.feature.screentime.ScreenTimeViewModel
 import com.geecee.escapelauncher.core.common.formatScreenTime
 
 /**
- * This function works out if the screen time is over the recommended and if it is finds out how many percent over it is
+ * This function works out if the screen time is over the recommended and if it is finds out how many per cent over it is
  */
 fun calculateOveragePercentage(screenTime: Long): Int {
     val recommendedTime: Double = 0.5 * 60 * 60 * 1000 // 1 hour in milliseconds
@@ -63,11 +60,9 @@ fun calculateOveragePercentage(screenTime: Long): Int {
 fun ScreenTimeDashboard(
     screenTimeViewModel: ScreenTimeViewModel = hiltViewModel(LocalActivity.current as ComponentActivity)
 ) {
-    val context = LocalActivity.current as Context
     val todayUsage by screenTimeViewModel.totalUsage.collectAsState()
     val yesterdayUsage by screenTimeViewModel.yesterdayTotalUsage.collectAsState()
-    val appUsageToday by screenTimeViewModel.appUsageList.collectAsState()
-    val appUsageYesterday by screenTimeViewModel.yesterdayAppUsageList.collectAsState()
+    val appUsageUiList by screenTimeViewModel.appUsageUiList.collectAsState()
 
     // UI for ScreenTime screen
     Column(
@@ -119,22 +114,16 @@ fun ScreenTimeDashboard(
         Spacer(Modifier.height(15.dp))
 
         AppUsages(Modifier) {
-            if (appUsageToday.isNotEmpty()) {
-                appUsageToday.forEach { appScreenTime ->
-                    val appName = AppUtils.getAppNameFromPackageName(context, appScreenTime.packageName)
-                    if (appName != "null") {
-                        val yesterdayAppUsage = appUsageYesterday.find { it.packageName == appScreenTime.packageName }
-                        val usageIncreased = appScreenTime.totalTime > (yesterdayAppUsage?.totalTime ?: 0L)
-
-                        AppUsage(
-                            appName,
-                            usageIncreased,
-                            if (appScreenTime.totalTime > 60000) formatScreenTime(
-                                appScreenTime.totalTime
-                            ) else "<1m",
-                            Modifier
-                        )
-                    }
+            if (appUsageUiList.isNotEmpty()) {
+                appUsageUiList.forEach { appUsageUi ->
+                    AppUsage(
+                        appUsageUi.appName,
+                        appUsageUi.usageIncreased,
+                        if (appUsageUi.totalTime > 60000) formatScreenTime(
+                            appUsageUi.totalTime
+                        ) else "<1m",
+                        Modifier
+                    )
                 }
             } else {
                 Text(

@@ -97,4 +97,32 @@ class AppsRepository @Inject constructor(
             .distinctBy { it.packageName + it.user.toString() }
             .sortedBy { it.displayName.lowercase() }
     }
+
+    /**
+     * Returns the app name from its package
+     *
+     * @param packageName Name of the package that's app name will be returned
+     * @return String app name
+     */
+    fun getAppNameFromPackageName(packageName: String): String {
+        // Check current installed apps first
+        _installedApps.value.find { it.packageName == packageName }?.let {
+            return it.displayName
+        }
+        return "null"
+    }
+
+    /**
+     * Returns an InstalledApp object from a package name
+     *
+     * @param packageName Name of the package
+     * @return InstalledApp? or null if not found
+     */
+    fun getInstalledAppFromPackageName(packageName: String): InstalledApp? {
+        // Check current installed apps first
+        _installedApps.value.find { it.packageName == packageName }?.let {
+            return it
+        }
+        return null
+    }
 }

@@ -2,11 +2,8 @@ package com.geecee.escapelauncher.utils
 
 import android.app.WallpaperManager
 import android.content.BroadcastReceiver
-import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
-import android.content.pm.ApplicationInfo
-import android.content.pm.PackageManager
 import android.graphics.Paint
 import android.util.Log
 import android.view.Window
@@ -16,7 +13,6 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import com.geecee.escapelauncher.HomeScreenModel
 import com.geecee.escapelauncher.core.analytics.analyticsProxy
-import com.geecee.escapelauncher.core.model.InstalledApp
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.io.IOException
@@ -43,38 +39,6 @@ class ScreenOffReceiver(private val onScreenOff: () -> Unit) : BroadcastReceiver
  * @author George Clensy
  */
 object AppUtils {
-
-    /**
-     *  Cache to store package name to app name mappings
-     */
-    private val appNameCache = mutableMapOf<String, String>()
-
-    /**
-     * Returns the app name from its package
-     *
-     * @param context Context is required
-     * @param packageName Name of the package that's app name will be returned
-     *
-     * @return String app name
-     */
-    fun getAppNameFromPackageName(context: Context, packageName: String): String {
-        // Check cache first for instant return
-        appNameCache[packageName]?.let { return it }
-
-        // If not in cache, perform the operation directly but still cache the result
-        try {
-            val packageManager: PackageManager = context.packageManager
-            val applicationInfo: ApplicationInfo = packageManager.getApplicationInfo(packageName, 0)
-            val appName = packageManager.getApplicationLabel(applicationInfo).toString()
-
-            // Cache the result for future use
-            appNameCache[packageName] = appName
-
-            return appName
-        } catch (_: PackageManager.NameNotFoundException) {
-            return "null"
-        }
-    }
 
     /**
      * Loads text from a file in Assets
@@ -162,28 +126,6 @@ object AppUtils {
             (blue * 255).toInt()
         )
     }
-
-    fun getInstalledAppFromPackageName(context: Context, packageName: String): InstalledApp? {
-        return try {
-            val pm: PackageManager = context.packageManager
-            val appInfo = pm.getApplicationInfo(packageName, 0)
-            val displayName = pm.getApplicationLabel(appInfo).toString()
-            val launchIntent = pm.getLaunchIntentForPackage(packageName)
-
-            // Some apps might not have a launchable activity
-            val componentName = launchIntent?.component ?: ComponentName(packageName, "")
-
-            InstalledApp(
-                displayName = displayName,
-                packageName = packageName,
-                componentName = componentName
-            )
-        } catch (e: PackageManager.NameNotFoundException) {
-            e.printStackTrace()
-            null
-        }
-    }
-
 
     fun configureOnboardingFullScreen(window: Window) {
         WindowCompat.setDecorFitsSystemWindows(window, false)

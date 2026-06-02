@@ -911,15 +911,13 @@ fun HiddenApps(
                 exit = fadeOut(animationSpec = tween(500))
             ) {
                 SettingsSwipeableButton(
-                    label = AppUtils.getAppNameFromPackageName(
-                        mainAppModel.getContext(),
+                    label = mainAppModel.appsRepository.getAppNameFromPackageName(
                         appPackageName
                     ),
                     onClick = {
                         val app =
                             installedApps.find { it.packageName == appPackageName }
-                                ?: AppUtils.getInstalledAppFromPackageName(
-                                    mainAppModel.getContext(),
+                                ?: mainAppModel.appsRepository.getInstalledAppFromPackageName(
                                     appPackageName
                                 )
 

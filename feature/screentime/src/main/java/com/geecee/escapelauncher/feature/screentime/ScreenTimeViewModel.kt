@@ -3,11 +3,15 @@ package com.geecee.escapelauncher.feature.screentime
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.geecee.escapelauncher.core.data.repository.ScreenTimeRepository
+import com.geecee.escapelauncher.core.data.repository.AppsRepository
 import com.geecee.escapelauncher.core.data.entity.AppUsageEntity
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -17,7 +21,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ScreenTimeViewModel @Inject constructor(
-    private val screenTimeRepository: ScreenTimeRepository
+    private val screenTimeRepository: ScreenTimeRepository,
+    private val appsRepository: AppsRepository
 ) : ViewModel() {
 
     private val _totalUsage = MutableStateFlow(0L)
@@ -31,6 +36,28 @@ class ScreenTimeViewModel @Inject constructor(
 
     private val _yesterdayAppUsageList = MutableStateFlow<List<AppUsageEntity>>(emptyList())
     val yesterdayAppUsageList: StateFlow<List<AppUsageEntity>> = _yesterdayAppUsageList.asStateFlow()
+
+    val appUsageUiList: StateFlow<List<AppUsageUiModel>> = combine(
+        appUsageList,
+        yesterdayAppUsageList
+    ) { today, yesterday ->
+        today.map { appScreenTime ->
+            val yesterdayAppUsage = yesterday.find { it.packageName == appScreenTime.packageName }
+            val usageIncreased = appScreenTime.totalTime > (yesterdayAppUsage?.totalTime ?: 0L)
+            val appName = appsRepository.getAppNameFromPackageName(appScreenTime.packageName)
+
+            AppUsageUiModel(
+                packageName = appScreenTime.packageName,
+                appName = appName,
+                totalTime = appScreenTime.totalTime,
+                usageIncreased = usageIncreased
+            )
+        }.filter { it.appName != "null" }
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = emptyList()
+    )
 
     init {
         loadData()
