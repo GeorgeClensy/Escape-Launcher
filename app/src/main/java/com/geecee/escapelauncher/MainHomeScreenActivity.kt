@@ -36,13 +36,11 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.geecee.escapelauncher.core.analytics.analyticsProxy
 import com.geecee.escapelauncher.ui.views.MainPagerScreen
 import com.geecee.escapelauncher.ui.views.Onboarding
 import com.geecee.escapelauncher.ui.views.Settings
-import com.geecee.escapelauncher.utils.AppUtils
-import com.geecee.escapelauncher.utils.AppUtils.configureAnalytics
 import com.geecee.escapelauncher.core.model.InstalledApp
-import com.geecee.escapelauncher.utils.ScreenOffReceiver
 import com.geecee.escapelauncher.feature.screentime.ScreenTimeViewModel
 import com.geecee.escapelauncher.core.data.worker.ClearOldDataWorker
 import com.geecee.escapelauncher.core.theme.BackgroundColor
@@ -50,7 +48,9 @@ import com.geecee.escapelauncher.core.theme.EscapeTheme
 import com.geecee.escapelauncher.feature.newwidgets.WidgetHostManager
 import com.geecee.escapelauncher.core.cloudmessaging.messagingInitializer
 import com.geecee.escapelauncher.core.common.configureFullScreenMode
+import com.geecee.escapelauncher.core.common.configureOnboardingFullScreen
 import com.geecee.escapelauncher.core.common.formatScreenTime
+import com.geecee.escapelauncher.core.ui.recievers.ScreenOffReceiver
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 import kotlinx.coroutines.Dispatchers
@@ -104,7 +104,8 @@ class MainHomeScreenActivity : ComponentActivity() {
         // Setup analytics
         lifecycleScope.launch {
             globalViewModel.allowAnalytics.collect { enabled ->
-                configureAnalytics(this@MainHomeScreenActivity, enabled)
+                analyticsProxy.configureAnalytics(this@MainHomeScreenActivity, enabled)
+                Log.d("Analytics", "Anayitcs are $enabled")
             }
         }
 
@@ -229,7 +230,6 @@ class MainHomeScreenActivity : ComponentActivity() {
             lifecycleScope.launch {
                 val isFirstTime = globalViewModel.firstTime.first()
                 if (!isFirstTime) {
-                    AppUtils.resetHome(homeScreenModel)
                     viewModel.requestToGoHome()
                 }
             }
@@ -318,7 +318,7 @@ class MainHomeScreenActivity : ComponentActivity() {
                     "onboarding",
                     enterTransition = { fadeIn(tween(900)) },
                     exitTransition = { fadeOut(tween(300)) }) {
-                    AppUtils.configureOnboardingFullScreen(window)
+                    configureOnboardingFullScreen(window)
 
                     Onboarding(
                         mainAppNavController = navController,

@@ -1,12 +1,19 @@
 package com.geecee.escapelauncher.core.common
 
+import android.Manifest
 import android.app.Activity
+import android.app.WallpaperManager
 import android.app.role.RoleManager
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Canvas
+import android.graphics.Paint
 import android.os.Build
 import android.provider.Settings
+import androidx.annotation.ColorInt
+import androidx.annotation.RequiresPermission
+import androidx.core.graphics.createBitmap
 
 private const val REQUEST_ROLE_HOME_CODE = 678
 
@@ -54,4 +61,29 @@ fun isDefaultLauncher(context: Context): Boolean {
         val resolveInfo = packageManager.resolveActivity(intent, PackageManager.MATCH_DEFAULT_ONLY)
         resolveInfo?.activityInfo?.packageName == context.packageName
     }
+}
+
+/**
+ * Set a solid colour as the home screen wallpaper.
+ *
+ * @param context The context of the application or activity.
+ * @param color The colour to set as the wallpaper.
+ */
+@RequiresPermission(Manifest.permission.SET_WALLPAPER)
+fun setSolidColorWallpaperHomeScreen(context: Context, @ColorInt colour: Int) {
+    val wallpaperManager = WallpaperManager.getInstance(context)
+
+    val displayMetrics = context.resources.displayMetrics
+    val width = displayMetrics.widthPixels
+    val height = displayMetrics.heightPixels
+
+    val bitmap = createBitmap(width, height)
+    val canvas = Canvas(bitmap)
+    val paint = Paint().apply {
+        this.color = colour
+        style = Paint.Style.FILL
+    }
+    canvas.drawRect(0f, 0f, width.toFloat(), height.toFloat(), paint)
+
+    wallpaperManager.setBitmap(bitmap, null, true, WallpaperManager.FLAG_SYSTEM)
 }

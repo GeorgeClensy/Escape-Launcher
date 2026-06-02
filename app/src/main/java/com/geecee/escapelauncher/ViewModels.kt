@@ -9,8 +9,6 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
@@ -22,7 +20,6 @@ import com.geecee.escapelauncher.core.data.repository.AppsRepository
 import com.geecee.escapelauncher.core.data.repository.ModifiedAppsRepository
 import com.geecee.escapelauncher.core.domain.repository.SettingsRepository
 import com.geecee.escapelauncher.core.model.InstalledApp
-import com.geecee.escapelauncher.utils.AppUtils
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.Dispatchers
@@ -42,12 +39,8 @@ class HomeScreenModel(application: Application, val mainAppViewModel: MainAppVie
     AndroidViewModel(application) {
     var currentSelectedApp = mutableStateOf(InstalledApp("", "", ComponentName("", "")))
 
-    val isCurrentAppFavorite by derivedStateOf {
-        favoriteApps.contains(currentSelectedApp.value)
-    }
 
     var showOpenChallenge = mutableStateOf(false)
-    var showBottomSheet = mutableStateOf(false)
 
     val coroutineScope = viewModelScope
     val interactionSource = MutableInteractionSource()
@@ -93,10 +86,6 @@ class HomeScreenModel(application: Application, val mainAppViewModel: MainAppVie
             animationSpec = tween(durationMillis = 500, easing = FastOutSlowInEasing)
         )
     }
-
-    var showWorkBottomSheet = mutableStateOf(false)
-
-    var showWorkApps = mutableStateOf(false)
 
     init {
         coroutineScope.launch {
@@ -164,7 +153,7 @@ class HomeScreenModel(application: Application, val mainAppViewModel: MainAppVie
                         showOpenChallenge.value = false
                     }
                 }
-                AppUtils.resetHome(this@HomeScreenModel)
+                mainAppViewModel.requestToGoHome()
             }
         }
     }

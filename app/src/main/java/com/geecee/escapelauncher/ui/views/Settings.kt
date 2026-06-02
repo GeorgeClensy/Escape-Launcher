@@ -81,9 +81,9 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.geecee.escapelauncher.BuildConfig
 import com.geecee.escapelauncher.GlobalViewModel
-import com.geecee.escapelauncher.HiddenAppsViewModel
+import com.geecee.escapelauncher.feature.settings.hiddenapps.HiddenAppsViewModel
 import com.geecee.escapelauncher.HomeScreenModel
-import com.geecee.escapelauncher.OpenChallengeViewModel
+import com.geecee.escapelauncher.feature.settings.openchallenges.OpenChallengeViewModel
 import com.geecee.escapelauncher.R
 import com.geecee.escapelauncher.core.common.isDefaultLauncher
 import com.geecee.escapelauncher.core.common.showLauncherSelector
@@ -114,9 +114,9 @@ import com.geecee.escapelauncher.feature.settings.MainSettingsPageViewModel
 import com.geecee.escapelauncher.feature.settings.SettingsViewModel
 import com.geecee.escapelauncher.feature.settings.widget.WidgetOptions
 import com.geecee.escapelauncher.feature.weather.WeatherViewModel
-import com.geecee.escapelauncher.utils.AppUtils
-import com.geecee.escapelauncher.utils.AppUtils.loadTextFromAssets
-import com.geecee.escapelauncher.utils.AppUtils.resetHome
+import com.geecee.escapelauncher.core.common.loadTextFromAssets
+import com.geecee.escapelauncher.core.common.setSolidColorWallpaperHomeScreen
+import com.geecee.escapelauncher.core.ui.utils.toAndroidColor
 import com.geecee.escapelauncher.utils.EscapeAccessibilityService
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -245,7 +245,6 @@ fun Settings(
                             hiddenAppsViewModel.unhideApp(app.packageName)
                         } else {
                             hiddenAppsViewModel.hideApp(app.packageName)
-                            resetHome(homeScreenModel, false)
                         }
                     })
             }
@@ -786,9 +785,9 @@ fun ThemeOptions(
                 label = stringResource(R.string.match_system_wallpaper),
                 isBottomOfGroup = true,
                 onClick = {
-                    AppUtils.setSolidColorWallpaperHomeScreen(
+                    setSolidColorWallpaperHomeScreen(
                         context,
-                        colour
+                        colour.toAndroidColor()
                     )
                 }
             )

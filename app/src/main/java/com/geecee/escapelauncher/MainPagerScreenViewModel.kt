@@ -14,7 +14,6 @@ class MainPagerScreenViewModel @Inject constructor(
     @ApplicationContext context: Context,
     private val repository: SettingsRepository
 ) : ViewModel() {
-    val firstTimeHelp = repository.firstTimeHelp
     fun setFirstTimeHelp(value: Boolean) {
         viewModelScope.launch {
             repository.setFirstTimeHelp(value)
@@ -22,7 +21,6 @@ class MainPagerScreenViewModel @Inject constructor(
     }
 
     val hideScreenTimePage = repository.hideScreenTimePage
-    val automaticallyOpenSearch = repository.searchAutoOpen
     val doubleTapToLock = repository.doubleTapToLock
     val hapticFeedBackEnabled = repository.hapticFeedBackEnabled
 }

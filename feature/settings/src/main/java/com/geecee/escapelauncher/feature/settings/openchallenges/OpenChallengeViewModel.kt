@@ -1,4 +1,4 @@
-package com.geecee.escapelauncher
+package com.geecee.escapelauncher.feature.settings.openchallenges
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -19,7 +19,7 @@ class OpenChallengeViewModel @Inject constructor(
         .map { it.toSet() }
         .stateIn(
             scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
+            started = SharingStarted.Companion.WhileSubscribed(5000),
             initialValue = emptySet()
         )
 

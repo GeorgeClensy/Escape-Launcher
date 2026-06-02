@@ -26,3 +26,13 @@ fun configureFullScreenMode(window: Window) {
         window.setNavigationBarContrastEnforced(false)
     }
 }
+
+fun configureOnboardingFullScreen(window: Window) {
+    WindowCompat.setDecorFitsSystemWindows(window, false)
+
+    val controller = WindowCompat.getInsetsController(window, window.decorView)
+    controller.systemBarsBehavior =
+        WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+
+    controller.hide(WindowInsetsCompat.Type.systemBars())
+}
