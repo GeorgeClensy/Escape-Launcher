@@ -41,7 +41,7 @@ import com.geecee.escapelauncher.feature.securefolder.canUseSecureFolder
 import com.geecee.escapelauncher.feature.workapps.WorkApps
 import com.geecee.escapelauncher.feature.workapps.WorkAppsFab
 import com.geecee.escapelauncher.privatespace.PrivateSpace
-import com.geecee.escapelauncher.utils.EscapeAccessibilityService
+import com.geecee.escapelauncher.core.common.EscapeAccessibilityService
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import com.geecee.escapelauncher.MainAppViewModel as MainAppModel

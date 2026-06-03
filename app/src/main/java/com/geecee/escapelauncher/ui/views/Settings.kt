@@ -117,7 +117,7 @@ import com.geecee.escapelauncher.feature.weather.WeatherViewModel
 import com.geecee.escapelauncher.core.common.loadTextFromAssets
 import com.geecee.escapelauncher.core.common.setSolidColorWallpaperHomeScreen
 import com.geecee.escapelauncher.core.ui.utils.toAndroidColor
-import com.geecee.escapelauncher.utils.EscapeAccessibilityService
+import com.geecee.escapelauncher.core.common.EscapeAccessibilityService
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.system.exitProcess

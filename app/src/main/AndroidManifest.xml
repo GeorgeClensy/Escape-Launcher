@@ -57,7 +57,7 @@
             android:exported="false" />
 
         <service
-            android:name=".utils.EscapeAccessibilityService"
+            android:name=".core.common.EscapeAccessibilityService"
             android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE"
             android:exported="false"
             tools:ignore="AccessibilityPolicy">
