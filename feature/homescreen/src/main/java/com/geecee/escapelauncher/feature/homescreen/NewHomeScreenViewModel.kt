@@ -13,6 +13,7 @@ import com.geecee.escapelauncher.core.ui.model.AppAction
 import com.geecee.escapelauncher.core.common.getAppShortcuts
 import com.geecee.escapelauncher.core.common.isMainUserApp
 import com.geecee.escapelauncher.core.common.startShortcut
+import com.geecee.escapelauncher.core.common.AppConfiguration
 import com.geecee.escapelauncher.feature.newwidgets.WidgetHostManager
 import com.geecee.escapelauncher.core.ui.R
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -36,8 +37,11 @@ class NewHomeScreenViewModel @Inject constructor(
     settingsRepository: SettingsRepository,
     appsRepository: AppsRepository,
     private val modifiedAppsRepository: ModifiedAppsRepository,
-    val widgetHostManager: WidgetHostManager
+    val widgetHostManager: WidgetHostManager,
+    private val appConfiguration: AppConfiguration
 ) : ViewModel() {
+    val isFoss = appConfiguration.isFoss
+
     // UI Events
     private val _uiEvent = MutableSharedFlow<HomeUiEvent>()
     val uiEvent = _uiEvent.asSharedFlow()

@@ -69,7 +69,6 @@ import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 import androidx.compose.ui.platform.LocalResources
-import com.geecee.escapelauncher.core.ui.BuildConfig
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -260,7 +259,7 @@ fun HomeScreen(
 
                     if (showWeather) {
                         @Suppress("KotlinConstantConditions") // This is to stop the IS_FOSS is always true cuz it's a foss sync in android studio
-                        if (!BuildConfig.IS_FOSS) {
+                        if (!homeScreenViewModel.isFoss) {
                             HomeWeatherImpl(alignment = homeAlignment)
                         }
                     }

@@ -432,6 +432,9 @@ fun MainSettingsPage(
                     checked = showWeather,
                     onCheckedChange = {
                         mainSettingsPageViewModel.setShowWeather(it)
+                        if (it) {
+                            weatherViewModel.forceUpdate()
+                        }
                     })
             }
         }

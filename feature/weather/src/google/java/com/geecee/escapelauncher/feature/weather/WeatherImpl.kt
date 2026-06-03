@@ -22,7 +22,7 @@ class WeatherImpl : WeatherProxy {
             LocationServices.getFusedLocationProviderClient(context)
 
         fusedLocationClient.lastLocation.addOnSuccessListener { location ->
-            Log.d("Weather", "Retrieved Weather")
+            Log.d("Weather", "Retrieved Weather Location: $location")
 
             if (location == null) {
                 callback("~~")
@@ -45,6 +45,7 @@ class WeatherImpl : WeatherProxy {
 
             client.newCall(request).enqueue(object : Callback {
                 override fun onFailure(call: Call, e: IOException) {
+                    Log.e("Weather", "Network request failed", e)
                     callback("~~")
                 }
 
@@ -57,16 +58,20 @@ class WeatherImpl : WeatherProxy {
                                 val temp = weather.optDouble("temperature", Double.NaN)
                                 callback("${temp.toInt()}${unitSymbol}")
                             } else {
+                                Log.e("Weather", "Weather data missing in response: $json")
                                 callback("No weather data")
                             }
                         }
                     }
                     catch (e: Exception) {
-                        Log.e("Weather", "Error getting weather", e)
+                        Log.e("Weather", "Error parsing weather data", e)
                         callback("~~")
                     }
                 }
             })
+        }.addOnFailureListener { e ->
+            Log.e("Weather", "Failed to get location", e)
+            callback("unavailable")
         }
     }
 }
