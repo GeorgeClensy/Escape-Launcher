@@ -4,7 +4,6 @@ import android.app.Application
 import com.geecee.escapelauncher.core.analytics.AnalyticsProxyImpl
 import com.geecee.escapelauncher.core.cloudmessaging.MessagingInitializerImpl
 import com.geecee.escapelauncher.core.analytics.analyticsProxy
-import com.geecee.escapelauncher.utils.Migration
 import com.geecee.escapelauncher.core.cloudmessaging.messagingInitializer
 import com.geecee.escapelauncher.feature.weather.WeatherImpl
 import com.geecee.escapelauncher.feature.weather.weatherProxy
@@ -14,7 +13,6 @@ import dagger.hilt.android.HiltAndroidApp
 class EscapeApplication : Application() {
     override fun onCreate() {
         super.onCreate()
-        Migration(this).migrateToUnifiedPrefs()
         // Initialize flavor-specific proxies
         analyticsProxy = AnalyticsProxyImpl()
         messagingInitializer = MessagingInitializerImpl()
