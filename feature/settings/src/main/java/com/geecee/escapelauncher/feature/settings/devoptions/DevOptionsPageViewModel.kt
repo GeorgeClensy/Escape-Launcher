@@ -1,4 +1,4 @@
-package com.geecee.escapelauncher.feature.settings
+package com.geecee.escapelauncher.feature.settings.devoptions
 
 import android.content.Context
 import androidx.lifecycle.ViewModel

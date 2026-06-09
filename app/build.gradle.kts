@@ -22,16 +22,21 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
+
         resValue("string", "app_version", baseVersionCode)
         resValue("string", "app_name", "Escape Launcher")
         resValue("string", "app_flavour", "Unknown Flavor")
-        resValue("string", "empty", "")
+
+        buildConfigField("String", "APP_VERSION", "\"$baseVersionCode\"")
+        buildConfigField("String", "APP_NAME", "\"Escape Launcher\"")
+        buildConfigField("String", "APP_FLAVOUR", "\"Unknown Flavor\"")
     }
     buildTypes {
         debug {
             applicationIdSuffix = ".dev"
             versionNameSuffix = "-dev"
             resValue("string", "app_name", "Escape Launcher Dev")
+            buildConfigField("String", "APP_NAME", "\"Escape Launcher Dev\"")
         }
         release {
             resValue("string", "app_name", "Escape Launcher")

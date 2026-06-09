@@ -57,6 +57,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
@@ -73,17 +74,19 @@ import com.geecee.escapelauncher.BuildConfig
 import com.geecee.escapelauncher.GlobalViewModel
 import com.geecee.escapelauncher.HomeScreenModel
 import com.geecee.escapelauncher.MainAppViewModel
-import com.geecee.escapelauncher.R
+import com.geecee.escapelauncher.core.ui.R
 import com.geecee.escapelauncher.core.common.configureFullScreenMode
+import com.geecee.escapelauncher.core.common.isDefaultLauncher
+import com.geecee.escapelauncher.core.common.loadTextFromAssets
+import com.geecee.escapelauncher.core.common.showLauncherSelector
 import com.geecee.escapelauncher.core.data.repository.AppsRepository
 import com.geecee.escapelauncher.core.theme.BackgroundColor
 import com.geecee.escapelauncher.core.theme.CardContainerColor
 import com.geecee.escapelauncher.core.theme.primaryContentColor
 import com.geecee.escapelauncher.core.ui.composables.AutoResizingText
 import com.geecee.escapelauncher.core.ui.composables.BulkManager
+import com.geecee.escapelauncher.core.ui.composables.PrivacyPolicyDialog
 import com.geecee.escapelauncher.core.ui.composables.SettingsSpacer
-import com.geecee.escapelauncher.core.common.isDefaultLauncher
-import com.geecee.escapelauncher.core.common.showLauncherSelector
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.delay
@@ -104,97 +107,65 @@ fun Onboarding(
     @Suppress("KotlinConstantConditions") val pages =
         listOfNotNull(
             OnboardingPage("welcome") { onNext, onPrev ->
-                WelcomeScreen(
-                    onPrev = {
-                        onPrev()
-                    },
-                    onNext = {
-                        onNext()
-                    }
-                )
-            },
-            OnboardingPage("stats") { onNext, onPrev ->
-                StatisticsScreen(
-                    onPrev = {
-                        onPrev()
-                    },
-                    onNext = {
-                        onNext()
-                    }
-                )
-            },
-            OnboardingPage("favorites") { onNext, onPrev ->
-                FavoritesSelectionScreen(
-                    mainAppViewModel,
-                    homeScreenModel,
-                    onPrev = {
-                        onPrev()
-                    },
-                    onNext = {
-                        onNext()
-                    }
-                )
-            },
-            OnboardingPage("default_launcher") { onNext, onPrev ->
-                DefaultLauncherScreen(
-                    activity,
-                    onPrev = {
-                        onPrev()
-                    },
-                    onNext = {
-                        onNext()
-                    }
-                )
-            },
-            if (!BuildConfig.IS_FOSS) {
-                OnboardingPage("analytics") { onNext, onPrev ->
-                    AnalyticsConsentScreen(
-                        mainAppViewModel,
-                        globalViewModel,
-                        onPrev = {
-                            onPrev()
-                        },
-                        onNext = {
-                            onNext()
-                        }
-                    )
-                }
-            } else {
-                null
-            },
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                OnboardingPage("accessibility") { onNext, onPrev ->
-                    AccessibilitySetupScreen(
-                        mainAppViewModel,
-                        onPrev = {
-                            onPrev()
-                        },
-                        onNext = {
-                            onNext()
-                        }
-                    )
-                }
-            } else {
-                null
+            WelcomeScreen(onPrev = {
+                onPrev()
+            }, onNext = {
+                onNext()
+            })
+        }, OnboardingPage("stats") { onNext, onPrev ->
+            StatisticsScreen(onPrev = {
+                onPrev()
+            }, onNext = {
+                onNext()
+            })
+        }, OnboardingPage("favorites") { onNext, onPrev ->
+            FavoritesSelectionScreen(mainAppViewModel, homeScreenModel, onPrev = {
+                onPrev()
+            }, onNext = {
+                onNext()
+            })
+        }, OnboardingPage("default_launcher") { onNext, onPrev ->
+            DefaultLauncherScreen(activity, onPrev = {
+                onPrev()
+            }, onNext = {
+                onNext()
+            })
+        }, if (!BuildConfig.IS_FOSS) {
+            OnboardingPage("analytics") { onNext, onPrev ->
+                AnalyticsConsentScreen(mainAppViewModel, globalViewModel, onPrev = {
+                    onPrev()
+                }, onNext = {
+                    onNext()
+                })
             }
-        )
+        } else {
+            null
+        }, if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            OnboardingPage("accessibility") { onNext, onPrev ->
+                AccessibilitySetupScreen(mainAppViewModel, onPrev = {
+                    onPrev()
+                }, onNext = {
+                    onNext()
+                })
+            }
+        } else {
+            null
+        })
 
     val coroutineScope = rememberCoroutineScope()
 
-    val pagerState = rememberPagerState (
-        pageCount = { pages.size }
-    )
+    val pagerState = rememberPagerState(
+        pageCount = { pages.size })
 
     // Progress follows pager motion
     val progress by remember {
         derivedStateOf {
             if (pages.size <= 1) 0f
             else {
-                (
-                        pagerState.currentPage +
-                                pagerState.currentPageOffsetFraction
-                        ).coerceIn(0f, pages.lastIndex.toFloat()) /
-                        pages.lastIndex
+                (pagerState.currentPage + pagerState.currentPageOffsetFraction).coerceIn(
+                        0f,
+                        pages.lastIndex.toFloat()
+                    ) / pages.lastIndex
             }
         }
     }
@@ -211,11 +182,8 @@ fun Onboarding(
                 .height(62.dp)
                 .padding(start = 30.dp, end = 30.dp)
         ) {
-            @Suppress("RemoveRedundantQualifierName")
-            androidx.compose.animation.AnimatedVisibility (
-                pagerState.currentPage != 0,
-                enter = fadeIn(),
-                exit = fadeOut()
+            @Suppress("RemoveRedundantQualifierName") androidx.compose.animation.AnimatedVisibility(
+                pagerState.currentPage != 0, enter = fadeIn(), exit = fadeOut()
             ) {
                 LinearProgressIndicator(
                     progress = { progress },
@@ -229,55 +197,50 @@ fun Onboarding(
         }
 
         // Pager content
-        HorizontalPager (
+        HorizontalPager(
             state = pagerState,
-            modifier = Modifier.weight(1f).graphicsLayer(),
+            modifier = Modifier
+                .weight(1f)
+                .graphicsLayer(),
             userScrollEnabled = false,
             beyondViewportPageCount = 1
         ) { pageIndex ->
 
             val page = pages[pageIndex]
 
-            page.content(
-                {
-                    if (pageIndex < pages.lastIndex) {
-                        coroutineScope.launch {
-                            pagerState.animateScrollToPage(
-                                pageIndex + 1,
-                                animationSpec = tween(
-                                    durationMillis = 500,
-                                    easing = FastOutSlowInEasing
-                                )
+            page.content({
+                if (pageIndex < pages.lastIndex) {
+                    coroutineScope.launch {
+                        pagerState.animateScrollToPage(
+                            pageIndex + 1, animationSpec = tween(
+                                durationMillis = 500, easing = FastOutSlowInEasing
                             )
-                        }
-                    } else {
-                        // Finished onboarding
-                        mainAppNavController.navigate("home") {
-                            popUpTo("onboarding") { inclusive = true }
-                            launchSingleTop = true
-                        }
-
-                        globalViewModel.setFirstTime(false)
-
-                        mainAppViewModel.getWindow()?.let {
-                            configureFullScreenMode(it)
-                        }
+                        )
                     }
-                },
-                {
-                    if (pageIndex > 0) {
-                        coroutineScope.launch {
-                            pagerState.animateScrollToPage(
-                                pageIndex - 1,
-                                animationSpec = tween(
-                                    durationMillis = 500,
-                                    easing = FastOutSlowInEasing
-                                )
-                            )
-                        }
+                } else {
+                    // Finished onboarding
+                    mainAppNavController.navigate("home") {
+                        popUpTo("onboarding") { inclusive = true }
+                        launchSingleTop = true
+                    }
+
+                    globalViewModel.setFirstTime(false)
+
+                    mainAppViewModel.getWindow()?.let {
+                        configureFullScreenMode(it)
                     }
                 }
-            )
+            }, {
+                if (pageIndex > 0) {
+                    coroutineScope.launch {
+                        pagerState.animateScrollToPage(
+                            pageIndex - 1, animationSpec = tween(
+                                durationMillis = 500, easing = FastOutSlowInEasing
+                            )
+                        )
+                    }
+                }
+            })
         }
     }
 }
@@ -290,7 +253,11 @@ fun PrevButton(
     IconButton(
         onClick = {
             onPrev()
-        }, modifier = modifier.padding(bottom = 30.dp).offset(x = (-4).dp), colors = IconButtonColors(
+        },
+        modifier = modifier
+            .padding(bottom = 30.dp)
+            .offset(x = (-4).dp),
+        colors = IconButtonColors(
             containerColor = primaryContentColor,
             contentColor = BackgroundColor,
             disabledContainerColor = primaryContentColor,
@@ -340,7 +307,9 @@ fun NextButton(
 }
 
 @Composable
-fun WelcomeScreen(onNext: () -> Unit, @Suppress("unused", "RedundantSuppression") onPrev: () -> Unit) {
+fun WelcomeScreen(
+    onNext: () -> Unit, @Suppress("unused", "RedundantSuppression") onPrev: () -> Unit
+) {
     Box(
         Modifier
             .fillMaxSize()
@@ -378,7 +347,11 @@ fun WelcomeScreen(onNext: () -> Unit, @Suppress("unused", "RedundantSuppression"
 
 @Composable
 fun StatisticsScreen(onNext: () -> Unit, onPrev: () -> Unit) {
-    Box(Modifier.fillMaxSize().padding(start = 30.dp, end = 30.dp)) {
+    Box(
+        Modifier
+            .fillMaxSize()
+            .padding(start = 30.dp, end = 30.dp)
+    ) {
         Column(
             Modifier.verticalScroll(rememberScrollState())
         ) {
@@ -430,15 +403,13 @@ fun StatisticsScreen(onNext: () -> Unit, onPrev: () -> Unit) {
         }
 
         PrevButton(
-            Modifier
-                .align(Alignment.BottomStart)
+            Modifier.align(Alignment.BottomStart)
         ) {
             onPrev()
         }
 
         NextButton(
-            Modifier
-                .align(Alignment.BottomEnd)
+            Modifier.align(Alignment.BottomEnd)
         ) {
             onNext()
         }
@@ -471,7 +442,11 @@ fun FavoritesSelectionScreen(
         showList = true
     }
 
-    Box(Modifier.fillMaxSize().padding(start = 30.dp, end = 30.dp)) {
+    Box(
+        Modifier
+            .fillMaxSize()
+            .padding(start = 30.dp, end = 30.dp)
+    ) {
         if (showList) {
             BulkManager(
                 items = installedApps,
@@ -484,9 +459,7 @@ fun FavoritesSelectionScreen(
                     val app = homeScreenModel.favoriteApps[fromIndex]
                     homeScreenModel.coroutineScope.launch {
                         mainAppModel.modifiedAppsRepository.reorderFavouriteApp(
-                            app.packageName,
-                            fromIndex,
-                            toIndex
+                            app.packageName, fromIndex, toIndex
                         )
                     }
                 },
@@ -507,15 +480,13 @@ fun FavoritesSelectionScreen(
         }
 
         PrevButton(
-            Modifier
-                .align(Alignment.BottomStart)
+            Modifier.align(Alignment.BottomStart)
         ) {
             onPrev()
         }
 
         NextButton(
-            Modifier
-                .align(Alignment.BottomEnd)
+            Modifier.align(Alignment.BottomEnd)
         ) {
             onNext()
         }
@@ -524,11 +495,13 @@ fun FavoritesSelectionScreen(
 
 @Composable
 fun DefaultLauncherScreen(
-    activity: Activity,
-    onNext: () -> Unit,
-    onPrev: () -> Unit
+    activity: Activity, onNext: () -> Unit, onPrev: () -> Unit
 ) {
-    Box(Modifier.fillMaxSize().padding(start = 30.dp, end = 30.dp)) {
+    Box(
+        Modifier
+            .fillMaxSize()
+            .padding(start = 30.dp, end = 30.dp)
+    ) {
         Column {
             Text(
                 stringResource(R.string.set_escape),
@@ -586,15 +559,13 @@ fun DefaultLauncherScreen(
         }
 
         PrevButton(
-            Modifier
-                .align(Alignment.BottomStart)
+            Modifier.align(Alignment.BottomStart)
         ) {
             onPrev()
         }
 
         NextButton(
-            Modifier
-                .align(Alignment.BottomEnd)
+            Modifier.align(Alignment.BottomEnd)
         ) {
             onNext()
         }
@@ -608,10 +579,15 @@ fun AnalyticsConsentScreen(
     onNext: () -> Unit,
     onPrev: () -> Unit
 ) {
+    val context = LocalContext.current
     val showPolicyDialog = remember { mutableStateOf(false) }
     val scrollState = rememberLazyListState()
 
-    Box(Modifier.fillMaxSize().padding(start = 30.dp, end = 30.dp)) {
+    Box(
+        Modifier
+            .fillMaxSize()
+            .padding(start = 30.dp, end = 30.dp)
+    ) {
         LazyColumn(
             state = scrollState
         ) {
@@ -667,15 +643,13 @@ fun AnalyticsConsentScreen(
         }
 
         PrevButton(
-            Modifier
-                .align(Alignment.BottomStart)
+            Modifier.align(Alignment.BottomStart)
         ) {
             onPrev()
         }
 
         Row(
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
+            modifier = Modifier.align(Alignment.BottomEnd)
         ) {
             NextButton(
                 text = stringResource(R.string.deny), outline = true
@@ -695,7 +669,9 @@ fun AnalyticsConsentScreen(
 
     AnimatedVisibility(showPolicyDialog.value, enter = fadeIn(), exit = fadeOut()) {
         Box(Modifier.padding(bottom = 30.dp)) {
-            PrivacyPolicyDialog(mainAppModel, showPolicyDialog)
+            loadTextFromAssets(context, "Privacy Policy.txt")?.let { text ->
+                PrivacyPolicyDialog(text = text, onDismiss = { showPolicyDialog.value = false })
+            }
         }
     }
 }
@@ -707,7 +683,11 @@ fun AccessibilitySetupScreen(
     val scrollState = rememberLazyListState()
     val context = mainAppModel.getContext()
 
-    Box(Modifier.fillMaxSize().padding(start = 30.dp, end = 30.dp)) {
+    Box(
+        Modifier
+            .fillMaxSize()
+            .padding(start = 30.dp, end = 30.dp)
+    ) {
         LazyColumn(
             state = scrollState
         ) {
@@ -765,15 +745,13 @@ fun AccessibilitySetupScreen(
         }
 
         PrevButton(
-            Modifier
-                .align(Alignment.BottomStart)
+            Modifier.align(Alignment.BottomStart)
         ) {
             onPrev()
         }
 
         Row(
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
+            modifier = Modifier.align(Alignment.BottomEnd)
         ) {
             NextButton {
                 onNext()

@@ -15,7 +15,8 @@ import kotlinx.coroutines.launch
 
 @HiltViewModel
 class WeatherViewModel @Inject constructor(
-    @ApplicationContext private val context: Context, private val repository: SettingsRepository
+    @param:ApplicationContext private val context: Context,
+    private val repository: SettingsRepository
 ) : ViewModel() {
     val weatherAppPackage = repository.weatherAppPackage
 

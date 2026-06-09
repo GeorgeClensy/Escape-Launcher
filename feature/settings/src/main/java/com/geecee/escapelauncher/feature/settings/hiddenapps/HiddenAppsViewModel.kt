@@ -16,8 +16,8 @@ import kotlinx.coroutines.launch
 @HiltViewModel
 class HiddenAppsViewModel @Inject constructor(
     private val modifiedAppsRepository: ModifiedAppsRepository,
-    private val settingsRepository: SettingsRepository,
-    appsRepository: AppsRepository
+    val appsRepository: AppsRepository,
+    private val settingsRepository: SettingsRepository
 ) : ViewModel() {
     val hiddenPackageIds: StateFlow<Set<String>> = modifiedAppsRepository.getHiddenPackageIdsFlow()
         .map { it.toSet() }

@@ -69,6 +69,7 @@ import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 import androidx.compose.ui.platform.LocalResources
+import kotlin.time.Duration.Companion.milliseconds
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -198,7 +199,7 @@ fun HomeScreen(
                 }
             }
 
-            //Glace widgets
+            //Glance widgets
             item {
                 FlowRow(
                     horizontalArrangement = Arrangement.spacedBy(10.dp),
@@ -217,7 +218,7 @@ fun HomeScreen(
                                 calendar.set(Calendar.SECOND, 0)
                                 calendar.set(Calendar.MILLISECOND, 0)
                                 val delayMillis = calendar.timeInMillis - now
-                                delay(delayMillis)
+                                delay(delayMillis.milliseconds)
                                 dateText = dateFormat.format(Date())
                             }
                         }

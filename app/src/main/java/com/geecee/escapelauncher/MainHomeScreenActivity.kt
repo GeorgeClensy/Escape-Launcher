@@ -39,7 +39,7 @@ import androidx.navigation.compose.rememberNavController
 import com.geecee.escapelauncher.core.analytics.analyticsProxy
 import com.geecee.escapelauncher.ui.views.MainPagerScreen
 import com.geecee.escapelauncher.ui.views.Onboarding
-import com.geecee.escapelauncher.ui.views.Settings
+import com.geecee.escapelauncher.feature.settings.Settings
 import com.geecee.escapelauncher.core.model.InstalledApp
 import com.geecee.escapelauncher.feature.screentime.ScreenTimeViewModel
 import com.geecee.escapelauncher.core.data.worker.ClearOldDataWorker
@@ -58,6 +58,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlin.time.Duration.Companion.milliseconds
 
 @AndroidEntryPoint
 class MainHomeScreenActivity : ComponentActivity() {
@@ -260,7 +261,7 @@ class MainHomeScreenActivity : ComponentActivity() {
                         homeScreenModel.animatedGoToMainPage()
                     }
                     launch {
-                        delay(550)
+                        delay(550.milliseconds)
                         homeScreenModel.appsListScrollState.scrollToItem(0)
                     }
                 }
@@ -299,8 +300,6 @@ class MainHomeScreenActivity : ComponentActivity() {
                     enterTransition = { fadeIn(tween(300)) },
                     exitTransition = { fadeOut(tween(300)) }) {
                     Settings(
-                        viewModel,
-                        homeScreenModel = homeScreenModel,
                         {
                             navController.navigate("home") {
                                 popUpTo("settings") {

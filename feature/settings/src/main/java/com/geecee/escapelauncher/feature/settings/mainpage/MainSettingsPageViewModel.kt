@@ -1,8 +1,9 @@
-package com.geecee.escapelauncher.feature.settings
+package com.geecee.escapelauncher.feature.settings.mainpage
 
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.geecee.escapelauncher.core.common.AppConfiguration
 import com.geecee.escapelauncher.core.data.repository.AppsRepository
 import com.geecee.escapelauncher.core.domain.repository.SettingsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -13,9 +14,10 @@ import kotlinx.coroutines.launch
 
 @HiltViewModel
 class MainSettingsPageViewModel @Inject constructor(
-    @ApplicationContext private val context: Context,
-    private val appsRepository: AppsRepository,
-    private val repository: SettingsRepository
+    @param:ApplicationContext private val context: Context,
+    appsRepository: AppsRepository,
+    private val repository: SettingsRepository,
+    val appConfiguration: AppConfiguration
 ) : ViewModel() {
     val hapticFeedBackEnabled = repository.hapticFeedBackEnabled
     fun setHapticFeedback(value: Boolean) {
@@ -116,7 +118,6 @@ class MainSettingsPageViewModel @Inject constructor(
         }
     }
 
-    val weatherAppPackage = repository.weatherAppPackage
     fun setWeatherAppPackage(value: String) {
         viewModelScope.launch {
             repository.setWeatherAppPackage(value)
@@ -180,6 +181,13 @@ class MainSettingsPageViewModel @Inject constructor(
     fun setHideScreenTimePage(value: Boolean) {
         viewModelScope.launch {
             repository.setHideScreenTimePage(value)
+        }
+    }
+
+    val allowAnalytics = repository.allowAnalyitics
+    fun setAllowAnalytics(value: Boolean) {
+        viewModelScope.launch {
+            repository.setAllowAnalytics(value)
         }
     }
 

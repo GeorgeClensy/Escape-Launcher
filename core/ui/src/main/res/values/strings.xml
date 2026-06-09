@@ -15,6 +15,7 @@
     <string name="dark">Dark</string>
 
     <!-- Privacy and Analytics stuff -->
+    <string name="Analytics" translatable="false">Analytics</string>
     <string name="analytics_and_data_collection">Analytics and Data collection</string>
     <string name="anonymous_data">We use anonymous data to improve your experience with Escape launcher. Make sure to read the privacy policy before selecting allow.</string>
     <string name="allow">Allow</string>
