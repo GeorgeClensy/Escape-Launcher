@@ -24,4 +24,6 @@ class GlobalViewModel @Inject constructor(
             repository.setFirstTime(value)
         }
     }
+
+    val showStatusBar = repository.showStatusBar
 }

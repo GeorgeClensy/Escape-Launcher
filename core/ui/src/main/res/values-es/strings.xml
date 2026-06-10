@@ -60,6 +60,7 @@
     <string name="match_system_wallpaper">Sincronizar fondo con tema</string>
     <string name="date">Fecha</string>
     <string name="home_screen_options">Opciones de Inicio</string>
+    <string name="show_status_bar">Mostrar Barra de Estado</string>
     <string name="screen_time">Tiempo de Pantalla</string>
     <string name="other">Otro</string>
     <string name="general">General</string>
