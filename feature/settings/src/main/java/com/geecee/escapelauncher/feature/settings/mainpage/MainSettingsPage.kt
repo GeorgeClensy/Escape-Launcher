@@ -69,6 +69,7 @@ fun MainSettingsPage(
     val showClock by mainSettingsPageViewModel.showClock.collectAsState(initial = true)
     val bigClock by mainSettingsPageViewModel.bigClock.collectAsState(initial = false)
     val showDate by mainSettingsPageViewModel.showDate.collectAsState(initial = false)
+    val showStatusBar by mainSettingsPageViewModel.showStatusBar.collectAsState(initial = false)
     val showWeather by mainSettingsPageViewModel.showWeather.collectAsState(initial = false)
     val useFahrenheit by mainSettingsPageViewModel.useFahrenheit.collectAsState(initial = false)
     val showScreenTimeApp by mainSettingsPageViewModel.showScreenTimeApp.collectAsState(initial = false)
@@ -165,6 +166,15 @@ fun MainSettingsPage(
             SettingsSwitch(
                 label = stringResource(id = R.string.date), checked = showDate, onCheckedChange = {
                     mainSettingsPageViewModel.setShowDate(it)
+                })
+        }
+
+        item {
+            SettingsSwitch(
+                label = stringResource(id = R.string.show_status_bar),
+                checked = showStatusBar,
+                onCheckedChange = {
+                    mainSettingsPageViewModel.setShowStatusBar(it)
                 })
         }
 

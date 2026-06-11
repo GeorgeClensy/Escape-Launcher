@@ -1,12 +1,17 @@
 package com.geecee.escapelauncher.core.theme
 
+import android.app.Activity
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.remember
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalView
+import androidx.core.view.WindowCompat
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 
 @Composable
@@ -30,18 +35,31 @@ fun EscapeTheme(
         )
     }
 
-    MaterialTheme(
-        colorScheme =
-            theme?.resolveColorScheme()
-                ?: if (syncTheme) {
-                    if (isSystemInDarkTheme()) {
-                        dScheme.resolveColorScheme()
-                    } else {
-                        lScheme.resolveColorScheme()
-                    }
+    val resolvedColorScheme =
+        theme?.resolveColorScheme()
+            ?: if (syncTheme) {
+                if (isSystemInDarkTheme()) {
+                    dScheme.resolveColorScheme()
                 } else {
-                    colorScheme.resolveColorScheme()
-                },
+                    lScheme.resolveColorScheme()
+                }
+            } else {
+                colorScheme.resolveColorScheme()
+            }
+
+    // Keep status bar icons readable against the themed background (dark icons on a light surface)
+    val view = LocalView.current
+    if (!view.isInEditMode) {
+        val lightStatusBarIcons = resolvedColorScheme.surface.luminance() > 0.5f
+        SideEffect {
+            val window = (view.context as Activity).window
+            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars =
+                lightStatusBarIcons
+        }
+    }
+
+    MaterialTheme(
+        colorScheme = resolvedColorScheme,
         typography = escapeType(fontFamily),
         content = content
     )

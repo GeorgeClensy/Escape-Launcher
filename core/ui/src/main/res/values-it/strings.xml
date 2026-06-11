@@ -84,6 +84,7 @@
     <string name="match_system_wallpaper">Adatta sfondo sistema al tema</string>
     <string name="date">Data</string>
     <string name="home_screen_options">Opzioni Schermata Home</string>
+    <string name="show_status_bar">Mostra Barra di Stato</string>
     <string name="screen_time">Tempo di Schermo</string>
     <string name="other">Altro</string>
     <string name="general">Generale</string>

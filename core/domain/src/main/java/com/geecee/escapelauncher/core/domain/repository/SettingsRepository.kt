@@ -15,6 +15,8 @@ interface SettingsRepository {
     suspend fun setBigClock(enabled: Boolean)
     val showDate: Flow<Boolean>
     suspend fun setShowDate(enabled: Boolean)
+    val showStatusBar: Flow<Boolean>
+    suspend fun setShowStatusBar(enabled: Boolean)
     val showScreenTimeHome: Flow<Boolean>
     suspend fun setShowScreenTimeHome(enabled: Boolean)
     val showWeather: Flow<Boolean>
