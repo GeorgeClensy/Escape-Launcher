@@ -10,15 +10,20 @@ import androidx.core.view.WindowInsetsControllerCompat
  * Puts the app into full screen
  *
  * @param window The window to make full screen
+ * @param showStatusBar Whether to keep the status bar visible (defaults to hidden)
  *
  * @author George Clensy
  */
 @Suppress("DEPRECATION")
-fun configureFullScreenMode(window: Window) {
+fun configureFullScreenMode(window: Window, showStatusBar: Boolean = false) {
     WindowCompat.setDecorFitsSystemWindows(window, false)
     val controller = WindowInsetsControllerCompat(window, window.decorView)
     controller.show(WindowInsetsCompat.Type.navigationBars()) // Show navigation bars
-    controller.hide(WindowInsetsCompat.Type.statusBars()) // hide status bar only
+    if (showStatusBar) {
+        controller.show(WindowInsetsCompat.Type.statusBars())
+    } else {
+        controller.hide(WindowInsetsCompat.Type.statusBars()) // hide status bar only
+    }
     controller.systemBarsBehavior =
         WindowInsetsControllerCompat.BEHAVIOR_DEFAULT
 

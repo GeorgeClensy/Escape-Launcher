@@ -23,11 +23,13 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -246,6 +248,8 @@ class MainHomeScreenActivity : ComponentActivity() {
     private fun SetupNavHost(startDestination: String) {
         val navController = rememberNavController()
 
+        val showStatusBar by globalViewModel.showStatusBar.collectAsState(initial = false)
+
         LaunchedEffect(viewModel.navigateHomeEvent) {
             viewModel.navigateHomeEvent.collectLatest {
                 if (navController.currentDestination?.route != "home") {
@@ -272,6 +276,7 @@ class MainHomeScreenActivity : ComponentActivity() {
             modifier = Modifier
                 .fillMaxSize()
                 .background(color = BackgroundColor)
+                .statusBarsPadding()
                 .animateContentSize()
         ) {
             NavHost(navController, startDestination = startDestination) {
@@ -293,7 +298,7 @@ class MainHomeScreenActivity : ComponentActivity() {
                         homeScreenModel
                     ) { navController.navigate("settings") }
 
-                    configureFullScreenMode(window)
+                    configureFullScreenMode(window, showStatusBar)
                 }
                 composable(
                     "settings",
@@ -311,7 +316,7 @@ class MainHomeScreenActivity : ComponentActivity() {
                         this@MainHomeScreenActivity,
                     )
 
-                    configureFullScreenMode(window)
+                    configureFullScreenMode(window, showStatusBar)
                 }
                 composable(
                     "onboarding",

@@ -71,6 +71,7 @@
     <string name="match_system_wallpaper">Facer coincidir fondo de pantalla do sistema coa decoración</string>
     <string name="date">Data</string>
     <string name="home_screen_options">Opcións da Pantalla de Inicio</string>
+    <string name="show_status_bar">Mostrar barra de estado</string>
     <string name="screen_time">Tempo en Pantalla</string>
     <string name="other">Outros</string>
     <string name="general">Xeral</string>

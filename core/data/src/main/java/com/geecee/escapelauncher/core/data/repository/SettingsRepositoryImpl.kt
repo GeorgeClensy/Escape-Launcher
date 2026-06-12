@@ -66,6 +66,15 @@ class SettingsRepositoryImpl @Inject constructor(
         dataStore.edit { preferences -> preferences[PreferencesKeys.SHOW_DATE] = enabled }
     }
 
+    override val showStatusBar: Flow<Boolean>
+        get() = dataStore.data.map { preferences ->
+            preferences[PreferencesKeys.SHOW_STATUS_BAR] ?: false
+        }
+
+    override suspend fun setShowStatusBar(enabled: Boolean) {
+        dataStore.edit { preferences -> preferences[PreferencesKeys.SHOW_STATUS_BAR] = enabled }
+    }
+
     override val showScreenTimeHome: Flow<Boolean>
         get() = dataStore.data.map { preferences ->
             preferences[PreferencesKeys.SHOW_SCREEN_TIME_HOME] ?: false

@@ -54,6 +54,13 @@ class MainSettingsPageViewModel @Inject constructor(
         }
     }
 
+    val showStatusBar = repository.showStatusBar
+    fun setShowStatusBar(value: Boolean) {
+        viewModelScope.launch {
+            repository.setShowStatusBar(value)
+        }
+    }
+
     val showScreenTimeHome = repository.showScreenTimeHome
     fun setShowScreenTimeHome(value: Boolean) {
         viewModelScope.launch {

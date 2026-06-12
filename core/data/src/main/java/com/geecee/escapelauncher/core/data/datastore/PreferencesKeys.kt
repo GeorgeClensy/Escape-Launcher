@@ -16,6 +16,7 @@ object PreferencesKeys {
     val SHOW_CLOCK = booleanPreferencesKey(name = "show_clock")
     val BIG_CLOCK = booleanPreferencesKey(name = "big_clock")
     val SHOW_DATE = booleanPreferencesKey(name = "show_date")
+    val SHOW_STATUS_BAR = booleanPreferencesKey(name = "show_status_bar")
     val SHOW_SCREEN_TIME_HOME = booleanPreferencesKey(name = "show_screen_time_home")
     val SHOW_WEATHER = booleanPreferencesKey(name = "show_weather")
     val USE_FAHRENHEIT = booleanPreferencesKey(name = "use_fahrenheit")
