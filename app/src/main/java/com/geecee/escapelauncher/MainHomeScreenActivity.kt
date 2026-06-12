@@ -38,7 +38,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.geecee.escapelauncher.core.analytics.analyticsProxy
 import com.geecee.escapelauncher.ui.views.MainPagerScreen
-import com.geecee.escapelauncher.ui.views.Onboarding
+import com.geecee.escapelauncher.feature.onboarding.Onboarding
 import com.geecee.escapelauncher.feature.settings.Settings
 import com.geecee.escapelauncher.core.model.InstalledApp
 import com.geecee.escapelauncher.feature.screentime.ScreenTimeViewModel
@@ -320,11 +320,15 @@ class MainHomeScreenActivity : ComponentActivity() {
                     configureOnboardingFullScreen(window)
 
                     Onboarding(
-                        mainAppNavController = navController,
-                        mainAppViewModel = viewModel,
-                        homeScreenModel = homeScreenModel,
-                        globalViewModel = globalViewModel,
-                        activity = this@MainHomeScreenActivity
+                        onFinished = {
+                            navController.navigate("home") {
+                                popUpTo("onboarding") { inclusive = true }
+                                launchSingleTop = true
+                            }
+                            viewModel.getWindow()?.let {
+                                configureFullScreenMode(it)
+                            }
+                        }
                     )
                 }
             }

@@ -69,4 +69,6 @@ interface SettingsRepository {
     suspend fun setFirstTime(enabled: Boolean)
     val widgetId: Flow<Int>
     suspend fun setWidgetId(value: Int)
+    val isOnDefaultLauncherOnboarding: Flow<Boolean>
+    suspend fun setOnDefaultLauncherOnboarding(value: Boolean)
 }

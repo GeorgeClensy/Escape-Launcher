@@ -308,4 +308,13 @@ class SettingsRepositoryImpl @Inject constructor(
     override suspend fun setWidgetId(value: Int) {
         dataStore.edit { preferences -> preferences[PreferencesKeys.WIDGET_ID] = value }
     }
+
+    override val isOnDefaultLauncherOnboarding: Flow<Boolean>
+        get() = dataStore.data.map { preferences ->
+            preferences[PreferencesKeys.IS_ON_DEAFAULT_LAUNCHER_ONBOARDING_PAGE] ?: false
+        }
+
+    override suspend fun setOnDefaultLauncherOnboarding(value: Boolean) {
+        dataStore.edit { preferences -> preferences[PreferencesKeys.IS_ON_DEAFAULT_LAUNCHER_ONBOARDING_PAGE] = value }
+    }
 }

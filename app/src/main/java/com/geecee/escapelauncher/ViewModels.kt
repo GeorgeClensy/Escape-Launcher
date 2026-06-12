@@ -100,16 +100,6 @@ class HomeScreenModel(application: Application, val mainAppViewModel: MainAppVie
                 withContext(Dispatchers.Main) {
                     favoriteApps.clear()
                     favoriteApps.addAll(newFavoriteApps)
-                    mainAppViewModel.isFavoritesLoaded.value = true
-                }
-            }
-        }
-
-        // Keep isAppsLoaded in sync with repository
-        coroutineScope.launch {
-            mainAppViewModel.appsRepository.installedApps.collect {
-                if (it.isNotEmpty()) {
-                    mainAppViewModel.isAppsLoaded.value = true
                 }
             }
         }
@@ -197,8 +187,6 @@ class MainAppViewModel @Inject constructor(
         }
     }
 
-    fun getContext(): android.content.Context = appContext // Returns the context
-
     private var window: Window? = null
 
     fun setWindow(window: Window) {
@@ -211,6 +199,24 @@ class MainAppViewModel @Inject constructor(
     val isAppsLoaded = mutableStateOf(false)
     val isFavoritesLoaded = mutableStateOf(false)
     val isScreenTimeLoaded = mutableStateOf(false)
+
+    init {
+        // Keep isAppsLoaded in sync with repository
+        viewModelScope.launch {
+            appsRepository.installedApps.collect {
+                if (it.isNotEmpty()) {
+                    isAppsLoaded.value = true
+                }
+            }
+        }
+
+        // Keep isFavoritesLoaded in sync
+        viewModelScope.launch {
+            modifiedAppsRepository.getFavouriteAppsInOrderFlow().collect {
+                isFavoritesLoaded.value = true
+            }
+        }
+    }
 
     // Other stuff
 

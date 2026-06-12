@@ -109,6 +109,7 @@ dependencies {
     implementation(project(":feature:settings"))
     implementation(project(":feature:appslist"))
     implementation(project(":feature:newwidgets"))
+    implementation(project(":feature:onboarding"))
 
     implementation(libs.androidx.hilt.navigation.compose)
 }

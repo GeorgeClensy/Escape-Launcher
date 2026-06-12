@@ -54,4 +54,5 @@ object PreferencesKeys {
     val HIDE_SCREEN_TIME_PAGE = booleanPreferencesKey(name = "hide_screen_time_page")
     val SHOW_HIDDEN_APPS_IN_SEARCH = booleanPreferencesKey(name = "show_hidden_apps_in_search")
     val FIRST_TIME = booleanPreferencesKey(name = "first_time")
+    val IS_ON_DEAFAULT_LAUNCHER_ONBOARDING_PAGE = booleanPreferencesKey(name = "is_on_default_launcher_onboarding_page")
 }
