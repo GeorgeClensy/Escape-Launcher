@@ -165,4 +165,5 @@ Here are all the previous sponsors who have not set the sponsorship as private:
 @guillaumecello  
 @user31676  
 @ZenMeadows
+@trigatsunshine
 </div>
