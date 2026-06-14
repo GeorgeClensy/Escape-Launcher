@@ -23,10 +23,7 @@ import com.geecee.escapelauncher.core.model.InstalledApp
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.channels.BufferOverflow
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -143,7 +140,6 @@ class HomeScreenModel(application: Application, val mainAppViewModel: MainAppVie
                         showOpenChallenge.value = false
                     }
                 }
-                mainAppViewModel.requestToGoHome()
             }
         }
     }
@@ -172,21 +168,6 @@ class MainAppViewModel @Inject constructor(
     val appsRepository: AppsRepository,
     val settingsRepository: SettingsRepository
 ) : AndroidViewModel(application) {
-    private val appContext: android.content.Context = application.applicationContext // The app context
-
-    private val _navigateHomeEvent = MutableSharedFlow<Unit>(
-        replay = 0,
-        onBufferOverflow = BufferOverflow.DROP_OLDEST,
-        extraBufferCapacity = 1
-    )
-    val navigateHomeEvent = _navigateHomeEvent.asSharedFlow()
-
-    fun requestToGoHome() {
-        viewModelScope.launch {
-            _navigateHomeEvent.emit(Unit)
-        }
-    }
-
     private var window: Window? = null
 
     fun setWindow(window: Window) {

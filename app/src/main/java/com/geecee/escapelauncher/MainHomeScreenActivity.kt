@@ -233,7 +233,7 @@ class MainHomeScreenActivity : ComponentActivity() {
             lifecycleScope.launch {
                 val isFirstTime = globalViewModel.firstTime.first()
                 if (!isFirstTime) {
-                    viewModel.requestToGoHome()
+                    globalViewModel.requestToGoHome()
                 }
             }
         }
@@ -250,8 +250,8 @@ class MainHomeScreenActivity : ComponentActivity() {
 
         val showStatusBar by globalViewModel.showStatusBar.collectAsState(initial = false)
 
-        LaunchedEffect(viewModel.navigateHomeEvent) {
-            viewModel.navigateHomeEvent.collectLatest {
+        LaunchedEffect(globalViewModel.navigateHomeEvent) {
+            globalViewModel.navigateHomeEvent.collectLatest {
                 if (navController.currentDestination?.route != "home") {
                     homeScreenModel.goToMainPage()
                     homeScreenModel.appsListScrollState.scrollToItem(0)
@@ -294,7 +294,6 @@ class MainHomeScreenActivity : ComponentActivity() {
                     )
 
                     MainPagerScreen(
-                        viewModel,
                         homeScreenModel
                     ) { navController.navigate("settings") }
 

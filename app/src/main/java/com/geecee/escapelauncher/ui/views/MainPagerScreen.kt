@@ -44,7 +44,8 @@ import com.geecee.escapelauncher.privatespace.PrivateSpace
 import com.geecee.escapelauncher.core.common.EscapeAccessibilityService
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import com.geecee.escapelauncher.MainAppViewModel as MainAppModel
+import com.geecee.escapelauncher.GlobalViewModel
+import kotlin.time.Duration.Companion.milliseconds
 
 /**
  *  Main composable for home screen:
@@ -56,9 +57,9 @@ import com.geecee.escapelauncher.MainAppViewModel as MainAppModel
 )
 @Composable
 fun MainPagerScreen(
-    mainAppModel: MainAppModel,
     homeScreenModel: HomeScreenModel,
     viewModel: MainPagerScreenViewModel = hiltViewModel(),
+    globalViewModel: GlobalViewModel = hiltViewModel(),
     screenTimeViewModel: ScreenTimeViewModel = hiltViewModel(LocalActivity.current as ComponentActivity),
     onOpenSettings: () -> Unit
 ) {
@@ -113,23 +114,29 @@ fun MainPagerScreen(
                         homeScreenModel.openApp(
                             app = app,
                             overrideChallenge = false,
-                            onAppOpened = { screenTimeViewModel.onAppOpened(it) }
+                            onAppOpened = {
+                                screenTimeViewModel.onAppOpened(it)
+                                globalViewModel.requestToGoHome()
+                            }
                         )
                     },
-                    onGoHomeRequest = { mainAppModel.requestToGoHome() }
+                    onGoHomeRequest = { globalViewModel.requestToGoHome() }
                 )
 
                 1 -> AppsList(
                     scrollState = homeScreenModel.appsListScrollState,
                     isBeingShown = homeScreenModel.pagerState.currentPage == 1,
                     onGoHomeRequest = {
-                        mainAppModel.requestToGoHome()
+                        globalViewModel.requestToGoHome()
                     },
                     onAppOpened = { app ->
                         homeScreenModel.openApp(
                             app = app,
                             overrideChallenge = false,
-                            onAppOpened = { screenTimeViewModel.onAppOpened(it) }
+                            onAppOpened = {
+                                screenTimeViewModel.onAppOpened(it)
+                                globalViewModel.requestToGoHome()
+                            }
                         )
                     },
                     extraListItems = { onClick, onLongClick ->
@@ -184,23 +191,29 @@ fun MainPagerScreen(
                         homeScreenModel.openApp(
                             app = app,
                             overrideChallenge = false,
-                            onAppOpened = { screenTimeViewModel.onAppOpened(it) }
+                            onAppOpened = {
+                                screenTimeViewModel.onAppOpened(it)
+                                globalViewModel.requestToGoHome()
+                            }
                         )
                     },
-                    onGoHomeRequest = { mainAppModel.requestToGoHome() }
+                    onGoHomeRequest = { globalViewModel.requestToGoHome() }
                 )
 
                 2 -> AppsList(
                     scrollState = homeScreenModel.appsListScrollState,
                     isBeingShown = homeScreenModel.pagerState.currentPage == 2,
                     onGoHomeRequest = {
-                        mainAppModel.requestToGoHome()
+                        globalViewModel.requestToGoHome()
                     },
                     onAppOpened = { app ->
                         homeScreenModel.openApp(
                             app = app,
                             overrideChallenge = false,
-                            onAppOpened = { screenTimeViewModel.onAppOpened(it) }
+                            onAppOpened = {
+                                screenTimeViewModel.onAppOpened(it)
+                                globalViewModel.requestToGoHome()
+                            }
                         )
                     },
                     extraListItems = { onClick, onLongClick ->
@@ -262,10 +275,13 @@ fun MainPagerScreen(
                 homeScreenModel.openApp(
                     app = homeScreenModel.currentSelectedApp.value,
                     overrideChallenge = true,
-                    onAppOpened = { screenTimeViewModel.onAppOpened(it) }
+                    onAppOpened = {
+                        screenTimeViewModel.onAppOpened(it)
+                        globalViewModel.requestToGoHome()
+                    }
                 )
                 homeScreenModel.coroutineScope.launch {
-                    delay(1000)
+                    delay(1000.milliseconds)
                     homeScreenModel.showOpenChallenge.value = false
                 }
             },

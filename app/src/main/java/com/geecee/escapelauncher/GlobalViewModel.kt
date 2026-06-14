@@ -5,25 +5,29 @@ import androidx.lifecycle.viewModelScope
 import com.geecee.escapelauncher.core.domain.repository.SettingsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
+import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 
 @HiltViewModel
 class GlobalViewModel @Inject constructor(
-    private val repository: SettingsRepository
+    repository: SettingsRepository
 ) : ViewModel() {
     val allowAnalytics = repository.allowAnalyitics
-    fun setAllowAnalytics(value: Boolean) {
-        viewModelScope.launch {
-            repository.setAllowAnalytics(value)
-        }
-    }
-
     val firstTime = repository.firstTime
-    fun setFirstTime(value: Boolean) {
+    val showStatusBar = repository.showStatusBar
+
+    private val _navigateHomeEvent = MutableSharedFlow<Unit>(
+        replay = 0,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST,
+        extraBufferCapacity = 1
+    )
+    val navigateHomeEvent = _navigateHomeEvent.asSharedFlow()
+
+    fun requestToGoHome() {
         viewModelScope.launch {
-            repository.setFirstTime(value)
+            _navigateHomeEvent.emit(Unit)
         }
     }
-
-    val showStatusBar = repository.showStatusBar
 }
