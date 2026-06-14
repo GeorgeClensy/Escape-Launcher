@@ -36,7 +36,6 @@ class MainPagerScreenViewModel @Inject constructor(
     private val appsRepository: AppsRepository,
     private val modifiedAppsRepository: ModifiedAppsRepository
 ) : AndroidViewModel(context as Application) {
-
     fun setFirstTimeHelp(value: Boolean) {
         viewModelScope.launch {
             repository.setFirstTimeHelp(value)

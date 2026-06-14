@@ -25,9 +25,7 @@ class GlobalViewModel @Inject constructor(
     val showStatusBar = settingsRepository.showStatusBar
 
     private val _navigateHomeEvent = MutableSharedFlow<Unit>(
-        replay = 0,
-        onBufferOverflow = BufferOverflow.DROP_OLDEST,
-        extraBufferCapacity = 1
+        replay = 0, onBufferOverflow = BufferOverflow.DROP_OLDEST, extraBufferCapacity = 1
     )
     val navigateHomeEvent = _navigateHomeEvent.asSharedFlow()
 
@@ -38,17 +36,14 @@ class GlobalViewModel @Inject constructor(
     }
 
     private var window: Window? = null
-
+    fun getWindow(): Window? = window
     fun setWindow(window: Window) {
         this.window = window
     }
 
-    fun getWindow(): Window? = window
-
     // Loading states for splash screen
     val isAppsLoaded = mutableStateOf(false)
     val isFavoritesLoaded = mutableStateOf(false)
-    val isScreenTimeLoaded = mutableStateOf(false)
     val isSettingsLoaded = mutableStateOf(false)
 
     init {

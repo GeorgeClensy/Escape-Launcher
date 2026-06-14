@@ -1,4 +1,4 @@
-@file:Suppress("KotlinConstantConditions") // Stop Android Studio saying that
+@file:Suppress("KotlinConstantConditions") // Stop Android Studio saying that isFoss is always false
 
 package com.geecee.escapelauncher
 
