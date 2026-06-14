@@ -1,7 +1,11 @@
 package com.geecee.escapelauncher
 
+import android.view.Window
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.geecee.escapelauncher.core.data.repository.AppsRepository
+import com.geecee.escapelauncher.core.data.repository.ModifiedAppsRepository
 import com.geecee.escapelauncher.core.domain.repository.SettingsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
@@ -12,11 +16,13 @@ import kotlinx.coroutines.launch
 
 @HiltViewModel
 class GlobalViewModel @Inject constructor(
-    repository: SettingsRepository
+    val modifiedAppsRepository: ModifiedAppsRepository,
+    val appsRepository: AppsRepository,
+    settingsRepository: SettingsRepository
 ) : ViewModel() {
-    val allowAnalytics = repository.allowAnalyitics
-    val firstTime = repository.firstTime
-    val showStatusBar = repository.showStatusBar
+    val allowAnalytics = settingsRepository.allowAnalyitics
+    val firstTime = settingsRepository.firstTime
+    val showStatusBar = settingsRepository.showStatusBar
 
     private val _navigateHomeEvent = MutableSharedFlow<Unit>(
         replay = 0,
@@ -28,6 +34,45 @@ class GlobalViewModel @Inject constructor(
     fun requestToGoHome() {
         viewModelScope.launch {
             _navigateHomeEvent.emit(Unit)
+        }
+    }
+
+    private var window: Window? = null
+
+    fun setWindow(window: Window) {
+        this.window = window
+    }
+
+    fun getWindow(): Window? = window
+
+    // Loading states for splash screen
+    val isAppsLoaded = mutableStateOf(false)
+    val isFavoritesLoaded = mutableStateOf(false)
+    val isScreenTimeLoaded = mutableStateOf(false)
+    val isSettingsLoaded = mutableStateOf(false)
+
+    init {
+        // Keep isAppsLoaded in sync with repository
+        viewModelScope.launch {
+            appsRepository.installedApps.collect {
+                if (it.isNotEmpty()) {
+                    isAppsLoaded.value = true
+                }
+            }
+        }
+
+        // Keep isFavoritesLoaded in sync
+        viewModelScope.launch {
+            modifiedAppsRepository.getFavouriteAppsInOrderFlow().collect {
+                isFavoritesLoaded.value = true
+            }
+        }
+
+        // Keep isSettingsLoaded in sync
+        viewModelScope.launch {
+            showStatusBar.collect {
+                isSettingsLoaded.value = true
+            }
         }
     }
 }

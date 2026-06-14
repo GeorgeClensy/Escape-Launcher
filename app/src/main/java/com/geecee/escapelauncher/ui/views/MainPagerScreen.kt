@@ -25,7 +25,6 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import com.geecee.escapelauncher.HomeScreenModel
 import com.geecee.escapelauncher.MainPagerScreenViewModel
 import com.geecee.escapelauncher.R
 import com.geecee.escapelauncher.core.common.doesPrivateSpaceExist
@@ -57,13 +56,12 @@ import kotlin.time.Duration.Companion.milliseconds
 )
 @Composable
 fun MainPagerScreen(
-    homeScreenModel: HomeScreenModel,
     viewModel: MainPagerScreenViewModel = hiltViewModel(),
     globalViewModel: GlobalViewModel = hiltViewModel(),
     screenTimeViewModel: ScreenTimeViewModel = hiltViewModel(LocalActivity.current as ComponentActivity),
     onOpenSettings: () -> Unit
 ) {
-    val hideScreenTimePage by viewModel.hideScreenTimePage.collectAsState(initial = false)
+    val hideScreenTimePage by viewModel.hideScreenTimePage.collectAsState()
     val doubleTapToLock by viewModel.doubleTapToLock.collectAsState(initial = false)
     val hapticFeedbackEnabled by viewModel.hapticFeedBackEnabled.collectAsState(initial = true)
     val coroutineScope = rememberCoroutineScope()
@@ -73,22 +71,24 @@ fun MainPagerScreen(
     // Control if the user can go back or not depending upon the page
     BackHandler(enabled = true) {
         coroutineScope.launch {
-            homeScreenModel.animatedGoToMainPage()
+            viewModel.animatedGoToMainPage()
         }
     }
 
     // Home Screen Pages
     HorizontalPager(
-        state = homeScreenModel.pagerState,
+        state = viewModel.pagerState,
         modifier = Modifier
             .fillMaxSize()
             .combinedClickable(
-                onClick = {}, onLongClickLabel = "",
+                onClick = {},
+                onLongClickLabel = "",
                 onLongClick = {
                     onOpenSettings()
                     viewModel.setFirstTimeHelp(false)
                 },
-                indication = null, interactionSource = homeScreenModel.interactionSource,
+                indication = null,
+                interactionSource = viewModel.interactionSource,
                 onDoubleClick = {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
                         if (doubleTapToLock) {
@@ -111,12 +111,11 @@ fun MainPagerScreen(
             when (page) {
                 0 -> HomeScreen(
                     onAppOpened = { app ->
-                        homeScreenModel.openApp(
+                        viewModel.openApp(
                             app = app,
                             overrideChallenge = false,
                             onAppOpened = {
                                 screenTimeViewModel.onAppOpened(it)
-                                globalViewModel.requestToGoHome()
                             }
                         )
                     },
@@ -124,18 +123,17 @@ fun MainPagerScreen(
                 )
 
                 1 -> AppsList(
-                    scrollState = homeScreenModel.appsListScrollState,
-                    isBeingShown = homeScreenModel.pagerState.currentPage == 1,
+                    scrollState = viewModel.appsListScrollState,
+                    isBeingShown = viewModel.pagerState.currentPage == 1,
                     onGoHomeRequest = {
                         globalViewModel.requestToGoHome()
                     },
                     onAppOpened = { app ->
-                        homeScreenModel.openApp(
+                        viewModel.openApp(
                             app = app,
                             overrideChallenge = false,
                             onAppOpened = {
                                 screenTimeViewModel.onAppOpened(it)
-                                globalViewModel.requestToGoHome()
                             }
                         )
                     },
@@ -188,12 +186,11 @@ fun MainPagerScreen(
 
                 1 -> HomeScreen(
                     onAppOpened = { app ->
-                        homeScreenModel.openApp(
+                        viewModel.openApp(
                             app = app,
                             overrideChallenge = false,
                             onAppOpened = {
                                 screenTimeViewModel.onAppOpened(it)
-                                globalViewModel.requestToGoHome()
                             }
                         )
                     },
@@ -201,18 +198,17 @@ fun MainPagerScreen(
                 )
 
                 2 -> AppsList(
-                    scrollState = homeScreenModel.appsListScrollState,
-                    isBeingShown = homeScreenModel.pagerState.currentPage == 2,
+                    scrollState = viewModel.appsListScrollState,
+                    isBeingShown = viewModel.pagerState.currentPage == 2,
                     onGoHomeRequest = {
                         globalViewModel.requestToGoHome()
                     },
                     onAppOpened = { app ->
-                        homeScreenModel.openApp(
+                        viewModel.openApp(
                             app = app,
                             overrideChallenge = false,
                             onAppOpened = {
                                 screenTimeViewModel.onAppOpened(it)
-                                globalViewModel.requestToGoHome()
                             }
                         )
                     },
@@ -264,7 +260,7 @@ fun MainPagerScreen(
 
     //Open Challenge
     AnimatedVisibility(
-        visible = homeScreenModel.showOpenChallenge.value,
+        visible = viewModel.showOpenChallenge.value,
         enter = fadeIn(),
         exit = fadeOut()
     ) {
@@ -272,21 +268,20 @@ fun MainPagerScreen(
             haptics = LocalHapticFeedback.current,
             enabled = hapticFeedbackEnabled,
             openApp = {
-                homeScreenModel.openApp(
-                    app = homeScreenModel.currentSelectedApp.value,
+                viewModel.openApp(
+                    app = viewModel.currentSelectedApp.value,
                     overrideChallenge = true,
                     onAppOpened = {
                         screenTimeViewModel.onAppOpened(it)
-                        globalViewModel.requestToGoHome()
                     }
                 )
-                homeScreenModel.coroutineScope.launch {
+                coroutineScope.launch {
                     delay(1000.milliseconds)
-                    homeScreenModel.showOpenChallenge.value = false
+                    viewModel.showOpenChallenge.value = false
                 }
             },
             goBack = {
-                homeScreenModel.showOpenChallenge.value = false
+                viewModel.showOpenChallenge.value = false
             })
     }
 }

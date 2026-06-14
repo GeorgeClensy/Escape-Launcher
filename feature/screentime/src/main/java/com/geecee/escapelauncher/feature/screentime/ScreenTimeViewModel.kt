@@ -87,6 +87,14 @@ class ScreenTimeViewModel @Inject constructor(
         loadData() // Refresh after close
     }
 
+    fun hasActiveSession(): Boolean {
+        return screenTimeRepository.hasActiveSession()
+    }
+
+    fun getActiveSessionPackageName(): String? {
+        return screenTimeRepository.getActiveSessionPackageName()
+    }
+
     fun getScreenTime(packageName: String): Long {
         return appUsageList.value.find { it.packageName == packageName }?.totalTime ?: 0L
     }

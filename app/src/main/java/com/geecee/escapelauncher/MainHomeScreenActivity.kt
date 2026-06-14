@@ -3,7 +3,6 @@ package com.geecee.escapelauncher
 import android.Manifest
 import android.app.Activity
 import android.content.BroadcastReceiver
-import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
@@ -23,13 +22,11 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -39,40 +36,35 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.geecee.escapelauncher.core.analytics.analyticsProxy
-import com.geecee.escapelauncher.ui.views.MainPagerScreen
-import com.geecee.escapelauncher.feature.onboarding.Onboarding
-import com.geecee.escapelauncher.feature.settings.Settings
-import com.geecee.escapelauncher.core.model.InstalledApp
-import com.geecee.escapelauncher.feature.screentime.ScreenTimeViewModel
-import com.geecee.escapelauncher.core.data.worker.ClearOldDataWorker
-import com.geecee.escapelauncher.core.theme.BackgroundColor
-import com.geecee.escapelauncher.core.theme.EscapeTheme
-import com.geecee.escapelauncher.feature.newwidgets.WidgetHostManager
 import com.geecee.escapelauncher.core.cloudmessaging.messagingInitializer
 import com.geecee.escapelauncher.core.common.configureFullScreenMode
 import com.geecee.escapelauncher.core.common.configureOnboardingFullScreen
 import com.geecee.escapelauncher.core.common.formatScreenTime
+import com.geecee.escapelauncher.core.data.worker.ClearOldDataWorker
+import com.geecee.escapelauncher.core.theme.BackgroundColor
+import com.geecee.escapelauncher.core.theme.EscapeTheme
 import com.geecee.escapelauncher.core.ui.recievers.ScreenOffReceiver
+import com.geecee.escapelauncher.feature.newwidgets.WidgetHostManager
+import com.geecee.escapelauncher.feature.onboarding.Onboarding
+import com.geecee.escapelauncher.feature.screentime.ScreenTimeViewModel
+import com.geecee.escapelauncher.feature.settings.Settings
+import com.geecee.escapelauncher.ui.views.MainPagerScreen
 import dagger.hilt.android.AndroidEntryPoint
-import javax.inject.Inject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
 
 @AndroidEntryPoint
 class MainHomeScreenActivity : ComponentActivity() {
     private val globalViewModel: GlobalViewModel by viewModels()
+    private val mainPagerViewModel: MainPagerScreenViewModel by viewModels()
 
     private val screenTimeViewModel: ScreenTimeViewModel by viewModels()
     private lateinit var screenOffReceiver: ScreenOffReceiver
     private lateinit var packageChangeReceiver: BroadcastReceiver
-    private val homeScreenModel by viewModels<HomeScreenModel> {
-        HomeScreenModelFactory(application, viewModel)
-    }
-    private val viewModel: MainAppViewModel by viewModels()
 
     @Inject
     lateinit var widgetHostManager: WidgetHostManager
@@ -114,13 +106,17 @@ class MainHomeScreenActivity : ComponentActivity() {
 
         // Make full screen
         enableEdgeToEdge()
-        configureFullScreenMode(window)
+        lifecycleScope.launch {
+            globalViewModel.showStatusBar.collect { show ->
+                configureFullScreenMode(window, show)
+            }
+        }
 
         // Set up the screen time tracking clean-up
         ClearOldDataWorker.scheduleDailyCleanup(this)
 
         // Mark screen time as loaded (now handled by ScreenTimeViewModel)
-        viewModel.isScreenTimeLoaded.value = true
+        globalViewModel.isScreenTimeLoaded.value = true
 
         var startDestination by mutableStateOf<String?>(null)
 
@@ -132,7 +128,7 @@ class MainHomeScreenActivity : ComponentActivity() {
 
         // Keep splash screen visible until we know where to go and essential data is loaded
         splashScreen.setKeepOnScreenCondition {
-            startDestination == null || !viewModel.isAppsLoaded.value || !viewModel.isFavoritesLoaded.value
+            startDestination == null || !globalViewModel.isAppsLoaded.value || !globalViewModel.isFavoritesLoaded.value || !globalViewModel.isSettingsLoaded.value
         }
 
         // Set up the application content
@@ -146,35 +142,32 @@ class MainHomeScreenActivity : ComponentActivity() {
         }
 
         // Assign window
-        viewModel.setWindow(window)
+        globalViewModel.setWindow(window)
 
         // Register screen off receiver
         screenOffReceiver = ScreenOffReceiver {
             // Screen turned off
-            if (viewModel.isAppOpened) {
+            if (screenTimeViewModel.hasActiveSession()) {
                 lifecycleScope.launch(Dispatchers.IO) {
-                    val packageName = homeScreenModel.currentSelectedApp.value.packageName
-                    screenTimeViewModel.onAppClosed(packageName)
+                    val packageName = screenTimeViewModel.getActiveSessionPackageName() ?: ""
+                    if (packageName.isNotEmpty()) {
+                        screenTimeViewModel.onAppClosed(packageName)
 
-                    Log.i(
-                        "INFO",
-                        "Screen turned off with app $packageName open, stopping screen time counting at " + formatScreenTime(
-                            screenTimeViewModel.getScreenTime(packageName)
+                        Log.i(
+                            "INFO",
+                            "Screen turned off with app $packageName open, stopping screen time counting at " + formatScreenTime(
+                                screenTimeViewModel.getScreenTime(packageName)
+                            )
                         )
-                    )
-
-                    // Reset state
-                    homeScreenModel.currentSelectedApp =
-                        mutableStateOf(InstalledApp("", "", ComponentName("", "")))
+                    }
                 }
-                viewModel.isAppOpened = false
             }
         }
         val filter = IntentFilter(Intent.ACTION_SCREEN_OFF)
         registerReceiver(screenOffReceiver, filter)
 
 
-        // Subscribe to notifications via flavor-specific initializer
+        // Subscribe to notifications via flavour-specific initializer
         messagingInitializer.initialize(this)
     }
 
@@ -200,15 +193,13 @@ class MainHomeScreenActivity : ComponentActivity() {
         super.onResume()
 
         // Check if we need to update screen time when coming back from an app
-        if (viewModel.isAppOpened) {
+        if (screenTimeViewModel.hasActiveSession()) {
             lifecycleScope.launch(Dispatchers.IO) {
-                val packageName = homeScreenModel.currentSelectedApp.value.packageName
-                screenTimeViewModel.onAppClosed(packageName)
-
-                // Reset state
-                homeScreenModel.currentSelectedApp.value = InstalledApp("", "", ComponentName("", ""))
+                val packageName = screenTimeViewModel.getActiveSessionPackageName() ?: ""
+                if (packageName.isNotEmpty()) {
+                    screenTimeViewModel.onAppClosed(packageName)
+                }
             }
-            viewModel.isAppOpened = false
         }
     }
 
@@ -248,25 +239,27 @@ class MainHomeScreenActivity : ComponentActivity() {
     private fun SetupNavHost(startDestination: String) {
         val navController = rememberNavController()
 
-        val showStatusBar by globalViewModel.showStatusBar.collectAsState(initial = false)
-
         LaunchedEffect(globalViewModel.navigateHomeEvent) {
-            globalViewModel.navigateHomeEvent.collectLatest {
+            globalViewModel.navigateHomeEvent.collect {
                 if (navController.currentDestination?.route != "home") {
-                    homeScreenModel.goToMainPage()
-                    homeScreenModel.appsListScrollState.scrollToItem(0)
                     navController.navigate("home") {
                         popUpTo(navController.graph.startDestinationId)
                         launchSingleTop = true
                     }
+                    launch {
+                        mainPagerViewModel.goToMainPage()
+                    }
+                    launch {
+                        mainPagerViewModel.appsListScrollState.scrollToItem(0)
+                    }
                 }
                 else {
                     launch {
-                        homeScreenModel.animatedGoToMainPage()
+                        mainPagerViewModel.animatedGoToMainPage()
                     }
                     launch {
-                        delay(550.milliseconds)
-                        homeScreenModel.appsListScrollState.scrollToItem(0)
+                        delay(300.milliseconds)
+                        mainPagerViewModel.appsListScrollState.scrollToItem(0)
                     }
                 }
             }
@@ -276,7 +269,6 @@ class MainHomeScreenActivity : ComponentActivity() {
             modifier = Modifier
                 .fillMaxSize()
                 .background(color = BackgroundColor)
-                .statusBarsPadding()
                 .animateContentSize()
         ) {
             NavHost(navController, startDestination = startDestination) {
@@ -294,10 +286,9 @@ class MainHomeScreenActivity : ComponentActivity() {
                     )
 
                     MainPagerScreen(
-                        homeScreenModel
-                    ) { navController.navigate("settings") }
-
-                    configureFullScreenMode(window, showStatusBar)
+                        viewModel = mainPagerViewModel,
+                        onOpenSettings = { navController.navigate("settings") }
+                    )
                 }
                 composable(
                     "settings",
@@ -314,8 +305,6 @@ class MainHomeScreenActivity : ComponentActivity() {
                         },
                         this@MainHomeScreenActivity,
                     )
-
-                    configureFullScreenMode(window, showStatusBar)
                 }
                 composable(
                     "onboarding",
@@ -329,7 +318,7 @@ class MainHomeScreenActivity : ComponentActivity() {
                                 popUpTo("onboarding") { inclusive = true }
                                 launchSingleTop = true
                             }
-                            viewModel.getWindow()?.let {
+                            globalViewModel.getWindow()?.let {
                                 configureFullScreenMode(it)
                             }
                         }

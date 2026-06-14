@@ -21,6 +21,14 @@ class ScreenTimeRepositoryImpl @Inject constructor(
         appSessions[packageName] = System.currentTimeMillis()
     }
 
+    override fun hasActiveSession(): Boolean {
+        return appSessions.isNotEmpty()
+    }
+
+    override fun getActiveSessionPackageName(): String? {
+        return appSessions.keys().asSequence().firstOrNull()
+    }
+
     override suspend fun onAppClosed(packageName: String): Int {
         val openTime = appSessions[packageName] ?: return 0
         val usageTime = System.currentTimeMillis() - openTime
