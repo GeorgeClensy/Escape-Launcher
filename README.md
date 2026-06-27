@@ -149,11 +149,15 @@ Thanks!
 
 At the moment, it is just me working on this app so I would really appriciate it if you donated with [github sponsors](https://github.com/sponsors/GeorgeClensy)!
 
+<br />
+
 <h1>
 Star History
 </h1>
 
 [![Star History Chart](https://api.star-history.com/svg?repos=GeorgeClensy/Escape-Launcher&type=date&legend=top-left)](https://www.star-history.com/#GeorgeClensy/Escape-Launcher&type=date&legend=top-left)
+
+<br />
 
 <h1>
   Sponsors
@@ -166,4 +170,5 @@ Here are all the previous sponsors who have not set the sponsorship as private:
 @user31676  
 @ZenMeadows
 @trigatsunshine
+@MarmiteonToasts
 </div>
