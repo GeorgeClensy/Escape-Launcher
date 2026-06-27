@@ -1,6 +1,9 @@
 # Escape Launcher style guide.
 
 > [!Warning]
+> Yes, this file is AI generated. It just exists as a loose guide to make sure the code isn't too awful. I have read it through and try my best to follow it but it can be very strict in places so just keep in mind that it it is not absolute just try your best if your contributing..
+
+> [!Warning]
 > We are currently working on implenting this style in the refactor branch. The app still has a large amount of code that does not follow this guide.
 
 Thank you for your interest in contributing! This guide covers code style, architecture conventions, and best practices used throughout the project. Following these keeps the codebase consistent and makes reviews easier for everyone.
