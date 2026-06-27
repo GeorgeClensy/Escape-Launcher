@@ -4,11 +4,11 @@ dependencies {
 
     // These plugins are only meant to be on an :app module so we just check if the thing its being applied to has android.application or android.library
     if (project.plugins.hasPlugin("com.android.application") || project.plugins.hasPlugin("com.android.library")) {
-        add("googleImplementation", platform("com.google.fire" + "base:fire" + "base-bom:34.8.0"))
+        add("googleImplementation", platform("com.google.fire" + "base:fire" + "base-bom:34.15.0"))
         add("googleImplementation", "com.google.fire" + "base:fire" + "base-analytics")
         add("googleImplementation", "com.google.fire" + "base:fire" + "base-crash" + "lytics")
         add("googleImplementation", "com.google.fire" + "base:fire" + "base-perf")
-        add("googleImplementation", "com.google.fire" + "base:fire" + "base-messaging:25.0.1")
+        add("googleImplementation", "com.google.fire" + "base:fire" + "base-messaging:25.1.0")
         add("googleImplementation", "com.google.android.gms:play-services-location:21.3.0")
         add("googleImplementation", "com.squareup.okhttp3:okhttp:5.3.2")
     }

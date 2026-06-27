@@ -11,8 +11,8 @@ buildscript {
         }
         dependencies {
             //noinspection UseTomlInstead
-            classpath("com.google.gms:google-services:4.4.4")
-            classpath("com.google.fire" + "base:fire" + "base-crash" + "lytics-gradle:3.0.6")
+            classpath("com.google.gms:google-services:4.5.0")
+            classpath("com.google.fire" + "base:fire" + "base-crash" + "lytics-gradle:3.0.7")
         }
     }
 }
