@@ -12,7 +12,7 @@ import kotlinx.coroutines.launch
 
 @HiltViewModel
 class WidgetOptionsViewModel @Inject constructor(
-    @ApplicationContext private val context: Context,
+    @ApplicationContext context: Context,
     private val repository: SettingsRepository,
     val widgetHostManager: WidgetHostManager
 ) : ViewModel() {

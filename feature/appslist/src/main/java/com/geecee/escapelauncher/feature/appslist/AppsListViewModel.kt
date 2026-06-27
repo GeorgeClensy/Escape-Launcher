@@ -31,9 +31,9 @@ import com.geecee.escapelauncher.core.ui.R
 
 @HiltViewModel
 class AppsListViewModel @Inject constructor(
-    @ApplicationContext private val context: Context,
-    private val settingsRepository: SettingsRepository,
-    private val appsRepository: AppsRepository,
+    @ApplicationContext context: Context,
+    settingsRepository: SettingsRepository,
+    appsRepository: AppsRepository,
     private val modifiedAppsRepository: ModifiedAppsRepository
 ) : ViewModel() {
     // UI Events

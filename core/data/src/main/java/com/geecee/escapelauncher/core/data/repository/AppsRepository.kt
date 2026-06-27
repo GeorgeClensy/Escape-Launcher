@@ -22,12 +22,13 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.time.Duration.Companion.milliseconds
 
 @OptIn(FlowPreview::class)
 @Singleton
 class AppsRepository @Inject constructor(
-    @ApplicationContext private val context: Context,
-    @ApplicationScope private val scope: CoroutineScope
+    @param:ApplicationContext private val context: Context,
+    @ApplicationScope scope: CoroutineScope
 ) {
     private val launcherApps = context.getSystemService(Context.LAUNCHER_APPS_SERVICE) as LauncherApps
     private val userManager = context.getSystemService(Context.USER_SERVICE) as UserManager
@@ -61,7 +62,7 @@ class AppsRepository @Inject constructor(
         scope.launch {
             refreshTrigger
                 .onStart { emit(Unit) }
-                .debounce(500) // Wait 500ms for batch installs/updates to settle
+                .debounce(500.milliseconds) // Wait 500ms for batch installs/updates to settle
                 .collect { performReload() }
         }
     }

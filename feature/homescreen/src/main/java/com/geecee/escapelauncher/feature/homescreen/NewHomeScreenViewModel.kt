@@ -33,12 +33,12 @@ import kotlin.collections.map
 
 @HiltViewModel
 class NewHomeScreenViewModel @Inject constructor(
-    @ApplicationContext private val context: Context,
+    @ApplicationContext context: Context,
     settingsRepository: SettingsRepository,
     appsRepository: AppsRepository,
     private val modifiedAppsRepository: ModifiedAppsRepository,
     val widgetHostManager: WidgetHostManager,
-    private val appConfiguration: AppConfiguration
+    appConfiguration: AppConfiguration
 ) : ViewModel() {
     val isFoss = appConfiguration.isFoss
 

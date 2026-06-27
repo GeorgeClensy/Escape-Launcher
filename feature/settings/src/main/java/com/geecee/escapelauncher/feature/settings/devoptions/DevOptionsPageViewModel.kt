@@ -11,7 +11,7 @@ import kotlinx.coroutines.launch
 
 @HiltViewModel
 class DevOptionsPageViewModel @Inject constructor(
-    @ApplicationContext private val context: Context,
+    @ApplicationContext context: Context,
     private val repository: SettingsRepository
 ) : ViewModel() {
     val firstTimeHelp = repository.firstTimeHelp

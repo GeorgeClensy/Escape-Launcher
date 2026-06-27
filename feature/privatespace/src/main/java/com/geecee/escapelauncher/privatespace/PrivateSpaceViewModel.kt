@@ -24,7 +24,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class PrivateSpaceViewModel @Inject constructor(
-    @ApplicationContext private val context: Context,
+    @param:ApplicationContext private val context: Context,
     private val repository: SettingsRepository
 ) : ViewModel() {
 

@@ -18,7 +18,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class WorkAppsViewModel @Inject constructor(
-    @ApplicationContext private val context: Context
+    @param:ApplicationContext private val context: Context
 ) : ViewModel() {
 
     private val _isUnlocked = MutableStateFlow(false)
