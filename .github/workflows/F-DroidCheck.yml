@@ -32,23 +32,22 @@ jobs:
           mkdir -p metadata
           
           # Copy your local F-Droid recipe into the workspace
-          # CHANGE "com.your.appid" to your actual app's ID!
-          cp ../.fdroid/com.your.appid.yml metadata/
+          cp ../.fdroid/com.geecee.escapelauncher.yml metadata/
           
       - name: Run F-Droid Lint
         run: |
           cd fdroid-workspace
           # Checks your YAML file for syntax errors, missing fields, etc.
-          fdroid lint com.your.appid
+          fdroid lint com.geecee.escapelauncher
 
       - name: Run F-Droid Scanner
         run: |
           cd fdroid-workspace
           # Scans your source code for non-free binaries, proprietary libraries 
           # (like Google Play Services), or pre-compiled .jar/.so files.
-          fdroid scanner com.your.appid
+          fdroid scanner com.geecee.escapelauncher
           
       - name: Test F-Droid Build
         run: |
            cd fdroid-workspace
-           fdroid build -v -l com.your.appid
+           fdroid build -v -l com.geecee.escapelauncher
