@@ -29,6 +29,7 @@ jobs:
           fdroid init
 
           echo "categories: [Connectivity, Development, Games, Graphics, Internet, Money, Multimedia, Navigation, Office, Phone & SMS, Reading, Science & Education, Security, Sports & Health, System, Theming, Time, Writing]" >> config.yml
+          echo "gradle: $(which gradle)" >> config.yml
           
           # F-Droid expects metadata to live in a "metadata" folder
           mkdir -p metadata
