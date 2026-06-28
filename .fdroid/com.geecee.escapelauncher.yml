@@ -1,0 +1,29 @@
+Categories:
+  - Launcher
+  - System
+License: MIT
+AuthorName: George Clensy
+SourceCode: https://github.com/GeorgeClensy/Escape-Launcher
+IssueTracker: https://github.com/GeorgeClensy/Escape-Launcher/issues
+Changelog: https://github.com/GeorgeClensy/Escape-Launcher/releases
+Donate: https://github.com/sponsors/GeorgeClensy
+
+AutoName: Escape Launcher
+
+RepoType: git
+Repo: https://github.com/GeorgeClensy/Escape-Launcher
+
+Builds:
+  - versionName: '3.0'
+    versionCode: 3
+    commit: refactor
+    subdir: app
+    gradle:
+      - foss
+    scandelete:
+      - build-logic/convention/build
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+CurrentVersion: '3.0'
+CurrentVersionCode: 3
