@@ -79,7 +79,8 @@ class AppsListViewModel @Inject constructor(
         modifiedAppsRepository.getHiddenPackageIdsFlow(),
         _searchText,
         hiddenAppsInSearch
-    ) { allApps, hiddenIds, query, showHidden ->
+    ) { allApps, hiddenIds, rawQuery, showHidden ->
+        val query = rawQuery.trim()
         val hiddenSet = hiddenIds.toSet()
 
         val filtered = if (query.isBlank()) {
