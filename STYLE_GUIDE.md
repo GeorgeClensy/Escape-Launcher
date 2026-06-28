@@ -53,7 +53,7 @@ Every module has its own `build.gradle.kts` using convention plugins defined in 
 | `escapelauncher.android.library` | Base Android library config |
 | `escapelauncher.android.application` | Base Android application config |
 | `escapelauncher.android.compose` | Adds Compose BOM |
-| `escapelauncher.android.compose.ui` | Compose + Material3 + icons |
+| `escapelauncher.android.composeui` | Compose + Material3 + icons |
 | `escapelauncher.android.hilt` | Hilt DI setup |
 | `escapelauncher.android.feature` | Convenience — applies library + compose.ui + hilt + testing |
 | `escapelauncher.android.room` | Room database setup |

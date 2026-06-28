@@ -10,7 +10,7 @@ class AndroidFeatureConventionPlugin : Plugin<Project> {
         with(target) {
             with(pluginManager) {
                 apply("escapelauncher.android.library")
-                apply("escapelauncher.android.compose.ui")
+                apply("escapelauncher.android.composeui")
                 apply("escapelauncher.android.hilt")
                 apply("escapelauncher.android.testing")
             }

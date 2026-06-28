@@ -28,39 +28,39 @@ dependencies {
 gradlePlugin {
     plugins {
         register("androidApplication") {
-            id = "escapelauncher.android.application"
+            id = libs.plugins.escapelauncher.android.application.get().pluginId
             implementationClass = "com.geecee.escapelauncher.AndroidApplicationConventionPlugin"
         }
         register("androidLibrary") {
-            id = "escapelauncher.android.library"
+            id = libs.plugins.escapelauncher.android.library.get().pluginId
             implementationClass = "com.geecee.escapelauncher.AndroidLibraryConventionPlugin"
         }
         register("androidCompose") {
-            id = "escapelauncher.android.compose"
+            id = libs.plugins.escapelauncher.android.compose.get().pluginId
             implementationClass = "com.geecee.escapelauncher.AndroidComposeConventionPlugin"
         }
         register("androidHilt") {
-            id = "escapelauncher.android.hilt"
+            id = libs.plugins.escapelauncher.android.hilt.get().pluginId
             implementationClass = "com.geecee.escapelauncher.AndroidHiltConventionPlugin"
         }
         register("escapeLauncherFlavours") {
-            id = "escapelauncher.android.flavours"
+            id = libs.plugins.escapelauncher.android.flavours.get().pluginId
             implementationClass = "com.geecee.escapelauncher.FlavorsConventionPlugin"
         }
         register("escapeLauncherTests") {
-            id = "escapelauncher.android.testing"
+            id = libs.plugins.escapelauncher.android.testing.get().pluginId
             implementationClass = "com.geecee.escapelauncher.AndroidTestConventionPlugin"
         }
         register("androidRoom") {
-            id = "escapelauncher.android.room"
+            id = libs.plugins.escapelauncher.android.room.get().pluginId
             implementationClass = "com.geecee.escapelauncher.AndroidRoomConventionPlugin"
         }
         register("androidComposeUi") {
-            id = "escapelauncher.android.compose.ui"
+            id = libs.plugins.escapelauncher.android.composeui.get().pluginId
             implementationClass = "com.geecee.escapelauncher.AndroidComposeUiConventionPlugin"
         }
         register("androidFeature") {
-            id = "escapelauncher.android.feature"
+            id = libs.plugins.escapelauncher.android.feature.get().pluginId
             implementationClass = "com.geecee.escapelauncher.AndroidFeatureConventionPlugin"
         }
     }

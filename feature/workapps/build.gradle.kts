@@ -1,5 +1,5 @@
 plugins {
-    id("escapelauncher.android.feature")
+    alias(libs.plugins.escapelauncher.android.feature)
 }
 
 android {

@@ -1,11 +1,11 @@
 plugins {
-    id("escapelauncher.android.application")
-    id("escapelauncher.android.compose")
-    id("escapelauncher.android.compose.ui")
-    id("escapelauncher.android.hilt")
-    id("escapelauncher.android.flavours")
-    id("escapelauncher.android.testing")
-    id("escapelauncher.android.room")
+    alias(libs.plugins.escapelauncher.android.application)
+    alias(libs.plugins.escapelauncher.android.compose)
+    alias(libs.plugins.escapelauncher.android.composeui)
+    alias(libs.plugins.escapelauncher.android.hilt)
+    alias(libs.plugins.escapelauncher.android.flavours)
+    alias(libs.plugins.escapelauncher.android.testing)
+    alias(libs.plugins.escapelauncher.android.room)
 }
 
 val baseVersionCode = "3.0"

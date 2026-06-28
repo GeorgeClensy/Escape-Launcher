@@ -1,9 +1,9 @@
 plugins {
-    id("escapelauncher.android.library")
-    id("escapelauncher.android.compose")
-    id("escapelauncher.android.compose.ui")
-    id("escapelauncher.android.flavours")
-    id("escapelauncher.android.testing")
+    alias(libs.plugins.escapelauncher.android.library)
+    alias(libs.plugins.escapelauncher.android.compose)
+    alias(libs.plugins.escapelauncher.android.composeui)
+    alias(libs.plugins.escapelauncher.android.flavours)
+    alias(libs.plugins.escapelauncher.android.testing)
 }
 
 android {

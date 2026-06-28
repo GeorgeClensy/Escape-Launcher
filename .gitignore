@@ -45,5 +45,6 @@ fabric.properties
 *.temp
 *.tmp
 
+# AI
 .artifacts
 graphify-out/

@@ -1,6 +1,6 @@
 plugins {
-    id("escapelauncher.android.library")
-    id("escapelauncher.android.testing")
+    alias(libs.plugins.escapelauncher.android.library)
+    alias(libs.plugins.escapelauncher.android.testing)
 }
 
 android {
