@@ -21,7 +21,7 @@ I will review all contributions, but some may be declined if they conflict with 
 
 ## Localisation
 
-You can also help by translating the app's strings. To do this: clone the repo, go to ./core/ui/res/values-en and copy string.xml into ./core/ui/res/values-NEW-LANG-CODE/strings.xml. Then edit the strings.xml and create a PR. You can see a list of all the language codes here. I will check your translations with AI and then will merge your branch.
+You can also help by translating the app's strings. To do this: clone the repo, go to ./core/ui/res/values-en and copy string.xml into ./core/ui/res/values-NEW-LANG-CODE/strings.xml. Then edit the strings.xml and create a PR. You can see a list of all the language codes [here](https://gist.github.com/lopspower/ce384ef98f3d79e61ec78dc9e512644f). I will check your translations with AI and then will merge your branch.
 
 ## Contributing Financially
 
