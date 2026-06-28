@@ -1,3 +1,4 @@
+
 <!--suppress ALL -->
 <div align="center">
 
@@ -13,6 +14,13 @@
 
 Escape launcher is a minimalist app launcher that replaces the default homes screen on android devices to help with social media and smartphone addiction. It has a simple yet customisable, material-ui-3 based design with a home page with favourite apps, support for widgets, clock, date, screen times. It also has a full apps list with search, work apps and a built in screen time tracking dashboard. It was one of the first and is still one of the only launchers to support the new private space profile that was added an Android 15. Escape launcher supports Android 8 (`minSDK = 26`) up until the latest release of android 16 (`targetSDK = 36`)
 
+</div>
+
+> [!Important]
+> I am currently working on refactoring the code in the [refactor branch](https://github.com/GeorgeClensy/Escape-Launcher/tree/refactor) so I am not currently accepting PRs, sorry.
+
+<div align="center">
+  
 <br>
 
 <table style="border-collapse: collapse; border: none;">
