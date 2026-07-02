@@ -9,8 +9,34 @@ import com.geecee.escapelauncher.core.domain.repository.SettingsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import jakarta.inject.Inject
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+
+data class MainSettingsUiState(
+    val hapticFeedBackEnabled: Boolean = true,
+    val twelveHourClock: Boolean = false,
+    val showClock: Boolean = true,
+    val bigClock: Boolean = false,
+    val showDate: Boolean = false,
+    val showStatusBar: Boolean = false,
+    val showScreenTimeHome: Boolean = false,
+    val showWeather: Boolean = false,
+    val useFahrenheit: Boolean = false,
+    val showScreenTimeApp: Boolean = false,
+    val homeAlignment: Int = 1,
+    val homeVAlignment: Int = 1,
+    val appsAlignment: Int = 1,
+    val doubleTapToLock: Boolean = false,
+    val showSearchBox: Boolean = true,
+    val searchAutoOpen: Boolean = false,
+    val bottomSearch: Boolean = false,
+    val automaticallyOpenAppsInSearch: Boolean = false,
+    val hideScreenTimePage: Boolean = false,
+    val allowAnalytics: Boolean = false
+)
 
 @HiltViewModel
 class MainSettingsPageViewModel @Inject constructor(
@@ -19,83 +45,131 @@ class MainSettingsPageViewModel @Inject constructor(
     private val repository: SettingsRepository,
     val appConfiguration: AppConfiguration
 ) : ViewModel() {
-    val hapticFeedBackEnabled = repository.hapticFeedBackEnabled
+
+    val uiState: StateFlow<MainSettingsUiState> = combine(
+        listOf(
+            repository.hapticFeedBackEnabled,
+            repository.twelveHourClock,
+            repository.showClock,
+            repository.bigClock,
+            repository.showDate,
+            repository.showStatusBar,
+            repository.showScreenTimeHome,
+            repository.showWeather,
+            repository.useFahrenheit,
+            repository.showScreenTimeApp,
+            repository.homeAlignment,
+            repository.homeVAlignment,
+            repository.appsAlignment,
+            repository.doubleTapToLock,
+            repository.showSearchBox,
+            repository.searchAutoOpen,
+            repository.bottomSearch,
+            repository.automaticallyOpenAppsInSearch,
+            repository.hideScreenTimePage,
+            repository.allowAnalyitics
+        )
+    ) { args: Array<Any?> ->
+        MainSettingsUiState(
+            hapticFeedBackEnabled = args[0] as Boolean,
+            twelveHourClock = args[1] as Boolean,
+            showClock = args[2] as Boolean,
+            bigClock = args[3] as Boolean,
+            showDate = args[4] as Boolean,
+            showStatusBar = args[5] as Boolean,
+            showScreenTimeHome = args[6] as Boolean,
+            showWeather = args[7] as Boolean,
+            useFahrenheit = args[8] as Boolean,
+            showScreenTimeApp = args[9] as Boolean,
+            homeAlignment = when (args[10] as String) {
+                "Left" -> 0
+                "Center" -> 1
+                else -> 2
+            },
+            homeVAlignment = when (args[11] as String) {
+                "Top" -> 0
+                "Center" -> 1
+                else -> 2
+            },
+            appsAlignment = when (args[12] as String) {
+                "Left" -> 0
+                "Center" -> 1
+                else -> 2
+            },
+            doubleTapToLock = args[13] as Boolean,
+            showSearchBox = args[14] as Boolean,
+            searchAutoOpen = args[15] as Boolean,
+            bottomSearch = args[16] as Boolean,
+            automaticallyOpenAppsInSearch = args[17] as Boolean,
+            hideScreenTimePage = args[18] as Boolean,
+            allowAnalytics = args[19] as Boolean
+        )
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = MainSettingsUiState()
+    )
+
     fun setHapticFeedback(value: Boolean) {
         viewModelScope.launch {
             repository.setHapticFeedback(value)
         }
     }
 
-    val twelveHourClock = repository.twelveHourClock
     fun setTwelveHourClock(value: Boolean) {
         viewModelScope.launch {
             repository.setTwelveHourClock(value)
         }
     }
 
-    val showClock = repository.showClock
     fun setShowClock(value: Boolean) {
         viewModelScope.launch {
             repository.setShowClock(value)
         }
     }
 
-    val bigClock = repository.bigClock
     fun setBigClock(value: Boolean) {
         viewModelScope.launch {
             repository.setBigClock(value)
         }
     }
 
-    val showDate = repository.showDate
     fun setShowDate(value: Boolean) {
         viewModelScope.launch {
             repository.setShowDate(value)
         }
     }
 
-    val showStatusBar = repository.showStatusBar
     fun setShowStatusBar(value: Boolean) {
         viewModelScope.launch {
             repository.setShowStatusBar(value)
         }
     }
 
-    val showScreenTimeHome = repository.showScreenTimeHome
     fun setShowScreenTimeHome(value: Boolean) {
         viewModelScope.launch {
             repository.setShowScreenTimeHome(value)
         }
     }
 
-    val showWeather = repository.showWeather
     fun setShowWeather(value: Boolean) {
         viewModelScope.launch {
             repository.setShowWeather(value)
         }
     }
 
-    val useFahrenheit = repository.useFahrenheit
     fun setUseFahrenheit(value: Boolean) {
         viewModelScope.launch {
             repository.setUseFahrenheit(value)
         }
     }
 
-    val showScreenTimeApp = repository.showScreenTimeApp
     fun setShowScreenTimeApp(value: Boolean) {
         viewModelScope.launch {
             repository.setShowScreenTimeApp(value)
         }
     }
 
-    val homeAlignment = repository.homeAlignment.map { alignment ->
-        when (alignment) {
-            "Left" -> 0
-            "Center" -> 1
-            else -> 2
-        }
-    }
     fun setHomeAlignment(index: Int) {
         val value = when (index) {
             0 -> "Left"
@@ -107,13 +181,6 @@ class MainSettingsPageViewModel @Inject constructor(
         }
     }
 
-    val homeVAlignment = repository.homeVAlignment.map { alignment ->
-        when (alignment) {
-            "Top" -> 0
-            "Center" -> 1
-            else -> 2
-        }
-    }
     fun setHomeVAlignment(index: Int) {
         val value = when (index) {
             0 -> "Top"
@@ -131,13 +198,6 @@ class MainSettingsPageViewModel @Inject constructor(
         }
     }
 
-    val appsAlignment = repository.appsAlignment.map { alignment ->
-        when (alignment) {
-            "Left" -> 0
-            "Center" -> 1
-            else -> 2
-        }
-    }
     fun setAppsAlignment(index: Int) {
         val value = when (index) {
             0 -> "Left"
@@ -149,49 +209,42 @@ class MainSettingsPageViewModel @Inject constructor(
         }
     }
 
-    val doubleTapToLock = repository.doubleTapToLock
     fun setDoubleTapToLock(value: Boolean) {
         viewModelScope.launch {
             repository.setDoubleTapToLock(value)
         }
     }
 
-    val showSearchBox = repository.showSearchBox
     fun setShowSearchBox(value: Boolean) {
         viewModelScope.launch {
             repository.setShowSearchBox(value)
         }
     }
 
-    val searchAutoOpen = repository.searchAutoOpen
     fun setSearchAutoOpen(value: Boolean) {
         viewModelScope.launch {
             repository.setSearchAutoOpen(value)
         }
     }
 
-    val bottomSearch = repository.bottomSearch
     fun setBottomSearch(value: Boolean) {
         viewModelScope.launch {
             repository.setBottomSearch(value)
         }
     }
 
-    val automaticallyOpenAppsInSearch = repository.automaticallyOpenAppsInSearch
     fun setAutomaticallyOpenAppsInSearch(value: Boolean) {
         viewModelScope.launch {
             repository.setAutomaticallyOpenAppsInSearch(value)
         }
     }
 
-    val hideScreenTimePage = repository.hideScreenTimePage
     fun setHideScreenTimePage(value: Boolean) {
         viewModelScope.launch {
             repository.setHideScreenTimePage(value)
         }
     }
 
-    val allowAnalytics = repository.allowAnalyitics
     fun setAllowAnalytics(value: Boolean) {
         viewModelScope.launch {
             repository.setAllowAnalytics(value)

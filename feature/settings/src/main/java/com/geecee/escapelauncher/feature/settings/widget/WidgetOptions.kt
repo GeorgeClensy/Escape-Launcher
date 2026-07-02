@@ -83,9 +83,9 @@ fun WidgetOptions(
         horizontalAlignment = Alignment.Start,
         modifier = modifier.fillMaxSize()
     ) {
-        item { EscapeHeader(onBackClick, stringResource(R.string.widget)) }
+        item(key = "header") { EscapeHeader(onBackClick, stringResource(R.string.widget)) }
 
-        item {
+        item(key = "remove_widget") {
             SettingsButton(
                 label = stringResource(R.string.remove_widget),
                 isTopOfGroup = true,
@@ -98,7 +98,7 @@ fun WidgetOptions(
             )
         }
 
-        item {
+        item(key = "select_widget") {
             SettingsButton(
                 label = stringResource(R.string.select_widget),
                 isBottomOfGroup = true,
@@ -106,10 +106,10 @@ fun WidgetOptions(
             )
         }
 
-        item { SettingsSpacer() }
+        item(key = "spacer1") { SettingsSpacer() }
 
         if (widgetId != AppWidgetManager.INVALID_APPWIDGET_ID) {
-            item {
+            item(key = "widget_renderer") {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -129,11 +129,11 @@ fun WidgetOptions(
                     )
                 }
             }
-            item { SettingsSpacer() }
+            item(key = "spacer2") { SettingsSpacer() }
         }
 
         // Offset slider
-        item {
+        item(key = "offset_slider") {
             SettingsSlider(
                 label = stringResource(R.string.offset),
                 value = widgetOffset,
@@ -151,7 +151,7 @@ fun WidgetOptions(
         }
 
         // Height slider
-        item {
+        item(key = "height_slider") {
             SettingsSlider(
                 label = stringResource(R.string.height),
                 value = widgetHeight,
@@ -168,7 +168,7 @@ fun WidgetOptions(
         }
 
         // Width slider
-        item {
+        item(key = "width_slider") {
             SettingsSlider(
                 label = stringResource(R.string.width),
                 value = widgetWidth,
@@ -185,7 +185,7 @@ fun WidgetOptions(
             )
         }
 
-        item { SettingsSpacer() }
-        item { SettingsSpacer() }
+        item(key = "spacer3") { SettingsSpacer() }
+        item(key = "spacer4") { SettingsSpacer() }
     }
 }

@@ -62,26 +62,27 @@ fun MainSettingsPage(
 ) {
     val context = LocalContext.current
     val activity = LocalActivity.current
+    val view = LocalView.current
 
     val installedApps by mainSettingsPageViewModel.installedApps.collectAsState()
+    val uiState by mainSettingsPageViewModel.uiState.collectAsState()
     var showWeatherAppPicker by remember { mutableStateOf(false) }
-    val view = LocalView.current
 
     LazyColumn(
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.Start,
         modifier = Modifier.fillMaxSize()
     ) {
-        item {
+        item(key = "header") {
             EscapeHeader(
                 goBack, stringResource(R.string.settings)
             )
         }
 
         //General
-        item { EscapeSubhead(stringResource(id = R.string.general)) }
+        item(key = "general_subhead") { EscapeSubhead(stringResource(id = R.string.general)) }
 
-        item {
+        item(key = "theme") {
             SettingsNavigationItem(
                 label = stringResource(id = R.string.theme),
                 false,
@@ -89,21 +90,18 @@ fun MainSettingsPage(
                 onClick = { onNavigate(SettingsNavKey.Theme) })
         }
 
-        item {
+        item(key = "font") {
             SettingsNavigationItem(
                 label = stringResource(id = R.string.choose_font),
                 false,
                 onClick = { onNavigate(SettingsNavKey.ChooseFont) })
         }
 
-        item {
-            val hapticFeedbackEnabled by mainSettingsPageViewModel.hapticFeedBackEnabled.collectAsState(
-                initial = true
-            )
+        item(key = "haptic") {
             SettingsSwitch(
                 label = stringResource(id = R.string.haptic_feedback),
                 isBottomOfGroup = true,
-                checked = hapticFeedbackEnabled,
+                checked = uiState.hapticFeedBackEnabled,
                 onCheckedChange = {
                     mainSettingsPageViewModel.setHapticFeedback(it)
                     view.isHapticFeedbackEnabled = it
@@ -111,13 +109,12 @@ fun MainSettingsPage(
         }
 
         // Home options
-        item { EscapeSubhead(stringResource(R.string.home_screen_options)) }
+        item(key = "home_options_subhead") { EscapeSubhead(stringResource(R.string.home_screen_options)) }
 
-        item {
-            val showClock by mainSettingsPageViewModel.showClock.collectAsState(initial = true)
+        item(key = "show_clock") {
             SettingsSwitch(
                 label = stringResource(id = R.string.show_clock),
-                checked = showClock,
+                checked = uiState.showClock,
                 onCheckedChange = {
                     mainSettingsPageViewModel.setShowClock(it)
                 },
@@ -125,51 +122,48 @@ fun MainSettingsPage(
             )
         }
 
-        item {
-            val twelveHourClock by mainSettingsPageViewModel.twelveHourClock.collectAsState(initial = false)
+        item(key = "12h_clock") {
             SettingsSwitch(
                 label = stringResource(id = R.string.twelve_hour_clock_setting),
-                checked = twelveHourClock,
+                checked = uiState.twelveHourClock,
                 onCheckedChange = {
                     mainSettingsPageViewModel.setTwelveHourClock(it)
                 })
         }
 
-        item {
-            val bigClock by mainSettingsPageViewModel.bigClock.collectAsState(initial = false)
+        item(key = "big_clock") {
             SettingsSwitch(
                 label = stringResource(id = R.string.big_clock),
-                checked = bigClock,
+                checked = uiState.bigClock,
                 onCheckedChange = {
                     mainSettingsPageViewModel.setBigClock(it)
                 })
         }
 
-        item {
-            val showDate by mainSettingsPageViewModel.showDate.collectAsState(initial = false)
+        item(key = "show_date") {
             SettingsSwitch(
-                label = stringResource(id = R.string.date), checked = showDate, onCheckedChange = {
+                label = stringResource(id = R.string.date),
+                checked = uiState.showDate,
+                onCheckedChange = {
                     mainSettingsPageViewModel.setShowDate(it)
                 })
         }
 
-        item {
-            val showStatusBar by mainSettingsPageViewModel.showStatusBar.collectAsState(initial = false)
+        item(key = "show_status_bar") {
             SettingsSwitch(
                 label = stringResource(id = R.string.show_status_bar),
-                checked = showStatusBar,
+                checked = uiState.showStatusBar,
                 onCheckedChange = {
                     mainSettingsPageViewModel.setShowStatusBar(it)
                     configureFullScreenMode(activity?.window!!, it)
                 })
         }
 
-        item {
-            if (!mainSettingsPageViewModel.appConfiguration.isFoss) {
-                val showWeather by mainSettingsPageViewModel.showWeather.collectAsState(initial = false)
+        if (!mainSettingsPageViewModel.appConfiguration.isFoss) {
+            item(key = "show_weather") {
                 SettingsSwitch(
                     label = stringResource(id = R.string.show_weather),
-                    checked = showWeather,
+                    checked = uiState.showWeather,
                     onCheckedChange = {
                         mainSettingsPageViewModel.setShowWeather(it)
                         if (it) {
@@ -177,23 +171,18 @@ fun MainSettingsPage(
                         }
                     })
             }
-        }
 
-        item {
-            if (!mainSettingsPageViewModel.appConfiguration.isFoss) {
-                val useFahrenheit by mainSettingsPageViewModel.useFahrenheit.collectAsState(initial = false)
+            item(key = "use_fahrenheit") {
                 SettingsSwitch(
                     label = stringResource(id = R.string.use_farenhight),
-                    checked = useFahrenheit,
+                    checked = uiState.useFahrenheit,
                     onCheckedChange = {
                         mainSettingsPageViewModel.setUseFahrenheit(it)
                         weatherViewModel.forceUpdate()
                     })
             }
-        }
 
-        item {
-            if (!mainSettingsPageViewModel.appConfiguration.isFoss) {
+            item(key = "choose_weather_app") {
                 SettingsNavigationItem(
                     label = stringResource(id = R.string.choose_weather_app),
                     false,
@@ -201,14 +190,14 @@ fun MainSettingsPage(
             }
         }
 
-        item {
+        item(key = "widget") {
             SettingsNavigationItem(
                 label = stringResource(id = R.string.widget),
                 false,
                 onClick = { onNavigate(SettingsNavKey.Widget) })
         }
 
-        item {
+        item(key = "manage_fav_apps") {
             SettingsNavigationItem(
                 stringResource(R.string.manage_favourite_apps),
                 diagonalArrow = false,
@@ -219,11 +208,10 @@ fun MainSettingsPage(
         }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            item {
-                val doubleTapToLock by mainSettingsPageViewModel.doubleTapToLock.collectAsState(initial = false)
+            item(key = "double_tap_to_lock") {
                 SettingsSwitch(
                     label = stringResource(id = R.string.double_tap_to_lock),
-                    checked = doubleTapToLock,
+                    checked = uiState.doubleTapToLock,
                     onCheckedChange = {
                         mainSettingsPageViewModel.setDoubleTapToLock(it)
                     },
@@ -232,7 +220,7 @@ fun MainSettingsPage(
             }
 
             if (EscapeAccessibilityService.instance == null) {
-                item {
+                item(key = "enable_accessibility") {
                     SettingsButton(
                         label = stringResource(R.string.enable_accessibility),
                         isBottomOfGroup = true,
@@ -247,106 +235,97 @@ fun MainSettingsPage(
 
 
         //Alignment Options
-        item { EscapeSubhead(stringResource(R.string.alignments)) }
+        item(key = "alignment_subhead") { EscapeSubhead(stringResource(R.string.alignments)) }
 
-        item {
+        item(key = "home_alignment") {
             val homeHorizontalOptions = listOf(
                 stringResource(R.string.left),
                 stringResource(R.string.center),
                 stringResource(R.string.right)
             )
 
-            val homeHorizontalIndex by mainSettingsPageViewModel.homeAlignment.collectAsState(initial = 1)
             SettingsSingleChoiceSegmentedButtons(
                 label = stringResource(id = R.string.home),
                 options = homeHorizontalOptions,
-                selectedIndex = homeHorizontalIndex,
+                selectedIndex = uiState.homeAlignment,
                 onSelectedIndexChange = { newIndex ->
                     mainSettingsPageViewModel.setHomeAlignment(newIndex)
                 },
-                isTopOfGroup = true // First item in this section
+                isTopOfGroup = true
             )
         }
 
-        item {
+        item(key = "home_v_alignment") {
             val homeVerticalOptions = listOf(
                 stringResource(R.string.top),
                 stringResource(R.string.center),
                 stringResource(R.string.bottom)
             )
 
-            val homeVerticalIndex by mainSettingsPageViewModel.homeVAlignment.collectAsState(initial = 1)
             SettingsSingleChoiceSegmentedButtons(
                 label = "",
                 options = homeVerticalOptions,
-                selectedIndex = homeVerticalIndex,
+                selectedIndex = uiState.homeVAlignment,
                 onSelectedIndexChange = { newIndex ->
                     mainSettingsPageViewModel.setHomeVAlignment(newIndex)
                 })
         }
 
-        item {
+        item(key = "apps_alignment") {
             val appsAlignmentOptions = listOf(
                 stringResource(R.string.left),
                 stringResource(R.string.center),
                 stringResource(R.string.right)
             )
 
-            val appsHorizontalIndex by mainSettingsPageViewModel.appsAlignment.collectAsState(initial = 1)
             SettingsSingleChoiceSegmentedButtons(
                 label = stringResource(id = R.string.apps),
                 options = appsAlignmentOptions,
-                selectedIndex = appsHorizontalIndex,
+                selectedIndex = uiState.appsAlignment,
                 onSelectedIndexChange = { newIndex ->
                     mainSettingsPageViewModel.setAppsAlignment(newIndex)
                 },
-                isBottomOfGroup = true // Last item in this section before any potential new sections
+                isBottomOfGroup = true
             )
         }
 
         // Search settings
-        item { EscapeSubhead(stringResource(R.string.search)) }
+        item(key = "search_subhead") { EscapeSubhead(stringResource(R.string.search)) }
 
-        item {
-            val showSearchBox by mainSettingsPageViewModel.showSearchBox.collectAsState(initial = true)
+        item(key = "show_search_box") {
             SettingsSwitch(
                 label = stringResource(id = R.string.search_box),
-                checked = showSearchBox,
+                checked = uiState.showSearchBox,
                 isTopOfGroup = true,
                 onCheckedChange = {
                     mainSettingsPageViewModel.setShowSearchBox(it)
                 })
         }
 
-        item {
-            val automaticallyOpenAppsInSearch by mainSettingsPageViewModel.automaticallyOpenAppsInSearch.collectAsState(
-                initial = false
-            )
+        item(key = "auto_open_search") {
             SettingsSwitch(
                 label = stringResource(id = R.string.auto_open),
-                checked = automaticallyOpenAppsInSearch,
+                checked = uiState.automaticallyOpenAppsInSearch,
                 isBottomOfGroup = false,
                 onCheckedChange = {
                     mainSettingsPageViewModel.setAutomaticallyOpenAppsInSearch(it)
                 })
         }
 
-        item {
-            val bottomSearch by mainSettingsPageViewModel.bottomSearch.collectAsState(initial = false)
+        item(key = "bottom_search") {
             SettingsSwitch(
                 label = stringResource(id = R.string.search_at_bottom),
-                checked = bottomSearch,
+                checked = uiState.bottomSearch,
                 isBottomOfGroup = false,
                 onCheckedChange = {
                     mainSettingsPageViewModel.setBottomSearch(it)
                 })
         }
 
-        item {
-            val searchAutoOpen by mainSettingsPageViewModel.searchAutoOpen.collectAsState(initial = false)
+        item(key = "apps_list_auto_search") {
             SettingsSwitch(
                 label = stringResource(id = R.string.apps_list_auto_search),
-                checked = searchAutoOpen,
+                checked = uiState.searchAutoOpen,
                 isBottomOfGroup = true,
                 onCheckedChange = {
                     mainSettingsPageViewModel.setSearchAutoOpen(it)
@@ -354,34 +333,31 @@ fun MainSettingsPage(
         }
 
         //Screen time
-        item { EscapeSubhead(stringResource(R.string.screen_time)) }
+        item(key = "screen_time_subhead") { EscapeSubhead(stringResource(R.string.screen_time)) }
 
-        item {
-            val showScreenTimeApp by mainSettingsPageViewModel.showScreenTimeApp.collectAsState(initial = false)
+        item(key = "screen_time_app") {
             SettingsSwitch(
                 label = stringResource(id = R.string.screen_time_on_app),
-                checked = showScreenTimeApp,
+                checked = uiState.showScreenTimeApp,
                 isTopOfGroup = true,
                 onCheckedChange = {
                     mainSettingsPageViewModel.setShowScreenTimeApp(it)
                 })
         }
 
-        item {
-            val hideScreenTimePage by mainSettingsPageViewModel.hideScreenTimePage.collectAsState(initial = false)
+        item(key = "hide_screen_time_page") {
             SettingsSwitch(
                 label = stringResource(id = R.string.hide_screen_time_page),
-                checked = hideScreenTimePage,
+                checked = uiState.hideScreenTimePage,
                 onCheckedChange = {
                     mainSettingsPageViewModel.setHideScreenTimePage(it)
                 })
         }
 
-        item {
-            val showScreenTimeHome by mainSettingsPageViewModel.showScreenTimeHome.collectAsState(initial = false)
+        item(key = "screen_time_home") {
             SettingsSwitch(
                 label = stringResource(id = R.string.screen_time_on_home_screen),
-                checked = showScreenTimeHome,
+                checked = uiState.showScreenTimeHome,
                 isBottomOfGroup = true,
                 onCheckedChange = {
                     mainSettingsPageViewModel.setShowScreenTimeHome(it)
@@ -389,13 +365,13 @@ fun MainSettingsPage(
         }
 
         //Apps
-        item {
+        item(key = "apps_subhead") {
             EscapeSubhead(
                 stringResource(R.string.apps)
             )
         }
 
-        item {
+        item(key = "manage_hidden_apps") {
             SettingsNavigationItem(
                 label = stringResource(id = R.string.manage_hidden_apps),
                 false,
@@ -403,7 +379,7 @@ fun MainSettingsPage(
                 onClick = { onNavigate(SettingsNavKey.HiddenApps) })
         }
 
-        item {
+        item(key = "manage_open_challenges") {
             SettingsNavigationItem(
                 label = stringResource(id = R.string.manage_open_challenges),
                 false,
@@ -412,9 +388,9 @@ fun MainSettingsPage(
         }
 
         //Other
-        item { EscapeSubhead(stringResource(id = R.string.other)) }
+        item(key = "other_subhead") { EscapeSubhead(stringResource(id = R.string.other)) }
 
-        item {
+        item(key = "make_default_launcher") {
             SettingsNavigationItem(
                 label = stringResource(id = R.string.make_default_launcher),
                 true,
@@ -431,18 +407,17 @@ fun MainSettingsPage(
         }
 
         if (!mainSettingsPageViewModel.appConfiguration.isFoss) {
-            item {
-                val allowAnalytics by mainSettingsPageViewModel.allowAnalytics.collectAsState(initial = false)
+            item(key = "analytics") {
                 SettingsSwitch(
                     label = stringResource(id = R.string.Analytics),
-                    checked = allowAnalytics,
+                    checked = uiState.allowAnalytics,
                     onCheckedChange = {
                         mainSettingsPageViewModel.setAllowAnalytics(it)
                     })
             }
         }
 
-        item {
+        item(key = "font_licences") {
             SettingsNavigationItem(
                 label = stringResource(R.string.font_licences),
                 diagonalArrow = false,
@@ -451,7 +426,7 @@ fun MainSettingsPage(
         }
 
         if (!mainSettingsPageViewModel.appConfiguration.isFoss) {
-            item {
+            item(key = "privacy_policy") {
                 SettingsNavigationItem(
                     label = stringResource(id = R.string.read_privacy_policy),
                     false,
@@ -460,9 +435,9 @@ fun MainSettingsPage(
             }
         }
 
-        item { SettingsSpacer() }
+        item(key = "spacer1") { SettingsSpacer() }
 
-        item {
+        item(key = "footer") {
             FooterBox(
                 mainSettingsPageViewModel.appConfiguration.appName + " " + mainSettingsPageViewModel.appConfiguration.appVersion,
                 secondText = mainSettingsPageViewModel.appConfiguration.appFlavour,
@@ -480,8 +455,8 @@ fun MainSettingsPage(
                 })
         }
 
-        item { SettingsSpacer() }
-        item { SettingsSpacer() }
+        item(key = "spacer2") { SettingsSpacer() }
+        item(key = "spacer3") { SettingsSpacer() }
     }
 
     if (showWeatherAppPicker) {

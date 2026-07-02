@@ -38,9 +38,9 @@ fun DevOptions(
         horizontalAlignment = Alignment.Start,
         modifier = Modifier.fillMaxSize()
     ) {
-        item { EscapeHeader(goBack, "Developer Options") }
+        item(key = "header") { EscapeHeader(goBack, "Developer Options") }
 
-        item {
+        item(key = "first_time") {
             SettingsSwitch(
                 "First time",
                 firstTimeHelp && firstTime,
@@ -52,7 +52,7 @@ fun DevOptions(
             )
         }
 
-        item {
+        item(key = "force_stop") {
             SettingsButton(
                 label = "Force Stop",
                 onClick = {
@@ -61,7 +61,7 @@ fun DevOptions(
             )
         }
 
-        item {
+        item(key = "clear_weather") {
             SettingsButton(
                 label = "Clear weather app",
                 onClick = {
@@ -71,7 +71,7 @@ fun DevOptions(
             )
         }
 
-        item {
+        item(key = "force_crash") {
             SettingsButton(
                 label = "Force crash",
                 onClick = {
@@ -80,7 +80,7 @@ fun DevOptions(
             )
         }
 
-        item {
+        item(key = "test_screen_off") {
             SettingsButton(
                 label = "Test Screen Off",
                 isBottomOfGroup = true,

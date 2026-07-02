@@ -4,14 +4,9 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.rememberTextMeasurer
@@ -25,6 +20,7 @@ import com.geecee.escapelauncher.core.theme.ContentColor
 
 /**
  * Automatically resizing text that fits to container.
+ * Uses TextMeasurer for high-performance measurement in a single pass.
  *
  * @param modifier Modifier
  * @param text Text to be displayed
@@ -34,89 +30,60 @@ import com.geecee.escapelauncher.core.theme.ContentColor
  * @param color Color of the text
  * @param fontFamily Font family of the text
  * @param textAlign Text alignment
- *
- * @author George Clensy
  */
 @Composable
 fun AutoResizingText(
     modifier: Modifier = Modifier,
     text: String,
     style: TextStyle = MaterialTheme.typography.bodyMedium,
-    minFontSize: TextUnit = 10.sp,
+    minFontSize: TextUnit = 12.sp,
     maxLines: Int = 1,
     color: Color = ContentColor,
     fontFamily: FontFamily? = MaterialTheme.typography.bodyMedium.fontFamily,
     textAlign: TextAlign? = null
 ) {
     BoxWithConstraints(modifier = modifier) {
-        val density = LocalDensity.current
         val textMeasurer = rememberTextMeasurer()
+        val maxWidthPx = constraints.maxWidth
 
-        var currentFontSize by remember(text, style, minFontSize) {
-            mutableStateOf(style.fontSize)
-        }
-
-        LaunchedEffect(text, style, minFontSize, maxWidth, currentFontSize) {
-            val availableWidthPx = with(density) { this@BoxWithConstraints.maxWidth.toPx() }
-
-            if (availableWidthPx <= 0) return@LaunchedEffect
-
-            var tempFontSize = style.fontSize
-            if (tempFontSize.isUnspecified || tempFontSize.value <= 0) {
-                tempFontSize = 16.sp
-            }
-
-            val textLayoutResult = textMeasurer.measure(
+        val fontSize = remember(text, style, maxWidthPx) {
+            var currentSize = if (style.fontSize.isUnspecified) 16.sp else style.fontSize
+            
+            // Fast path: check if it fits with default size
+            val result = textMeasurer.measure(
                 text = text,
-                style = style.copy(fontSize = tempFontSize),
-                overflow = TextOverflow.Clip,
-                softWrap = false,
+                style = style.copy(fontSize = currentSize, fontFamily = fontFamily),
+                constraints = Constraints(maxWidth = maxWidthPx),
                 maxLines = maxLines,
-                constraints = Constraints(maxWidth = availableWidthPx.toInt())
+                overflow = TextOverflow.Clip
             )
 
-            if (textLayoutResult.didOverflowWidth) {
-                var shrunkFontSize = tempFontSize
-                while (shrunkFontSize > minFontSize) {
-                    shrunkFontSize = (shrunkFontSize.value * 0.9f).sp
-                    if (shrunkFontSize < minFontSize) {
-                        shrunkFontSize = minFontSize
-                    }
-
-                    val shrunkLayoutResult = textMeasurer.measure(
+            if (result.hasVisualOverflow) {
+                // Iterative shrink (could use binary search for even more speed, 
+                // but usually 1-3 steps is enough)
+                while (currentSize > minFontSize) {
+                    currentSize = (currentSize.value * 0.9f).sp
+                    val stepResult = textMeasurer.measure(
                         text = text,
-                        style = style.copy(fontSize = shrunkFontSize),
-                        overflow = TextOverflow.Clip,
-                        softWrap = false,
+                        style = style.copy(fontSize = currentSize, fontFamily = fontFamily),
+                        constraints = Constraints(maxWidth = maxWidthPx),
                         maxLines = maxLines,
-                        constraints = Constraints(maxWidth = availableWidthPx.toInt())
+                        overflow = TextOverflow.Clip
                     )
-
-                    if (!shrunkLayoutResult.didOverflowWidth) {
-                        tempFontSize = shrunkFontSize
-                        break
-                    }
-
-                    if (shrunkFontSize == minFontSize) {
-                        tempFontSize = minFontSize
-                        break
-                    }
+                    if (!stepResult.hasVisualOverflow) break
                 }
+                if (currentSize < minFontSize) currentSize = minFontSize
             }
-
-            if (currentFontSize != tempFontSize) {
-                currentFontSize = tempFontSize
-            }
+            currentSize
         }
 
         Text(
             text = text,
-            style = style.copy(fontSize = currentFontSize),
+            style = style.copy(fontSize = fontSize, color = color, fontFamily = fontFamily),
             maxLines = maxLines,
             overflow = TextOverflow.Ellipsis,
-            color = color,
-            fontFamily = fontFamily,
-            textAlign = textAlign
+            textAlign = textAlign,
+            softWrap = false
         )
     }
 }
