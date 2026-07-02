@@ -5,6 +5,7 @@ import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
@@ -28,6 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.geecee.escapelauncher.core.theme.BackgroundColor
 import com.geecee.escapelauncher.core.theme.CardContainerColor
 import com.geecee.escapelauncher.core.theme.primaryContentColor
 import com.geecee.escapelauncher.feature.onboarding.accessibility.AccessibilityPage
@@ -83,6 +85,7 @@ fun Onboarding(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .background(color = BackgroundColor)
             .windowInsetsPadding(WindowInsets.displayCutout)
             .padding(start = 0.dp, end = 0.dp, top = 30.dp)
     ) {

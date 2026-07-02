@@ -6,6 +6,7 @@ plugins {
     alias(libs.plugins.escapelauncher.android.flavours)
     alias(libs.plugins.escapelauncher.android.testing)
     alias(libs.plugins.escapelauncher.android.room)
+    alias(libs.plugins.kotlin.serialization)
 }
 
 val baseVersionCode = "3.0"
@@ -77,7 +78,10 @@ dependencies {
     implementation(libs.androidx.activity.compose)
 
     // Navigation
-    implementation(libs.androidx.navigation.compose)
+    implementation(libs.androidx.navigation3.runtime)
+    implementation(libs.androidx.navigation3.ui)
+    implementation(libs.androidx.lifecycle.viewmodel.navigation3)
+    implementation(libs.kotlinx.serialization.json)
 
     // WorkManager
     implementation(libs.androidx.work.runtime.ktx)

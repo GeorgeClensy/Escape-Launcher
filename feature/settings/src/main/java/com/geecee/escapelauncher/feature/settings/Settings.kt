@@ -7,6 +7,8 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -21,10 +23,14 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
+import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
+import androidx.navigation3.runtime.NavKey
+import androidx.navigation3.runtime.entryProvider
+import androidx.navigation3.runtime.rememberNavBackStack
+import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
+import androidx.navigation3.ui.NavDisplay
 import com.geecee.escapelauncher.core.common.loadTextFromAssets
+import com.geecee.escapelauncher.core.theme.BackgroundColor
 import com.geecee.escapelauncher.core.ui.R
 import com.geecee.escapelauncher.core.ui.composables.BulkManager
 import com.geecee.escapelauncher.core.ui.composables.PrivacyPolicyDialog
@@ -38,6 +44,23 @@ import com.geecee.escapelauncher.feature.settings.openchallenges.OpenChallengeVi
 import com.geecee.escapelauncher.feature.settings.theme.ThemeOptions
 import com.geecee.escapelauncher.feature.settings.widget.WidgetOptions
 import kotlinx.coroutines.launch
+import kotlinx.serialization.Serializable
+
+/**
+ * Type-safe navigation keys for the settings sub-destinations.
+ */
+sealed interface SettingsNavKey : NavKey {
+    @Serializable data object MainSettingsPage : SettingsNavKey
+    @Serializable data object HiddenApps : SettingsNavKey
+    @Serializable data object OpenChallenges : SettingsNavKey
+    @Serializable data object ChooseFont : SettingsNavKey
+    @Serializable data object DevOptions : SettingsNavKey
+    @Serializable data object Theme : SettingsNavKey
+    @Serializable data object Widget : SettingsNavKey
+    @Serializable data object BulkHiddenApps : SettingsNavKey
+    @Serializable data object BulkFavouriteApps : SettingsNavKey
+    @Serializable data object FontLicences : SettingsNavKey
+}
 
 //
 // MENUS
@@ -66,136 +89,127 @@ fun Settings(
     Box(
         modifier = Modifier
             .fillMaxSize()
+            .background(color = BackgroundColor)
             .padding(20.dp, 0.dp, 20.dp, 0.dp)
     ) {
 
-        val navController = rememberNavController()
+        val backStack = rememberNavBackStack(SettingsNavKey.MainSettingsPage)
 
-        NavHost(navController = navController, "mainSettingsPage") {
-            composable(
-                "mainSettingsPage",
-                enterTransition = { fadeIn(tween(300)) },
-                exitTransition = { fadeOut(tween(300)) }) {
-                MainSettingsPage(
-                    { goBack() },
-                    { showPolicyDialog.value = true },
-                    navController
-                )
-            }
-            composable(
-                "hiddenApps",
-                enterTransition = { fadeIn(tween(300)) },
-                exitTransition = { fadeOut(tween(300)) }) {
-                HiddenApps(
-                    goToManageHiddenApps = {
-                        navController.navigate("bulkHiddenApps")
-                    }) { navController.popBackStack() }
-            }
-            composable(
-                "openChallenges",
-                enterTransition = { fadeIn(tween(300)) },
-                exitTransition = { fadeOut(tween(300)) }) {
-                val openChallegeAppIds by openChallengeViewModel.challengeAppIds.collectAsState()
+        NavDisplay(
+            backStack = backStack,
+            onBack = {
+                if (backStack.size > 1) {
+                    backStack.removeLastOrNull()
+                } else {
+                    goBack()
+                }
+            },
+            transitionSpec = {
+                fadeIn(tween(300)) togetherWith fadeOut(tween(300))
+            },
+            popTransitionSpec = {
+                fadeIn(tween(300)) togetherWith fadeOut(tween(300))
+            },
+            entryDecorators = listOf(
+                rememberSaveableStateHolderNavEntryDecorator(),
+                rememberViewModelStoreNavEntryDecorator(),
+            ),
+            entryProvider = entryProvider {
+                entry<SettingsNavKey.MainSettingsPage> {
+                    MainSettingsPage(
+                        goBack = { goBack() },
+                        showPolicyDialog = { showPolicyDialog.value = true },
+                        onNavigate = { key -> backStack.add(key) }
+                    )
+                }
+                entry<SettingsNavKey.HiddenApps> {
+                    HiddenApps(
+                        goToManageHiddenApps = {
+                            backStack.add(SettingsNavKey.BulkHiddenApps)
+                        }) { backStack.removeLastOrNull() }
+                }
+                entry<SettingsNavKey.OpenChallenges> {
+                    val openChallegeAppIds by openChallengeViewModel.challengeAppIds.collectAsState()
 
-                BulkManager(
-                    items = installedApps,
-                    id = { it.packageName },
-                    label = { it.displayName },
-                    selectedIdsOverride = openChallegeAppIds,
-                    title = stringResource(R.string.manage_open_challenges),
-                    onBackClicked = { navController.popBackStack() },
-                    onItemClicked = { app, selected ->
-                        if (selected) {
-                            openChallengeViewModel.removeChallengeFromApp(app.packageName)
-                        } else {
-                            openChallengeViewModel.addChallengeToApp(app.packageName)
-                        }
-                    })
-            }
-            composable(
-                "chooseFont",
-                enterTransition = { fadeIn(tween(300)) },
-                exitTransition = { fadeOut(tween(300)) }) {
-                ChooseFont(context = context) { navController.popBackStack() }
-            }
-            composable(
-                "devOptions",
-                enterTransition = { fadeIn(tween(300)) },
-                exitTransition = { fadeOut(tween(300)) }) {
-                DevOptions { navController.popBackStack() }
-            }
-            composable(
-                "theme",
-                enterTransition = { fadeIn(tween(300)) },
-                exitTransition = { fadeOut(tween(300)) }) {
-                ThemeOptions(goBack = { navController.popBackStack() })
-            }
-            composable(
-                "widget",
-                enterTransition = { fadeIn(tween(300)) },
-                exitTransition = { fadeOut(tween(300)) }) {
-                WidgetOptions(onBackClick = { navController.popBackStack() })
-            }
-            composable(
-                "bulkHiddenApps",
-                enterTransition = { fadeIn(tween(300)) },
-                exitTransition = { fadeOut(tween(300)) }) {
-                val hiddenPackageIds by hiddenAppsViewModel.hiddenPackageIds.collectAsState()
-
-                BulkManager(
-                    items = installedApps,
-                    id = { it.packageName },
-                    label = { it.displayName },
-                    selectedIdsOverride = hiddenPackageIds,
-                    title = stringResource(R.string.manage_hidden_apps),
-                    onBackClicked = { navController.popBackStack() },
-                    onItemClicked = { app, selected ->
-                        if (selected) {
-                            hiddenAppsViewModel.unhideApp(app.packageName)
-                        } else {
-                            hiddenAppsViewModel.hideApp(app.packageName)
-                        }
-                    })
-            }
-            composable(
-                "bulkFavouriteApps",
-                enterTransition = { fadeIn(tween(300)) },
-                exitTransition = { fadeOut(tween(300)) }) {
-                BulkManager(
-                    items = installedApps,
-                    id = { it.packageName },
-                    label = { it.displayName },
-                    preSelectedItems = favouriteApps,
-                    title = stringResource(R.string.manage_favourite_apps),
-                    reorderable = true,
-                    onItemMoved = { fromIndex, toIndex ->
-                        val app = favouriteApps[fromIndex]
-                        coroutineScope.launch {
-                            settingsViewModel.modifiedAppsRepository.reorderFavouriteApp(
-                                app.packageName, fromIndex, toIndex
-                            )
-                        }
-                    },
-                    onBackClicked = { navController.popBackStack() },
-                    onItemClicked = { app, selected ->
-                        coroutineScope.launch {
+                    BulkManager(
+                        items = installedApps,
+                        id = { it.packageName },
+                        label = { it.displayName },
+                        selectedIdsOverride = openChallegeAppIds,
+                        title = stringResource(R.string.manage_open_challenges),
+                        onBackClicked = { backStack.removeLastOrNull() },
+                        onItemClicked = { app, selected ->
                             if (selected) {
-                                settingsViewModel.modifiedAppsRepository.removeFavourite(app.packageName)
+                                openChallengeViewModel.removeChallengeFromApp(app.packageName)
                             } else {
-                                settingsViewModel.modifiedAppsRepository.addFavourite(app.packageName)
+                                openChallengeViewModel.addChallengeToApp(app.packageName)
                             }
-                        }
-                    })
-            }
-            composable(
-                "fontLicences",
-                enterTransition = { fadeIn(tween(300)) },
-                exitTransition = { fadeOut(tween(300)) }) {
-                FontLicenceDialog(context = context) {
-                    navController.popBackStack()
+                        })
+                }
+                entry<SettingsNavKey.ChooseFont> {
+                    ChooseFont(context = context) { backStack.removeLastOrNull() }
+                }
+                entry<SettingsNavKey.DevOptions> {
+                    DevOptions { backStack.removeLastOrNull() }
+                }
+                entry<SettingsNavKey.Theme> {
+                    ThemeOptions(goBack = { backStack.removeLastOrNull() })
+                }
+                entry<SettingsNavKey.Widget> {
+                    WidgetOptions(onBackClick = { backStack.removeLastOrNull() })
+                }
+                entry<SettingsNavKey.BulkHiddenApps> {
+                    val hiddenPackageIds by hiddenAppsViewModel.hiddenPackageIds.collectAsState()
+
+                    BulkManager(
+                        items = installedApps,
+                        id = { it.packageName },
+                        label = { it.displayName },
+                        selectedIdsOverride = hiddenPackageIds,
+                        title = stringResource(R.string.manage_hidden_apps),
+                        onBackClicked = { backStack.removeLastOrNull() },
+                        onItemClicked = { app, selected ->
+                            if (selected) {
+                                hiddenAppsViewModel.unhideApp(app.packageName)
+                            } else {
+                                hiddenAppsViewModel.hideApp(app.packageName)
+                            }
+                        })
+                }
+                entry<SettingsNavKey.BulkFavouriteApps> {
+                    BulkManager(
+                        items = installedApps,
+                        id = { it.packageName },
+                        label = { it.displayName },
+                        preSelectedItems = favouriteApps,
+                        title = stringResource(R.string.manage_favourite_apps),
+                        reorderable = true,
+                        onItemMoved = { fromIndex, toIndex ->
+                            val app = favouriteApps[fromIndex]
+                            coroutineScope.launch {
+                                settingsViewModel.modifiedAppsRepository.reorderFavouriteApp(
+                                    app.packageName, fromIndex, toIndex
+                                )
+                            }
+                        },
+                        onBackClicked = { backStack.removeLastOrNull() },
+                        onItemClicked = { app, selected ->
+                            coroutineScope.launch {
+                                if (selected) {
+                                    settingsViewModel.modifiedAppsRepository.removeFavourite(app.packageName)
+                                } else {
+                                    settingsViewModel.modifiedAppsRepository.addFavourite(app.packageName)
+                                }
+                            }
+                        })
+                }
+                entry<SettingsNavKey.FontLicences> {
+                    FontLicenceDialog(context = context) {
+                        backStack.removeLastOrNull()
+                    }
                 }
             }
-        }
+        )
     }
 
     AnimatedVisibility(showPolicyDialog.value, enter = fadeIn(), exit = fadeOut()) {

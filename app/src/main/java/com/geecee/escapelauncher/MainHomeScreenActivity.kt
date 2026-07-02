@@ -12,9 +12,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.compose.animation.animateContentSize
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -26,9 +24,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.lifecycleScope
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
+import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
+import androidx.navigation3.runtime.NavKey
+import androidx.navigation3.runtime.entryProvider
+import androidx.navigation3.runtime.rememberNavBackStack
+import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
+import androidx.navigation3.ui.NavDisplay
 import com.geecee.escapelauncher.core.analytics.analyticsProxy
 import com.geecee.escapelauncher.core.cloudmessaging.messagingInitializer
 import com.geecee.escapelauncher.core.common.configureFullScreenMode
@@ -38,6 +39,10 @@ import com.geecee.escapelauncher.core.common.hasPermission
 import com.geecee.escapelauncher.core.data.worker.ClearOldDataWorker
 import com.geecee.escapelauncher.core.theme.BackgroundColor
 import com.geecee.escapelauncher.core.theme.EscapeTheme
+import com.geecee.escapelauncher.core.theme.enterTransition
+import com.geecee.escapelauncher.core.theme.exitTransition
+import com.geecee.escapelauncher.core.theme.popEnterTransition
+import com.geecee.escapelauncher.core.theme.popExitTransition
 import com.geecee.escapelauncher.core.ui.recievers.ScreenOffReceiver
 import com.geecee.escapelauncher.feature.newwidgets.WidgetHostManager
 import com.geecee.escapelauncher.feature.onboarding.Onboarding
@@ -48,8 +53,23 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.serialization.Serializable
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
+
+/**
+ * Type-safe navigation keys for the top-level app destinations.
+ */
+sealed interface AppNavKey : NavKey {
+    @Serializable
+    data object Home : AppNavKey
+
+    @Serializable
+    data object Settings : AppNavKey
+
+    @Serializable
+    data object Onboarding : AppNavKey
+}
 
 @AndroidEntryPoint
 class MainHomeScreenActivity : ComponentActivity() {
@@ -100,10 +120,10 @@ class MainHomeScreenActivity : ComponentActivity() {
         ClearOldDataWorker.scheduleDailyCleanup(this)
 
         // Determine start destination before hiding splash screen
-        var startDestination by mutableStateOf<String?>(null)
+        var startDestination by mutableStateOf<AppNavKey?>(null)
         lifecycleScope.launch {
             val isFirstTime = globalViewModel.firstTime.first()
-            startDestination = if (isFirstTime) "onboarding" else "home"
+            startDestination = if (isFirstTime) AppNavKey.Onboarding else AppNavKey.Home
         }
 
         // Assign window
@@ -144,7 +164,7 @@ class MainHomeScreenActivity : ComponentActivity() {
             val destination = startDestination
             if (destination != null) {
                 EscapeTheme {
-                    SetupNavHost(destination)
+                    SetupNavDisplay(destination)
                 }
             }
         }
@@ -202,21 +222,22 @@ class MainHomeScreenActivity : ComponentActivity() {
 
 
     /**
-     * Sets up main navigation host for the app
+     * Sets up main navigation display for the app
      *
      * @param startDestination Where to start
      */
     @Composable
-    private fun SetupNavHost(startDestination: String) {
-        val navController = rememberNavController()
+    private fun SetupNavDisplay(startDestination: AppNavKey) {
+        val backStack = rememberNavBackStack(startDestination)
 
         // Responsible for going home when navigateHomeEvent happens
         LaunchedEffect(globalViewModel.navigateHomeEvent) {
             globalViewModel.navigateHomeEvent.collect {
-                if (navController.currentDestination?.route != "home") {
-                    navController.navigate("home") {
-                        popUpTo(navController.graph.startDestinationId)
-                        launchSingleTop = true
+                // Clear the back stack and set Home as the only entry
+                if (backStack.lastOrNull() !is AppNavKey.Home) {
+                    backStack.removeAll { it !is AppNavKey.Home }
+                    if (backStack.isEmpty()) {
+                        backStack.add(AppNavKey.Home)
                     }
                 }
                 launch {
@@ -232,68 +253,68 @@ class MainHomeScreenActivity : ComponentActivity() {
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(color = BackgroundColor) // Sets the whole apps background btw, sure would be bad if something happened to this line!
+                .background(color = BackgroundColor)
                 .animateContentSize()
         ) {
-            NavHost(navController, startDestination = startDestination) {
-                composable(
-                    "home",
-                    enterTransition = { fadeIn(tween(300)) },
-                    exitTransition = { fadeOut(tween(300)) }) {
-
-                    // Ask for permissions as soon as you get to the homepage. Bad.
-                    LaunchedEffect(Unit) {
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                            if (!hasPermission(Manifest.permission.POST_NOTIFICATIONS)) {
-                                permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
-                            }
-                        }
-
-                        if (!hasPermission(Manifest.permission.ACCESS_FINE_LOCATION)) {
-                            permissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
-                        }
-                    }
-
-                    MainPagerScreen(
-                        viewModel = mainPagerViewModel,
-                        onOpenSettings = { navController.navigate("settings") }
-                    )
-                }
-                composable(
-                    route = "settings",
-                    enterTransition = { fadeIn(tween(300)) },
-                    exitTransition = { fadeOut(tween(300)) }) {
-                    Settings(
-                        goBack = {
-                            navController.navigate("home") {
-                                popUpTo("settings") {
-                                    inclusive = true
+            NavDisplay(
+                backStack = backStack,
+                onBack = { backStack.removeLastOrNull() },
+                entryDecorators = listOf(
+                    rememberSaveableStateHolderNavEntryDecorator(),
+                    rememberViewModelStoreNavEntryDecorator(),
+                ),
+                entryProvider = entryProvider {
+                    entry<AppNavKey.Home> {
+                        // Ask for permissions as soon as you get to the homepage. Bad.
+                        LaunchedEffect(Unit) {
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                                if (!hasPermission(Manifest.permission.POST_NOTIFICATIONS)) {
+                                    permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
                                 }
-                                launchSingleTop = true
                             }
-                        },
-                        activity = this@MainHomeScreenActivity,
-                    )
-                }
-                composable(
-                    route ="onboarding",
-                    enterTransition = { fadeIn(tween(900)) },
-                    exitTransition = { fadeOut(tween(300)) }) {
-                    configureOnboardingFullScreen(window)
 
-                    Onboarding(
-                        onFinished = {
-                            navController.navigate("home") {
-                                popUpTo("onboarding") { inclusive = true }
-                                launchSingleTop = true
-                            }
-                            globalViewModel.getWindow()?.let {
-                                configureFullScreenMode(it)
+                            if (!hasPermission(Manifest.permission.ACCESS_FINE_LOCATION)) {
+                                permissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
                             }
                         }
-                    )
+
+                        MainPagerScreen(
+                            viewModel = mainPagerViewModel,
+                            onOpenSettings = { backStack.add(AppNavKey.Settings) }
+                        )
+                    }
+                    entry<AppNavKey.Settings> {
+                        Settings(
+                            goBack = {
+                                backStack.removeLastOrNull()
+                            },
+                            activity = this@MainHomeScreenActivity,
+                        )
+                    }
+                    entry<AppNavKey.Onboarding> {
+                        configureOnboardingFullScreen(window)
+
+                        Onboarding(
+                            onFinished = {
+                                backStack.clear()
+                                backStack.add(AppNavKey.Home)
+                                globalViewModel.getWindow()?.let {
+                                    configureFullScreenMode(it)
+                                }
+                            }
+                        )
+                    }
+                },
+                transitionSpec = {
+                    enterTransition() togetherWith exitTransition()
+                },
+                popTransitionSpec = {
+                    popEnterTransition() togetherWith popExitTransition()
+                },
+                predictivePopTransitionSpec = {
+                    popEnterTransition() togetherWith popExitTransition()
                 }
-            }
+            )
         }
     }
 }

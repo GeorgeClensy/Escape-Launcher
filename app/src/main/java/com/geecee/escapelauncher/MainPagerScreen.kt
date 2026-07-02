@@ -9,6 +9,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -29,6 +30,7 @@ import com.geecee.escapelauncher.core.common.EscapeAccessibilityService
 import com.geecee.escapelauncher.core.common.doesPrivateSpaceExist
 import com.geecee.escapelauncher.core.common.doesWorkProfileExist
 import com.geecee.escapelauncher.core.common.isDefaultLauncher
+import com.geecee.escapelauncher.core.theme.BackgroundColor
 import com.geecee.escapelauncher.core.ui.R
 import com.geecee.escapelauncher.core.ui.composables.OpenChallenge
 import com.geecee.escapelauncher.feature.appslist.AppsList
@@ -78,6 +80,7 @@ fun MainPagerScreen(
         state = viewModel.pagerState,
         modifier = Modifier
             .fillMaxSize()
+            .background(color = BackgroundColor)
             .combinedClickable(
                 onClick = {},
                 onLongClickLabel = "",

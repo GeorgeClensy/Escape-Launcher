@@ -13,6 +13,7 @@ android {
 
 dependencies {
     implementation(libs.androidx.appcompat)
-    implementation(project(":core:domain"))
     implementation(libs.androidx.hilt.navigation.compose)
+    implementation(libs.androidx.compose.animation.core)
+    implementation(project(":core:domain"))
 }

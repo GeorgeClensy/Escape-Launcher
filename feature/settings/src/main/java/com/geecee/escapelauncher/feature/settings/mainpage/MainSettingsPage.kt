@@ -24,7 +24,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.core.net.toUri
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import androidx.navigation.NavController
+import com.geecee.escapelauncher.feature.settings.SettingsNavKey
 import com.geecee.escapelauncher.core.common.EscapeAccessibilityService
 import com.geecee.escapelauncher.core.common.configureFullScreenMode
 import com.geecee.escapelauncher.core.common.isDefaultLauncher
@@ -47,7 +47,7 @@ import com.geecee.escapelauncher.feature.weather.WeatherViewModel
  *
  * @param goBack When back button is pressed
  * @param showPolicyDialog When the show privacy policy button is pressed
- * @param navController Settings nav controller with "personalisation", "hiddenApps", "openChallenges"
+ * @param onNavigate Callback to navigate to a settings sub-page
  *
  * @see Settings
  */
@@ -56,7 +56,7 @@ import com.geecee.escapelauncher.feature.weather.WeatherViewModel
 fun MainSettingsPage(
     goBack: () -> Unit,
     showPolicyDialog: () -> Unit,
-    navController: NavController,
+    onNavigate: (SettingsNavKey) -> Unit,
     mainSettingsPageViewModel: MainSettingsPageViewModel = hiltViewModel(),
     weatherViewModel: WeatherViewModel = hiltViewModel(LocalActivity.current as ComponentActivity)
 ) {
@@ -110,14 +110,14 @@ fun MainSettingsPage(
                 label = stringResource(id = R.string.theme),
                 false,
                 isTopOfGroup = true,
-                onClick = { navController.navigate("theme") })
+                onClick = { onNavigate(SettingsNavKey.Theme) })
         }
 
         item {
             SettingsNavigationItem(
                 label = stringResource(id = R.string.choose_font),
                 false,
-                onClick = { navController.navigate("chooseFont") })
+                onClick = { onNavigate(SettingsNavKey.ChooseFont) })
         }
 
         item {
@@ -219,7 +219,7 @@ fun MainSettingsPage(
             SettingsNavigationItem(
                 label = stringResource(id = R.string.widget),
                 false,
-                onClick = { navController.navigate("widget") })
+                onClick = { onNavigate(SettingsNavKey.Widget) })
         }
 
         item {
@@ -228,7 +228,7 @@ fun MainSettingsPage(
                 diagonalArrow = false,
                 isBottomOfGroup = Build.VERSION.SDK_INT < Build.VERSION_CODES.P,
                 onClick = {
-                    navController.navigate("bulkFavouriteApps")
+                    onNavigate(SettingsNavKey.BulkFavouriteApps)
                 })
         }
 
@@ -401,7 +401,7 @@ fun MainSettingsPage(
                 label = stringResource(id = R.string.manage_hidden_apps),
                 false,
                 isTopOfGroup = true,
-                onClick = { navController.navigate("hiddenApps") })
+                onClick = { onNavigate(SettingsNavKey.HiddenApps) })
         }
 
         item {
@@ -409,7 +409,7 @@ fun MainSettingsPage(
                 label = stringResource(id = R.string.manage_open_challenges),
                 false,
                 isBottomOfGroup = true,
-                onClick = { navController.navigate("openChallenges") })
+                onClick = { onNavigate(SettingsNavKey.OpenChallenges) })
         }
 
         //Other
@@ -447,7 +447,7 @@ fun MainSettingsPage(
                 label = stringResource(R.string.font_licences),
                 diagonalArrow = false,
                 isBottomOfGroup = mainSettingsPageViewModel.appConfiguration.isFoss,
-                onClick = { navController.navigate("fontLicences") })
+                onClick = { onNavigate(SettingsNavKey.FontLicences) })
         }
 
         if (!mainSettingsPageViewModel.appConfiguration.isFoss) {
@@ -476,7 +476,7 @@ fun MainSettingsPage(
                 icon = painterResource(R.drawable.outlineicon),
                 sponsorButtonText = stringResource(R.string.sponsor),
                 onBackgroundClick = {
-                    navController.navigate("devOptions")
+                    onNavigate(SettingsNavKey.DevOptions)
                 })
         }
 
