@@ -21,10 +21,6 @@ import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
@@ -53,8 +49,6 @@ fun SettingsSingleChoiceSegmentedButtons(
     isTopOfGroup: Boolean = false,
     isBottomOfGroup: Boolean = false
 ) {
-    var currentSelectedIndex by remember { mutableIntStateOf(selectedIndex) }
-
     val groupEdgeCornerRadius = 24.dp
     val defaultCornerRadius = 8.dp
 
@@ -98,9 +92,8 @@ fun SettingsSingleChoiceSegmentedButtons(
                         shape = SegmentedButtonDefaults.itemShape(
                             index = index, count = options.size
                         ), onClick = {
-                            currentSelectedIndex = index
                             onSelectedIndexChange(index)
-                        }, selected = index == currentSelectedIndex
+                        }, selected = index == selectedIndex
                     ) {
                         Text(text = optionLabel, overflow = TextOverflow.Ellipsis, maxLines = 1)
                     }

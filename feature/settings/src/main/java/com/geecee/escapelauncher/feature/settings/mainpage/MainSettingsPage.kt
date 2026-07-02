@@ -66,30 +66,6 @@ fun MainSettingsPage(
     val installedApps by mainSettingsPageViewModel.installedApps.collectAsState()
     var showWeatherAppPicker by remember { mutableStateOf(false) }
     val view = LocalView.current
-    val twelveHourClock by mainSettingsPageViewModel.twelveHourClock.collectAsState(initial = false)
-    val showClock by mainSettingsPageViewModel.showClock.collectAsState(initial = true)
-    val bigClock by mainSettingsPageViewModel.bigClock.collectAsState(initial = false)
-    val showDate by mainSettingsPageViewModel.showDate.collectAsState(initial = false)
-    val showStatusBar by mainSettingsPageViewModel.showStatusBar.collectAsState(initial = false)
-    val showWeather by mainSettingsPageViewModel.showWeather.collectAsState(initial = false)
-    val useFahrenheit by mainSettingsPageViewModel.useFahrenheit.collectAsState(initial = false)
-    val showScreenTimeApp by mainSettingsPageViewModel.showScreenTimeApp.collectAsState(initial = false)
-    val showScreenTimeHome by mainSettingsPageViewModel.showScreenTimeHome.collectAsState(initial = false)
-    val hapticFeedbackEnabled by mainSettingsPageViewModel.hapticFeedBackEnabled.collectAsState(
-        initial = true
-    )
-    val homeHorizontalIndex by mainSettingsPageViewModel.homeAlignment.collectAsState(initial = 1)
-    val appsHorizontalIndex by mainSettingsPageViewModel.appsAlignment.collectAsState(initial = 1)
-    val homeVerticalIndex by mainSettingsPageViewModel.homeVAlignment.collectAsState(initial = 1)
-    val allowAnalytics by mainSettingsPageViewModel.allowAnalytics.collectAsState(initial = false)
-    val doubleTapToLock by mainSettingsPageViewModel.doubleTapToLock.collectAsState(initial = false)
-    val showSearchBox by mainSettingsPageViewModel.showSearchBox.collectAsState(initial = true)
-    val searchAutoOpen by mainSettingsPageViewModel.searchAutoOpen.collectAsState(initial = false)
-    val bottomSearch by mainSettingsPageViewModel.bottomSearch.collectAsState(initial = false)
-    val automaticallyOpenAppsInSearch by mainSettingsPageViewModel.automaticallyOpenAppsInSearch.collectAsState(
-        initial = false
-    )
-    val hideScreenTimePage by mainSettingsPageViewModel.hideScreenTimePage.collectAsState(initial = false)
 
     LazyColumn(
         verticalArrangement = Arrangement.Top,
@@ -121,6 +97,9 @@ fun MainSettingsPage(
         }
 
         item {
+            val hapticFeedbackEnabled by mainSettingsPageViewModel.hapticFeedBackEnabled.collectAsState(
+                initial = true
+            )
             SettingsSwitch(
                 label = stringResource(id = R.string.haptic_feedback),
                 isBottomOfGroup = true,
@@ -135,6 +114,7 @@ fun MainSettingsPage(
         item { EscapeSubhead(stringResource(R.string.home_screen_options)) }
 
         item {
+            val showClock by mainSettingsPageViewModel.showClock.collectAsState(initial = true)
             SettingsSwitch(
                 label = stringResource(id = R.string.show_clock),
                 checked = showClock,
@@ -146,6 +126,7 @@ fun MainSettingsPage(
         }
 
         item {
+            val twelveHourClock by mainSettingsPageViewModel.twelveHourClock.collectAsState(initial = false)
             SettingsSwitch(
                 label = stringResource(id = R.string.twelve_hour_clock_setting),
                 checked = twelveHourClock,
@@ -155,6 +136,7 @@ fun MainSettingsPage(
         }
 
         item {
+            val bigClock by mainSettingsPageViewModel.bigClock.collectAsState(initial = false)
             SettingsSwitch(
                 label = stringResource(id = R.string.big_clock),
                 checked = bigClock,
@@ -164,6 +146,7 @@ fun MainSettingsPage(
         }
 
         item {
+            val showDate by mainSettingsPageViewModel.showDate.collectAsState(initial = false)
             SettingsSwitch(
                 label = stringResource(id = R.string.date), checked = showDate, onCheckedChange = {
                     mainSettingsPageViewModel.setShowDate(it)
@@ -171,6 +154,7 @@ fun MainSettingsPage(
         }
 
         item {
+            val showStatusBar by mainSettingsPageViewModel.showStatusBar.collectAsState(initial = false)
             SettingsSwitch(
                 label = stringResource(id = R.string.show_status_bar),
                 checked = showStatusBar,
@@ -182,6 +166,7 @@ fun MainSettingsPage(
 
         item {
             if (!mainSettingsPageViewModel.appConfiguration.isFoss) {
+                val showWeather by mainSettingsPageViewModel.showWeather.collectAsState(initial = false)
                 SettingsSwitch(
                     label = stringResource(id = R.string.show_weather),
                     checked = showWeather,
@@ -196,6 +181,7 @@ fun MainSettingsPage(
 
         item {
             if (!mainSettingsPageViewModel.appConfiguration.isFoss) {
+                val useFahrenheit by mainSettingsPageViewModel.useFahrenheit.collectAsState(initial = false)
                 SettingsSwitch(
                     label = stringResource(id = R.string.use_farenhight),
                     checked = useFahrenheit,
@@ -234,6 +220,7 @@ fun MainSettingsPage(
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             item {
+                val doubleTapToLock by mainSettingsPageViewModel.doubleTapToLock.collectAsState(initial = false)
                 SettingsSwitch(
                     label = stringResource(id = R.string.double_tap_to_lock),
                     checked = doubleTapToLock,
@@ -269,6 +256,7 @@ fun MainSettingsPage(
                 stringResource(R.string.right)
             )
 
+            val homeHorizontalIndex by mainSettingsPageViewModel.homeAlignment.collectAsState(initial = 1)
             SettingsSingleChoiceSegmentedButtons(
                 label = stringResource(id = R.string.home),
                 options = homeHorizontalOptions,
@@ -287,6 +275,7 @@ fun MainSettingsPage(
                 stringResource(R.string.bottom)
             )
 
+            val homeVerticalIndex by mainSettingsPageViewModel.homeVAlignment.collectAsState(initial = 1)
             SettingsSingleChoiceSegmentedButtons(
                 label = "",
                 options = homeVerticalOptions,
@@ -303,6 +292,7 @@ fun MainSettingsPage(
                 stringResource(R.string.right)
             )
 
+            val appsHorizontalIndex by mainSettingsPageViewModel.appsAlignment.collectAsState(initial = 1)
             SettingsSingleChoiceSegmentedButtons(
                 label = stringResource(id = R.string.apps),
                 options = appsAlignmentOptions,
@@ -318,6 +308,7 @@ fun MainSettingsPage(
         item { EscapeSubhead(stringResource(R.string.search)) }
 
         item {
+            val showSearchBox by mainSettingsPageViewModel.showSearchBox.collectAsState(initial = true)
             SettingsSwitch(
                 label = stringResource(id = R.string.search_box),
                 checked = showSearchBox,
@@ -328,6 +319,9 @@ fun MainSettingsPage(
         }
 
         item {
+            val automaticallyOpenAppsInSearch by mainSettingsPageViewModel.automaticallyOpenAppsInSearch.collectAsState(
+                initial = false
+            )
             SettingsSwitch(
                 label = stringResource(id = R.string.auto_open),
                 checked = automaticallyOpenAppsInSearch,
@@ -338,6 +332,7 @@ fun MainSettingsPage(
         }
 
         item {
+            val bottomSearch by mainSettingsPageViewModel.bottomSearch.collectAsState(initial = false)
             SettingsSwitch(
                 label = stringResource(id = R.string.search_at_bottom),
                 checked = bottomSearch,
@@ -348,6 +343,7 @@ fun MainSettingsPage(
         }
 
         item {
+            val searchAutoOpen by mainSettingsPageViewModel.searchAutoOpen.collectAsState(initial = false)
             SettingsSwitch(
                 label = stringResource(id = R.string.apps_list_auto_search),
                 checked = searchAutoOpen,
@@ -361,6 +357,7 @@ fun MainSettingsPage(
         item { EscapeSubhead(stringResource(R.string.screen_time)) }
 
         item {
+            val showScreenTimeApp by mainSettingsPageViewModel.showScreenTimeApp.collectAsState(initial = false)
             SettingsSwitch(
                 label = stringResource(id = R.string.screen_time_on_app),
                 checked = showScreenTimeApp,
@@ -371,6 +368,7 @@ fun MainSettingsPage(
         }
 
         item {
+            val hideScreenTimePage by mainSettingsPageViewModel.hideScreenTimePage.collectAsState(initial = false)
             SettingsSwitch(
                 label = stringResource(id = R.string.hide_screen_time_page),
                 checked = hideScreenTimePage,
@@ -380,6 +378,7 @@ fun MainSettingsPage(
         }
 
         item {
+            val showScreenTimeHome by mainSettingsPageViewModel.showScreenTimeHome.collectAsState(initial = false)
             SettingsSwitch(
                 label = stringResource(id = R.string.screen_time_on_home_screen),
                 checked = showScreenTimeHome,
@@ -433,6 +432,7 @@ fun MainSettingsPage(
 
         if (!mainSettingsPageViewModel.appConfiguration.isFoss) {
             item {
+                val allowAnalytics by mainSettingsPageViewModel.allowAnalytics.collectAsState(initial = false)
                 SettingsSwitch(
                     label = stringResource(id = R.string.Analytics),
                     checked = allowAnalytics,
