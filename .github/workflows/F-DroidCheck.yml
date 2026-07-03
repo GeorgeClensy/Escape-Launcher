@@ -1,6 +1,7 @@
 name: F-Droid Pre-Upload Check
 
-on: [push]
+on:
+  workflow_dispatch: 
 
 jobs:
   check:
