@@ -30,7 +30,7 @@ fun NextButton(
 ) {
     Button(
         onClick = { onNext() },
-        modifier = modifier.padding(bottom = 30.dp),
+        modifier = modifier.padding(bottom = 45.dp),
         border = if (outline) BorderStroke(1.dp, primaryContentColor) else null,
         colors = ButtonColors(
             containerColor = if (outline) Color.Transparent else primaryContentColor,

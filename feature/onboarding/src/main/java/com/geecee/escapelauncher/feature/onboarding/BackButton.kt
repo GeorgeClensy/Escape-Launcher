@@ -23,7 +23,7 @@ fun PrevButton(
     IconButton(
         onClick = { onPrev() },
         modifier = modifier
-            .padding(bottom = 30.dp)
+            .padding(bottom = 45.dp)
             .offset(x = (-4).dp),
         colors = IconButtonColors(
             containerColor = primaryContentColor,
