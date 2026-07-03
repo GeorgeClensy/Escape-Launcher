@@ -4,7 +4,6 @@ package com.geecee.escapelauncher.feature.settings
 
 import android.app.Activity
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
@@ -31,6 +30,10 @@ import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import com.geecee.escapelauncher.core.common.loadTextFromAssets
 import com.geecee.escapelauncher.core.theme.BackgroundColor
+import com.geecee.escapelauncher.core.theme.enterTransition
+import com.geecee.escapelauncher.core.theme.exitTransition
+import com.geecee.escapelauncher.core.theme.popEnterTransition
+import com.geecee.escapelauncher.core.theme.popExitTransition
 import com.geecee.escapelauncher.core.ui.R
 import com.geecee.escapelauncher.core.ui.composables.BulkManager
 import com.geecee.escapelauncher.core.ui.composables.PrivacyPolicyDialog
@@ -50,16 +53,35 @@ import kotlinx.serialization.Serializable
  * Type-safe navigation keys for the settings sub-destinations.
  */
 sealed interface SettingsNavKey : NavKey {
-    @Serializable data object MainSettingsPage : SettingsNavKey
-    @Serializable data object HiddenApps : SettingsNavKey
-    @Serializable data object OpenChallenges : SettingsNavKey
-    @Serializable data object ChooseFont : SettingsNavKey
-    @Serializable data object DevOptions : SettingsNavKey
-    @Serializable data object Theme : SettingsNavKey
-    @Serializable data object Widget : SettingsNavKey
-    @Serializable data object BulkHiddenApps : SettingsNavKey
-    @Serializable data object BulkFavouriteApps : SettingsNavKey
-    @Serializable data object FontLicences : SettingsNavKey
+    @Serializable
+    data object MainSettingsPage : SettingsNavKey
+
+    @Serializable
+    data object HiddenApps : SettingsNavKey
+
+    @Serializable
+    data object OpenChallenges : SettingsNavKey
+
+    @Serializable
+    data object ChooseFont : SettingsNavKey
+
+    @Serializable
+    data object DevOptions : SettingsNavKey
+
+    @Serializable
+    data object Theme : SettingsNavKey
+
+    @Serializable
+    data object Widget : SettingsNavKey
+
+    @Serializable
+    data object BulkHiddenApps : SettingsNavKey
+
+    @Serializable
+    data object BulkFavouriteApps : SettingsNavKey
+
+    @Serializable
+    data object FontLicences : SettingsNavKey
 }
 
 //
@@ -105,10 +127,13 @@ fun Settings(
                 }
             },
             transitionSpec = {
-                fadeIn(tween(300)) togetherWith fadeOut(tween(300))
+                enterTransition() togetherWith exitTransition()
             },
             popTransitionSpec = {
-                fadeIn(tween(300)) togetherWith fadeOut(tween(300))
+                popEnterTransition() togetherWith popExitTransition()
+            },
+            predictivePopTransitionSpec = {
+                popEnterTransition() togetherWith popExitTransition()
             },
             entryDecorators = listOf(
                 rememberSaveableStateHolderNavEntryDecorator(),
