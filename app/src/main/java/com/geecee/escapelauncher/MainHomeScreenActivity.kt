@@ -126,9 +126,6 @@ class MainHomeScreenActivity : ComponentActivity() {
             startDestination = if (isFirstTime) AppNavKey.Onboarding else AppNavKey.Home
         }
 
-        // Assign window
-        globalViewModel.setWindow(window)
-
         // Keep splash screen visible until we know where to go and essential data is loaded
         splashScreen.setKeepOnScreenCondition {
             startDestination == null || !globalViewModel.isAppsLoaded.value || !globalViewModel.isFavoritesLoaded.value || !globalViewModel.isSettingsLoaded.value
@@ -298,9 +295,7 @@ class MainHomeScreenActivity : ComponentActivity() {
                             onFinished = {
                                 backStack.clear()
                                 backStack.add(AppNavKey.Home)
-                                globalViewModel.getWindow()?.let {
-                                    configureFullScreenMode(it)
-                                }
+                                configureFullScreenMode(window)
                             }
                         )
                     }

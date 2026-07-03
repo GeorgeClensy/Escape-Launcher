@@ -1,6 +1,5 @@
 package com.geecee.escapelauncher
 
-import android.view.Window
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -33,12 +32,6 @@ class GlobalViewModel @Inject constructor(
         viewModelScope.launch {
             _navigateHomeEvent.emit(Unit)
         }
-    }
-
-    private var window: Window? = null
-    fun getWindow(): Window? = window
-    fun setWindow(window: Window) {
-        this.window = window
     }
 
     // Loading states for splash screen
