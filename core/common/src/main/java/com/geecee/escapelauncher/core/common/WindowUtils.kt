@@ -7,37 +7,37 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 
 /**
- * Puts the app into full screen
+ * Configure the status bar visibility
  *
- * @param window The window to make full screen
- * @param showStatusBar Whether to keep the status bar visible (defaults to hidden)
- *
- * @author George Clensy
+ * @param hide Whether to hide the status bar
  */
-@Suppress("DEPRECATION")
-fun configureFullScreenMode(window: Window, showStatusBar: Boolean = false) {
-    WindowCompat.setDecorFitsSystemWindows(window, false)
-    val controller = WindowInsetsControllerCompat(window, window.decorView)
-    controller.show(WindowInsetsCompat.Type.navigationBars()) // Show navigation bars
-    if (showStatusBar) {
-        controller.show(WindowInsetsCompat.Type.statusBars())
+fun Window.configureStatusBar(hide: Boolean) {
+    WindowCompat.setDecorFitsSystemWindows(this, false)
+    val controller = WindowCompat.getInsetsController(this, decorView)
+    controller.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+    if (hide) {
+        controller.hide(WindowInsetsCompat.Type.statusBars())
     } else {
-        controller.hide(WindowInsetsCompat.Type.statusBars()) // hide status bar only
-    }
-    controller.systemBarsBehavior =
-        WindowInsetsControllerCompat.BEHAVIOR_DEFAULT
-
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-        window.setNavigationBarContrastEnforced(false)
+        controller.show(WindowInsetsCompat.Type.statusBars())
     }
 }
 
-fun configureOnboardingFullScreen(window: Window) {
-    WindowCompat.setDecorFitsSystemWindows(window, false)
+/**
+ * Configure the navigation bar visibility
+ *
+ * @param hide Whether to hide the navigation bar
+ */
+fun Window.configureNavBar(hide: Boolean) {
+    WindowCompat.setDecorFitsSystemWindows(this, false)
+    val controller = WindowCompat.getInsetsController(this, decorView)
+    controller.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+    if (hide) {
+        controller.hide(WindowInsetsCompat.Type.navigationBars())
+    } else {
+        controller.show(WindowInsetsCompat.Type.navigationBars())
+    }
 
-    val controller = WindowCompat.getInsetsController(window, window.decorView)
-    controller.systemBarsBehavior =
-        WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
-
-    controller.hide(WindowInsetsCompat.Type.systemBars())
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+        isNavigationBarContrastEnforced = false
+    }
 }

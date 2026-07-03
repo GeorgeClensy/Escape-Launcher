@@ -26,7 +26,7 @@ import androidx.core.net.toUri
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.geecee.escapelauncher.feature.settings.SettingsNavKey
 import com.geecee.escapelauncher.core.common.EscapeAccessibilityService
-import com.geecee.escapelauncher.core.common.configureFullScreenMode
+import com.geecee.escapelauncher.core.common.configureStatusBar
 import com.geecee.escapelauncher.core.common.isDefaultLauncher
 import com.geecee.escapelauncher.core.common.showLauncherSelector
 import com.geecee.escapelauncher.core.common.showLauncherSettingsMenu
@@ -155,7 +155,7 @@ fun MainSettingsPage(
                 checked = uiState.showStatusBar,
                 onCheckedChange = {
                     mainSettingsPageViewModel.setShowStatusBar(it)
-                    configureFullScreenMode(activity?.window!!, it)
+                    activity?.window?.configureStatusBar(hide = !it)
                 })
         }
 

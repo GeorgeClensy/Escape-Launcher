@@ -32,8 +32,8 @@ import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import com.geecee.escapelauncher.core.analytics.analyticsProxy
 import com.geecee.escapelauncher.core.cloudmessaging.messagingInitializer
-import com.geecee.escapelauncher.core.common.configureFullScreenMode
-import com.geecee.escapelauncher.core.common.configureOnboardingFullScreen
+import com.geecee.escapelauncher.core.common.configureNavBar
+import com.geecee.escapelauncher.core.common.configureStatusBar
 import com.geecee.escapelauncher.core.common.formatScreenTime
 import com.geecee.escapelauncher.core.common.hasPermission
 import com.geecee.escapelauncher.core.data.worker.ClearOldDataWorker
@@ -112,7 +112,8 @@ class MainHomeScreenActivity : ComponentActivity() {
         enableEdgeToEdge()
         lifecycleScope.launch {
             globalViewModel.showStatusBar.collect { show ->
-                configureFullScreenMode(window, show)
+                window.configureStatusBar(hide = !show)
+                window.configureNavBar(hide = false)
             }
         }
 
@@ -289,13 +290,10 @@ class MainHomeScreenActivity : ComponentActivity() {
                         )
                     }
                     entry<AppNavKey.Onboarding> {
-                        configureOnboardingFullScreen(window)
-
                         Onboarding(
                             onFinished = {
                                 backStack.clear()
                                 backStack.add(AppNavKey.Home)
-                                configureFullScreenMode(window)
                             }
                         )
                     }
