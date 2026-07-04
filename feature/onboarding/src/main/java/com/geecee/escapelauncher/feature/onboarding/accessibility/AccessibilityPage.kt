@@ -26,12 +26,9 @@ import androidx.compose.ui.unit.sp
 import com.geecee.escapelauncher.core.theme.BackgroundColor
 import com.geecee.escapelauncher.core.theme.primaryContentColor
 import com.geecee.escapelauncher.core.ui.R
-import com.geecee.escapelauncher.feature.onboarding.NextButton
-import com.geecee.escapelauncher.feature.onboarding.PrevButton
 
 @Composable
-fun AccessibilityPage(onNext: () -> Unit, onPrev: () -> Unit
-) {
+fun AccessibilityPage() {
     val scrollState = rememberLazyListState()
     val context = LocalContext.current
 
@@ -93,20 +90,6 @@ fun AccessibilityPage(onNext: () -> Unit, onPrev: () -> Unit
 
             item {
                 Spacer(Modifier.height(240.dp))
-            }
-        }
-
-        PrevButton(
-            Modifier.align(Alignment.BottomStart)
-        ) {
-            onPrev()
-        }
-
-        Row(
-            modifier = Modifier.align(Alignment.BottomEnd)
-        ) {
-            NextButton {
-                onNext()
             }
         }
     }

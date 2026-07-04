@@ -9,7 +9,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
@@ -20,11 +19,9 @@ import androidx.compose.ui.unit.dp
 import com.geecee.escapelauncher.core.theme.primaryContentColor
 import com.geecee.escapelauncher.core.ui.R
 import com.geecee.escapelauncher.core.ui.composables.SettingsSpacer
-import com.geecee.escapelauncher.feature.onboarding.NextButton
-import com.geecee.escapelauncher.feature.onboarding.PrevButton
 
 @Composable
-fun StatisticsPage(onNext: () -> Unit, onPrev: () -> Unit) {
+fun StatisticsPage() {
     Box(
         Modifier
             .fillMaxSize()
@@ -78,18 +75,6 @@ fun StatisticsPage(onNext: () -> Unit, onPrev: () -> Unit) {
                 style = MaterialTheme.typography.titleSmall,
                 textAlign = TextAlign.Start
             )
-        }
-
-        PrevButton(
-            Modifier.align(Alignment.BottomStart)
-        ) {
-            onPrev()
-        }
-
-        NextButton(
-            Modifier.align(Alignment.BottomEnd)
-        ) {
-            onNext()
         }
     }
 }

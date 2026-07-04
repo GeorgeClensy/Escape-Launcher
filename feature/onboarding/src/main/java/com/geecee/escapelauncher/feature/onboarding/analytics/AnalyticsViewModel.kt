@@ -11,6 +11,8 @@ import javax.inject.Inject
 class AnalyticsViewModel @Inject constructor(
     private val repository: SettingsRepository
 ) : ViewModel() {
+    val allowAnalytics = repository.allowAnalyitics
+
     fun setAllowAnalytics(value: Boolean) {
         viewModelScope.launch {
             repository.setAllowAnalytics(value)

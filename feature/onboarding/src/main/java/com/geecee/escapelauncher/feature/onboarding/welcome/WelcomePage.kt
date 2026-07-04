@@ -13,12 +13,9 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.geecee.escapelauncher.core.theme.primaryContentColor
 import com.geecee.escapelauncher.core.ui.R
-import com.geecee.escapelauncher.feature.onboarding.NextButton
 
 @Composable
-fun WelcomePage(
-    onNext: () -> Unit
-) {
+fun WelcomePage() {
     Box(
         Modifier
             .fillMaxSize()
@@ -37,10 +34,6 @@ fun WelcomePage(
                     .align(Alignment.CenterHorizontally),
                 tint = primaryContentColor
             )
-        }
-
-        NextButton(Modifier.align(Alignment.BottomEnd)) {
-            onNext()
         }
     }
 }

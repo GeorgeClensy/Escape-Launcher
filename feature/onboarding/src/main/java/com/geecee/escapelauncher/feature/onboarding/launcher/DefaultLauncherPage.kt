@@ -30,13 +30,9 @@ import com.geecee.escapelauncher.core.common.showLauncherSelector
 import com.geecee.escapelauncher.core.theme.BackgroundColor
 import com.geecee.escapelauncher.core.theme.primaryContentColor
 import com.geecee.escapelauncher.core.ui.R
-import com.geecee.escapelauncher.feature.onboarding.NextButton
-import com.geecee.escapelauncher.feature.onboarding.PrevButton
 
 @Composable
-fun DefaultLauncherPage(
-    onNext: () -> Unit, onPrev: () -> Unit
-) {
+fun DefaultLauncherPage() {
     val activity = LocalActivity.current
 
     Box(
@@ -103,18 +99,6 @@ fun DefaultLauncherPage(
                 }
             }
             Spacer(Modifier.height(240.dp))
-        }
-
-        PrevButton(
-            Modifier.align(Alignment.BottomStart)
-        ) {
-            onPrev()
-        }
-
-        NextButton(
-            Modifier.align(Alignment.BottomEnd)
-        ) {
-            onNext()
         }
     }
 }
