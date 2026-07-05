@@ -1,10 +1,5 @@
 package com.geecee.escapelauncher.core.ui.composables
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -76,24 +71,36 @@ fun <T> BulkManager(
         }
     }
 
-    var draggedId by remember { mutableStateOf<String?>(null) }
-    var dragOffset by remember { mutableFloatStateOf(0f) }
-    var measuredItemHeight by remember { mutableIntStateOf(0) }
-    val lazyListState = rememberLazyListState()
-
-    val combinedItems by remember(items, displayedSelectedItems, effectiveSelectedIds) {
+    val structuralData by remember(items, displayedSelectedItems, effectiveSelectedIds) {
         derivedStateOf {
-            buildList {
+            val unselected = items.filter { item -> !effectiveSelectedIds.contains(id(item)) }
+
+            val combined = buildList {
                 addAll(displayedSelectedItems.map { ListItem.Entry(it, isInSelectedSection = true) })
                 if (displayedSelectedItems.isNotEmpty()) {
                     add(ListItem.Spacer)
                 }
-                // Filter out items already in the selected section to avoid duplicates
-                val available = items.filter { item -> !effectiveSelectedIds.contains(id(item)) }
-                addAll(available.map { ListItem.Entry(it, isInSelectedSection = false) })
+                addAll(unselected.map { ListItem.Entry(it, isInSelectedSection = false) })
             }
+
+            // Storing boundary ids for quick O(1) lookups inside the rows
+            val firstSelectedId = displayedSelectedItems.firstOrNull()?.let(id)
+            val lastSelectedId = displayedSelectedItems.lastOrNull()?.let(id)
+            val firstUnselectedId = unselected.firstOrNull()?.let(id)
+            val lastUnselectedId = unselected.lastOrNull()?.let(id)
+
+            Triple(combined, Pair(firstSelectedId, lastSelectedId), Pair(firstUnselectedId, lastUnselectedId))
         }
     }
+
+    val combinedItems = structuralData.first
+    val (firstSelectedId, lastSelectedId) = structuralData.second
+    val (firstUnselectedId, lastUnselectedId) = structuralData.third
+
+    var draggedId by remember { mutableStateOf<String?>(null) }
+    var dragOffset by remember { mutableFloatStateOf(0f) }
+    var measuredItemHeight by remember { mutableIntStateOf(0) }
+    val lazyListState = rememberLazyListState()
 
     LazyColumn(
         state = lazyListState,
@@ -117,12 +124,7 @@ fun <T> BulkManager(
             items = combinedItems,
             key = { item ->
                 when (item) {
-                    is ListItem.Entry -> "${if (item.isInSelectedSection) "sel" else "avail"}_${
-                        id(
-                            item.item
-                        )
-                    }"
-
+                    is ListItem.Entry -> "${if (item.isInSelectedSection) "sel" else "avail"}_${id(item.item)}"
                     ListItem.Spacer -> "spacer"
                 }
             }
@@ -134,28 +136,27 @@ fun <T> BulkManager(
                     val currentLabel = label(currentItem)
                     val isSelected = effectiveSelectedIds.contains(currentId)
 
-                    val unselectedItems = remember(items, effectiveSelectedIds) {
-                        items.filter { !effectiveSelectedIds.contains(id(it)) }
-                    }
-
+                    // --- OPTIMIZATION: O(1) checks instead of filtering allocations here ---
                     val isTopOfGroup = if (listItem.isInSelectedSection) {
-                        displayedSelectedItems.firstOrNull() == currentItem
+                        firstSelectedId == currentId
                     } else {
-                        unselectedItems.firstOrNull() == currentItem
+                        firstUnselectedId == currentId
                     }
 
                     val isBottomOfGroup = if (listItem.isInSelectedSection) {
-                        displayedSelectedItems.lastOrNull() == currentItem
+                        lastSelectedId == currentId
                     } else {
-                        unselectedItems.lastOrNull() == currentItem
+                        lastUnselectedId == currentId
                     }
 
                     if (listItem.isInSelectedSection && reorderable) {
                         val isDragging = draggedId == currentId
-                        val currentIndex = selectedState.indexOfFirst { id(it) == currentId }
+                        val currentIndex = remember(selectedState, currentId) {
+                            selectedState.indexOfFirst { id(it) == currentId }
+                        }
+
                         val maxDragUp = -currentIndex * measuredItemHeight.toFloat()
-                        val maxDragDown =
-                            (selectedState.size - 1 - currentIndex) * measuredItemHeight.toFloat()
+                        val maxDragDown = (selectedState.size - 1 - currentIndex) * measuredItemHeight.toFloat()
 
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
@@ -169,8 +170,7 @@ fun <T> BulkManager(
                                 .offset {
                                     IntOffset(
                                         0,
-                                        if (isDragging) dragOffset.coerceIn(maxDragUp, maxDragDown)
-                                            .roundToInt() else 0
+                                        if (isDragging) dragOffset.coerceIn(maxDragUp, maxDragDown).roundToInt() else 0
                                     )
                                 }
                         ) {
@@ -189,30 +189,21 @@ fun <T> BulkManager(
                                     .padding(horizontal = 8.dp)
                                     .pointerInput(currentId) {
                                         detectVerticalDragGestures(
-                                            onDragStart = {
-                                                draggedId = currentId; dragOffset = 0f
-                                            },
+                                            onDragStart = { draggedId = currentId; dragOffset = 0f },
                                             onVerticalDrag = { change, dragAmount ->
                                                 change.consume()
                                                 dragOffset += dragAmount
                                                 val threshold = measuredItemHeight.toFloat() / 2
-                                                val fromIndex =
-                                                    selectedState.indexOfFirst { id(it) == currentId }
+                                                val fromIndex = selectedState.indexOfFirst { id(it) == currentId }
 
                                                 if (dragOffset > threshold && fromIndex < selectedState.size - 1) {
                                                     val toIndex = fromIndex + 1
-                                                    selectedState.add(
-                                                        toIndex,
-                                                        selectedState.removeAt(fromIndex)
-                                                    )
+                                                    selectedState.add(toIndex, selectedState.removeAt(fromIndex))
                                                     dragOffset -= measuredItemHeight
                                                     onItemMoved(fromIndex, toIndex)
                                                 } else if (dragOffset < -threshold && fromIndex > 0) {
                                                     val toIndex = fromIndex - 1
-                                                    selectedState.add(
-                                                        toIndex,
-                                                        selectedState.removeAt(fromIndex)
-                                                    )
+                                                    selectedState.add(toIndex, selectedState.removeAt(fromIndex))
                                                     dragOffset += measuredItemHeight
                                                     onItemMoved(fromIndex, toIndex)
                                                 }
@@ -229,9 +220,7 @@ fun <T> BulkManager(
                         SettingsButton(
                             label = currentLabel,
                             onClick = {
-                                if (isSelected) selectedState.remove(currentItem) else selectedState.add(
-                                    currentItem
-                                )
+                                if (isSelected) selectedState.remove(currentItem) else selectedState.add(currentItem)
                                 onItemClicked(currentItem, isSelected)
                             },
                             isTopOfGroup = isTopOfGroup,
@@ -242,11 +231,7 @@ fun <T> BulkManager(
                     }
                 }
 
-                ListItem.Spacer -> AnimatedVisibility(
-                    visible = displayedSelectedItems.isNotEmpty(),
-                    enter = expandVertically() + fadeIn(),
-                    exit = shrinkVertically() + fadeOut()
-                ) {
+                ListItem.Spacer -> {
                     SettingsSpacer()
                 }
             }
