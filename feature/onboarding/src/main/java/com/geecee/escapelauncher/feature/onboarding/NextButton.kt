@@ -2,30 +2,27 @@ package com.geecee.escapelauncher.feature.onboarding
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowForward
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MediumExtendedFloatingActionButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.geecee.escapelauncher.core.theme.BackgroundColor
 import com.geecee.escapelauncher.core.theme.EscapeThemePreview
 import com.geecee.escapelauncher.core.theme.primaryContentColor
+import com.geecee.escapelauncher.core.ui.composables.BouncyMorphingFab
 
 @Composable
 fun NextButton(
     modifier: Modifier = Modifier,
     onNext: () -> Unit
 ) {
-    MediumExtendedFloatingActionButton(
-        onClick = { onNext() },
+    BouncyMorphingFab (
         modifier = modifier,
+        icon = Icons.AutoMirrored.Rounded.ArrowForward,
+        contentDescription = "Continue",
         containerColor = primaryContentColor,
         contentColor = BackgroundColor,
-    ) {
-        Icon(
-            imageVector = Icons.AutoMirrored.Rounded.ArrowForward, contentDescription = "Continue"
-        )
-    }
+        onClick = { onNext() }
+    )
 }
 
 @Preview
