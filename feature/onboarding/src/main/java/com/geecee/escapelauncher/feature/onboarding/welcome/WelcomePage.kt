@@ -49,7 +49,7 @@ fun WelcomePage() {
         BlurryCircle(
             modifier = Modifier
                 .align(Alignment.BottomEnd)
-                .offset(x = 100.dp, y = 200.dp),
+                .offset(x = 0.dp, y = 200.dp),
             circleColor = primaryContentColor.toAndroidColor()
         )
     }

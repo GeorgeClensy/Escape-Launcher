@@ -1,5 +1,6 @@
 package com.geecee.escapelauncher.core.ui.composables
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.spring
@@ -73,9 +74,15 @@ fun BouncyMorphingFab(
         containerColor = containerColor,
         contentColor = contentColor,
     ) {
-        Icon(
-            imageVector = icon, contentDescription = contentDescription
-        )
+        AnimatedContent(
+            targetState = icon,
+            label = "InternalIconTransition"
+        ) { targetIcon ->
+            Icon(
+                imageVector = targetIcon,
+                contentDescription = contentDescription
+            )
+        }
     }
 }
 

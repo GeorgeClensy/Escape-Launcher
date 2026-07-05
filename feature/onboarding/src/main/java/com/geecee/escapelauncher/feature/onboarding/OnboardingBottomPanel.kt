@@ -22,6 +22,7 @@ import com.geecee.escapelauncher.core.theme.EscapeThemePreview
 fun OnboardingBottomPanel(
     modifier: Modifier = Modifier,
     showPrevButton: Boolean = true,
+    useTickNextButton: Boolean = false,
     onPrevButtonClick: () -> Unit = {},
     onNextButtonClick: () -> Unit = {}
 ) {
@@ -57,7 +58,8 @@ fun OnboardingBottomPanel(
             }
 
             NextButton(
-                modifier = Modifier.align(Alignment.CenterEnd)
+                modifier = Modifier.align(Alignment.CenterEnd),
+                showTick = useTickNextButton
             ) {
                 onNextButtonClick()
             }

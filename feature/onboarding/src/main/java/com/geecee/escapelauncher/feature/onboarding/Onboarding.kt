@@ -3,6 +3,10 @@ package com.geecee.escapelauncher.feature.onboarding
 import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -49,7 +53,6 @@ fun Onboarding(
     val screens = viewModel.screens
     val coroutineScope = rememberCoroutineScope()
     val isOnDefaultLauncherPage by viewModel.startFromLauncherPage.collectAsState(initial = null)
-
     if (isOnDefaultLauncherPage == null) return
 
     val pagerState = rememberPagerState(
@@ -61,6 +64,7 @@ fun Onboarding(
         }
     )
 
+    // Set StartFromLauncherPage
     LaunchedEffect(pagerState.currentPage, pagerState.isScrollInProgress) {
         if (!pagerState.isScrollInProgress) {
             if (pagerState.currentPage != screens.indexOf(OnboardingScreen.DEFAULT_LAUNCHER)) {
@@ -72,17 +76,36 @@ fun Onboarding(
         }
     }
 
-    val progress by remember {
+    // Progress Bar animations
+    val targetProgress by remember {
         derivedStateOf {
             if (screens.size <= 1) 0f
             else {
-                (pagerState.currentPage + pagerState.currentPageOffsetFraction).coerceIn(
-                    0f,
-                    screens.lastIndex.toFloat()
-                ) / screens.lastIndex
+                val targetPage = if (pagerState.isScrollInProgress) pagerState.targetPage else pagerState.currentPage
+                targetPage.toFloat() / screens.lastIndex
             }
         }
     }
+
+    val progressAnimationSpec = remember(pagerState.targetPage) {
+        val targetPage = pagerState.targetPage
+        if (targetPage == 0 || targetPage == screens.lastIndex) {
+            // Smooth, non-bouncy transition for the start and end bits
+            tween<Float>(durationMillis = 300, easing = FastOutSlowInEasing)
+        } else {
+            // Elastic bounce for the middle pages
+            spring(
+                dampingRatio = Spring.DampingRatioMediumBouncy,
+                stiffness = Spring.StiffnessLow
+            )
+        }
+    }
+
+    val animatedProgress by animateFloatAsState(
+        targetValue = targetProgress,
+        animationSpec = progressAnimationSpec,
+        label = "BouncyProgress"
+    )
 
     val onNext: () -> Unit = {
         if (pagerState.currentPage < screens.lastIndex) {
@@ -127,10 +150,14 @@ fun Onboarding(
                     .padding(start = 30.dp, end = 30.dp)
             ) {
                 AnimatedVisibility(
-                    pagerState.currentPage != 0, enter = fadeIn(), exit = fadeOut()
+                    visible = pagerState.currentPage != 0,
+                    enter = fadeIn(),
+                    exit = fadeOut(
+                        animationSpec = tween(durationMillis = 100, easing = LinearEasing)
+                    )
                 ) {
                     LinearProgressIndicator(
-                        progress = { progress },
+                        progress = { animatedProgress },
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(32.dp),
@@ -141,9 +168,11 @@ fun Onboarding(
             }
         },
         bottomBar = {
+            // Bottom Panel
             OnboardingBottomPanel(
                 modifier = Modifier,
                 showPrevButton = screens[pagerState.currentPage] != OnboardingScreen.WELCOME,
+                useTickNextButton = pagerState.currentPage == screens.lastIndex,
                 onPrevButtonClick = {
                     onPrev()
                 },
@@ -153,6 +182,7 @@ fun Onboarding(
             )
         }
     ) { innerPadding ->
+        // Pager
         HorizontalPager(
             state = pagerState,
             modifier = Modifier
@@ -160,7 +190,7 @@ fun Onboarding(
                 .padding(innerPadding)
                 .graphicsLayer(),
             userScrollEnabled = false,
-            beyondViewportPageCount = 1
+            //beyondViewportPageCount = 1
         ) { page ->
             val screen = screens[page]
 
