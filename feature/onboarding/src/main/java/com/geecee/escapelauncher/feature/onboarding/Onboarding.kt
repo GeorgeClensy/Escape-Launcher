@@ -190,7 +190,7 @@ fun Onboarding(
                 .padding(innerPadding)
                 .graphicsLayer(),
             userScrollEnabled = true,
-            beyondViewportPageCount = 1 // This keeps the "orbs" that are offset on the first page visible on the 2nd page cuz the first page is still loaded, I think this makes it look cleaner cuz there's no sharp edges
+            beyondViewportPageCount = 2 // This keeps the "orbs" that are offset on the first page visible on the 2nd page cuz the first page is still loaded, I think this makes it look cleaner cuz there's no sharp edges
         ) { page ->
             val screen = screens[page]
 

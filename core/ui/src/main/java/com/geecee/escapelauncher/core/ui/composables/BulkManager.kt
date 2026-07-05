@@ -15,6 +15,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DragHandle
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -34,6 +35,7 @@ import androidx.compose.ui.zIndex
 import com.geecee.escapelauncher.core.theme.ContentColor
 import kotlin.math.roundToInt
 
+//Todo: make this not bad and fix the reordering animations
 @Composable
 fun <T> BulkManager(
     items: List<T>,
@@ -52,6 +54,12 @@ fun <T> BulkManager(
     onItemMoved: (fromIndex: Int, toIndex: Int) -> Unit = { _, _ -> }
 ) {
     val selectedState = remember { mutableStateListOf<T>().apply { addAll(preSelectedItems) } }
+
+    // Sync database data when it finishes loading asynchronously
+    LaunchedEffect(preSelectedItems) {
+        selectedState.clear()
+        selectedState.addAll(preSelectedItems)
+    }
 
     val effectiveSelectedIds by remember(selectedState, selectedIdsOverride) {
         derivedStateOf {
