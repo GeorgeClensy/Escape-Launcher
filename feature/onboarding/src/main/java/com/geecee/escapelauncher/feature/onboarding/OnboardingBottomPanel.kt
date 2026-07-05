@@ -26,8 +26,8 @@ fun OnboardingBottomPanel(
     onNextButtonClick: () -> Unit = {}
 ) {
     val shape = RoundedCornerShape(
-        topEnd = 36.dp,
-        topStart = 36.dp,
+        topEnd = 28.dp,
+        topStart = 28.dp,
         bottomEnd = 0.dp,
         bottomStart = 0.dp
     )

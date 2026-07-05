@@ -10,9 +10,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.geecee.escapelauncher.core.theme.EscapeThemePreview
 import com.geecee.escapelauncher.core.theme.primaryContentColor
 import com.geecee.escapelauncher.core.ui.R
+import com.geecee.escapelauncher.core.ui.utils.toAndroidColor
 
 @Composable
 fun WelcomePage() {
@@ -35,5 +38,27 @@ fun WelcomePage() {
                 tint = primaryContentColor
             )
         }
+
+        BlurryCircle(
+            modifier = Modifier
+                .align(Alignment.BottomStart)
+                .offset(x = -(100).dp,y = 100.dp),
+            circleColor = primaryContentColor.toAndroidColor()
+        )
+
+        BlurryCircle(
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .offset(x = 100.dp, y = 200.dp),
+            circleColor = primaryContentColor.toAndroidColor()
+        )
+    }
+}
+
+@Preview
+@Composable
+fun PrevWelcomePage() {
+    EscapeThemePreview {
+        WelcomePage()
     }
 }
