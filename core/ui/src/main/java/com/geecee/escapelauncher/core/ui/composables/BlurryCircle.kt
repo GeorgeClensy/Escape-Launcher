@@ -1,4 +1,4 @@
-package com.geecee.escapelauncher.feature.onboarding.welcome
+package com.geecee.escapelauncher.core.ui.composables
 
 import android.graphics.BlurMaskFilter
 import androidx.compose.foundation.layout.Box
@@ -11,6 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Outline
 import androidx.compose.ui.graphics.Paint
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.asAndroidPath
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.nativeCanvas
@@ -43,8 +44,8 @@ fun BlurryCircle(
 
                 val nativePath = when (outline) {
                     is Outline.Generic -> outline.path.asAndroidPath()
-                    is Outline.Rectangle -> androidx.compose.ui.graphics.Path().apply { addRect(outline.rect) }.asAndroidPath()
-                    is Outline.Rounded -> androidx.compose.ui.graphics.Path().apply { addRoundRect(outline.roundRect) }.asAndroidPath()
+                    is Outline.Rectangle -> Path().apply { addRect(outline.rect) }.asAndroidPath()
+                    is Outline.Rounded -> Path().apply { addRoundRect(outline.roundRect) }.asAndroidPath()
                 }
 
                 drawIntoCanvas { canvas ->

@@ -1,5 +1,11 @@
 package com.geecee.escapelauncher.feature.onboarding.welcome
 
+import androidx.compose.animation.core.EaseInOutSine
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -8,17 +14,53 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import com.geecee.escapelauncher.core.theme.EscapeThemePreview
 import com.geecee.escapelauncher.core.ui.R
+import com.geecee.escapelauncher.core.ui.composables.BlurryCircle
 import com.geecee.escapelauncher.core.ui.utils.toAndroidColor
 
 @Composable
 fun WelcomePage() {
+    // Stuff to make the cirlces move
+    val infiniteTransition = rememberInfiniteTransition(label = "FloatingCircles")
+    val leftCirlceYOffset by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 35f, // Moves down by 35dp
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 5000, easing = EaseInOutSine),
+            repeatMode = RepeatMode.Reverse // Bounces smoothly back and forth
+        ),
+        label = "PrimaryCircleY"
+    )
+    val leftCircleXOffset by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 20f, // Moves right by 20dp
+        animationSpec = infiniteRepeatable(
+            animation = tween(
+                durationMillis = 4000,
+                easing = EaseInOutSine
+            ), // Different duration so it feels organic
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "PrimaryCircleX"
+    )
+    val rightYOffset by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = -45f, // Moves up by 45dp
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 6000, easing = EaseInOutSine),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "TertiaryCircleY"
+    )
+
     Box(
         Modifier
             .fillMaxSize()
@@ -42,14 +84,24 @@ fun WelcomePage() {
         BlurryCircle(
             modifier = Modifier
                 .align(Alignment.BottomStart)
-                .offset(x = -(100).dp, y = 100.dp),
+                .offset {
+                    IntOffset(
+                        x = -(100).dp.roundToPx() + leftCircleXOffset.dp.roundToPx(),
+                        y = 100.dp.roundToPx() + leftCirlceYOffset.dp.roundToPx()
+                    )
+                },
             circleColor = MaterialTheme.colorScheme.primary.toAndroidColor()
         )
 
         BlurryCircle(
             modifier = Modifier
                 .align(Alignment.BottomEnd)
-                .offset(x = 100.dp, y = 200.dp),
+                .offset {
+                    IntOffset(
+                        x = 100.dp.roundToPx(),
+                        y = 200.dp.roundToPx() + rightYOffset.dp.roundToPx()
+                    )
+                },
             circleColor = MaterialTheme.colorScheme.tertiary.toAndroidColor()
         )
     }
