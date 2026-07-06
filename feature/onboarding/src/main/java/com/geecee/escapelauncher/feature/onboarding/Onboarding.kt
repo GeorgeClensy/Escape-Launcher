@@ -32,11 +32,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.geecee.escapelauncher.core.theme.BackgroundColor
 import com.geecee.escapelauncher.core.theme.CardContainerColor
 import com.geecee.escapelauncher.core.theme.primaryContentColor
+import com.geecee.escapelauncher.core.ui.utils.doHapticFeedBack
 import com.geecee.escapelauncher.feature.onboarding.accessibility.AccessibilityPage
 import com.geecee.escapelauncher.feature.onboarding.analytics.AnalyticsPage
 import com.geecee.escapelauncher.feature.onboarding.favorites.FavoritesPage
@@ -50,8 +52,10 @@ fun Onboarding(
     onFinished: () -> Unit,
     viewModel: OnboardingViewModel = hiltViewModel()
 ) {
-    val screens = viewModel.screens
     val coroutineScope = rememberCoroutineScope()
+    val haptics = LocalHapticFeedback.current
+    val hapticFeedbackEnabled by viewModel.hapticFeedBackEnabled.collectAsState(initial = true)
+    val screens = viewModel.screens
     val isOnDefaultLauncherPage by viewModel.startFromLauncherPage.collectAsState(initial = null)
     if (isOnDefaultLauncherPage == null) return
 
@@ -109,6 +113,8 @@ fun Onboarding(
 
     val onNext: () -> Unit = {
         if (pagerState.currentPage < screens.lastIndex) {
+            doHapticFeedBack(haptics, hapticFeedbackEnabled)
+
             coroutineScope.launch {
                 pagerState.animateScrollToPage(
                     pagerState.currentPage + 1, animationSpec = tween(
@@ -124,6 +130,8 @@ fun Onboarding(
 
     val onPrev: () -> Unit = {
         if (pagerState.currentPage > 0) {
+            doHapticFeedBack(haptics, hapticFeedbackEnabled)
+
             coroutineScope.launch {
                 pagerState.animateScrollToPage(
                     pagerState.currentPage - 1, animationSpec = tween(

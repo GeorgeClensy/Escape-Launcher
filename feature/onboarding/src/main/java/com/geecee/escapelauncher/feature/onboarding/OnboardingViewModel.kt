@@ -47,4 +47,6 @@ class OnboardingViewModel @Inject constructor(
             settingsRepository.setOnDefaultLauncherOnboarding(value)
         }
     }
+
+    val hapticFeedBackEnabled = settingsRepository.hapticFeedBackEnabled
 }
