@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -35,13 +36,13 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import com.geecee.escapelauncher.core.theme.BackgroundColor
 import com.geecee.escapelauncher.core.theme.CardContainerColor
 import com.geecee.escapelauncher.core.theme.primaryContentColor
 import com.geecee.escapelauncher.core.ui.utils.doHapticFeedBack
 import com.geecee.escapelauncher.feature.onboarding.accessibility.AccessibilityPage
 import com.geecee.escapelauncher.feature.onboarding.analytics.AnalyticsPage
 import com.geecee.escapelauncher.feature.onboarding.favorites.FavoritesPage
+import com.geecee.escapelauncher.feature.onboarding.finished.FinishedPage
 import com.geecee.escapelauncher.feature.onboarding.launcher.DefaultLauncherPage
 import com.geecee.escapelauncher.feature.onboarding.statistics.StatisticsPage
 import com.geecee.escapelauncher.feature.onboarding.welcome.WelcomePage
@@ -146,9 +147,17 @@ fun Onboarding(
     Scaffold(
         modifier = Modifier
             .fillMaxSize()
-            .background(color = BackgroundColor)
-            .windowInsetsPadding(WindowInsets.displayCutout)
-            .padding(start = 0.dp, end = 0.dp, top = 30.dp),
+            .background(
+                color = MaterialTheme.colorScheme.surface
+            )
+            .windowInsetsPadding(
+                insets = WindowInsets.displayCutout
+            )
+            .padding(
+                start = 0.dp,
+                end = 0.dp,
+                top = 30.dp
+            ),
         topBar = {
             // Progress bar
             Box(
@@ -158,7 +167,7 @@ fun Onboarding(
                     .padding(start = 30.dp, end = 30.dp)
             ) {
                 AnimatedVisibility(
-                    visible = pagerState.currentPage != 0,
+                    visible = pagerState.currentPage != 0 && pagerState.currentPage != screens.lastIndex,
                     enter = fadeIn(),
                     exit = fadeOut(
                         animationSpec = tween(durationMillis = 100, easing = LinearEasing)
@@ -209,6 +218,9 @@ fun Onboarding(
                 OnboardingScreen.DEFAULT_LAUNCHER -> DefaultLauncherPage()
                 OnboardingScreen.ANALYTICS -> AnalyticsPage()
                 OnboardingScreen.ACCESSIBILITY -> AccessibilityPage()
+                OnboardingScreen.FINISHED -> FinishedPage(
+                    isShown = pagerState.currentPage == screens.lastIndex
+                )
             }
         }
     }

@@ -15,4 +15,5 @@ dependencies {
     implementation(project(":core:analytics"))
 
     implementation(libs.androidx.compose.material.icons.extended)
+    implementation(libs.lottie.compose)
 }

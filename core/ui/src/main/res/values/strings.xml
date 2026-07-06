@@ -125,6 +125,8 @@
     <string name="accessibility_title">Screen Lock Permission</string>
     <string name="accessibility_description">Escape Launcher uses androids accessibility APIs to lock the screen when the double tap to lock feature is enabled. If you choose not to grant this permission, you can always grant it later in settings.</string>
     <string name="grant_accessibility">Allow</string>
+    <string name="all_setup">All set up!</string>
+    <string name="lets_go">Let\'s go</string>
 
     <!-- Screen time dashboard -->
     <string name="of_your_day_spent_on_your_phone">Of your day spent on your phone</string>

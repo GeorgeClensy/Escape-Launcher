@@ -108,11 +108,11 @@ fun WelcomePage() {
                         )
 
                         coroutineScope.launch {
-                            iconScale.animateTo(0.8f, animationSpec = tween(durationMillis = 50))
+                            iconScale.animateTo(0.9f, animationSpec = tween(durationMillis = 50))
                             iconScale.animateTo(
                                 targetValue = 1f,
                                 animationSpec = spring(
-                                    dampingRatio = Spring.DampingRatioHighBouncy,
+                                    dampingRatio = Spring.DampingRatioMediumBouncy,
                                     stiffness = Spring.StiffnessMedium
                                 )
                             )

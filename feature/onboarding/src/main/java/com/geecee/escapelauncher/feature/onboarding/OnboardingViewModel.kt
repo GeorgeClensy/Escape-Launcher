@@ -14,7 +14,8 @@ enum class OnboardingScreen {
     FAVORITES,
     DEFAULT_LAUNCHER,
     ANALYTICS,
-    ACCESSIBILITY
+    ACCESSIBILITY,
+    FINISHED
 }
 
 @HiltViewModel
@@ -31,7 +32,8 @@ class OnboardingViewModel @Inject constructor(
         OnboardingScreen.FAVORITES,
         OnboardingScreen.DEFAULT_LAUNCHER,
         if (!isFoss) OnboardingScreen.ANALYTICS else null,
-        if (showAccessibility) OnboardingScreen.ACCESSIBILITY else null
+        if (showAccessibility) OnboardingScreen.ACCESSIBILITY else null,
+        OnboardingScreen.FINISHED
     )
 
     fun completeOnboarding() {
