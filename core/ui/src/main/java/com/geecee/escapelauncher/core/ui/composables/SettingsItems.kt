@@ -18,6 +18,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -109,6 +110,7 @@ fun SettingsSwitch(
  *
  * @param label The text to be shown
  * @param diagonalArrow Whether the arrow should be pointed upwards to signal that pressing this will take you out of Escape Launcher
+ * @param repalceIconWichCheck Will replace the icon with a tick
  * @param onClick When composable is clicked
  * @param isTopOfGroup Whether this item is at the top of a group of items, for corner rounding
  * @param isBottomOfGroup Whether this item is at the bottom of a group of items, for corner rounding
@@ -118,6 +120,7 @@ fun SettingsSwitch(
 fun SettingsNavigationItem(
     label: String,
     diagonalArrow: Boolean?,
+    repalceIconWichCheck: Boolean = false,
     onClick: () -> Unit,
     isTopOfGroup: Boolean = false,
     isBottomOfGroup: Boolean = false
@@ -160,20 +163,30 @@ fun SettingsNavigationItem(
                 style = MaterialTheme.typography.bodyMedium,
             )
             val iconModifier = Modifier.size(24.dp) // Standardized icon size slightly
-            if (diagonalArrow == true) { // Explicitly check for true
+            if (repalceIconWichCheck) {
                 Icon(
-                    Icons.AutoMirrored.Default.KeyboardArrowRight,
-                    contentDescription = null, // Content description can be null for decorative icons
-                    modifier = iconModifier.rotate(-45f),
-                    tint = ContentColor,
-                )
-            } else {
-                Icon(
-                    Icons.AutoMirrored.Default.KeyboardArrowRight,
-                    contentDescription = null, // Content description can be null for decorative icons
+                    Icons.Rounded.Check,
+                    contentDescription = null,
                     modifier = iconModifier,
                     tint = ContentColor,
                 )
+            }
+            else {
+                if (diagonalArrow == true) { // Explicitly check for true
+                    Icon(
+                        Icons.AutoMirrored.Default.KeyboardArrowRight,
+                        contentDescription = null, // Content description can be null for decorative icons
+                        modifier = iconModifier.rotate(-45f),
+                        tint = ContentColor,
+                    )
+                } else {
+                    Icon(
+                        Icons.AutoMirrored.Default.KeyboardArrowRight,
+                        contentDescription = null, // Content description can be null for decorative icons
+                        modifier = iconModifier,
+                        tint = ContentColor,
+                    )
+                }
             }
         }
     }
