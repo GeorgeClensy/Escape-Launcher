@@ -122,7 +122,6 @@
     <string name="swipe_for_all_apps">Scorri per tutte le app</string>
     <string name="hold_for_settings">Tieni premuto per impostazioni</string>
     <string name="accessibility_title">Permesso Blocco Schermo</string>
-    <string name="accessibility_description">Escape Launcher utilizza le API di accessibilità di Android per bloccare lo schermo quando la funzione doppio tocco per bloccare è attivata. Se scegli di non concedere questo permesso, potrai sempre concederlo in seguito nelle impostazioni.</string>
     <string name="grant_accessibility">Consenti</string>
 
     <!-- Screen time dashboard -->

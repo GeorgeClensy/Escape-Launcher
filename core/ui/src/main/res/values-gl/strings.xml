@@ -110,7 +110,6 @@
     <string name="swipe_for_all_apps">Desprazar para Todas as Apps</string>
     <string name="hold_for_settings">Manter premido para Axustes</string>
     <string name="accessibility_title">Permiso para Bloquear Pantalla</string>
-    <string name="accessibility_description">Escape Launcher usa APIs de accesibilidade de Android para bloquear a pantalla con dobre toque. Se non concedes este permiso agora poderás facelo máis tarde nos axustes.</string>
     <string name="grant_accessibility">Permitir</string>
 
     <!-- Screen time dashboard -->

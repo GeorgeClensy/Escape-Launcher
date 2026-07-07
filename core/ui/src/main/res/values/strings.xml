@@ -123,7 +123,7 @@
     <string name="swipe_for_all_apps">Swipe for all apps</string>
     <string name="hold_for_settings">Hold for settings</string>
     <string name="accessibility_title">Screen Lock Permission</string>
-    <string name="accessibility_description">Escape Launcher uses androids accessibility APIs to lock the screen when the double tap to lock feature is enabled. If you choose not to grant this permission, you can always grant it later in settings.</string>
+    <string name="accessibility_description">Escape Launcher requires additional permissions to be able to lock your device by double tapping the home screen. If you choose not to allow these permissions, you can always grant them later through settings.</string>
     <string name="grant_accessibility">Allow</string>
     <string name="all_setup">All set up!</string>
     <string name="lets_go">Let\'s go</string>
