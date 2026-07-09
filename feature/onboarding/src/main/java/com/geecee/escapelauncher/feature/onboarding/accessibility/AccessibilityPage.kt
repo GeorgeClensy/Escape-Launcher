@@ -3,12 +3,13 @@ package com.geecee.escapelauncher.feature.onboarding.accessibility
 import android.content.Intent
 import android.provider.Settings
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -23,7 +24,6 @@ import com.geecee.escapelauncher.core.ui.composables.SettingsNavigationItem
 
 @Composable
 fun AccessibilityPage() {
-    val scrollState = rememberLazyListState()
     val context = LocalContext.current
 
     Box(
@@ -31,51 +31,40 @@ fun AccessibilityPage() {
             .fillMaxSize()
             .padding(start = 30.dp, end = 30.dp)
     ) {
-        LazyColumn(
-            state = scrollState
+        Column(
+            Modifier.verticalScroll(rememberScrollState())
         ) {
-            item {
-                Text(
-                    stringResource(R.string.accessibility_title),
-                    Modifier,
-                    color = MaterialTheme.colorScheme.primary,
-                    style = MaterialTheme.typography.titleSmall,
-                    textAlign = TextAlign.Start
-                )
-            }
+            Text(
+                stringResource(R.string.accessibility_title),
+                Modifier,
+                color = MaterialTheme.colorScheme.primary,
+                style = MaterialTheme.typography.titleSmall,
+                textAlign = TextAlign.Start
+            )
 
-            item {
-                Spacer(Modifier.height(10.dp))
-            }
+            Spacer(Modifier.height(10.dp))
 
-            item {
-                Text(
-                    stringResource(R.string.accessibility_description),
-                    Modifier,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    style = MaterialTheme.typography.bodySmall,
-                    textAlign = TextAlign.Start,
-                    lineHeight = 32.sp
-                )
-            }
+            Text(
+                stringResource(R.string.accessibility_description),
+                Modifier,
+                color = MaterialTheme.colorScheme.onSurface,
+                style = MaterialTheme.typography.bodySmall,
+                textAlign = TextAlign.Start,
+                lineHeight = 32.sp
+            )
 
-            item {
-                Spacer(Modifier.height(20.dp))
-            }
+            Spacer(Modifier.height(20.dp))
 
-            item {
-                SettingsNavigationItem(
-                    label = stringResource(R.string.grant_accessibility),
-                    onClick = {
-                        val intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
-                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                        context.startActivity(intent)
-                    },
-                    diagonalArrow = true,
-                    isTopOfGroup = true,
-                    isBottomOfGroup = true
-                )
-            }
+            SettingsNavigationItem(
+                label = stringResource(R.string.grant_accessibility), onClick = {
+                    val intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    context.startActivity(intent)
+                }, diagonalArrow = true, isTopOfGroup = true, isBottomOfGroup = true
+            )
+
+            Spacer(Modifier.height(50.dp))
         }
     }
 }
+

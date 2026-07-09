@@ -3,9 +3,12 @@ package com.geecee.escapelauncher.feature.onboarding.analytics
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -35,7 +38,11 @@ fun AnalyticsPage(
             .fillMaxSize()
             .padding(start = 30.dp, end = 30.dp)
     ) {
-        Column {
+        Column (
+            modifier = Modifier
+                .verticalScroll(rememberScrollState())
+                .fillMaxHeight()
+        ) {
             Text(
                 stringResource(R.string.analytics_and_data_collection),
                 Modifier,
@@ -63,7 +70,8 @@ fun AnalyticsPage(
 
             loadTextFromAssets(context, "Privacy Policy.txt")?.let { text ->
                 LegalTextBox(
-                    modifier = Modifier.weight(1f).padding(bottom = 10.dp),
+                    modifier = Modifier
+                        .padding(bottom = 10.dp),
                     text = text
                 )
             }
