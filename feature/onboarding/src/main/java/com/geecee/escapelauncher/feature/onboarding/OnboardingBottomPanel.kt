@@ -50,7 +50,7 @@ fun OnboardingBottomPanel(
                 enter = fadeIn(),
                 exit = fadeOut()
             ) {
-                PrevButton(
+                BackButton(
                     modifier = Modifier.align(Alignment.CenterStart)
                 ) {
                     onPrevButtonClick()

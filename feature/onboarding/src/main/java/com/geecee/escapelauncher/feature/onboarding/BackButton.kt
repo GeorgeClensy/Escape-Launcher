@@ -13,7 +13,7 @@ import com.geecee.escapelauncher.core.ui.R
 import com.geecee.escapelauncher.core.ui.composables.BouncyMorphingFab
 
 @Composable
-fun PrevButton(
+fun BackButton(
     modifier: Modifier = Modifier,
     onPrev: () -> Unit,
 ) {
@@ -29,9 +29,9 @@ fun PrevButton(
 
 @Preview
 @Composable
-fun PrevPrevButton() {
+fun PrevBackButton() {
     EscapeThemePreview {
-        PrevButton {
+        BackButton {
             // Do nothing on click
         }
     }
