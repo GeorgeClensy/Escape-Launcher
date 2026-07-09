@@ -15,7 +15,7 @@ import com.geecee.escapelauncher.core.ui.composables.BouncyMorphingFab
 @Composable
 fun BackButton(
     modifier: Modifier = Modifier,
-    onPrev: () -> Unit,
+    onClick: () -> Unit,
 ) {
     BouncyMorphingFab (
         modifier = modifier,
@@ -23,7 +23,7 @@ fun BackButton(
         contentDescription = stringResource(R.string.back),
         containerColor = primaryContentColor,
         contentColor = BackgroundColor,
-        onClick = { onPrev() }
+        onClick = { onClick() }
     )
 }
 

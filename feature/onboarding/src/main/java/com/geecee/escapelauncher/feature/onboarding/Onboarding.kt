@@ -1,6 +1,5 @@
 package com.geecee.escapelauncher.feature.onboarding
 
-import android.util.Log
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -58,12 +57,7 @@ fun Onboarding(
     // Set StartFromLauncherPage
     LaunchedEffect(pagerState.currentPage, pagerState.isScrollInProgress) {
         if (!pagerState.isScrollInProgress) {
-            if (pagerState.currentPage != screens.indexOf(OnboardingScreen.DEFAULT_LAUNCHER)) {
-                viewModel.setStartFromLauncherPage(false)
-            } else {
-                viewModel.setStartFromLauncherPage(true)
-            }
-            Log.d("Onboarding", "Page settled on ${pagerState.currentPage}")
+            viewModel.onPageSettled(pagerState.currentPage)
         }
     }
 

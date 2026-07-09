@@ -51,4 +51,13 @@ class OnboardingViewModel @Inject constructor(
     }
 
     val hapticFeedBackEnabled = settingsRepository.hapticFeedBackEnabled
+
+    fun onPageSettled(pageIndex: Int) {
+        val launcherPageIndex = screens.indexOf(OnboardingScreen.DEFAULT_LAUNCHER)
+        if (pageIndex != launcherPageIndex) {
+            setStartFromLauncherPage(false)
+        } else {
+            setStartFromLauncherPage(true)
+        }
+    }
 }
