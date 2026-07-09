@@ -23,11 +23,13 @@ import com.geecee.escapelauncher.core.ui.R
 import com.geecee.escapelauncher.core.ui.composables.SettingsNavigationItem
 
 @Composable
-fun DefaultLauncherPage() {
+fun DefaultLauncherPage(
+    modifier: Modifier = Modifier
+) {
     val activity = LocalActivity.current
 
     Box(
-        Modifier
+        modifier
             .fillMaxSize()
             .padding(start = 30.dp, end = 30.dp)
     ) {

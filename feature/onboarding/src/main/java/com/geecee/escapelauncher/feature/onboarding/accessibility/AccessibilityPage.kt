@@ -23,11 +23,13 @@ import com.geecee.escapelauncher.core.ui.R
 import com.geecee.escapelauncher.core.ui.composables.SettingsNavigationItem
 
 @Composable
-fun AccessibilityPage() {
+fun AccessibilityPage(
+    modifier: Modifier = Modifier
+) {
     val context = LocalContext.current
 
     Box(
-        Modifier
+        modifier
             .fillMaxSize()
             .padding(start = 30.dp, end = 30.dp)
     ) {

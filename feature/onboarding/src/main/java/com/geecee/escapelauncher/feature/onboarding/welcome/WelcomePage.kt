@@ -38,7 +38,9 @@ import com.geecee.escapelauncher.core.ui.utils.toAndroidColor
 import kotlinx.coroutines.launch
 
 @Composable
-fun WelcomePage() {
+fun WelcomePage(
+    modifier: Modifier = Modifier
+) {
     val coroutineScope = rememberCoroutineScope()
 
     // Tapping the logo stuff
@@ -79,7 +81,7 @@ fun WelcomePage() {
     )
 
     Box(
-        Modifier
+        modifier
             .fillMaxSize()
             .padding(start = 30.dp, end = 30.dp)
     ) {

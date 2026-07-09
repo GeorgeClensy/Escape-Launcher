@@ -51,6 +51,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun Onboarding(
     onFinished: () -> Unit,
+    modifier: Modifier = Modifier,
     viewModel: OnboardingViewModel = hiltViewModel()
 ) {
     val coroutineScope = rememberCoroutineScope()
@@ -145,7 +146,7 @@ fun Onboarding(
 
 
     Scaffold(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .background(
                 color = MaterialTheme.colorScheme.surface

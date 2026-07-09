@@ -40,6 +40,7 @@ import com.geecee.escapelauncher.core.ui.utils.toAndroidColor
 
 @Composable
 fun FinishedPage(
+    modifier: Modifier = Modifier,
     isShown: Boolean
 ) {
     // Animation in middle stuff
@@ -118,7 +119,7 @@ fun FinishedPage(
     )
 
     Box(
-        Modifier
+        modifier
             .fillMaxSize()
             .padding(start = 30.dp, end = 30.dp)
     ) {

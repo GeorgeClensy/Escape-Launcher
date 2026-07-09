@@ -31,7 +31,9 @@ import com.airbnb.lottie.compose.rememberLottieDynamicProperty
 import com.geecee.escapelauncher.core.ui.R
 
 @Composable
-fun StatisticsPage() {
+fun StatisticsPage(
+    modifier: Modifier = Modifier
+) {
     val black = Color.BLACK
     val surface = MaterialTheme.colorScheme.surfaceContainerHighest.toArgb()
     val primary = MaterialTheme.colorScheme.primary.toArgb()
@@ -125,7 +127,7 @@ fun StatisticsPage() {
     )
 
     Box(
-        Modifier
+        modifier
             .fillMaxSize()
             .padding(start = 30.dp, end = 30.dp)
     ) {

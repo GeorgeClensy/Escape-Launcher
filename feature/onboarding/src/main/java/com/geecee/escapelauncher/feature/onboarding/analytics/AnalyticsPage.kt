@@ -28,13 +28,14 @@ import com.geecee.escapelauncher.core.ui.composables.SettingsSwitch
 
 @Composable
 fun AnalyticsPage(
+    modifier: Modifier = Modifier,
     analyticsViewModel: AnalyticsViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
     val allowAnalytics by analyticsViewModel.allowAnalytics.collectAsState(initial = false)
 
     Box(
-        Modifier
+        modifier
             .fillMaxSize()
             .padding(start = 30.dp, end = 30.dp)
     ) {

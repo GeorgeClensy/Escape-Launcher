@@ -24,6 +24,7 @@ import kotlin.time.Duration.Companion.milliseconds
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun FavoritesPage(
+    modifier: Modifier = Modifier,
     viewModel: FavoritesViewModel = hiltViewModel()
 ) {
     val installedApps by viewModel.installedApps.collectAsState()
@@ -37,7 +38,7 @@ fun FavoritesPage(
     }
 
     Box(
-        Modifier
+        modifier
             .fillMaxSize()
             .padding(start = 30.dp, end = 30.dp)
     ) {
