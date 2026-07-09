@@ -2,6 +2,7 @@ package com.geecee.escapelauncher.feature.onboarding.accessibility
 
 import android.content.Intent
 import android.provider.Settings
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -17,8 +18,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.geecee.escapelauncher.core.theme.EscapeThemePreview
 import com.geecee.escapelauncher.core.ui.R
 import com.geecee.escapelauncher.core.ui.composables.SettingsNavigationItem
 
@@ -70,3 +73,15 @@ fun AccessibilityPage(
     }
 }
 
+@Preview
+@Composable
+fun PrevAccessibilityPage() {
+    EscapeThemePreview {
+        Box(Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.surface)
+        ) {
+            AccessibilityPage()
+        }
+    }
+}

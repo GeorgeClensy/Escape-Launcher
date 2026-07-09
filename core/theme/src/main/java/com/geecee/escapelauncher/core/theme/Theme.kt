@@ -11,6 +11,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.text.font.FontFamily
 import androidx.core.view.WindowCompat
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 
@@ -68,6 +69,8 @@ fun EscapeTheme(
 @Composable
 fun EscapeThemePreview(content: @Composable (() -> Unit)) {
     MaterialTheme(
-        colorScheme = offLightScheme, content = content
+        colorScheme = offLightScheme,
+        typography = escapeType(FontFamily.Default),
+        content = content
     )
 }
