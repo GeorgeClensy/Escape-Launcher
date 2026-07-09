@@ -127,6 +127,8 @@
     <string name="grant_accessibility">Allow</string>
     <string name="all_setup">All set up!</string>
     <string name="lets_go">Let\'s go</string>
+    <string name="you_spend_too_long_scrolling">You spend too long scrolling</string>
+    <string name="escaoe_launcher_replaces_your_homescreen">Escape Launcher replaces your home screen with a more minimal one so social media apps are less tempting</string>
 
     <!-- Screen time dashboard -->
     <string name="of_your_day_spent_on_your_phone">Of your day spent on your phone</string>
