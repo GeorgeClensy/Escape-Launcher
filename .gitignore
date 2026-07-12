@@ -20,7 +20,6 @@ crash-reports/
 .kotlin/
 
 # IDE - IntelliJ / Android Studio
-.idea/
 .idea/*
 !.idea/icon.svg
 *.iws
