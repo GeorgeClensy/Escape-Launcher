@@ -21,6 +21,8 @@ crash-reports/
 
 # IDE - IntelliJ / Android Studio
 .idea/
+.idea/*
+!.idea/icon.svg
 *.iws
 *.ipr
 *.ids
