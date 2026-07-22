@@ -44,7 +44,7 @@ fun StatisticsPage(
     val secondary = MaterialTheme.colorScheme.secondary.toArgb()
     val onSurface = MaterialTheme.colorScheme.onSurface.toArgb()
     val composition by rememberLottieComposition(
-        LottieCompositionSpec.RawRes(R.raw.good_phone_bad_phone) // They are freinds, the escape launcher fun never ends
+        LottieCompositionSpec.RawRes(R.raw.good_phone_bad_phone) // They are friends, the escape launcher fun never ends
     )
     val dynamicProperties = rememberLottieDynamicProperties(
         rememberLottieDynamicProperty(

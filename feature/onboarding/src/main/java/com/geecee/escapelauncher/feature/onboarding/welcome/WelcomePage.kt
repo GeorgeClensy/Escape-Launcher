@@ -14,8 +14,10 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -87,6 +89,8 @@ fun WelcomePage(
     ) {
         Column(
             Modifier
+                .widthIn(max = 400.dp)
+                .fillMaxWidth()
                 .align(Alignment.Center)
                 .offset(y = (-62).dp)
         ) {
@@ -124,35 +128,48 @@ fun WelcomePage(
             )
         }
 
-        BlurryCircle(
+        Box(
             modifier = Modifier
-                .align(Alignment.BottomStart)
-                .offset {
-                    IntOffset(
-                        x = -(100).dp.roundToPx() + leftCircleXOffset.dp.roundToPx(),
-                        y = 100.dp.roundToPx() + leftCirlceYOffset.dp.roundToPx()
-                    )
-                },
-            circleColor = MaterialTheme.colorScheme.primary.toAndroidColor()
-        )
+                .align(Alignment.BottomCenter)
+        ) {
+            BlurryCircle(
+                modifier = Modifier
+                    .align(Alignment.BottomStart)
+                    .offset {
+                        IntOffset(
+                            x = 100.dp.roundToPx(),
+                            y = 200.dp.roundToPx() + rightYOffset.dp.roundToPx()
+                        )
+                    },
+                circleColor = MaterialTheme.colorScheme.tertiary.toAndroidColor()
+            )
 
-        BlurryCircle(
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .offset {
-                    IntOffset(
-                        x = 100.dp.roundToPx(),
-                        y = 200.dp.roundToPx() + rightYOffset.dp.roundToPx()
-                    )
-                },
-            circleColor = MaterialTheme.colorScheme.tertiary.toAndroidColor()
-        )
+            BlurryCircle(
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .offset {
+                        IntOffset(
+                            x = -(100).dp.roundToPx() + leftCircleXOffset.dp.roundToPx(),
+                            y = 100.dp.roundToPx() + leftCirlceYOffset.dp.roundToPx()
+                        )
+                    },
+                circleColor = MaterialTheme.colorScheme.primary.toAndroidColor()
+            )
+        }
     }
 }
 
 @Preview
 @Composable
 fun PrevWelcomePage() {
+    EscapeThemePreview {
+        WelcomePage()
+    }
+}
+
+@Preview(device = "id:pixel_9_pro_fold")
+@Composable
+fun PrevWelcomePageFoldable() {
     EscapeThemePreview {
         WelcomePage()
     }

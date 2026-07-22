@@ -56,7 +56,7 @@ fun FinishedPage(
         rememberLottieDynamicProperty(
             property = LottieProperty.COLOR,
             value = primaryContainerColor,
-            keyPath = arrayOf("Middle", "shape","**")
+            keyPath = arrayOf("Middle", "shape", "**")
         ),
         rememberLottieDynamicProperty(
             property = LottieProperty.COLOR,
@@ -76,7 +76,10 @@ fun FinishedPage(
     )
     LaunchedEffect(isShown) {
         if (isShown) {
-            lottieAnimatable.snapTo(composition = composition, progress = 0f) // Reset to start frame
+            lottieAnimatable.snapTo(
+                composition = composition,
+                progress = 0f
+            ) // Reset to start frame
             lottieAnimatable.animate(
                 composition = composition,
                 iterations = 1
@@ -146,35 +149,50 @@ fun FinishedPage(
             )
         }
 
-        BlurryCircle(
+        Box(
             modifier = Modifier
-                .align(Alignment.BottomStart)
-                .offset {
-                    IntOffset(
-                        x = 100.dp.roundToPx(),
-                        y = 200.dp.roundToPx() + rightYOffset.dp.roundToPx()
-                    )
-                },
-            circleColor = MaterialTheme.colorScheme.tertiary.toAndroidColor()
-        )
+                .align(Alignment.BottomCenter)
+        ) {
+            BlurryCircle(
+                modifier = Modifier
+                    .align(Alignment.BottomStart)
+                    .offset {
+                        IntOffset(
+                            x = 100.dp.roundToPx(),
+                            y = 200.dp.roundToPx() + rightYOffset.dp.roundToPx()
+                        )
+                    },
+                circleColor = MaterialTheme.colorScheme.tertiary.toAndroidColor()
+            )
 
-        BlurryCircle(
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .offset {
-                    IntOffset(
-                        x = -(100).dp.roundToPx() + leftCircleXOffset.dp.roundToPx(),
-                        y = 100.dp.roundToPx() + leftCirlceYOffset.dp.roundToPx()
-                    )
-                },
-            circleColor = MaterialTheme.colorScheme.primary.toAndroidColor()
-        )
+            BlurryCircle(
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .offset {
+                        IntOffset(
+                            x = -(100).dp.roundToPx() + leftCircleXOffset.dp.roundToPx(),
+                            y = 100.dp.roundToPx() + leftCirlceYOffset.dp.roundToPx()
+                        )
+                    },
+                circleColor = MaterialTheme.colorScheme.primary.toAndroidColor()
+            )
+        }
     }
 }
 
 @Preview
 @Composable
 fun PrevFinishedPage() {
+    EscapeThemePreview {
+        FinishedPage(
+            isShown = true
+        )
+    }
+}
+
+@Preview(device = "id:pixel_9_pro_fold")
+@Composable
+fun PrevFinishedPageFoldable() {
     EscapeThemePreview {
         FinishedPage(
             isShown = true
