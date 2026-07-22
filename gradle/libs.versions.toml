@@ -6,31 +6,31 @@ minSdk = "26"
 targetSdk = "37"
 
 # Build & Language Tools
-agp = "9.2.1"
-kotlin = "2.4.0"
-ksp = "2.3.6"
+agp = "9.3.0"
+kotlin = "2.4.10"
+ksp = "2.3.10"
 
 # Jetpack & Compose Libraries
 activityCompose = "1.13.0"
 appcompat = "1.7.1"
-composeBom = "2026.06.00"
+composeBom = "2026.06.01"
 coreKtx = "1.19.0"
 coreSplashscreen = "1.2.0"
 datastorePreferences = "1.2.1"
 graphicsShapes = "1.1.0"
 lifecycleRuntimeKtx = "2.11.0"
-material3 = "1.5.0-alpha22"
+material3 = "1.5.0-alpha24"
 navigationCompose = "2.9.8"
-navigation3 = "1.1.3"
-kotlinxSerializationJson = "1.8.0"
+navigation3 = "1.1.4"
+kotlinxSerializationJson = "1.11.0"
 room = "2.8.4"
-runtimeSaveable = "1.11.3"
+runtimeSaveable = "1.11.4"
 workRuntimeKtx = "2.11.2"
 
 # Dependency Injection (Hilt)
-hilt = "2.60"
-hiltNavigationCompose = "1.3.0"
-hiltCommon = "1.3.0"
+hilt = "2.60.1"
+hiltNavigationCompose = "1.4.0"
+hiltCommon = "1.4.0"
 
 # Other
 gson = "2.14.0"
@@ -39,7 +39,7 @@ gson = "2.14.0"
 espressoCore = "3.7.0"
 junit = "4.13.2"
 junitVersion = "1.3.0"
-animationCore = "1.11.3"
+animationCore = "1.11.4"
 
 [libraries]
 # Gradle Plugins (for build-logic or legacy application)
