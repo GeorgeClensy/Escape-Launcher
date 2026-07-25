@@ -3,7 +3,6 @@ plugins {
     alias(libs.plugins.escapelauncher.android.compose)
     alias(libs.plugins.escapelauncher.android.composeui)
     alias(libs.plugins.escapelauncher.android.hilt)
-    alias(libs.plugins.escapelauncher.android.flavours)
     alias(libs.plugins.escapelauncher.android.testing)
     alias(libs.plugins.escapelauncher.android.room)
     alias(libs.plugins.kotlin.serialization)
@@ -62,26 +61,10 @@ android {
 }
 
 dependencies {
-    // Core Android Libraries
-    implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.appcompat)
-    implementation(libs.androidx.core.splashscreen)
-
-    // Material Design and UI Libraries
-    implementation(libs.androidx.ui)
-    implementation(libs.androidx.ui.graphics)
-    implementation(libs.androidx.graphics.shapes)
-
-
-    // Lifecycle and Activity Libraries
-    implementation(libs.androidx.lifecycle.runtime.ktx)
-    implementation(libs.androidx.activity.compose)
-
-    // Navigation
-    implementation(libs.androidx.navigation3.runtime)
-    implementation(libs.androidx.navigation3.ui)
-    implementation(libs.androidx.lifecycle.viewmodel.navigation3)
-    implementation(libs.kotlinx.serialization.json)
+    implementation(libs.bundles.androidx.core)
+    implementation(libs.bundles.compose.ui)
+    implementation(libs.bundles.navigation3)
+    implementation(libs.bundles.hilt)
 
     // WorkManager
     implementation(libs.androidx.work.runtime.ktx)
@@ -114,6 +97,4 @@ dependencies {
     implementation(project(":feature:appslist"))
     implementation(project(":feature:newwidgets"))
     implementation(project(":feature:onboarding"))
-
-    implementation(libs.androidx.hilt.navigation.compose)
 }

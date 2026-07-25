@@ -45,7 +45,7 @@ gradlePlugin {
         }
         register("escapeLauncherFlavours") {
             id = libs.plugins.escapelauncher.android.flavours.get().pluginId
-            implementationClass = "com.geecee.escapelauncher.FlavorsConventionPlugin"
+            implementationClass = "com.geecee.escapelauncher.FlavoursConventionPlugin"
         }
         register("escapeLauncherTests") {
             id = libs.plugins.escapelauncher.android.testing.get().pluginId
@@ -62,6 +62,10 @@ gradlePlugin {
         register("androidFeature") {
             id = libs.plugins.escapelauncher.android.feature.get().pluginId
             implementationClass = "com.geecee.escapelauncher.AndroidFeatureConventionPlugin"
+        }
+        register("androidGoogle") {
+            id = libs.plugins.escapelauncher.android.google.get().pluginId
+            implementationClass = "com.geecee.escapelauncher.AndroidGoogleConventionPlugin"
         }
     }
 }

@@ -14,15 +14,17 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 internal fun Project.configureKotlinAndroid(
     commonExtension: ApplicationExtension,
 ) {
-    commonExtension.compileSdk = libs.findVersion("compileSdk").get().toString().toInt()
+    commonExtension.apply {
+        compileSdk = libs.findVersion("compileSdk").get().toString().toInt()
 
-    commonExtension.defaultConfig {
-        minSdk = libs.findVersion("minSdk").get().toString().toInt()
-    }
+        defaultConfig {
+            minSdk = libs.findVersion("minSdk").get().toString().toInt()
+        }
 
-    commonExtension.compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
+        compileOptions {
+            sourceCompatibility = JavaVersion.VERSION_17
+            targetCompatibility = JavaVersion.VERSION_17
+        }
     }
 
     configureKotlin()
@@ -31,15 +33,17 @@ internal fun Project.configureKotlinAndroid(
 internal fun Project.configureKotlinAndroid(
     commonExtension: LibraryExtension,
 ) {
-    commonExtension.compileSdk = libs.findVersion("compileSdk").get().toString().toInt()
+    commonExtension.apply {
+        compileSdk = libs.findVersion("compileSdk").get().toString().toInt()
 
-    commonExtension.defaultConfig {
-        minSdk = libs.findVersion("minSdk").get().toString().toInt()
-    }
+        defaultConfig {
+            minSdk = libs.findVersion("minSdk").get().toString().toInt()
+        }
 
-    commonExtension.compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
+        compileOptions {
+            sourceCompatibility = JavaVersion.VERSION_17
+            targetCompatibility = JavaVersion.VERSION_17
+        }
     }
 
     configureKotlin()

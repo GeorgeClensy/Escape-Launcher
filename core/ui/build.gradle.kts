@@ -2,7 +2,6 @@ plugins {
     alias(libs.plugins.escapelauncher.android.library)
     alias(libs.plugins.escapelauncher.android.compose)
     alias(libs.plugins.escapelauncher.android.composeui)
-    alias(libs.plugins.escapelauncher.android.flavours)
     alias(libs.plugins.escapelauncher.android.testing)
 }
 

@@ -11,15 +11,13 @@ class AndroidLibraryConventionPlugin : Plugin<Project> {
         with(target) {
             with(pluginManager) {
                 apply("com.android.library")
+                apply("escapelauncher.android.flavours")
             }
 
             extensions.configure<LibraryExtension> {
                 configureKotlinAndroid(this)
                 lint {
                     targetSdk = libs.findVersion("targetSdk").get().toString().toInt()
-                }
-                defaultConfig {
-                    missingDimensionStrategy("distribution", "foss")
                 }
             }
         }

@@ -1,6 +1,5 @@
 plugins {
     alias(libs.plugins.escapelauncher.android.feature)
-    alias(libs.plugins.escapelauncher.android.flavours)
 }
 
 android {

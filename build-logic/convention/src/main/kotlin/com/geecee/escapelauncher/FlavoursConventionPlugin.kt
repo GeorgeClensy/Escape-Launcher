@@ -6,7 +6,7 @@ import org.gradle.api.Project
 import org.gradle.kotlin.dsl.invoke
 
 @Suppress("unused")
-class FlavorsConventionPlugin : Plugin<Project> {
+class FlavoursConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         with(target) {
             pluginManager.withPlugin("com.android.application") {
@@ -59,19 +59,7 @@ private fun applyFlavors(target: Project) {
             }
         }
 
-        // Apply a Google-only script if one exists alongside this module's build file
-        val isFoss = isFossBuild(gradle)
-        if (!isFoss) {
-            val scriptFile = rootProject.file("google.gradle.kts")
-            if (scriptFile.exists()) {
-                apply(mapOf("from" to scriptFile))
-                println(">>> [FlavorsPlugin] Added the google.gradle script to this build because it's a google build. :D (Or it could be a sync, for some reason its fine that if the google stuff is in a foss sync cuz its not in the build.)")
-            }
-        } else {
-            println(">>> [FlavorsPlugin] Did not add the google.gradle build script to this build because it's not a google build D:")
-        }
+        // Apply Google-specific logic via the new convention plugin
+        pluginManager.apply("escapelauncher.android.google")
     }
 }
-
-private fun isFossBuild(gradle: org.gradle.api.invocation.Gradle): Boolean =
-    gradle.startParameter.taskNames.any { it.contains("foss", ignoreCase = true) }

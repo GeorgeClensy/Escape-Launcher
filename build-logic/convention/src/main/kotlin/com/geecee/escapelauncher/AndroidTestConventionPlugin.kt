@@ -9,9 +9,8 @@ class AndroidTestConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         with(target) {
             dependencies {
-                add("testImplementation", libs.findLibrary("junit").get())
-                add("androidTestImplementation", libs.findLibrary("androidx-junit").get())
-                add("androidTestImplementation", libs.findLibrary("androidx-espresso-core").get())
+                add("testImplementation", libs.findBundle("unit-testing").get())
+                add("androidTestImplementation", libs.findBundle("android-testing").get())
             }
         }
     }
