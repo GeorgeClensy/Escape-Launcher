@@ -6,7 +6,7 @@ minSdk = "26"
 targetSdk = "37"
 
 # Build & Language Tools
-agp = "9.3.0"
+agp = "9.3.1"
 kotlin = "2.4.10"
 ksp = "2.3.10"
 
