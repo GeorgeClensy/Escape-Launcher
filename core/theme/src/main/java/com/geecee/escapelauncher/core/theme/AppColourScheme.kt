@@ -14,13 +14,9 @@ import androidx.compose.ui.platform.LocalContext
 enum class AppColourScheme(val id: Int, val seedColor: Color? = null) {
     MONOCHROME(0, Color(0xFF676767)),
     RED(3, Color(0xFF8F4C38)),
-    DARK_RED(4, Color(0xFF8F4C38)),
     GREEN(5, Color(0xFF4C662B)),
-    DARK_GREEN(6, Color(0xFF4C662B)),
     BLUE(7, Color(0xFF415F91)),
-    DARK_BLUE(8, Color(0xFF415F91)),
     YELLOW(9, Color(0xFF6D5E0F)),
-    DARK_YELLOW(10, Color(0xFF6D5E0F)),
     OFF_LIGHT(11, Color(0xFF8C4F28)),
     SYSTEM(12),
     ESCAPE_THEME(13);
@@ -28,6 +24,17 @@ enum class AppColourScheme(val id: Int, val seedColor: Color? = null) {
     companion object {
         fun fromId(id: Int): AppColourScheme =
             entries.find { it.id == id } ?: ESCAPE_THEME
+
+        val selectableThemes = listOf(
+            ESCAPE_THEME,
+            OFF_LIGHT,
+            MONOCHROME,
+            RED,
+            GREEN,
+            BLUE,
+            YELLOW,
+            SYSTEM
+        )
     }
 }
 

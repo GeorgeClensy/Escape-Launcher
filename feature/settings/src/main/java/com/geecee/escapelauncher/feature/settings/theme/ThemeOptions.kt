@@ -33,10 +33,8 @@ fun ThemeOptions(
     goBack: () -> Unit, themeViewModel: ThemeViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
-
     val scheme by themeViewModel.theme.collectAsState()
-
-    val themeIds = listOf(13, 11, 0, 3, 5, 7, 9, 12)
+    val selectableThemes = AppColourScheme.selectableThemes
 
     LazyColumn(Modifier.fillMaxSize()) {
 
@@ -61,21 +59,17 @@ fun ThemeOptions(
 
         item { SettingsSpacer() }
 
-        itemsIndexed(themeIds, key = { _, id -> id }) { index, themeId ->
-
-            val isSelected = scheme.id == themeId
+        itemsIndexed(selectableThemes, key = { _, theme -> theme.id }) { index, themeOption ->
+            val isSelected = scheme == themeOption
 
             ThemeCard(
-                theme = themeId,
-
+                scheme = themeOption,
                 isSelected = isSelected,
-
                 modifier = Modifier.fillMaxWidth(),
                 isTopOfGroup = index == 0,
-                isBottomOfGroup = index == themeIds.size - 1,
-
+                isBottomOfGroup = index == selectableThemes.size - 1,
                 onClick = {
-                    themeViewModel.setTheme(AppColourScheme.fromId(themeId))
+                    themeViewModel.setTheme(themeOption)
                 })
         }
 

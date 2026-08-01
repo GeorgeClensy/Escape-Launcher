@@ -25,26 +25,25 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.geecee.escapelauncher.core.theme.AppColourScheme
 import com.geecee.escapelauncher.core.theme.resolveColorScheme
-import com.geecee.escapelauncher.core.ui.composables.nameResFromId
+import com.geecee.escapelauncher.core.ui.composables.nameRes
 
 
 /**
  * Theme select card
  *
- * @param theme The theme ID number (see: Theme.kt)
+ * @param scheme The theme scheme
  *
  * @see com.geecee.escapelauncher.core.theme.EscapeTheme
  */
 @Composable
 fun ThemeCard(
-    theme: Int,
+    scheme: AppColourScheme,
     isSelected: Boolean,
     modifier: Modifier,
-    onClick: (Int) -> Unit,
+    onClick: (AppColourScheme) -> Unit,
     isTopOfGroup: Boolean = false,
     isBottomOfGroup: Boolean = false
 ) {
-    val scheme = AppColourScheme.fromId(theme)
     val colors = scheme.resolveColorScheme()
 
     val groupEdgeCornerRadius = 24.dp
@@ -61,8 +60,8 @@ fun ThemeCard(
         Box(
             modifier
                 .clip(shape)
-                .clickable { onClick(theme) }
-                .background(colors.background)
+                .clickable { onClick(scheme) }
+                .background(colors.primaryContainer)
                 .height(72.dp)) {
 
             AnimatedVisibility(
@@ -85,7 +84,7 @@ fun ThemeCard(
             }
 
             Text(
-                text = stringResource(AppColourScheme.nameResFromId(theme)),
+                text = stringResource(scheme.nameRes()),
                 color = colors.onPrimaryContainer,
                 style = MaterialTheme.typography.bodyMedium,
                 textAlign = TextAlign.Center,
