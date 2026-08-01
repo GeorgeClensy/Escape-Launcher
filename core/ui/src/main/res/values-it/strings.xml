@@ -1,14 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Themes -->
-    <string name="light_red">Rosso Chiaro</string>
-    <string name="dark_red">Rosso Scuro</string>
-    <string name="light_blue">Blu Chiaro</string>
-    <string name="dark_blue">Blu Scuro</string>
-    <string name="light_yellow">Giallo Chiaro</string>
-    <string name="dark_yellow">Giallo Scuro</string>
-    <string name="light_green">Verde Chiaro</string>
-    <string name="dark_green">Verde Scuro</string>
+    <string name="red">Rosso Chiaro</string>
+    <string name="blue">Blu Chiaro</string>
+    <string name="yellow">Giallo Chiaro</string>
+    <string name="green">Verde Chiaro</string>
     <string name="off_white">Bianco sporco</string>
     <string name="system">Sistema</string>
     <string name="pitch_black">Nero profondo</string>

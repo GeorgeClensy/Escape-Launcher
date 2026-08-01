@@ -10,17 +10,17 @@ fun AppColourScheme.nameRes(): Int = when (this) {
     AppColourScheme.LIGHT -> R.string.light
     AppColourScheme.PITCH_DARK -> R.string.pitch_black
 
-    AppColourScheme.LIGHT_RED -> R.string.light_red
-    AppColourScheme.DARK_RED -> R.string.dark_red
+    AppColourScheme.RED -> R.string.red
+    AppColourScheme.DARK_RED -> R.string.red
 
-    AppColourScheme.LIGHT_GREEN -> R.string.light_green
-    AppColourScheme.DARK_GREEN -> R.string.dark_green
+    AppColourScheme.GREEN -> R.string.green
+    AppColourScheme.DARK_GREEN -> R.string.green
 
-    AppColourScheme.LIGHT_BLUE -> R.string.light_blue
-    AppColourScheme.DARK_BLUE -> R.string.dark_blue
+    AppColourScheme.BLUE -> R.string.blue
+    AppColourScheme.DARK_BLUE -> R.string.blue
 
-    AppColourScheme.LIGHT_YELLOW -> R.string.light_yellow
-    AppColourScheme.DARK_YELLOW -> R.string.dark_yellow
+    AppColourScheme.YELLOW -> R.string.yellow
+    AppColourScheme.DARK_YELLOW -> R.string.yellow
 
     AppColourScheme.OFF_LIGHT -> R.string.off_white
     AppColourScheme.SYSTEM -> R.string.system

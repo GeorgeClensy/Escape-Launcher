@@ -8,28 +8,23 @@ import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 
-enum class AppColourScheme(val id: Int) {
-    DARK(0),
-    LIGHT(1),
+enum class AppColourScheme(val id: Int, val seedColor: Color? = null) {
+    DARK(0, Color(0xFFC6C6C6)),
+    LIGHT(1, Color(0xFF070808)),
     PITCH_DARK(2),
-
-    LIGHT_RED(3),
-    DARK_RED(4),
-
-    LIGHT_GREEN(5),
-    DARK_GREEN(6),
-
-    LIGHT_BLUE(7),
-    DARK_BLUE(8),
-
-    LIGHT_YELLOW(9),
-    DARK_YELLOW(10),
-
-    OFF_LIGHT(11),
+    RED(3, Color(0xFF8F4C38)),
+    DARK_RED(4, Color(0xFF8F4C38)),
+    GREEN(5, Color(0xFF4C662B)),
+    DARK_GREEN(6, Color(0xFF4C662B)),
+    BLUE(7, Color(0xFF415F91)),
+    DARK_BLUE(8, Color(0xFF415F91)),
+    YELLOW(9, Color(0xFF6D5E0F)),
+    DARK_YELLOW(10, Color(0xFF6D5E0F)),
+    OFF_LIGHT(11, Color(0xFF8C4F28)),
     SYSTEM(12),
-
     ESCAPE_THEME(13);
 
     companion object {
@@ -37,41 +32,36 @@ enum class AppColourScheme(val id: Int) {
             entries.find { it.id == id } ?: ESCAPE_THEME
     }
 }
+
 @Composable
 fun AppColourScheme.resolveColorScheme(): ColorScheme {
     val isDark = isSystemInDarkTheme()
 
+    if (this == AppColourScheme.ESCAPE_THEME) return darkSchemeEscapeTheme
+    if (this == AppColourScheme.PITCH_DARK) return PitchDarkColorScheme
+    
+    if (this == AppColourScheme.SYSTEM) {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            if (isDark) {
+                dynamicDarkColorScheme(LocalContext.current)
+            } else {
+                dynamicLightColorScheme(LocalContext.current)
+            }
+        } else {
+            if (isDark) darkColorScheme() else lightColorScheme()
+        }
+    }
+
+    // Dynamic generation from seed if available
+    seedColor?.let {
+        return DynamicThemeUtils.generateColorSchemeFromSeed(it, isDark)
+    }
+
+    // Fallback to static schemes if no seed (shouldn't happen for most now)
     return when (this) {
         AppColourScheme.DARK -> darkScheme
         AppColourScheme.LIGHT -> lightScheme
-        AppColourScheme.PITCH_DARK -> PitchDarkColorScheme
-
-        AppColourScheme.LIGHT_RED -> lightSchemeRed
-        AppColourScheme.DARK_RED -> darkSchemeRed
-
-        AppColourScheme.LIGHT_GREEN -> lightSchemeGreen
-        AppColourScheme.DARK_GREEN -> darkSchemeGreen
-
-        AppColourScheme.LIGHT_BLUE -> lightSchemeBlue
-        AppColourScheme.DARK_BLUE -> darkSchemeBlue
-
-        AppColourScheme.LIGHT_YELLOW -> lightSchemeYellow
-        AppColourScheme.DARK_YELLOW -> darkSchemeYellow
-
         AppColourScheme.OFF_LIGHT -> offLightScheme
-
-        AppColourScheme.ESCAPE_THEME -> darkSchemeEscapeTheme
-
-        AppColourScheme.SYSTEM -> {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                if (isDark) {
-                    dynamicDarkColorScheme(LocalContext.current)
-                } else {
-                    dynamicLightColorScheme(LocalContext.current)
-                }
-            } else {
-                if (isDark) darkColorScheme() else lightColorScheme()
-            }
-        }
+        else -> if (isDark) darkColorScheme() else lightColorScheme()
     }
 }

@@ -118,14 +118,10 @@
     <string name="no_apps_used">Aínda non abriches ningunha app!</string>
     
     <!-- Themes -->
-    <string name="light_red">Vermello claro</string>
-    <string name="dark_red">Vermello escuro</string>
-    <string name="light_blue">Azul claro</string>
-    <string name="dark_blue">Azul escuro</string>
-    <string name="light_yellow">Amarelo claro</string>
-    <string name="dark_yellow">Amarelo escuro</string>
-    <string name="light_green">Verde claro</string>
-    <string name="dark_green">Verde escuro</string>
+    <string name="red">Vermello claro</string>
+    <string name="blue">Azul claro</string>
+    <string name="yellow">Amarelo claro</string>
+    <string name="green">Verde claro</string>
     <string name="off_white">Branco estragado</string>
     <string name="system">Sistema</string>
     <string name="accessibility_service_description">Permite que a app apague a pantalla.</string>
