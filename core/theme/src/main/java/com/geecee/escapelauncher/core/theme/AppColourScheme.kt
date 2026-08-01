@@ -28,11 +28,13 @@ enum class AppColourScheme(val id: Int) {
     DARK_YELLOW(10),
 
     OFF_LIGHT(11),
-    SYSTEM(12);
+    SYSTEM(12),
+
+    ESCAPE_THEME(13);
 
     companion object {
         fun fromId(id: Int): AppColourScheme =
-            entries.find { it.id == id } ?: DARK
+            entries.find { it.id == id } ?: ESCAPE_THEME
     }
 }
 @Composable
@@ -57,6 +59,8 @@ fun AppColourScheme.resolveColorScheme(): ColorScheme {
         AppColourScheme.DARK_YELLOW -> darkSchemeYellow
 
         AppColourScheme.OFF_LIGHT -> offLightScheme
+
+        AppColourScheme.ESCAPE_THEME -> darkSchemeEscapeTheme
 
         AppColourScheme.SYSTEM -> {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {

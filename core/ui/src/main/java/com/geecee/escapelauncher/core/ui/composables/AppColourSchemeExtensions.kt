@@ -24,6 +24,8 @@ fun AppColourScheme.nameRes(): Int = when (this) {
 
     AppColourScheme.OFF_LIGHT -> R.string.off_white
     AppColourScheme.SYSTEM -> R.string.system
+
+    AppColourScheme.ESCAPE_THEME -> R.string.escape_launcher
 }
 
 @StringRes

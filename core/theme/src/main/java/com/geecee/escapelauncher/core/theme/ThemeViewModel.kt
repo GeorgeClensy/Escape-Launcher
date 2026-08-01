@@ -21,7 +21,7 @@ class ThemeViewModel @Inject constructor(
             .stateIn(
                 scope = viewModelScope,
                 started = SharingStarted.WhileSubscribed(5000),
-                initialValue = AppColourScheme.OFF_LIGHT
+                initialValue = AppColourScheme.ESCAPE_THEME
             )
 
     val ltheme: StateFlow<AppColourScheme> =
@@ -30,7 +30,7 @@ class ThemeViewModel @Inject constructor(
             .stateIn(
                 scope = viewModelScope,
                 started = SharingStarted.WhileSubscribed(5000),
-                initialValue = AppColourScheme.OFF_LIGHT
+                initialValue = AppColourScheme.ESCAPE_THEME
             )
 
     val dtheme: StateFlow<AppColourScheme> =
@@ -39,7 +39,7 @@ class ThemeViewModel @Inject constructor(
             .stateIn(
                 scope = viewModelScope,
                 started = SharingStarted.WhileSubscribed(5000),
-                initialValue = AppColourScheme.DARK
+                initialValue = AppColourScheme.ESCAPE_THEME
             )
 
     val syncTheme = repository.syncTheme

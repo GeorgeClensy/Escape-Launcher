@@ -23,9 +23,9 @@ fun EscapeTheme(
     content: @Composable (() -> Unit)
 ) {
     val context = LocalContext.current
-    val colorScheme by themeViewModel.theme.collectAsState(AppColourScheme.OFF_LIGHT)
-    val lScheme by themeViewModel.ltheme.collectAsState(AppColourScheme.OFF_LIGHT)
-    val dScheme by themeViewModel.dtheme.collectAsState(AppColourScheme.DARK)
+    val colorScheme by themeViewModel.theme.collectAsState(AppColourScheme.ESCAPE_THEME)
+    val lScheme by themeViewModel.ltheme.collectAsState(AppColourScheme.ESCAPE_THEME)
+    val dScheme by themeViewModel.dtheme.collectAsState(AppColourScheme.ESCAPE_THEME)
     val syncTheme by themeViewModel.syncTheme.collectAsState(false)
     val font by themeViewModel.font.collectAsState("Jost")
 
@@ -69,7 +69,7 @@ fun EscapeTheme(
 @Composable
 fun EscapeThemePreview(content: @Composable (() -> Unit)) {
     MaterialTheme(
-        colorScheme = offLightScheme,
+        colorScheme = darkSchemeEscapeTheme,
         typography = escapeType(FontFamily.Default),
         content = content
     )

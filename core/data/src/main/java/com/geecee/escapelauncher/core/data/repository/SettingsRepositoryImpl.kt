@@ -185,7 +185,7 @@ class SettingsRepositoryImpl @Inject constructor(
 
     override val theme: Flow<Int>
         get() = dataStore.data.map { preferences ->
-            preferences[PreferencesKeys.THEME] ?: 11
+            preferences[PreferencesKeys.THEME] ?: 13
         }
 
     override suspend fun setTheme(theme: Int) {
@@ -194,7 +194,7 @@ class SettingsRepositoryImpl @Inject constructor(
 
     override val ltheme: Flow<Int>
         get() = dataStore.data.map { preferences ->
-            preferences[PreferencesKeys.LTHEME] ?: 11
+            preferences[PreferencesKeys.LTHEME] ?: 13
         }
 
     override suspend fun setLTheme(theme: Int) {
@@ -203,7 +203,7 @@ class SettingsRepositoryImpl @Inject constructor(
 
     override val dtheme: Flow<Int>
         get() = dataStore.data.map { preferences ->
-            preferences[PreferencesKeys.DTHEME] ?: 11
+            preferences[PreferencesKeys.DTHEME] ?: 13
         }
 
     override suspend fun setDTheme(theme: Int) {

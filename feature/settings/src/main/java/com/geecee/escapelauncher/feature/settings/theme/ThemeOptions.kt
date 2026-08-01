@@ -52,7 +52,7 @@ fun ThemeOptions(
     val isDark = isSystemInDarkTheme()
     var highlightedThemeId by remember { mutableIntStateOf(-1) }
 
-    val themeIds = listOf(11, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12)
+    val themeIds = listOf(13, 11, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12)
 
     LazyColumn(Modifier.fillMaxSize()) {
 
