@@ -1,26 +1,28 @@
 package com.geecee.escapelauncher.core.theme
 
+import android.annotation.SuppressLint
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import com.google.android.material.color.utilities.Hct
-import com.google.android.material.color.utilities.SchemeTonalSpot
 import com.google.android.material.color.utilities.SchemeMonochrome
-import android.annotation.SuppressLint
+import com.google.android.material.color.utilities.SchemeTonalSpot
 
 /**
  * Utility to generate a complete Material 3 [ColorScheme] from a single seed color
  * using Google's official Material Color Utilities algorithm.
  */
 object DynamicThemeUtils {
+
     /**
      * Generates a full Material 3 [ColorScheme] from a single seed color
      *
      * @param seedColor the source color to derive the palette from
      * @param isDark whether to build the dark or light variant of the scheme
      * @param contrastLevel -1.0 (low) to 1.0 (high); 0.0 is the Material 3 default
+     * @param isMonochrome whether to generate a grayscale palette
      */
     @SuppressLint("RestrictedApi")
     fun generateColorSchemeFromSeed(
@@ -74,6 +76,18 @@ object DynamicThemeUtils {
                 surfaceContainerHighest = Color(scheme.surfaceContainerHighest),
                 surfaceContainerLow = Color(scheme.surfaceContainerLow),
                 surfaceContainerLowest = Color(scheme.surfaceContainerLowest),
+                primaryFixed = Color(scheme.primaryFixed),
+                primaryFixedDim = Color(scheme.primaryFixedDim),
+                onPrimaryFixed = Color(scheme.onPrimaryFixed),
+                onPrimaryFixedVariant = Color(scheme.onPrimaryFixedVariant),
+                secondaryFixed = Color(scheme.secondaryFixed),
+                secondaryFixedDim = Color(scheme.secondaryFixedDim),
+                onSecondaryFixed = Color(scheme.onSecondaryFixed),
+                onSecondaryFixedVariant = Color(scheme.onSecondaryFixedVariant),
+                tertiaryFixed = Color(scheme.tertiaryFixed),
+                tertiaryFixedDim = Color(scheme.tertiaryFixedDim),
+                onTertiaryFixed = Color(scheme.onTertiaryFixed),
+                onTertiaryFixedVariant = Color(scheme.onTertiaryFixedVariant),
             )
         } else {
             lightColorScheme(
@@ -113,6 +127,18 @@ object DynamicThemeUtils {
                 surfaceContainerHighest = Color(scheme.surfaceContainerHighest),
                 surfaceContainerLow = Color(scheme.surfaceContainerLow),
                 surfaceContainerLowest = Color(scheme.surfaceContainerLowest),
+                primaryFixed = Color(scheme.primaryFixed),
+                primaryFixedDim = Color(scheme.primaryFixedDim),
+                onPrimaryFixed = Color(scheme.onPrimaryFixed),
+                onPrimaryFixedVariant = Color(scheme.onPrimaryFixedVariant),
+                secondaryFixed = Color(scheme.secondaryFixed),
+                secondaryFixedDim = Color(scheme.secondaryFixedDim),
+                onSecondaryFixed = Color(scheme.onSecondaryFixed),
+                onSecondaryFixedVariant = Color(scheme.onSecondaryFixedVariant),
+                tertiaryFixed = Color(scheme.tertiaryFixed),
+                tertiaryFixedDim = Color(scheme.tertiaryFixedDim),
+                onTertiaryFixed = Color(scheme.onTertiaryFixed),
+                onTertiaryFixedVariant = Color(scheme.onTertiaryFixedVariant),
             )
         }
     }
