@@ -1,4 +1,4 @@
-package com.geecee.escapelauncher.core.theme
+package com.geecee.escapelauncher.core.theme.colours
 
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.ui.graphics.Color

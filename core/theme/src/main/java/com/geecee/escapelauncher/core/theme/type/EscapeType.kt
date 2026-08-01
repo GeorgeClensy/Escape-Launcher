@@ -1,4 +1,4 @@
-package com.geecee.escapelauncher.core.theme
+package com.geecee.escapelauncher.core.theme.type
 
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily

@@ -1,4 +1,4 @@
-package com.geecee.escapelauncher.core.theme
+package com.geecee.escapelauncher.core.theme.type
 
 import android.annotation.SuppressLint
 import android.content.Context

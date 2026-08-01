@@ -42,7 +42,7 @@ import com.geecee.escapelauncher.core.common.launchApp
 import com.geecee.escapelauncher.core.common.uninstallApp
 import com.geecee.escapelauncher.core.model.InstalledApp
 import com.geecee.escapelauncher.core.theme.BackgroundColor
-import com.geecee.escapelauncher.core.theme.transparentHalf
+import com.geecee.escapelauncher.core.theme.colours.transparentHalf
 import com.geecee.escapelauncher.core.ui.composables.AnimatedPillSearchBar
 import com.geecee.escapelauncher.core.ui.composables.AppsListHeader
 import com.geecee.escapelauncher.core.ui.composables.HomeScreenBottomSheet

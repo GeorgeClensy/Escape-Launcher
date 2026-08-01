@@ -13,9 +13,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.geecee.escapelauncher.core.common.setSolidColorWallpaperHomeScreen
-import com.geecee.escapelauncher.core.theme.AppColourScheme
+import com.geecee.escapelauncher.core.theme.colours.AppColourScheme
 import com.geecee.escapelauncher.core.theme.ThemeViewModel
-import com.geecee.escapelauncher.core.theme.resolveColorScheme
+import com.geecee.escapelauncher.core.theme.colours.resolveColorScheme
 import com.geecee.escapelauncher.core.ui.R
 import com.geecee.escapelauncher.core.ui.composables.EscapeHeader
 import com.geecee.escapelauncher.core.ui.composables.SettingsButton

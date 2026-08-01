@@ -1,4 +1,4 @@
-package com.geecee.escapelauncher.core.theme
+package com.geecee.escapelauncher.core.theme.motion
 
 import androidx.compose.animation.core.CubicBezierEasing
 import androidx.compose.animation.core.tween

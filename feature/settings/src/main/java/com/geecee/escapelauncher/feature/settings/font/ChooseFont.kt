@@ -16,7 +16,7 @@ import com.geecee.escapelauncher.core.ui.R
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.geecee.escapelauncher.core.theme.ThemeViewModel
-import com.geecee.escapelauncher.core.theme.getFontFamily
+import com.geecee.escapelauncher.core.theme.type.getFontFamily
 import com.geecee.escapelauncher.core.ui.composables.EscapeHeader
 import com.geecee.escapelauncher.core.ui.composables.SettingsButton
 import com.geecee.escapelauncher.core.ui.composables.SettingsSpacer

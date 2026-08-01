@@ -30,10 +30,10 @@ import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import com.geecee.escapelauncher.core.common.loadTextFromAssets
 import com.geecee.escapelauncher.core.theme.BackgroundColor
-import com.geecee.escapelauncher.core.theme.enterTransition
-import com.geecee.escapelauncher.core.theme.exitTransition
-import com.geecee.escapelauncher.core.theme.popEnterTransition
-import com.geecee.escapelauncher.core.theme.popExitTransition
+import com.geecee.escapelauncher.core.theme.motion.enterTransition
+import com.geecee.escapelauncher.core.theme.motion.exitTransition
+import com.geecee.escapelauncher.core.theme.motion.popEnterTransition
+import com.geecee.escapelauncher.core.theme.motion.popExitTransition
 import com.geecee.escapelauncher.core.ui.R
 import com.geecee.escapelauncher.core.ui.composables.BulkManager
 import com.geecee.escapelauncher.core.ui.composables.PrivacyPolicyDialog

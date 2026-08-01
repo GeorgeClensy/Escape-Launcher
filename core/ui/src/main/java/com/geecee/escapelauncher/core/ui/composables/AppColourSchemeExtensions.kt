@@ -1,7 +1,7 @@
 package com.geecee.escapelauncher.core.ui.composables
 
 import androidx.annotation.StringRes
-import com.geecee.escapelauncher.core.theme.AppColourScheme
+import com.geecee.escapelauncher.core.theme.colours.AppColourScheme
 import com.geecee.escapelauncher.core.ui.R
 
 @StringRes

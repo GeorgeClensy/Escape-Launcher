@@ -31,8 +31,8 @@ import com.geecee.escapelauncher.core.ui.composables.ScreenTimeInfoBox
 import com.geecee.escapelauncher.core.ui.composables.SettingsSpacer
 import com.geecee.escapelauncher.core.ui.R
 import com.geecee.escapelauncher.core.theme.ContentColor
-import com.geecee.escapelauncher.core.theme.escapeGreen
-import com.geecee.escapelauncher.core.theme.escapeRed
+import com.geecee.escapelauncher.core.theme.colours.escapeGreen
+import com.geecee.escapelauncher.core.theme.colours.escapeRed
 import com.geecee.escapelauncher.core.common.formatScreenTime
 
 /**

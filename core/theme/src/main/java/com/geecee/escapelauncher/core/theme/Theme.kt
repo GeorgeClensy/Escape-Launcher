@@ -13,6 +13,11 @@ import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.font.FontFamily
 import androidx.core.view.WindowCompat
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.geecee.escapelauncher.core.theme.colours.AppColourScheme
+import com.geecee.escapelauncher.core.theme.colours.darkSchemeEscapeTheme
+import com.geecee.escapelauncher.core.theme.colours.resolveColorScheme
+import com.geecee.escapelauncher.core.theme.type.escapeType
+import com.geecee.escapelauncher.core.theme.type.getFontFamily
 
 @Composable
 fun EscapeTheme(

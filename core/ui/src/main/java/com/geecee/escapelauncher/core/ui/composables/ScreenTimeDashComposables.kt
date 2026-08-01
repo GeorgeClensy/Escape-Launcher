@@ -29,8 +29,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.geecee.escapelauncher.core.theme.CardContainerColor
-import com.geecee.escapelauncher.core.theme.escapeGreen
-import com.geecee.escapelauncher.core.theme.escapeRed
+import com.geecee.escapelauncher.core.theme.colours.escapeGreen
+import com.geecee.escapelauncher.core.theme.colours.escapeRed
 import com.geecee.escapelauncher.core.theme.primaryContentColor
 
 /**

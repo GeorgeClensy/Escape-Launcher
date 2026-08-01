@@ -1,4 +1,4 @@
-package com.geecee.escapelauncher.core.theme
+package com.geecee.escapelauncher.core.theme.colours
 
 import android.annotation.SuppressLint
 import androidx.compose.material3.ColorScheme
@@ -11,13 +11,13 @@ import com.google.android.material.color.utilities.SchemeMonochrome
 import com.google.android.material.color.utilities.SchemeTonalSpot
 
 /**
- * Utility to generate a complete Material 3 [ColorScheme] from a single seed color
+ * Utility to generate a complete Material 3 [androidx.compose.material3.ColorScheme] from a single seed color
  * using Google's official Material Color Utilities algorithm.
  */
-object DynamicThemeUtils {
+object DynamicColourSchemeUtils {
 
     /**
-     * Generates a full Material 3 [ColorScheme] from a single seed color
+     * Generates a full Material 3 [androidx.compose.material3.ColorScheme] from a single seed color
      *
      * @param seedColor the source color to derive the palette from
      * @param isDark whether to build the dark or light variant of the scheme

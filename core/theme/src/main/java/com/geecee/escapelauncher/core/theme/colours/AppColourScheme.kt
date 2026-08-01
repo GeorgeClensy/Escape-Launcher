@@ -1,4 +1,4 @@
-package com.geecee.escapelauncher.core.theme
+package com.geecee.escapelauncher.core.theme.colours
 
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -77,7 +77,7 @@ fun AppColourScheme.resolveColorScheme(): ColorScheme {
         else -> {
             // Dynamic generation from seed if available
             seedColor?.let {
-                DynamicThemeUtils.generateColorSchemeFromSeed(
+                DynamicColourSchemeUtils.generateColorSchemeFromSeed(
                     seedColor = it,
                     isDark = isDark,
                     isMonochrome = this == AppColourScheme.MONOCHROME
