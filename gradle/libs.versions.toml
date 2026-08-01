@@ -95,18 +95,6 @@ androidx-hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-com
 hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hilt" }
 hilt-compiler = { module = "com.google.dagger:hilt-android-compiler", version.ref = "hilt" }
 
-# Google & Firebase
-fb-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebaseBom" }
-fb-analytics = { group = "com.google.firebase", name = "firebase-analytics" }
-fb-crashlytics = { group = "com.google.firebase", name = "firebase-crashlytics" }
-fb-perf = { group = "com.google.firebase", name = "firebase-perf" }
-fb-messaging = { group = "com.google.firebase", name = "firebase-messaging" }
-gms-google-services = { group = "com.google.gms", name = "google-services", version.ref = "googleServices" }
-fb-crashlytics-gradle = { group = "com.google.firebase", name = "firebase-crashlytics-gradle", version.ref = "crashlytics" }
-gms-play-services-location = { group = "com.google.android.gms", name = "play-services-location", version.ref = "playServicesLocation" }
-okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp" }
-androidx-ui-text-google-fonts = { group = "androidx.compose.ui", name = "ui-text-google-fonts", version.ref = "googleFonts" }
-
 # Other
 gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
 

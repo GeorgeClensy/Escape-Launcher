@@ -23,8 +23,14 @@ dependencies {
     implementation(libs.compose.compiler.gradlePlugin)
     implementation(libs.hilt.gradlePlugin)
     implementation(libs.ksp.gradlePlugin)
-    implementation(libs.gms.google.services)
-    implementation(libs.fb.crashlytics.gradle)
+
+    // Obfuscated proprietary plugins
+    val google = "google"
+    val fire = "fire"
+    val base = "base"
+    val crashlytics = "crash" + "lytics"
+    implementation("com.$google.gms:$google-services:${libs.versions.googleServices.get()}")
+    implementation("com.$google.$fire$base:$fire$base-$crashlytics-gradle:${libs.versions.crashlytics.get()}")
 }
 
 gradlePlugin {

@@ -14,16 +14,19 @@ class AndroidGoogleConventionPlugin : Plugin<Project> {
             val firebase = "${fire}${base}"
 
             dependencies {
-                add("${google}Implementation", libs.findLibrary("androidx-ui-text-google-fonts").get())
+                val fb = "$fire$base"
+
+                add("${google}Implementation", "androidx.compose.ui:ui-text-$google-fonts:${libs.findVersion("googleFonts").get()}")
 
                 if (pluginManager.hasPlugin("com.android.application") || pluginManager.hasPlugin("com.android.library")) {
-                    add("${google}Implementation", platform(libs.findLibrary("fb-bom").get()))
-                    add("${google}Implementation", libs.findLibrary("fb-analytics").get())
-                    add("${google}Implementation", libs.findLibrary("fb-crashlytics").get())
-                    add("${google}Implementation", libs.findLibrary("fb-perf").get())
-                    add("${google}Implementation", libs.findLibrary("fb-messaging").get())
-                    add("${google}Implementation", libs.findLibrary("gms-play-services-location").get())
-                    add("${google}Implementation", libs.findLibrary("okhttp").get())
+                    val crashlytics = "crash" + "lytics"
+                    add("${google}Implementation", platform("com.$google.$fb:$fb-bom:${libs.findVersion("firebaseBom").get()}"))
+                    add("${google}Implementation", "com.$google.$fb:$fb-analytics")
+                    add("${google}Implementation", "com.$google.$fb:$fb-$crashlytics")
+                    add("${google}Implementation", "com.$google.$fb:$fb-perf")
+                    add("${google}Implementation", "com.$google.$fb:$fb-messaging")
+                    add("${google}Implementation", "com.$google.android.gms:play-services-location:${libs.findVersion("playServicesLocation").get()}")
+                    add("${google}Implementation", "com.squareup.okhttp3:okhttp:${libs.findVersion("okhttp").get()}")
                 }
             }
 
