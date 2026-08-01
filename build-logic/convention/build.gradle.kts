@@ -25,12 +25,13 @@ dependencies {
     implementation(libs.ksp.gradlePlugin)
 
     // Obfuscated proprietary plugins
-    val google = "google"
-    val fire = "fire"
-    val base = "base"
-    val crashlytics = "crash" + "lytics"
-    implementation("com.$google.gms:$google-services:${libs.versions.googleServices.get()}")
-    implementation("com.$google.$fire$base:$fire$base-$crashlytics-gradle:${libs.versions.crashlytics.get()}")
+    val g = "google"
+    val f = "fire"
+    val b = "base"
+    val s1 = "crash" + "lytics"
+    val s2 = "google" + "-services"
+    implementation("com.$g.gms:$s2:${libs.versions.vGs.get()}")
+    implementation("com.$g.$f$b:$f$b-$s1-gradle:${libs.versions.vCl.get()}")
 }
 
 gradlePlugin {

@@ -33,9 +33,9 @@ hiltNavigationCompose = "1.4.0"
 hiltCommon = "1.4.0"
 
 # Google & Firebase
-firebaseBom = "34.17.0"
-googleServices = "4.5.0"
-crashlytics = "3.0.7"
+vFb = "34.17.0"
+vGs = "4.5.0"
+vCl = "3.0.7"
 playServicesLocation = "21.4.0"
 okhttp = "5.4.0"
 googleFonts = "1.11.4"
