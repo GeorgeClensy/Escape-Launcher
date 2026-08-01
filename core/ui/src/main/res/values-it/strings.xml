@@ -3,9 +3,12 @@
     <!-- Themes -->
     <string name="red">Rosso Chiaro</string>
     <string name="blue">Blu Chiaro</string>
+    <string name="teal">Turchese</string>
+    <string name="purple">Viola</string>
+    <string name="pink">Rosa</string>
     <string name="yellow">Giallo Chiaro</string>
     <string name="green">Verde Chiaro</string>
-    <string name="off_white">Bianco sporco</string>
+    <string name="orange">Arancione</string>
     <string name="system">Sistema</string>
     <string name="pitch_black">Nero profondo</string>
     <string name="light">Chiaro</string>

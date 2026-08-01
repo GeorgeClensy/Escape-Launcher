@@ -92,9 +92,12 @@
     <string name="no_apps_used">Aún no se han abierto apps!</string>
     <string name="red">Rojo Claro</string>
     <string name="blue">Azul Claro</string>
+    <string name="teal">Turquesa</string>
+    <string name="purple">Morado</string>
+    <string name="pink">Rosa</string>
     <string name="yellow">Amarillo Claro</string>
     <string name="green">Verde Claro</string>
-    <string name="off_white">Blanquecino</string>
+    <string name="orange">Naranja</string>
     <string name="system">Sistema</string>
     <string name="accessibility_service_description">Permite a la app apagar la pantalla.</string>
     <string name="back">Atrás</string>

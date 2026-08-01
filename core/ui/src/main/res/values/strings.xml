@@ -2,9 +2,12 @@
     <!-- Themes -->
     <string name="red">Red</string>
     <string name="blue">Blue</string>
+    <string name="teal">Teal</string>
+    <string name="purple">Purple</string>
+    <string name="pink">Pink</string>
     <string name="yellow">Yellow</string>
     <string name="green">Green</string>
-    <string name="off_white">Off white</string>
+    <string name="orange">Orange</string>
     <string name="system">System</string>
     <string name="monochrome">Monochrome</string>
     <string name="pitch_black">Pitch black</string>

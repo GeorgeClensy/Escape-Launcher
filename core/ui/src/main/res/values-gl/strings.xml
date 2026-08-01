@@ -120,9 +120,12 @@
     <!-- Themes -->
     <string name="red">Vermello claro</string>
     <string name="blue">Azul claro</string>
+    <string name="teal">Turquesa</string>
+    <string name="purple">Púrpura</string>
+    <string name="pink">Rosa</string>
     <string name="yellow">Amarelo claro</string>
     <string name="green">Verde claro</string>
-    <string name="off_white">Branco estragado</string>
+    <string name="orange">Laranxa</string>
     <string name="system">Sistema</string>
     <string name="accessibility_service_description">Permite que a app apague a pantalla.</string>
     <string name="back">Volver</string>

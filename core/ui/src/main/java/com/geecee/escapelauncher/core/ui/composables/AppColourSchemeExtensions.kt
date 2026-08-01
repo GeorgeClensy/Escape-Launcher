@@ -10,8 +10,11 @@ fun AppColourScheme.nameRes(): Int = when (this) {
     AppColourScheme.RED -> R.string.red
     AppColourScheme.GREEN -> R.string.green
     AppColourScheme.BLUE -> R.string.blue
+    AppColourScheme.TEAL -> R.string.teal
+    AppColourScheme.PURPLE -> R.string.purple
+    AppColourScheme.PINK -> R.string.pink
     AppColourScheme.YELLOW -> R.string.yellow
-    AppColourScheme.OFF_LIGHT -> R.string.off_white
+    AppColourScheme.ORANGE -> R.string.orange
     AppColourScheme.SYSTEM -> R.string.system
     AppColourScheme.ESCAPE_THEME -> R.string.escape_launcher
 }

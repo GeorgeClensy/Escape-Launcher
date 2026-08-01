@@ -17,7 +17,10 @@ enum class AppColourScheme(val id: Int, val seedColor: Color? = null) {
     GREEN(5, Color(0xFF4C662B)),
     BLUE(7, Color(0xFF415F91)),
     YELLOW(9, Color(0xFF6D5E0F)),
-    OFF_LIGHT(11, Color(0xFF8C4F28)),
+    ORANGE(11, Color(0xFF8C4F28)),
+    TEAL(14, Color(0xFF006A6A)),
+    PURPLE(15, Color(0xFF6750A4)),
+    PINK(16, Color(0xFF984061)),
     SYSTEM(12),
     ESCAPE_THEME(13);
 
@@ -27,13 +30,16 @@ enum class AppColourScheme(val id: Int, val seedColor: Color? = null) {
 
         val selectableThemes = listOf(
             ESCAPE_THEME,
-            OFF_LIGHT,
-            MONOCHROME,
+            SYSTEM,
             RED,
-            GREEN,
-            BLUE,
+            ORANGE,
             YELLOW,
-            SYSTEM
+            GREEN,
+            TEAL,
+            BLUE,
+            PURPLE,
+            PINK,
+            MONOCHROME,
         )
     }
 }
