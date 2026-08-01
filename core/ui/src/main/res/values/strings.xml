@@ -6,6 +6,7 @@
     <string name="green">Green</string>
     <string name="off_white">Off white</string>
     <string name="system">System</string>
+    <string name="monochrome">Monochrome</string>
     <string name="pitch_black">Pitch black</string>
     <string name="light">Light</string>
     <string name="dark">Dark</string>
@@ -76,7 +77,6 @@
     <string name="hide_private_space_in_search">Hidden private space</string>
     <string name="haptic_feedback">Haptic feedback</string>
     <string name="done">Done</string>
-    <string name="syncLightDark">Sync with system light/dark</string>
     <string name="match_system_wallpaper">Match system wallpaper with theme</string>
     <string name="date">Date</string>
     <string name="home_screen_options">Home Screen Options</string>

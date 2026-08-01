@@ -1,7 +1,6 @@
 package com.geecee.escapelauncher.core.theme
 
 import android.app.Activity
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -24,9 +23,6 @@ fun EscapeTheme(
 ) {
     val context = LocalContext.current
     val colorScheme by themeViewModel.theme.collectAsState(AppColourScheme.ESCAPE_THEME)
-    val lScheme by themeViewModel.ltheme.collectAsState(AppColourScheme.ESCAPE_THEME)
-    val dScheme by themeViewModel.dtheme.collectAsState(AppColourScheme.ESCAPE_THEME)
-    val syncTheme by themeViewModel.syncTheme.collectAsState(false)
     val font by themeViewModel.font.collectAsState("Jost")
 
     val fontFamily = remember(fontName, font) {
@@ -36,17 +32,7 @@ fun EscapeTheme(
         )
     }
 
-    val resolvedColorScheme =
-        theme?.resolveColorScheme()
-            ?: if (syncTheme) {
-                if (isSystemInDarkTheme()) {
-                    dScheme.resolveColorScheme()
-                } else {
-                    lScheme.resolveColorScheme()
-                }
-            } else {
-                colorScheme.resolveColorScheme()
-            }
+    val resolvedColorScheme = (theme ?: colorScheme).resolveColorScheme()
 
     // Keep status bar icons readable against the themed background (dark icons on a light surface)
     val view = LocalView.current

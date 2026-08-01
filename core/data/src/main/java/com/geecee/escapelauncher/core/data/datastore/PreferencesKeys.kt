@@ -39,9 +39,6 @@ object PreferencesKeys {
 
     //Theme
     val THEME = intPreferencesKey(name = "theme")
-    val DTHEME = intPreferencesKey(name = "dtheme")
-    val LTHEME = intPreferencesKey(name = "ltheme")
-    val SYNC_THEME = booleanPreferencesKey(name = "sync_theme")
     val FONT = stringPreferencesKey(name = "font")
 
     //Search

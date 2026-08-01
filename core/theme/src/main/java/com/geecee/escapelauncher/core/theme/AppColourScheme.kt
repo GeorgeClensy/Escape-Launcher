@@ -12,9 +12,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 
 enum class AppColourScheme(val id: Int, val seedColor: Color? = null) {
-    DARK(0, Color(0xFFC6C6C6)),
-    LIGHT(1, Color(0xFF070808)),
-    PITCH_DARK(2),
+    MONOCHROME(0, Color(0xFF676767)),
     RED(3, Color(0xFF8F4C38)),
     DARK_RED(4, Color(0xFF8F4C38)),
     GREEN(5, Color(0xFF4C662B)),
@@ -38,7 +36,6 @@ fun AppColourScheme.resolveColorScheme(): ColorScheme {
     val isDark = isSystemInDarkTheme()
 
     if (this == AppColourScheme.ESCAPE_THEME) return darkSchemeEscapeTheme
-    if (this == AppColourScheme.PITCH_DARK) return PitchDarkColorScheme
     
     if (this == AppColourScheme.SYSTEM) {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
@@ -54,14 +51,13 @@ fun AppColourScheme.resolveColorScheme(): ColorScheme {
 
     // Dynamic generation from seed if available
     seedColor?.let {
-        return DynamicThemeUtils.generateColorSchemeFromSeed(it, isDark)
+        return DynamicThemeUtils.generateColorSchemeFromSeed(
+            seedColor = it,
+            isDark = isDark,
+            isMonochrome = this == AppColourScheme.MONOCHROME
+        )
     }
 
-    // Fallback to static schemes if no seed (shouldn't happen for most now)
-    return when (this) {
-        AppColourScheme.DARK -> darkScheme
-        AppColourScheme.LIGHT -> lightScheme
-        AppColourScheme.OFF_LIGHT -> offLightScheme
-        else -> if (isDark) darkColorScheme() else lightColorScheme()
-    }
+    // Fallback
+    return if (isDark) darkColorScheme() else lightColorScheme()
 }

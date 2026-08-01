@@ -43,12 +43,6 @@ interface SettingsRepository {
     suspend fun setAppsAlignment(alignment: String)
     val theme: Flow<Int>
     suspend fun setTheme(theme: Int)
-    val dtheme: Flow<Int>
-    suspend fun setDTheme(theme: Int)
-    val ltheme: Flow<Int>
-    suspend fun setLTheme(theme: Int)
-    val syncTheme: Flow<Boolean>
-    suspend fun setSyncTheme(value: Boolean)
     val font: Flow<String>
     suspend fun setFont(value: String)
     val allowAnalyitics: Flow<Boolean>

@@ -81,8 +81,6 @@ private class SharedPreferencesToDataStoreMigration(
 
         // Migrate all mapped settings
         migrateInt("Theme", PreferencesKeys.THEME)
-        migrateInt("dTheme", PreferencesKeys.DTHEME)
-        migrateInt("lTheme", PreferencesKeys.LTHEME)
         migrateBoolean("Analytics", PreferencesKeys.ALLOW_ANALYTICS)
         migrateString("HomeAlignment", PreferencesKeys.HOME_ALIGNMENT)
         migrateString("HomeVAlignment", PreferencesKeys.HOME_V_ALIGNMENT)
@@ -97,7 +95,6 @@ private class SharedPreferencesToDataStoreMigration(
         migrateBoolean("FirstTime", PreferencesKeys.FIRST_TIME)
         migrateBoolean("FirstTimeAppDrawHelp", PreferencesKeys.FIRST_TIME_HELP)
         migrateBoolean("searchHiddenPrivateSpace", PreferencesKeys.HIDE_PRIVATE_SPACE)
-        migrateBoolean("AutoThemeSwitch", PreferencesKeys.SYNC_THEME)
         migrateBoolean("ShowDate", PreferencesKeys.SHOW_DATE)
         migrateBoolean("TwelveHourClock", PreferencesKeys.TWELVE_HOUR_CLOCK)
         migrateBoolean("HideScreenTimePage", PreferencesKeys.HIDE_SCREEN_TIME_PAGE)

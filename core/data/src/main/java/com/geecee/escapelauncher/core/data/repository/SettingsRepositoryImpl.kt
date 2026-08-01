@@ -192,33 +192,6 @@ class SettingsRepositoryImpl @Inject constructor(
         dataStore.edit { preferences -> preferences[PreferencesKeys.THEME] = theme }
     }
 
-    override val ltheme: Flow<Int>
-        get() = dataStore.data.map { preferences ->
-            preferences[PreferencesKeys.LTHEME] ?: 13
-        }
-
-    override suspend fun setLTheme(theme: Int) {
-        dataStore.edit { preferences -> preferences[PreferencesKeys.LTHEME] = theme }
-    }
-
-    override val dtheme: Flow<Int>
-        get() = dataStore.data.map { preferences ->
-            preferences[PreferencesKeys.DTHEME] ?: 13
-        }
-
-    override suspend fun setDTheme(theme: Int) {
-        dataStore.edit { preferences -> preferences[PreferencesKeys.DTHEME] = theme }
-    }
-
-    override val syncTheme: Flow<Boolean>
-        get() = dataStore.data.map { preferences ->
-            preferences[PreferencesKeys.SYNC_THEME] ?: false
-        }
-
-    override suspend fun setSyncTheme(value: Boolean) {
-        dataStore.edit { preferences -> preferences[PreferencesKeys.SYNC_THEME] = value }
-    }
-
     override val font: Flow<String>
         get() = dataStore.data.map { preferences ->
             preferences[PreferencesKeys.FONT] ?: "Jost"

@@ -6,9 +6,7 @@ import com.geecee.escapelauncher.core.ui.R
 
 @StringRes
 fun AppColourScheme.nameRes(): Int = when (this) {
-    AppColourScheme.DARK -> R.string.dark
-    AppColourScheme.LIGHT -> R.string.light
-    AppColourScheme.PITCH_DARK -> R.string.pitch_black
+    AppColourScheme.MONOCHROME -> R.string.monochrome
 
     AppColourScheme.RED -> R.string.red
     AppColourScheme.DARK_RED -> R.string.red

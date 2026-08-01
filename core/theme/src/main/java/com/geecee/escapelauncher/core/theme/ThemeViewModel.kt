@@ -24,47 +24,9 @@ class ThemeViewModel @Inject constructor(
                 initialValue = AppColourScheme.ESCAPE_THEME
             )
 
-    val ltheme: StateFlow<AppColourScheme> =
-        repository.ltheme
-            .map { id -> AppColourScheme.fromId(id) }
-            .stateIn(
-                scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(5000),
-                initialValue = AppColourScheme.ESCAPE_THEME
-            )
-
-    val dtheme: StateFlow<AppColourScheme> =
-        repository.dtheme
-            .map { id -> AppColourScheme.fromId(id) }
-            .stateIn(
-                scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(5000),
-                initialValue = AppColourScheme.ESCAPE_THEME
-            )
-
-    val syncTheme = repository.syncTheme
-
     fun setTheme(scheme: AppColourScheme) {
         viewModelScope.launch {
             repository.setTheme(scheme.id)
-        }
-    }
-
-    fun setLTheme(scheme: AppColourScheme) {
-        viewModelScope.launch {
-            repository.setLTheme(scheme.id)
-        }
-    }
-
-    fun setDTheme(scheme: AppColourScheme) {
-        viewModelScope.launch {
-            repository.setDTheme(scheme.id)
-        }
-    }
-
-    fun setSyncTheme(sync: Boolean) {
-        viewModelScope.launch {
-            repository.setSyncTheme(sync)
         }
     }
 

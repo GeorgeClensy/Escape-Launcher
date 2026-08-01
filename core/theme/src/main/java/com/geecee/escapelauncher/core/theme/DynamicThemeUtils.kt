@@ -7,6 +7,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import com.google.android.material.color.utilities.Hct
 import com.google.android.material.color.utilities.SchemeTonalSpot
+import com.google.android.material.color.utilities.SchemeMonochrome
 import android.annotation.SuppressLint
 
 /**
@@ -25,9 +26,15 @@ object DynamicThemeUtils {
     fun generateColorSchemeFromSeed(
         seedColor: Color,
         isDark: Boolean,
-        contrastLevel: Double = 0.0
+        contrastLevel: Double = 0.0,
+        isMonochrome: Boolean = false
     ): ColorScheme {
-        val scheme = SchemeTonalSpot(Hct.fromInt(seedColor.toArgb()), isDark, contrastLevel)
+        val hct = Hct.fromInt(seedColor.toArgb())
+        val scheme = if (isMonochrome) {
+            SchemeMonochrome(hct, isDark, contrastLevel)
+        } else {
+            SchemeTonalSpot(hct, isDark, contrastLevel)
+        }
 
         return if (isDark) {
             darkColorScheme(
