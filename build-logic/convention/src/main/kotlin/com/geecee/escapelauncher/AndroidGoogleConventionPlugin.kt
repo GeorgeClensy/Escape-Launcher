@@ -17,12 +17,12 @@ class AndroidGoogleConventionPlugin : Plugin<Project> {
                 add("${google}Implementation", libs.findLibrary("androidx-ui-text-google-fonts").get())
 
                 if (pluginManager.hasPlugin("com.android.application") || pluginManager.hasPlugin("com.android.library")) {
-                    add("${google}Implementation", platform(libs.findLibrary("$firebase-bom").get()))
-                    add("${google}Implementation", libs.findLibrary("$firebase-analytics").get())
-                    add("${google}Implementation", libs.findLibrary("$firebase-crashlytics").get())
-                    add("${google}Implementation", libs.findLibrary("$firebase-perf").get())
-                    add("${google}Implementation", libs.findLibrary("$firebase-messaging").get())
-                    add("${google}Implementation", libs.findLibrary("play-services-location").get())
+                    add("${google}Implementation", platform(libs.findLibrary("fb-bom").get()))
+                    add("${google}Implementation", libs.findLibrary("fb-analytics").get())
+                    add("${google}Implementation", libs.findLibrary("fb-crashlytics").get())
+                    add("${google}Implementation", libs.findLibrary("fb-perf").get())
+                    add("${google}Implementation", libs.findLibrary("fb-messaging").get())
+                    add("${google}Implementation", libs.findLibrary("gms-play-services-location").get())
                     add("${google}Implementation", libs.findLibrary("okhttp").get())
                 }
             }

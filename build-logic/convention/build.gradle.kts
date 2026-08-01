@@ -23,6 +23,8 @@ dependencies {
     implementation(libs.compose.compiler.gradlePlugin)
     implementation(libs.hilt.gradlePlugin)
     implementation(libs.ksp.gradlePlugin)
+    implementation(libs.gms.google.services)
+    implementation(libs.fb.crashlytics.gradle)
 }
 
 gradlePlugin {

@@ -19,8 +19,6 @@ Builds:
     subdir: app
     gradle:
       - foss
-    scandelete:
-      - build-logic/convention/build
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags

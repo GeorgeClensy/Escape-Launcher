@@ -19,9 +19,9 @@ coreSplashscreen = "1.2.0"
 datastorePreferences = "1.2.1"
 graphicsShapes = "1.1.0"
 lifecycleRuntimeKtx = "2.11.0"
-material3 = "1.5.0-alpha24"
+material3 = "1.5.0-alpha25"
 navigationCompose = "2.9.8"
-navigation3 = "1.1.4"
+navigation3 = "1.1.5"
 kotlinxSerializationJson = "1.11.0"
 room = "2.8.4"
 runtimeSaveable = "1.11.4"
@@ -33,7 +33,7 @@ hiltNavigationCompose = "1.4.0"
 hiltCommon = "1.4.0"
 
 # Google & Firebase
-firebaseBom = "34.16.0"
+firebaseBom = "34.17.0"
 googleServices = "4.5.0"
 crashlytics = "3.0.7"
 playServicesLocation = "21.4.0"
@@ -96,14 +96,14 @@ hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hilt"
 hilt-compiler = { module = "com.google.dagger:hilt-android-compiler", version.ref = "hilt" }
 
 # Google & Firebase
-firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebaseBom" }
-firebase-analytics = { group = "com.google.firebase", name = "firebase-analytics" }
-firebase-crashlytics = { group = "com.google.firebase", name = "firebase-crashlytics" }
-firebase-perf = { group = "com.google.firebase", name = "firebase-perf" }
-firebase-messaging = { group = "com.google.firebase", name = "firebase-messaging" }
-google-services-plugin = { group = "com.google.gms", name = "google-services", version.ref = "googleServices" }
-crashlytics-plugin = { group = "com.google.firebase", name = "firebase-crashlytics-gradle", version.ref = "crashlytics" }
-play-services-location = { group = "com.google.android.gms", name = "play-services-location", version.ref = "playServicesLocation" }
+fb-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebaseBom" }
+fb-analytics = { group = "com.google.firebase", name = "firebase-analytics" }
+fb-crashlytics = { group = "com.google.firebase", name = "firebase-crashlytics" }
+fb-perf = { group = "com.google.firebase", name = "firebase-perf" }
+fb-messaging = { group = "com.google.firebase", name = "firebase-messaging" }
+gms-google-services = { group = "com.google.gms", name = "google-services", version.ref = "googleServices" }
+fb-crashlytics-gradle = { group = "com.google.firebase", name = "firebase-crashlytics-gradle", version.ref = "crashlytics" }
+gms-play-services-location = { group = "com.google.android.gms", name = "play-services-location", version.ref = "playServicesLocation" }
 okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp" }
 androidx-ui-text-google-fonts = { group = "androidx.compose.ui", name = "ui-text-google-fonts", version.ref = "googleFonts" }
 
@@ -168,8 +168,6 @@ hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 jetbrains-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
-google-services = { id = "com.google.gms.google-services", version.ref = "googleServices" }
-crashlytics = { id = "com.google.firebase.crashlytics", version.ref = "crashlytics" }
 
 # Escape Launcher Plugins
 escapelauncher-android-application = { id = "escapelauncher.android.application" }
