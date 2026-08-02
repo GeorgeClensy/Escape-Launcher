@@ -9,7 +9,8 @@ import com.geecee.escapelauncher.core.common.AppConfiguration
 import com.geecee.escapelauncher.core.common.getAppShortcuts
 import com.geecee.escapelauncher.core.common.isMainUserApp
 import com.geecee.escapelauncher.core.common.startShortcut
-import com.geecee.escapelauncher.core.domain.GetFavoriteAppsUseCase
+import com.geecee.escapelauncher.core.domain.apps.GetFavoriteAppsUseCase
+import com.geecee.escapelauncher.core.domain.challenges.GetOpenChallengeAppsUseCase
 import com.geecee.escapelauncher.core.domain.repository.ModifiedAppsRepository
 import com.geecee.escapelauncher.core.domain.repository.SettingsRepository
 import com.geecee.escapelauncher.core.model.InstalledApp
@@ -38,7 +39,8 @@ class NewHomeScreenViewModel @Inject constructor(
     private val modifiedAppsRepository: ModifiedAppsRepository,
     getFavoriteAppsUseCase: GetFavoriteAppsUseCase,
     val widgetHostManager: WidgetHostManager,
-    appConfiguration: AppConfiguration
+    appConfiguration: AppConfiguration,
+    getOpenChallengeAppsUseCase: GetOpenChallengeAppsUseCase
 ) : ViewModel() {
     val isFoss = appConfiguration.isFoss
 
@@ -115,10 +117,10 @@ class NewHomeScreenViewModel @Inject constructor(
 
     val doesBottomSheetAppHaveChallenge: StateFlow<Boolean> = combine(
         _bottomSheetApp,
-        modifiedAppsRepository.getChallengePackageIdsFlow()
+        getOpenChallengeAppsUseCase()
     ) { app, challenges ->
         app?.let { selectedApp ->
-            challenges.any { it == selectedApp.packageName }
+            challenges.any { it.packageName == selectedApp.packageName }
         } ?: false
     }.stateIn(
         scope = viewModelScope,

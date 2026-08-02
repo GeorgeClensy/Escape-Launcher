@@ -154,13 +154,13 @@ fun Settings(
                         }) { backStack.removeLastOrNull() }
                 }
                 entry<SettingsNavKey.OpenChallenges> {
-                    val openChallegeAppIds by openChallengeViewModel.challengeAppIds.collectAsState()
+                    val openChallengeAppIds by openChallengeViewModel.challengeAppIds.collectAsState()
 
                     BulkManager(
                         items = installedApps,
                         id = { it.packageName },
                         label = { it.displayName },
-                        selectedIdsOverride = openChallegeAppIds,
+                        selectedIdsOverride = openChallengeAppIds.map { it.packageName }.toSet(),
                         title = stringResource(R.string.manage_open_challenges),
                         onBackClicked = { backStack.removeLastOrNull() },
                         onItemClicked = { app, selected ->

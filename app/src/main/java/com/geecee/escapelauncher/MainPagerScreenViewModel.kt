@@ -13,7 +13,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.geecee.escapelauncher.core.common.launchApp
-import com.geecee.escapelauncher.core.domain.GetFavoriteAppsUseCase
+import com.geecee.escapelauncher.core.domain.apps.GetFavoriteAppsUseCase
 import com.geecee.escapelauncher.core.domain.repository.ModifiedAppsRepository
 import com.geecee.escapelauncher.core.domain.repository.SettingsRepository
 import com.geecee.escapelauncher.core.model.InstalledApp

@@ -14,6 +14,7 @@ import com.geecee.escapelauncher.core.common.getAppShortcuts
 import com.geecee.escapelauncher.core.common.isMainUserApp
 import com.geecee.escapelauncher.core.common.sortAppsByRelevance
 import com.geecee.escapelauncher.core.common.startShortcut
+import com.geecee.escapelauncher.core.domain.challenges.GetOpenChallengeAppsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import jakarta.inject.Inject
@@ -34,7 +35,8 @@ class AppsListViewModel @Inject constructor(
     @ApplicationContext context: Context,
     settingsRepository: SettingsRepository,
     appsRepository: AppsRepository,
-    private val modifiedAppsRepository: ModifiedAppsRepository
+    private val modifiedAppsRepository: ModifiedAppsRepository,
+    getOpenChallengeAppsUseCase: GetOpenChallengeAppsUseCase
 ) : ViewModel() {
     // UI Events
     private val _uiEvent = MutableSharedFlow<AppsListUiEvent>()
@@ -129,10 +131,10 @@ class AppsListViewModel @Inject constructor(
     )
     val doesBottomSheetAppHaveChallenge: StateFlow<Boolean> = combine(
         _bottomSheetApp,
-        modifiedAppsRepository.getChallengePackageIdsFlow()
+        getOpenChallengeAppsUseCase()
     ) { app, challenges ->
         app?.let { selectedApp ->
-            challenges.any { it == selectedApp.packageName }
+            challenges.any { it.packageName == selectedApp.packageName }
         } ?: false
     }.stateIn(
         scope = viewModelScope,
