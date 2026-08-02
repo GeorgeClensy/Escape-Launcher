@@ -1,7 +1,6 @@
-package com.geecee.escapelauncher.core.ui.model
+package com.geecee.escapelauncher.core.model
 
 import androidx.annotation.StringRes
-import com.geecee.escapelauncher.core.model.InstalledApp
 
 /**
  * Action that can be shown in the bottom sheet or other menus.

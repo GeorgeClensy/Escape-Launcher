@@ -28,7 +28,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.geecee.escapelauncher.core.model.InstalledApp
-import com.geecee.escapelauncher.core.ui.model.AppAction
+import com.geecee.escapelauncher.core.model.AppAction
 
 /**
  * Bottom Sheet home screen

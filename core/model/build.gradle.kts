@@ -6,3 +6,7 @@ plugins {
 android {
     namespace = "com.geecee.escapelauncher.core.model"
 }
+
+dependencies {
+    implementation(libs.androidx.annotation)
+}

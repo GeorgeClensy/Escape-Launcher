@@ -9,29 +9,33 @@ import com.geecee.escapelauncher.core.common.AppConfiguration
 import com.geecee.escapelauncher.core.common.getAppShortcuts
 import com.geecee.escapelauncher.core.common.isMainUserApp
 import com.geecee.escapelauncher.core.common.startShortcut
+import com.geecee.escapelauncher.core.domain.apps.AppActionType
+import com.geecee.escapelauncher.core.domain.apps.GetAppActionsUseCase
 import com.geecee.escapelauncher.core.domain.apps.GetFavoriteAppsUseCase
-import com.geecee.escapelauncher.core.domain.challenges.GetOpenChallengeAppsUseCase
 import com.geecee.escapelauncher.core.domain.repository.ModifiedAppsRepository
 import com.geecee.escapelauncher.core.domain.repository.SettingsRepository
+import com.geecee.escapelauncher.core.model.AppAction
 import com.geecee.escapelauncher.core.model.InstalledApp
 import com.geecee.escapelauncher.core.ui.R
-import com.geecee.escapelauncher.core.ui.model.AppAction
 import com.geecee.escapelauncher.feature.newwidgets.WidgetHostManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import jakarta.inject.Inject
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlin.collections.map
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
 class NewHomeScreenViewModel @Inject constructor(
     @ApplicationContext context: Context,
@@ -40,7 +44,7 @@ class NewHomeScreenViewModel @Inject constructor(
     getFavoriteAppsUseCase: GetFavoriteAppsUseCase,
     val widgetHostManager: WidgetHostManager,
     appConfiguration: AppConfiguration,
-    getOpenChallengeAppsUseCase: GetOpenChallengeAppsUseCase
+    private val getAppActionsUseCase: GetAppActionsUseCase
 ) : ViewModel() {
     val isFoss = appConfiguration.isFoss
 
@@ -101,94 +105,66 @@ class NewHomeScreenViewModel @Inject constructor(
         _bottomSheetApp.value = app
     }
 
-    // App Status
-    val isBottomSheetAppFavourite: StateFlow<Boolean> = combine(
-        _bottomSheetApp,
-        modifiedAppsRepository.getFavouriteAppsInOrderFlow()
-    ) { app, favourites ->
-        app?.let { selectedApp ->
-            favourites.any { it.packageId == selectedApp.packageName }
-        } ?: false
-    }.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5000),
-        initialValue = false
-    )
-
-    val doesBottomSheetAppHaveChallenge: StateFlow<Boolean> = combine(
-        _bottomSheetApp,
-        getOpenChallengeAppsUseCase()
-    ) { app, challenges ->
-        app?.let { selectedApp ->
-            challenges.any { it.packageName == selectedApp.packageName }
-        } ?: false
-    }.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5000),
-        initialValue = false
-    )
-
     // Actions
-    val bottomSheetActions: StateFlow<List<AppAction>> = combine(
-        _bottomSheetApp,
-        isBottomSheetAppFavourite,
-        doesBottomSheetAppHaveChallenge
-    ) { app, isFavourite, hasChallenge ->
-        if (app == null) return@combine emptyList()
-        
-        listOf(
-            AppAction(
-                labelRes = R.string.uninstall,
-                onClick = { clickedApp ->
-                    viewModelScope.launch {
-                        _uiEvent.emit(HomeUiEvent.UninstallApp(clickedApp))
-                    }
-                }
-            ),
-            AppAction(
-                labelRes = if (isFavourite) R.string.rem_from_fav else R.string.add_to_fav,
-                isVisible = { it.isMainUserApp() },
-                onClick = { clickedApp ->
-                    viewModelScope.launch {
-                        if (isFavourite) {
-                            modifiedAppsRepository.removeFavourite(clickedApp.packageName)
-                        } else {
-                            modifiedAppsRepository.addFavourite(clickedApp.packageName)
-                            _uiEvent.emit(HomeUiEvent.NavigateHome)
+    val bottomSheetActions: StateFlow<List<AppAction>> = _bottomSheetApp.flatMapLatest { app ->
+        if (app == null) flowOf(emptyList())
+        else getAppActionsUseCase(app.packageName).map { actionTypes ->
+            actionTypes.map { type ->
+                when (type) {
+                    AppActionType.Uninstall -> AppAction(
+                        labelRes = R.string.uninstall,
+                        onClick = { clickedApp ->
+                            viewModelScope.launch {
+                                _uiEvent.emit(HomeUiEvent.UninstallApp(clickedApp))
+                            }
                         }
-                        _showBottomSheet.value = false
-                    }
+                    )
+                    is AppActionType.ToggleFavorite -> AppAction(
+                        labelRes = if (type.isFavorite) R.string.rem_from_fav else R.string.add_to_fav,
+                        isVisible = { it.isMainUserApp() },
+                        onClick = { clickedApp ->
+                            viewModelScope.launch {
+                                if (type.isFavorite) {
+                                    modifiedAppsRepository.removeFavourite(clickedApp.packageName)
+                                } else {
+                                    modifiedAppsRepository.addFavourite(clickedApp.packageName)
+                                    _uiEvent.emit(HomeUiEvent.NavigateHome)
+                                }
+                                _showBottomSheet.value = false
+                            }
+                        }
+                    )
+                    AppActionType.Hide -> AppAction(
+                        labelRes = R.string.hide,
+                        isVisible = { it.isMainUserApp() },
+                        onClick = { clickedApp ->
+                            viewModelScope.launch {
+                                modifiedAppsRepository.setHidden(clickedApp.packageName, true)
+                                _showBottomSheet.value = false
+                            }
+                        }
+                    )
+                    AppActionType.AppInfo -> AppAction(
+                        labelRes = R.string.app_info,
+                        onClick = { clickedApp ->
+                            viewModelScope.launch {
+                                _uiEvent.emit(HomeUiEvent.ShowAppInfo(clickedApp))
+                            }
+                        }
+                    )
+                    AppActionType.AddChallenge -> AppAction(
+                        labelRes = R.string.add_open_challenge,
+                        isVisible = { it.isMainUserApp() },
+                        onClick = { clickedApp ->
+                            viewModelScope.launch {
+                                modifiedAppsRepository.setChallenge(clickedApp.packageName, true)
+                                _showBottomSheet.value = false
+                            }
+                        }
+                    )
                 }
-            ),
-            AppAction(
-                labelRes = R.string.hide,
-                isVisible = { it.isMainUserApp() },
-                onClick = { clickedApp ->
-                    viewModelScope.launch {
-                        modifiedAppsRepository.setHidden(clickedApp.packageName, true)
-                        _showBottomSheet.value = false
-                    }
-                }
-            ),
-            AppAction(
-                labelRes = R.string.app_info,
-                onClick = { clickedApp ->
-                    viewModelScope.launch {
-                        _uiEvent.emit(HomeUiEvent.ShowAppInfo(clickedApp))
-                    }
-                }
-            ),
-            AppAction(
-                labelRes = R.string.add_open_challenge,
-                isVisible = { it.isMainUserApp() && !hasChallenge },
-                onClick = { clickedApp ->
-                    viewModelScope.launch {
-                        modifiedAppsRepository.setChallenge(clickedApp.packageName, true)
-                        _showBottomSheet.value = false
-                    }
-                }
-            )
-        )
+            }
+        }
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
