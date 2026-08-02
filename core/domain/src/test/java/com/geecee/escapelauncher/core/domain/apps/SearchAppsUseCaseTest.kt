@@ -1,9 +1,10 @@
-package com.geecee.escapelauncher.core.common
+package com.geecee.escapelauncher.core.domain.apps
 
+import com.geecee.escapelauncher.core.domain.search.fuzzyMatch
 import org.junit.Test
 import org.junit.Assert.*
 
-class SearchUtilsTest {
+class SearchAppsUseCaseTest {
 
     @Test
     fun `fuzzyMatch should return true for exact match`() {

@@ -11,8 +11,6 @@ import androidx.core.net.toUri
 import com.geecee.escapelauncher.core.analytics.analyticsProxy
 import com.geecee.escapelauncher.core.model.InstalledApp
 
-import java.text.Normalizer
-
 /**
  * Checks if the app belongs to the main user.
  */
@@ -68,28 +66,6 @@ fun launchApp(
         analyticsProxy.recordException(e)
         false
     }
-}
-
-/**
- * Sorts a list of apps by relevance to a search query.
- */
-fun sortAppsByRelevance(apps: List<InstalledApp>, query: String): List<InstalledApp> {
-    val regexUnaccent = "\\p{M}+"
-    val normalizedQuery = Normalizer.normalize(query, Normalizer.Form.NFD)
-        .replace(Regex(regexUnaccent), "")
-        .lowercase()
-
-    return apps.sortedWith(compareBy<InstalledApp> { app ->
-        val normalizedName = Normalizer.normalize(app.displayName, Normalizer.Form.NFD)
-            .replace(Regex(regexUnaccent), "")
-            .lowercase()
-
-        when {
-            normalizedName.startsWith(normalizedQuery) -> 0
-            normalizedName.contains(normalizedQuery) -> 1
-            else -> 2
-        }
-    }.thenBy { it.displayName.lowercase() })
 }
 
 fun uninstallApp(context: Context, app: InstalledApp) {

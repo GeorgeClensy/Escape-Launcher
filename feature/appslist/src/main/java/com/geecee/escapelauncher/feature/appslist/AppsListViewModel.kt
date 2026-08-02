@@ -4,14 +4,12 @@ import android.content.Context
 import androidx.compose.ui.Alignment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.geecee.escapelauncher.core.common.fuzzyMatch
 import com.geecee.escapelauncher.core.common.getAppShortcuts
 import com.geecee.escapelauncher.core.common.isMainUserApp
-import com.geecee.escapelauncher.core.common.sortAppsByRelevance
 import com.geecee.escapelauncher.core.common.startShortcut
 import com.geecee.escapelauncher.core.domain.apps.AppActionType
 import com.geecee.escapelauncher.core.domain.apps.GetAppActionsUseCase
-import com.geecee.escapelauncher.core.domain.repository.AppsRepository
+import com.geecee.escapelauncher.core.domain.search.SearchAppsUseCase
 import com.geecee.escapelauncher.core.domain.repository.ModifiedAppsRepository
 import com.geecee.escapelauncher.core.domain.repository.SettingsRepository
 import com.geecee.escapelauncher.core.model.AppAction
@@ -27,7 +25,6 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
@@ -39,9 +36,9 @@ import kotlinx.coroutines.launch
 class AppsListViewModel @Inject constructor(
     @ApplicationContext context: Context,
     settingsRepository: SettingsRepository,
-    appsRepository: AppsRepository,
     private val modifiedAppsRepository: ModifiedAppsRepository,
-    private val getAppActionsUseCase: GetAppActionsUseCase
+    private val getAppActionsUseCase: GetAppActionsUseCase,
+    private val searchAppsUseCase: SearchAppsUseCase
 ) : ViewModel() {
     // UI Events
     private val _uiEvent = MutableSharedFlow<AppsListUiEvent>()
@@ -81,35 +78,12 @@ class AppsListViewModel @Inject constructor(
     }
 
     // Apps
-    val apps: StateFlow<List<InstalledApp>> = combine(
-        appsRepository.mainUserApps,
-        modifiedAppsRepository.getHiddenPackageIdsFlow(),
-        _searchText,
-        hiddenAppsInSearch
-    ) { allApps, hiddenIds, rawQuery, showHidden ->
-        val query = rawQuery.trim()
-        val hiddenSet = hiddenIds.toSet()
-
-        val filtered = if (query.isBlank()) {
-            allApps.filter { !hiddenSet.contains(it.packageName) }
-        } else {
-            allApps.filter { app ->
-                val isHidden = hiddenSet.contains(app.packageName)
-                val matchesQuery = fuzzyMatch(app.displayName, query)
-                matchesQuery && (!isHidden || showHidden)
-            }
-        }
-
-        if (query.isNotBlank()) {
-            sortAppsByRelevance(filtered, query)
-        } else {
-            filtered
-        }
-    }.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5000),
-        initialValue = emptyList()
-    )
+    val apps: StateFlow<List<InstalledApp>> = searchAppsUseCase(_searchText, hiddenAppsInSearch)
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList()
+        )
     
     // Bottom sheet
     private val _showBottomSheet = MutableStateFlow(false)

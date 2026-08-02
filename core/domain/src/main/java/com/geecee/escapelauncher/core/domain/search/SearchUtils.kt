@@ -1,9 +1,10 @@
-package com.geecee.escapelauncher.core.common
+package com.geecee.escapelauncher.core.domain.search
 
+import com.geecee.escapelauncher.core.model.InstalledApp
 import java.text.Normalizer
 
-fun fuzzyMatch(text: String, pattern: String): Boolean {
-    // Case-insensitive contains check (original behavior)
+internal fun fuzzyMatch(text: String, pattern: String): Boolean {
+    // Case-insensitive contains check
     if (text.contains(pattern, ignoreCase = true)) {
         return true
     }
@@ -38,6 +39,24 @@ fun fuzzyMatch(text: String, pattern: String): Boolean {
         textIndex++
     }
 
-    // If we matched all characters in pattern, it's a fuzzy match
     return patternIndex == normalizedPattern.length
+}
+
+internal fun sortAppsByRelevance(apps: List<InstalledApp>, query: String): List<InstalledApp> {
+    val regexUnaccent = "\\p{M}+"
+    val normalizedQuery = Normalizer.normalize(query, Normalizer.Form.NFD)
+        .replace(Regex(regexUnaccent), "")
+        .lowercase()
+
+    return apps.sortedWith(compareBy<InstalledApp> { app ->
+        val normalizedName = Normalizer.normalize(app.displayName, Normalizer.Form.NFD)
+            .replace(Regex(regexUnaccent), "")
+            .lowercase()
+
+        when {
+            normalizedName.startsWith(normalizedQuery) -> 0
+            normalizedName.contains(normalizedQuery) -> 1
+            else -> 2
+        }
+    }.thenBy { it.displayName.lowercase() })
 }
