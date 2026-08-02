@@ -12,7 +12,7 @@
 ![Downloads](https://img.shields.io/github/downloads/GeorgeClensy/Escape-Launcher/total?style=flat&color=B2D8D8)
 [![Discord](https://img.shields.io/badge/Discord-B2D8D8?style=flat&logo=discord)](https://discord.gg/9u5eVTFsyS)
 
-Escape launcher is a minimalist app launcher that replaces the default homes screen on android devices to help with social media and smartphone addiction. It has a simple yet customisable, material-ui-3 based design with a home page with favourite apps, support for widgets, clock, date, screen times. It also has a full apps list with search, work apps and a built in screen time tracking dashboard. It was one of the first and is still one of the only launchers to support the new private space profile that was added an Android 15. Escape launcher supports Android 8 (`minSDK = 26`) up until the latest release of android 16 (`targetSDK = 36`)
+Escape launcher is a minimalist app launcher that replaces the default homes screen on android devices to help with social media and smartphone addiction. It has a simple yet customisable, material-ui-3 based design with a home page with favourite apps, support for widgets, clock, date, screen times. It also has a full apps list with search, work apps and a built in screen time tracking dashboard. It was one of the first and is still one of the only launchers to support the new private space profile that was added an Android 15. Escape launcher supports Android 9 (`minSDK = 28`) up until the latest release of android 16 (`targetSDK = 36`)
 
 </div>
 
