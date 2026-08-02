@@ -13,7 +13,6 @@ dependencies {
     implementation(project(":core:domain"))
     implementation(project(":core:ui"))
     implementation(project(":core:model"))
-    implementation(project(":core:data"))
     implementation(project(":core:analytics"))
     implementation(project(":domain:time"))
     implementation(project(":feature:newwidgets"))

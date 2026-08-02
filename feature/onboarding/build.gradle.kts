@@ -7,7 +7,6 @@ android {
 
 dependencies {
     implementation(project(":core:common"))
-    implementation(project(":core:data"))
     implementation(project(":core:domain"))
     implementation(project(":core:ui"))
     implementation(project(":core:theme"))
