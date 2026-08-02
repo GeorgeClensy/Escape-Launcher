@@ -1,7 +1,7 @@
-package com.geecee.escapelauncher.domain.time
+package com.geecee.escapelauncher.core.domain.time
 
+import jakarta.inject.Inject
 import java.time.LocalTime
-import javax.inject.Inject
 
 class GetCurrentTimePartsUseCase @Inject constructor() {
     fun invoke(time: LocalTime, twelveHourDisplay: Boolean): Triple<Int, Int, Boolean> {

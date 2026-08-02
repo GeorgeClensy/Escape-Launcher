@@ -2,7 +2,7 @@ package com.geecee.escapelauncher.feature.homescreen
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.geecee.escapelauncher.domain.time.GetCurrentTimePartsUseCase
+import com.geecee.escapelauncher.core.domain.time.GetCurrentTimePartsUseCase
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
