@@ -18,7 +18,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.geecee.escapelauncher.core.theme.ContentColor
 
 /**
  * Title header with back button
@@ -31,7 +30,7 @@ fun EscapeHeader(
     goBack: () -> Unit,
     title: String,
     hideBack: Boolean = false,
-    color: Color = ContentColor,
+    color: Color = MaterialTheme.colorScheme.onSurface,
     padding: Boolean = true
 ) {
     Row(
@@ -81,7 +80,7 @@ fun EscapeSubhead(title: String) {
     ) {
         Text(
             text = title,
-            color = ContentColor,
+            color = MaterialTheme.colorScheme.onSurface,
             style = MaterialTheme.typography.bodyMedium,
             modifier = Modifier.align(Alignment.CenterVertically)
         )

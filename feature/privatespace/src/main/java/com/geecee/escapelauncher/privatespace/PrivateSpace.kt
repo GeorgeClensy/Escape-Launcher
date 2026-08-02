@@ -33,8 +33,6 @@ import com.geecee.escapelauncher.core.ui.R
 import com.geecee.escapelauncher.core.ui.composables.LockedAppFolderUI
 import com.geecee.escapelauncher.core.ui.composables.LockedFolderCard
 import com.geecee.escapelauncher.core.ui.composables.SettingsSwitch
-import com.geecee.escapelauncher.core.theme.ContentColor
-import com.geecee.escapelauncher.core.theme.SecondaryCardContainerColor
 
 /**
  * Android 15+ Private space UI with apps, settings button and lock button
@@ -86,10 +84,10 @@ fun PrivateSpace(
                             onClick = {
                                 viewModel.toggleSettings()
                             }, modifier = Modifier, colors = IconButtonColors(
-                                containerColor = SecondaryCardContainerColor,
-                                contentColor = ContentColor,
-                                disabledContainerColor = SecondaryCardContainerColor,
-                                disabledContentColor = ContentColor
+                                containerColor = MaterialTheme.colorScheme.surfaceContainer,
+                                contentColor = MaterialTheme.colorScheme.onSurface,
+                                disabledContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+                                disabledContentColor = MaterialTheme.colorScheme.onSurface
                             )
                         ) {
                             Icon(
@@ -102,10 +100,10 @@ fun PrivateSpace(
                             onClick = {
                                 viewModel.togglePrivateSpaceProfile(onLauncherNotDefault = {})
                             }, modifier = Modifier, colors = IconButtonColors(
-                                containerColor = SecondaryCardContainerColor,
-                                contentColor = ContentColor,
-                                disabledContainerColor = SecondaryCardContainerColor,
-                                disabledContentColor = ContentColor
+                                containerColor = MaterialTheme.colorScheme.surfaceContainer,
+                                contentColor = MaterialTheme.colorScheme.onSurface,
+                                disabledContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+                                disabledContentColor = MaterialTheme.colorScheme.onSurface
                             )
                         ) {
                             Icon(
@@ -175,7 +173,7 @@ fun PrivateAppItem(
     Text(
         appName,
         modifier = modifier,
-        color = ContentColor,
+        color = MaterialTheme.colorScheme.onSurface,
         style = MaterialTheme.typography.bodyMedium
     )
 }

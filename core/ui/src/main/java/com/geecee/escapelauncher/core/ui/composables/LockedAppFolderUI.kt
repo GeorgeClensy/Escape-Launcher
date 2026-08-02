@@ -16,9 +16,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.geecee.escapelauncher.core.theme.ContentColor
 import com.geecee.escapelauncher.core.theme.EscapeThemePreview
-import com.geecee.escapelauncher.core.theme.SecondaryCardContainerColor
 
 /**
  * UI for a locked folder to be used at the bottom of the apps list.
@@ -57,10 +55,10 @@ fun LockedAppFolderUI(
             }, modifier = Modifier.align(
                 alignment = Alignment.CenterEnd
             ), colors = IconButtonColors(
-                containerColor = SecondaryCardContainerColor,
-                contentColor = ContentColor,
-                disabledContainerColor = SecondaryCardContainerColor,
-                disabledContentColor = ContentColor
+                containerColor = MaterialTheme.colorScheme.surfaceContainer,
+                contentColor = MaterialTheme.colorScheme.onSurface,
+                disabledContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+                disabledContentColor = MaterialTheme.colorScheme.onSurface
             )
         ) {
             Icon(

@@ -22,6 +22,7 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -41,7 +42,6 @@ import com.geecee.escapelauncher.core.common.goToAppInfo
 import com.geecee.escapelauncher.core.common.launchApp
 import com.geecee.escapelauncher.core.common.uninstallApp
 import com.geecee.escapelauncher.core.model.InstalledApp
-import com.geecee.escapelauncher.core.theme.BackgroundColor
 import com.geecee.escapelauncher.core.theme.colours.transparentHalf
 import com.geecee.escapelauncher.core.ui.composables.AnimatedPillSearchBar
 import com.geecee.escapelauncher.core.ui.composables.AppsListHeader
@@ -295,7 +295,7 @@ fun AppsList(
 @Composable
 private fun AppsListPreview() {
     val scrollState = rememberLazyListState()
-    Box(modifier = Modifier.background(BackgroundColor)) {
+    Box(modifier = Modifier.background(MaterialTheme.colorScheme.surface)) {
         AppsList(
             scrollState = scrollState,
             isBeingShown = true,

@@ -25,8 +25,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.geecee.escapelauncher.core.theme.CardContainerColor
-import com.geecee.escapelauncher.core.theme.ContentColor
 
 
 /**
@@ -66,8 +64,8 @@ fun SettingsSingleChoiceSegmentedButtons(
             bottomStart = bottomStartRadius,
             bottomEnd = bottomEndRadius
         ), colors = CardDefaults.cardColors(
-            containerColor = CardContainerColor,
-            contentColor = ContentColor
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+            contentColor = MaterialTheme.colorScheme.onSurface
         )
     ) {
         Row(
@@ -149,8 +147,8 @@ fun SettingsSlider(
             bottomStart = bottomStartRadius,
             bottomEnd = bottomEndRadius
         ), colors = CardDefaults.cardColors(
-            containerColor = CardContainerColor,
-            contentColor = ContentColor
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+            contentColor = MaterialTheme.colorScheme.onSurface
         )
     ) {
         Row(
@@ -183,7 +181,7 @@ fun SettingsSlider(
                     .size(40.dp)
                     .padding(start = 8.dp)
                     .clickable(onClick = onReset),
-                tint = ContentColor,
+                tint = MaterialTheme.colorScheme.onSurface,
             )
         }
     }

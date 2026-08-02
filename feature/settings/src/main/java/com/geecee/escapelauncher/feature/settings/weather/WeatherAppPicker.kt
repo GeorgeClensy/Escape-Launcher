@@ -21,7 +21,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.geecee.escapelauncher.core.model.InstalledApp
-import com.geecee.escapelauncher.core.theme.primaryContentColor
 
 /**
  * Weather app picker
@@ -58,7 +57,7 @@ fun WeatherAppPicker(
                         Text(
                             text = app.displayName,
                             style = MaterialTheme.typography.bodyLarge,
-                            color = primaryContentColor
+                            color = MaterialTheme.colorScheme.primary
                         )
                     }
                 }

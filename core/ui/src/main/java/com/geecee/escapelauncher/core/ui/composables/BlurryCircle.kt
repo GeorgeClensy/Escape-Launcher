@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialShapes
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.toShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -19,7 +20,6 @@ import androidx.compose.ui.graphics.nativePaint
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.geecee.escapelauncher.core.theme.EscapeThemePreview
-import com.geecee.escapelauncher.core.theme.primaryContentColor
 import com.geecee.escapelauncher.core.ui.utils.toAndroidColor
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
@@ -60,7 +60,7 @@ fun BlurryCircle(
 fun PrevBlurryCircle() {
     EscapeThemePreview() {
         BlurryCircle(
-            circleColor = primaryContentColor.toAndroidColor()
+            circleColor = MaterialTheme.colorScheme.primary.toAndroidColor()
         )
     }
 }

@@ -35,8 +35,6 @@ import androidx.compose.ui.platform.SoftwareKeyboardController
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
-import com.geecee.escapelauncher.core.theme.BackgroundColor
-import com.geecee.escapelauncher.core.theme.primaryContentColor
 
 /**
  * Search Bar for apps list that collapses into a pill
@@ -90,7 +88,7 @@ fun AnimatedPillSearchBar(
             .height(56.dp)
             .clickable { onExpandedChange(!isExpanded) },
         shape = RoundedCornerShape(28.dp),
-        color = primaryContentColor
+        color = MaterialTheme.colorScheme.primary
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -99,14 +97,14 @@ fun AnimatedPillSearchBar(
             Icon(
                 imageVector = Icons.Default.Search,
                 contentDescription = "Search",
-                tint = BackgroundColor,
+                tint = MaterialTheme.colorScheme.surface,
                 modifier = Modifier.size(24.dp)
             )
 
             if (!isExpanded) {
                 Text(
                     text = closedText,
-                    color = BackgroundColor,
+                    color = MaterialTheme.colorScheme.surface,
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.padding(start = 4.dp)
                 )
@@ -128,9 +126,9 @@ fun AnimatedPillSearchBar(
                         onSearchDone(textFieldValue.text.trim(), keyboardController)
                     }),
                     textStyle = MaterialTheme.typography.bodyMedium.copy(
-                        color = BackgroundColor
+                        color = MaterialTheme.colorScheme.surface
                     ),
-                    cursorBrush = SolidColor(BackgroundColor)
+                    cursorBrush = SolidColor(MaterialTheme.colorScheme.surface)
                 )
             }
         }

@@ -28,7 +28,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.geecee.escapelauncher.core.model.InstalledApp
-import com.geecee.escapelauncher.core.theme.ContentColor
 import com.geecee.escapelauncher.core.ui.model.AppAction
 
 /**
@@ -62,14 +61,14 @@ fun HomeScreenBottomSheet(
                 Icon(
                     Icons.Default.Settings,
                     contentDescription = "App Options",
-                    tint = ContentColor,
+                    tint = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier
                         .size(45.dp)
                         .padding(end = 10.dp)
                 )
                 Text(
                     app.displayName,
-                    color = ContentColor,
+                    color = MaterialTheme.colorScheme.onSurface,
                     fontSize = 32.sp,
                     style = MaterialTheme.typography.titleMedium
                 )
@@ -103,7 +102,7 @@ private fun AppActionItem(action: AppAction, app: InstalledApp) {
         modifier = Modifier
             .padding(vertical = 10.dp)
             .combinedClickable(onClick = { action.onClick(app) }),
-        color = ContentColor,
+        color = MaterialTheme.colorScheme.onSurface,
         style = MaterialTheme.typography.bodyMedium
     )
 }

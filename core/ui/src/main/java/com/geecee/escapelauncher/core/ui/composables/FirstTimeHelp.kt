@@ -18,8 +18,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
-import com.geecee.escapelauncher.core.theme.CardContainerColor
-import com.geecee.escapelauncher.core.theme.ContentColor
 
 
 /**
@@ -33,7 +31,7 @@ fun FirstTimeHelp(swipeForAllAppsText: String, holdForSettingsText: String) {
         )
     ) {
         Column(
-            Modifier.background(CardContainerColor)
+            Modifier.background(MaterialTheme.colorScheme.surfaceContainerHigh)
         ) {
             Row(
                 Modifier
@@ -44,13 +42,13 @@ fun FirstTimeHelp(swipeForAllAppsText: String, holdForSettingsText: String) {
                     Icons.AutoMirrored.Rounded.ArrowForward,
                     "",
                     Modifier.align(Alignment.CenterVertically),
-                    tint = ContentColor
+                    tint = MaterialTheme.colorScheme.onSurface
                 )
                 Spacer(Modifier.width(5.dp))
                 Text(
                     swipeForAllAppsText,
                     modifier = Modifier,
-                    color = ContentColor,
+                    color = MaterialTheme.colorScheme.onSurface,
                     style = MaterialTheme.typography.bodyMedium
                 )
             }
@@ -64,13 +62,13 @@ fun FirstTimeHelp(swipeForAllAppsText: String, holdForSettingsText: String) {
                     Icons.Default.Settings,
                     "",
                     Modifier.align(Alignment.CenterVertically),
-                    tint = ContentColor
+                    tint = MaterialTheme.colorScheme.onSurface
                 )
                 Spacer(Modifier.width(5.dp))
                 Text(
                     holdForSettingsText,
                     modifier = Modifier,
-                    color = ContentColor,
+                    color = MaterialTheme.colorScheme.onSurface,
                     style = MaterialTheme.typography.bodyMedium
                 )
             }

@@ -12,6 +12,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.Card
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -20,8 +21,6 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.geecee.escapelauncher.core.theme.CardContainerColor
-import com.geecee.escapelauncher.core.theme.ContentColor
 
 /**
  * Privacy Policy dialogue
@@ -47,7 +46,7 @@ fun PrivacyPolicyDialog(
                 // Load text from the asset
                 BasicText(
                     text = text, style = TextStyle(
-                        color = ContentColor,
+                        color = MaterialTheme.colorScheme.onSurface,
                         textAlign = TextAlign.Start,
                         fontWeight = FontWeight.Normal
                     ), modifier = Modifier.fillMaxWidth()
@@ -63,10 +62,10 @@ fun PrivacyPolicyDialog(
                         .align(Alignment.CenterHorizontally)
                         .padding(bottom = 8.dp),
                     colors = ButtonColors(
-                        CardContainerColor,
-                        ContentColor,
-                        CardContainerColor,
-                        ContentColor
+                        MaterialTheme.colorScheme.surfaceContainerHigh,
+                        MaterialTheme.colorScheme.onSurface,
+                        MaterialTheme.colorScheme.surfaceContainerHigh,
+                        MaterialTheme.colorScheme.onSurface
                     )
                 ) {
                     Text("OK")

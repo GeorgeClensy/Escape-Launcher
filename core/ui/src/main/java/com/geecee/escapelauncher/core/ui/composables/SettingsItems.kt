@@ -38,12 +38,6 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.geecee.escapelauncher.core.theme.CardContainerColor
-import com.geecee.escapelauncher.core.theme.CardContainerColorDisabled
-import com.geecee.escapelauncher.core.theme.ContentColor
-import com.geecee.escapelauncher.core.theme.ContentColorDisabled
-import com.geecee.escapelauncher.core.theme.ErrorContainerColor
-import com.geecee.escapelauncher.core.theme.ErrorContentColor
 
 /**
  * Switch for setting with a label on the left
@@ -80,8 +74,8 @@ fun SettingsSwitch(
             bottomEnd = bottomEndRadius,
             bottomStart = bottomStartRadius
         ), colors = CardDefaults.cardColors(
-            containerColor = CardContainerColor,
-            contentColor = ContentColor
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+            contentColor = MaterialTheme.colorScheme.onSurface
         )
     ) {
         Row(
@@ -144,8 +138,8 @@ fun SettingsNavigationItem(
             bottomEnd = bottomEndRadius,
             bottomStart = bottomStartRadius
         ), colors = CardDefaults.cardColors(
-            containerColor = CardContainerColor,
-            contentColor = ContentColor
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+            contentColor = MaterialTheme.colorScheme.onSurface
         )
     ) {
         Row(
@@ -168,7 +162,7 @@ fun SettingsNavigationItem(
                     Icons.Rounded.Check,
                     contentDescription = null,
                     modifier = iconModifier,
-                    tint = ContentColor,
+                    tint = MaterialTheme.colorScheme.onSurface,
                 )
             }
             else {
@@ -177,14 +171,14 @@ fun SettingsNavigationItem(
                         Icons.AutoMirrored.Default.KeyboardArrowRight,
                         contentDescription = null, // Content description can be null for decorative icons
                         modifier = iconModifier.rotate(-45f),
-                        tint = ContentColor,
+                        tint = MaterialTheme.colorScheme.onSurface,
                     )
                 } else {
                     Icon(
                         Icons.AutoMirrored.Default.KeyboardArrowRight,
                         contentDescription = null, // Content description can be null for decorative icons
                         modifier = iconModifier,
-                        tint = ContentColor,
+                        tint = MaterialTheme.colorScheme.onSurface,
                     )
                 }
             }
@@ -236,13 +230,13 @@ fun SettingsButton(
     )
 
     val animatedContainerColor by animateColorAsState(
-        targetValue = if (isDisabled) CardContainerColorDisabled else if (isSelected) CardContainerColorDisabled else CardContainerColor,
+        targetValue = if (isDisabled) MaterialTheme.colorScheme.surfaceContainerLow else if (isSelected) MaterialTheme.colorScheme.surfaceContainerLow else MaterialTheme.colorScheme.surfaceContainerHigh,
         animationSpec = tween(durationMillis = 300),
         label = "containerColor"
     )
 
     val animatedContentColor by animateColorAsState(
-        targetValue = if (!isDisabled) ContentColor else ContentColorDisabled,
+        targetValue = if (!isDisabled) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface,
         animationSpec = tween(durationMillis = 300),
         label = "contentColor"
     )
@@ -348,8 +342,8 @@ fun SettingsSwipeableButton(
                     bottomStart = bottomStartRadius
                 ),
                 colors = CardDefaults.cardColors(
-                    containerColor = ErrorContainerColor,
-                    contentColor = ErrorContentColor
+                    containerColor = MaterialTheme.colorScheme.error,
+                    contentColor = MaterialTheme.colorScheme.onError
                 )
             ) {
                 Box(
@@ -361,7 +355,7 @@ fun SettingsSwipeableButton(
                     Icon(
                         imageVector = Icons.Default.Delete,
                         contentDescription = deleteIconContentDescription,
-                        tint = ErrorContentColor
+                        tint = MaterialTheme.colorScheme.onError
                     )
                 }
             }
@@ -377,8 +371,8 @@ fun SettingsSwipeableButton(
                 bottomEnd = bottomEndRadius,
                 bottomStart = bottomStartRadius
             ), colors = CardDefaults.cardColors(
-                containerColor = CardContainerColor,
-                contentColor = ContentColor
+                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                contentColor = MaterialTheme.colorScheme.onSurface
             )
         ) {
             Row(

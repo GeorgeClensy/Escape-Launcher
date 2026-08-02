@@ -41,10 +41,6 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.geecee.escapelauncher.core.model.InstalledApp
 import com.geecee.escapelauncher.core.ui.R
 import com.geecee.escapelauncher.core.ui.composables.LockedFolderCard
-import com.geecee.escapelauncher.core.theme.BackgroundColor
-import com.geecee.escapelauncher.core.theme.ContentColor
-import com.geecee.escapelauncher.core.theme.SecondaryCardContainerColor
-import com.geecee.escapelauncher.core.theme.primaryContentColor
 
 // IMPORTANT TODO: Fix that the app doesn't track the work apps state for example if you uninstall an app escape will still show it until it has been restarted which can cause it to crash if you then tap on the app
 
@@ -66,8 +62,8 @@ fun WorkAppsFab(
             onClick()
         },
         modifier = modifier.size(56.dp),
-        contentColor = BackgroundColor,
-        containerColor = primaryContentColor,
+        contentColor = MaterialTheme.colorScheme.surface,
+        containerColor = MaterialTheme.colorScheme.primary,
     ) {
         Icon(Icons.Rounded.Work, contentDescription = stringResource(R.string.work_profile))
     }
@@ -97,7 +93,7 @@ fun WorkAppItem(
     Text(
         appName,
         modifier = modifier,
-        color = ContentColor,
+        color = MaterialTheme.colorScheme.onSurface,
         style = MaterialTheme.typography.bodyMedium
     )
 }
@@ -157,10 +153,10 @@ fun WorkApps(
                             }
                         },
                         colors = IconButtonColors(
-                            containerColor = SecondaryCardContainerColor,
-                            contentColor = ContentColor,
-                            disabledContainerColor = SecondaryCardContainerColor,
-                            disabledContentColor = ContentColor
+                            containerColor = MaterialTheme.colorScheme.surfaceContainer,
+                            contentColor = MaterialTheme.colorScheme.onSurface,
+                            disabledContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+                            disabledContentColor = MaterialTheme.colorScheme.onSurface
                         )
                     ) {
                         Icon(
@@ -228,8 +224,8 @@ fun WorkApps(
                     modifier = Modifier
                         .padding(bottom = 30.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = SecondaryCardContainerColor,
-                        contentColor = ContentColor,
+                        containerColor = MaterialTheme.colorScheme.surfaceContainer,
+                        contentColor = MaterialTheme.colorScheme.onSurface,
                     )
                 ) {
                     Text(stringResource(R.string.unpause))

@@ -24,7 +24,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.geecee.escapelauncher.core.common.loadTextFromAssets
 import com.geecee.escapelauncher.core.theme.EscapeThemePreview
-import com.geecee.escapelauncher.core.theme.primaryContentColor
 import com.geecee.escapelauncher.core.ui.R
 import com.geecee.escapelauncher.core.ui.composables.LegalTextBox
 import com.geecee.escapelauncher.core.ui.composables.SettingsSwitch
@@ -50,7 +49,7 @@ fun AnalyticsPage(
             Text(
                 stringResource(R.string.analytics_and_data_collection),
                 Modifier,
-                primaryContentColor,
+                MaterialTheme.colorScheme.primary,
                 style = MaterialTheme.typography.titleSmall,
                 textAlign = TextAlign.Start
             )

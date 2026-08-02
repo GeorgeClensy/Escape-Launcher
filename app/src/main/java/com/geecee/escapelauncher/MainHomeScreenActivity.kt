@@ -30,6 +30,7 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
+import androidx.compose.material3.MaterialTheme
 import com.geecee.escapelauncher.core.analytics.analyticsProxy
 import com.geecee.escapelauncher.core.cloudmessaging.messagingInitializer
 import com.geecee.escapelauncher.core.common.configureNavBar
@@ -37,7 +38,6 @@ import com.geecee.escapelauncher.core.common.configureStatusBar
 import com.geecee.escapelauncher.core.common.formatScreenTime
 import com.geecee.escapelauncher.core.common.hasPermission
 import com.geecee.escapelauncher.core.data.worker.ClearOldDataWorker
-import com.geecee.escapelauncher.core.theme.BackgroundColor
 import com.geecee.escapelauncher.core.theme.EscapeTheme
 import com.geecee.escapelauncher.core.theme.motion.enterTransition
 import com.geecee.escapelauncher.core.theme.motion.exitTransition
@@ -251,7 +251,7 @@ class MainHomeScreenActivity : ComponentActivity() {
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(color = BackgroundColor)
+                .background(color = MaterialTheme.colorScheme.surface)
                 .animateContentSize()
         ) {
             NavDisplay(

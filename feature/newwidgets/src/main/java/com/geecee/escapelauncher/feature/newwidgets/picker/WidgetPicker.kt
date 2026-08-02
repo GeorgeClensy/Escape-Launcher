@@ -50,9 +50,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.drawable.toBitmap
 import com.geecee.escapelauncher.core.analytics.analyticsProxy
-import com.geecee.escapelauncher.core.theme.BackgroundColor
-import com.geecee.escapelauncher.core.theme.ContentColor
-import com.geecee.escapelauncher.core.theme.primaryContentColor
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -102,7 +99,7 @@ fun CustomWidgetPicker(
             if (isLoading) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     CircularWavyProgressIndicator(
-                        color = primaryContentColor
+                        color = MaterialTheme.colorScheme.primary
                     )
                 }
             } else {
@@ -194,14 +191,14 @@ fun WidgetAppItem(
                         Box(
                             modifier = Modifier
                                 .size(40.dp)
-                                .background(BackgroundColor, RoundedCornerShape(8.dp)),
+                                .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(8.dp)),
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Search,
                                 contentDescription = null,
                                 modifier = Modifier.size(24.dp),
-                                tint = ContentColor
+                                tint = MaterialTheme.colorScheme.onSurface
                             )
                         }
                     }
@@ -213,12 +210,12 @@ fun WidgetAppItem(
                         Text(
                             text = widgetAppData.appName,
                             style = MaterialTheme.typography.bodyLarge,
-                            color = primaryContentColor
+                            color = MaterialTheme.colorScheme.primary
                         )
                         Text(
                             text = "${widgets.size} ${if (widgets.size == 1) "widget" else "widgets"}",
                             style = MaterialTheme.typography.bodySmall,
-                            color = ContentColor
+                            color = MaterialTheme.colorScheme.onSurface
                         )
                     }
                 }
@@ -228,7 +225,7 @@ fun WidgetAppItem(
                     imageVector = Icons.Default.KeyboardArrowDown,
                     contentDescription = if (expanded) "Collapse" else "Expand",
                     modifier = Modifier.rotate(rotationState),
-                    tint = ContentColor
+                    tint = MaterialTheme.colorScheme.onSurface
                 )
             }
 
@@ -269,7 +266,7 @@ fun WidgetPreview(
     Surface(
         onClick = onClick,
         shape = RoundedCornerShape(12.dp),
-        color = BackgroundColor.copy(alpha = 0.5f),
+        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.5f),
         modifier = Modifier.fillMaxWidth()
     ) {
         Column(
@@ -312,7 +309,7 @@ fun WidgetPreview(
                     CircularProgressIndicator(
                         modifier = Modifier.size(24.dp),
                         strokeWidth = 2.dp,
-                        color = ContentColor.copy(alpha = 0.3f)
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f)
                     )
                 } else if (imageBitmap != null) {
                     Image(
@@ -329,12 +326,12 @@ fun WidgetPreview(
                             imageVector = Icons.Default.Search,
                             contentDescription = null,
                             modifier = Modifier.size(48.dp),
-                            tint = ContentColor.copy(alpha = 0.5f)
+                            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
                         )
                         Text(
                             text = "No preview available",
                             style = MaterialTheme.typography.labelSmall,
-                            color = ContentColor.copy(alpha = 0.5f)
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
                         )
                     }
                 }
@@ -346,7 +343,7 @@ fun WidgetPreview(
             Text(
                 text = widget.label,
                 style = MaterialTheme.typography.bodyMedium,
-                color = primaryContentColor,
+                color = MaterialTheme.colorScheme.primary,
                 textAlign = TextAlign.Center,
                 maxLines = 1
             )

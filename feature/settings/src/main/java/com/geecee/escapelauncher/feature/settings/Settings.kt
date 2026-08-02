@@ -11,6 +11,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -29,7 +30,6 @@ import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import com.geecee.escapelauncher.core.common.loadTextFromAssets
-import com.geecee.escapelauncher.core.theme.BackgroundColor
 import com.geecee.escapelauncher.core.theme.motion.enterTransition
 import com.geecee.escapelauncher.core.theme.motion.exitTransition
 import com.geecee.escapelauncher.core.theme.motion.popEnterTransition
@@ -111,7 +111,7 @@ fun Settings(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(color = BackgroundColor)
+            .background(color = MaterialTheme.colorScheme.surface)
             .padding(20.dp, 0.dp, 20.dp, 0.dp)
     ) {
 

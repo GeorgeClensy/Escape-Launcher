@@ -17,14 +17,12 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.unit.dp
-import com.geecee.escapelauncher.core.theme.CardContainerColor
-import com.geecee.escapelauncher.core.theme.ContentColor
-import com.geecee.escapelauncher.core.theme.primaryContentColor
 
 
 @Composable
@@ -45,8 +43,8 @@ fun FooterBox(
             }),
         shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.cardColors(
-            containerColor = CardContainerColor,
-            contentColor = ContentColor
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+            contentColor = MaterialTheme.colorScheme.onSurface
         )
     ) {
         Column(
@@ -60,7 +58,7 @@ fun FooterBox(
                 "Escape Launcher Icon",
                 Modifier
                     .padding(3.dp),
-                tint = ContentColor
+                tint = MaterialTheme.colorScheme.onSurface
             )
 
             Spacer(
@@ -70,7 +68,7 @@ fun FooterBox(
             AutoResizingText(
                 text = text,
                 modifier = Modifier,
-                color = ContentColor,
+                color = MaterialTheme.colorScheme.onSurface,
             )
 
             Spacer(Modifier.height(10.dp))
@@ -78,7 +76,7 @@ fun FooterBox(
             AutoResizingText(
                 text = secondText,
                 modifier = Modifier,
-                color = ContentColor,
+                color = MaterialTheme.colorScheme.onSurface,
             )
 
             Spacer(Modifier.height(15.dp))
@@ -87,16 +85,16 @@ fun FooterBox(
                 onClick = {
                     onSponsorClick()
                 }, colors = ButtonDefaults.buttonColors(
-                    containerColor = primaryContentColor,
-                    contentColor = CardContainerColor
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.surfaceContainerHigh
                 )
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Filled.Favorite, "", tint = CardContainerColor)
+                    Icon(Icons.Filled.Favorite, "", tint = MaterialTheme.colorScheme.surfaceContainerHigh)
                     Spacer(Modifier.width(5.dp))
                     AutoResizingText(
                         text = sponsorButtonText,
-                        color = CardContainerColor
+                        color = MaterialTheme.colorScheme.surfaceContainerHigh
                     )
                 }
             }

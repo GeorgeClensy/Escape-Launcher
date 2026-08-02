@@ -16,7 +16,6 @@ import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.isUnspecified
 import androidx.compose.ui.unit.sp
-import com.geecee.escapelauncher.core.theme.ContentColor
 
 /**
  * Automatically resizing text that fits to container.
@@ -38,7 +37,7 @@ fun AutoResizingText(
     style: TextStyle = MaterialTheme.typography.bodyMedium,
     minFontSize: TextUnit = 12.sp,
     maxLines: Int = 1,
-    color: Color = ContentColor,
+    color: Color = MaterialTheme.colorScheme.onSurface,
     fontFamily: FontFamily? = MaterialTheme.typography.bodyMedium.fontFamily,
     textAlign: TextAlign? = null
 ) {

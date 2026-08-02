@@ -17,7 +17,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.geecee.escapelauncher.core.theme.primaryContentColor
 
 /**
  * A composable that displays a small information widget with an optional icon and text.
@@ -54,13 +53,13 @@ fun GlanceWidget(
                     .align(Alignment.CenterVertically)
                     .size(22.dp)
                     .padding(end = 2.dp),
-                tint = primaryContentColor
+                tint = MaterialTheme.colorScheme.primary
             )
         }
 
         Text(
             text = text,
-            color = primaryContentColor,
+            color = MaterialTheme.colorScheme.primary,
             style = if (small) {
                 MaterialTheme.typography.bodyMedium
             } else {

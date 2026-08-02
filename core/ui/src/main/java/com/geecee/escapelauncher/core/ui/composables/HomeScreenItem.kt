@@ -13,7 +13,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.unit.dp
-import com.geecee.escapelauncher.core.theme.primaryContentColor
 
 
 /**
@@ -51,7 +50,7 @@ fun HomeScreenItem(
         Text(
             appName,
             modifier = Modifier.padding(vertical = 15.dp),
-            color = primaryContentColor,
+            color = MaterialTheme.colorScheme.primary,
             style = MaterialTheme.typography.bodyMedium
         )
 
@@ -62,7 +61,7 @@ fun HomeScreenItem(
                 modifier = Modifier
                     .padding(vertical = 15.dp, horizontal = 5.dp)
                     .alpha(0.5f),
-                color = primaryContentColor,
+                color = MaterialTheme.colorScheme.primary,
                 style = MaterialTheme.typography.bodyMedium
             )
         }

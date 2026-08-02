@@ -12,6 +12,7 @@ import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -21,8 +22,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.geecee.escapelauncher.core.common.loadTextFromAssets
-import com.geecee.escapelauncher.core.theme.CardContainerColor
-import com.geecee.escapelauncher.core.theme.ContentColor
 import com.geecee.escapelauncher.core.ui.composables.SettingsSpacer
 
 /**
@@ -46,7 +45,7 @@ fun FontLicenceDialog(context: Context, onOKClick: () -> Unit) {
         loadTextFromAssets(context, "Font Licence.txt")?.let { text ->
             BasicText(
                 text = text, style = TextStyle(
-                    color = ContentColor,
+                    color = MaterialTheme.colorScheme.onSurface,
                     textAlign = TextAlign.Start,
                     fontWeight = FontWeight.Normal
                 ), modifier = Modifier.fillMaxWidth()
@@ -62,10 +61,10 @@ fun FontLicenceDialog(context: Context, onOKClick: () -> Unit) {
                 .align(Alignment.CenterHorizontally)
                 .padding(bottom = 8.dp),
             colors = ButtonColors(
-                CardContainerColor,
-                ContentColor,
-                CardContainerColor,
-                ContentColor
+                MaterialTheme.colorScheme.surfaceContainerHigh,
+                MaterialTheme.colorScheme.onSurface,
+                MaterialTheme.colorScheme.surfaceContainerHigh,
+                MaterialTheme.colorScheme.onSurface
             )
         ) {
             Text("OK")

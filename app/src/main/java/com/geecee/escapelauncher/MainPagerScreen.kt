@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -30,7 +31,6 @@ import com.geecee.escapelauncher.core.common.EscapeAccessibilityService
 import com.geecee.escapelauncher.core.common.doesPrivateSpaceExist
 import com.geecee.escapelauncher.core.common.doesWorkProfileExist
 import com.geecee.escapelauncher.core.common.isDefaultLauncher
-import com.geecee.escapelauncher.core.theme.BackgroundColor
 import com.geecee.escapelauncher.core.ui.R
 import com.geecee.escapelauncher.core.ui.composables.OpenChallenge
 import com.geecee.escapelauncher.feature.appslist.AppsList
@@ -80,7 +80,7 @@ fun MainPagerScreen(
         state = viewModel.pagerState,
         modifier = Modifier
             .fillMaxSize()
-            .background(color = BackgroundColor)
+            .background(color = MaterialTheme.colorScheme.surface)
             .combinedClickable(
                 onClick = {},
                 onLongClickLabel = "",

@@ -19,7 +19,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.geecee.escapelauncher.core.theme.EscapeThemePreview
-import com.geecee.escapelauncher.core.theme.primaryContentColor
 import com.geecee.escapelauncher.core.ui.R
 import com.geecee.escapelauncher.core.ui.composables.BulkManager
 import kotlinx.coroutines.delay
@@ -62,7 +61,7 @@ fun FavoritesPage(
                 hideTitle = false,
                 hideBack = true,
                 topPadding = false,
-                titleColor = primaryContentColor,
+                titleColor = MaterialTheme.colorScheme.primary,
                 onItemClicked = { app, selected ->
                     if (selected) {
                         viewModel.removeFavorite(app.packageName)

@@ -28,10 +28,8 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.geecee.escapelauncher.core.theme.CardContainerColor
 import com.geecee.escapelauncher.core.theme.colours.escapeGreen
 import com.geecee.escapelauncher.core.theme.colours.escapeRed
-import com.geecee.escapelauncher.core.theme.primaryContentColor
 
 /**
  * Screen time with an arrow indicating whether it's increased or decreased
@@ -62,7 +60,7 @@ fun ScreenTime(time: String, increased: Boolean, modifier: Modifier) {
             text = time,
             style = MaterialTheme.typography.titleMedium,
             modifier = modifier,
-            color = primaryContentColor,
+            color = MaterialTheme.colorScheme.primary,
             fontWeight = FontWeight.SemiBold
         )
 
@@ -78,7 +76,7 @@ fun ScreenTimeInfoBox(text: String, percent: Int, percentageColour: Color, modif
         modifier = modifier
             .clip(RoundedCornerShape(48.dp))
             .aspectRatio(1f)
-            .background(CardContainerColor)
+            .background(MaterialTheme.colorScheme.surfaceContainerHigh)
     ) {
         val boxWithConstraintsScope = this
         val padding = boxWithConstraintsScope.maxWidth * 0.1f
@@ -110,7 +108,7 @@ fun ScreenTimeInfoBox(text: String, percent: Int, percentageColour: Color, modif
                     textAlign = TextAlign.Center,
                     fontWeight = FontWeight.SemiBold
                 ),
-                color = primaryContentColor
+                color = MaterialTheme.colorScheme.primary
             )
         }
     }
@@ -130,7 +128,7 @@ fun AppUsage(appName: String, increased: Boolean, time: String, modifier: Modifi
             text = if (appName.length > 12) appName.take(12) + "..." else appName,
             modifier = Modifier.align(Alignment.CenterStart),
             style = MaterialTheme.typography.bodyMedium,
-            color = primaryContentColor
+            color = MaterialTheme.colorScheme.primary
         )
 
         Row(
@@ -160,7 +158,7 @@ fun AppUsage(appName: String, increased: Boolean, time: String, modifier: Modifi
                 text = time,
                 style = MaterialTheme.typography.bodyMedium,
                 modifier = modifier,
-                color = primaryContentColor,
+                color = MaterialTheme.colorScheme.primary,
                 fontWeight = FontWeight.SemiBold
             )
         }
@@ -176,7 +174,7 @@ fun AppUsages(modifier: Modifier, content: @Composable () -> Unit) {
         modifier
             .fillMaxSize()
             .clip(RoundedCornerShape(48.dp))
-            .background(CardContainerColor)
+            .background(MaterialTheme.colorScheme.surfaceContainerHigh)
     ) {
         Column(
             Modifier.padding(20.dp)

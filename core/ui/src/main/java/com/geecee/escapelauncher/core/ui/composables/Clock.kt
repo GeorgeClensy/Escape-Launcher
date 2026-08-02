@@ -10,7 +10,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.geecee.escapelauncher.core.theme.primaryContentColor
 
 private const val BIG_TIME_FORMAT = "%02d\n%02d"
 private const val SMALL_TIME_FORMAT = "%02d:%02d"
@@ -39,7 +38,7 @@ fun Clock(
                 x = if (bigClock) 0.dp else ClockDefaults.SmallClockOffsetX,
                 y = if (bigClock) 0.dp else ClockDefaults.SmallClockOffsetY
             ),
-        color = primaryContentColor,
+        color = MaterialTheme.colorScheme.primary,
         fontWeight = FontWeight.SemiBold,
         style =
             if (bigClock)

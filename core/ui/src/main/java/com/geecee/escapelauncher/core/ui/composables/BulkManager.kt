@@ -14,6 +14,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DragHandle
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
@@ -32,7 +33,6 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
-import com.geecee.escapelauncher.core.theme.ContentColor
 import kotlin.math.roundToInt
 
 //Todo: make this not bad and fix the reordering animations
@@ -49,7 +49,7 @@ fun <T> BulkManager(
     reorderable: Boolean = false,
     hideTitle: Boolean = false,
     hideBack: Boolean = false,
-    titleColor: Color = ContentColor,
+    titleColor: Color = MaterialTheme.colorScheme.onSurface,
     topPadding: Boolean = true,
     onItemMoved: (fromIndex: Int, toIndex: Int) -> Unit = { _, _ -> }
 ) {
@@ -221,7 +221,7 @@ fun <T> BulkManager(
                                         )
                                     }
                             ) {
-                                Icon(Icons.Default.DragHandle, "Reorder", tint = ContentColor)
+                                Icon(Icons.Default.DragHandle, "Reorder", tint = MaterialTheme.colorScheme.onSurface)
                             }
                         }
                     } else {

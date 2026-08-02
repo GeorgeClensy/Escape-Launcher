@@ -7,7 +7,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.geecee.escapelauncher.core.theme.primaryContentColor
 
 /**
  * Apps List title
@@ -17,7 +16,7 @@ fun AppsListHeader(text: String = "") {
     Spacer(modifier = Modifier.height(140.dp))
     Text(
         text = text,
-        color = primaryContentColor,
+        color = MaterialTheme.colorScheme.primary,
         style = MaterialTheme.typography.titleMedium
     )
 }

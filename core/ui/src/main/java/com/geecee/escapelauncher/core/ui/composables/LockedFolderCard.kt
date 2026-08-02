@@ -8,10 +8,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import com.geecee.escapelauncher.core.theme.CardContainerColor
-import com.geecee.escapelauncher.core.theme.CardContainerColorDisabled
-import com.geecee.escapelauncher.core.theme.ContentColor
-import com.geecee.escapelauncher.core.theme.ContentColorDisabled
 
 
 /**
@@ -34,10 +30,10 @@ fun LockedFolderCard(
             .clip(MaterialTheme.shapes.extraLarge)
             .animateContentSize(),
         colors = CardColors(
-            containerColor = CardContainerColor,
-            contentColor = ContentColor,
-            disabledContentColor = CardContainerColorDisabled,
-            disabledContainerColor = ContentColorDisabled,
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+            contentColor = MaterialTheme.colorScheme.onSurface,
+            disabledContentColor = MaterialTheme.colorScheme.surfaceContainerLow,
+            disabledContainerColor = MaterialTheme.colorScheme.onSurface,
         )
     ) {
         content()

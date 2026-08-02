@@ -33,8 +33,6 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.geecee.escapelauncher.core.theme.CardContainerColor
-import com.geecee.escapelauncher.core.theme.ContentColor
 import kotlinx.coroutines.delay
 
 @Composable
@@ -121,16 +119,16 @@ fun OpenChallenge(
                     },
                     Modifier.align(Alignment.CenterHorizontally),
                     colors = ButtonColors(
-                        ContentColor,
-                        CardContainerColor,
-                        ContentColor,
-                        CardContainerColor
+                        MaterialTheme.colorScheme.onSurface,
+                        MaterialTheme.colorScheme.surfaceContainerHigh,
+                        MaterialTheme.colorScheme.onSurface,
+                        MaterialTheme.colorScheme.surfaceContainerHigh
                     )
                 ) {
                     Icon(
                         Icons.AutoMirrored.Default.ArrowBack,
                         "Go back",
-                        tint = CardContainerColor
+                        tint = MaterialTheme.colorScheme.surfaceContainerHigh
                     )
                 }
             }

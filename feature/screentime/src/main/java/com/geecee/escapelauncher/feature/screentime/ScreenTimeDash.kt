@@ -30,7 +30,6 @@ import com.geecee.escapelauncher.core.ui.composables.ScreenTime
 import com.geecee.escapelauncher.core.ui.composables.ScreenTimeInfoBox
 import com.geecee.escapelauncher.core.ui.composables.SettingsSpacer
 import com.geecee.escapelauncher.core.ui.R
-import com.geecee.escapelauncher.core.theme.ContentColor
 import com.geecee.escapelauncher.core.theme.colours.escapeGreen
 import com.geecee.escapelauncher.core.theme.colours.escapeRed
 import com.geecee.escapelauncher.core.common.formatScreenTime
@@ -130,7 +129,7 @@ fun ScreenTimeDashboard(
                     text = stringResource(R.string.no_apps_used),
                     modifier = Modifier.align(Alignment.CenterHorizontally),
                     style = MaterialTheme.typography.bodyMedium,
-                    color = ContentColor
+                    color = MaterialTheme.colorScheme.onSurface
                 )
             }
         }
