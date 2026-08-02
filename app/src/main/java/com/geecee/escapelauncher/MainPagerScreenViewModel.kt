@@ -13,7 +13,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.geecee.escapelauncher.core.common.launchApp
-import com.geecee.escapelauncher.core.domain.repository.AppsRepository
+import com.geecee.escapelauncher.core.domain.GetFavoriteAppsUseCase
 import com.geecee.escapelauncher.core.domain.repository.ModifiedAppsRepository
 import com.geecee.escapelauncher.core.domain.repository.SettingsRepository
 import com.geecee.escapelauncher.core.model.InstalledApp
@@ -23,7 +23,6 @@ import jakarta.inject.Inject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -33,8 +32,8 @@ import kotlin.time.Duration.Companion.milliseconds
 class MainPagerScreenViewModel @Inject constructor(
     @ApplicationContext context: Context,
     private val repository: SettingsRepository,
-    private val appsRepository: AppsRepository,
-    private val modifiedAppsRepository: ModifiedAppsRepository
+    private val modifiedAppsRepository: ModifiedAppsRepository,
+    private val getFavoriteAppsUseCase: GetFavoriteAppsUseCase
 ) : AndroidViewModel(context as Application) {
     fun setFirstTimeHelp(value: Boolean) {
         viewModelScope.launch {
@@ -90,14 +89,7 @@ class MainPagerScreenViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            combine(
-                appsRepository.mainUserApps,
-                modifiedAppsRepository.getFavouriteAppsInOrderFlow()
-            ) { apps, entities ->
-                entities.mapNotNull { entity ->
-                    apps.find { it.packageName == entity.packageId }
-                }
-            }.collect { newFavoriteApps ->
+            getFavoriteAppsUseCase().collect { newFavoriteApps ->
                 withContext(Dispatchers.Main) {
                     favoriteApps.clear()
                     favoriteApps.addAll(newFavoriteApps)

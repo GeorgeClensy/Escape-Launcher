@@ -9,7 +9,7 @@ import com.geecee.escapelauncher.core.common.AppConfiguration
 import com.geecee.escapelauncher.core.common.getAppShortcuts
 import com.geecee.escapelauncher.core.common.isMainUserApp
 import com.geecee.escapelauncher.core.common.startShortcut
-import com.geecee.escapelauncher.core.domain.repository.AppsRepository
+import com.geecee.escapelauncher.core.domain.GetFavoriteAppsUseCase
 import com.geecee.escapelauncher.core.domain.repository.ModifiedAppsRepository
 import com.geecee.escapelauncher.core.domain.repository.SettingsRepository
 import com.geecee.escapelauncher.core.model.InstalledApp
@@ -35,8 +35,8 @@ import kotlin.collections.map
 class NewHomeScreenViewModel @Inject constructor(
     @ApplicationContext context: Context,
     settingsRepository: SettingsRepository,
-    appsRepository: AppsRepository,
     private val modifiedAppsRepository: ModifiedAppsRepository,
+    getFavoriteAppsUseCase: GetFavoriteAppsUseCase,
     val widgetHostManager: WidgetHostManager,
     appConfiguration: AppConfiguration
 ) : ViewModel() {
@@ -79,18 +79,12 @@ class NewHomeScreenViewModel @Inject constructor(
     val widgetId = settingsRepository.widgetId
 
     // Favorite Apps
-    val favoriteApps: StateFlow<List<InstalledApp>> = combine(
-        appsRepository.mainUserApps,
-        modifiedAppsRepository.getFavouriteAppsInOrderFlow()
-    ) { apps, entities ->
-        entities.mapNotNull { entity ->
-            apps.find { it.packageName == entity.packageId }
-        }
-    }.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5000),
-        initialValue = emptyList()
-    )
+    val favoriteApps: StateFlow<List<InstalledApp>> = getFavoriteAppsUseCase()
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList()
+        )
 
     // Bottom Sheet State
     private val _showBottomSheet = MutableStateFlow(false)
