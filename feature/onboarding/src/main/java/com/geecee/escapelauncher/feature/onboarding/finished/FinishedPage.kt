@@ -19,8 +19,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -48,29 +46,25 @@ fun FinishedPage(
         LottieCompositionSpec.RawRes(R.raw.finished_animation)
     )
     val lottieAnimatable = rememberLottieAnimatable()
-    val primaryContainerColor = MaterialTheme.colorScheme.primaryContainer.toArgb()
-    val secondaryContainerColor = MaterialTheme.colorScheme.secondaryContainer.toArgb()
-    val tertiaryContainerColor = MaterialTheme.colorScheme.tertiaryContainer.toArgb()
-    val onPrimaryContainerColor = MaterialTheme.colorScheme.onPrimaryContainer.toArgb()
     val dynamicProperties = rememberLottieDynamicProperties(
         rememberLottieDynamicProperty(
             property = LottieProperty.COLOR,
-            value = primaryContainerColor,
+            value = MaterialTheme.colorScheme.primary.toAndroidColor(),
             keyPath = arrayOf("Middle", "shape", "**")
         ),
         rememberLottieDynamicProperty(
             property = LottieProperty.COLOR,
-            value = onPrimaryContainerColor,
+            value = MaterialTheme.colorScheme.onPrimary.toAndroidColor(),
             keyPath = arrayOf("Middle", "check", "**")
         ),
         rememberLottieDynamicProperty(
             property = LottieProperty.COLOR,
-            value = secondaryContainerColor,
+            value = MaterialTheme.colorScheme.secondary.toAndroidColor(),
             keyPath = arrayOf("Behind 1", "**")
         ),
         rememberLottieDynamicProperty(
             property = LottieProperty.COLOR,
-            value = tertiaryContainerColor,
+            value = MaterialTheme.colorScheme.tertiary.toAndroidColor(),
             keyPath = arrayOf("Behind 3", "**")
         )
     )
@@ -142,7 +136,7 @@ fun FinishedPage(
                 stringResource(id = R.string.all_setup),
                 style = MaterialTheme.typography.headlineSmall,
                 textAlign = TextAlign.Center,
-                color = Color(onPrimaryContainerColor),
+                color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier
                     .fillMaxWidth()
                     .offset(y = (-20).dp)
