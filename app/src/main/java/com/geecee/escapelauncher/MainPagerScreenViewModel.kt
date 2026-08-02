@@ -14,7 +14,8 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.geecee.escapelauncher.core.common.launchApp
 import com.geecee.escapelauncher.core.domain.apps.GetFavoriteAppsUseCase
-import com.geecee.escapelauncher.core.domain.repository.ModifiedAppsRepository
+import com.geecee.escapelauncher.core.domain.apps.TryOpenAppResult
+import com.geecee.escapelauncher.core.domain.apps.TryOpenAppUseCase
 import com.geecee.escapelauncher.core.domain.repository.SettingsRepository
 import com.geecee.escapelauncher.core.model.InstalledApp
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -32,8 +33,8 @@ import kotlin.time.Duration.Companion.milliseconds
 class MainPagerScreenViewModel @Inject constructor(
     @ApplicationContext context: Context,
     private val repository: SettingsRepository,
-    private val modifiedAppsRepository: ModifiedAppsRepository,
-    private val getFavoriteAppsUseCase: GetFavoriteAppsUseCase
+    private val getFavoriteAppsUseCase: GetFavoriteAppsUseCase,
+    private val tryOpenAppUseCase: TryOpenAppUseCase
 ) : AndroidViewModel(context as Application) {
     fun setFirstTimeHelp(value: Boolean) {
         viewModelScope.launch {
@@ -122,22 +123,19 @@ class MainPagerScreenViewModel @Inject constructor(
         onAppOpened: ((String) -> Unit)? = null
     ) {
         viewModelScope.launch {
-            val hasChallenge = if (overrideChallenge) {
-                false
-            } else {
-                modifiedAppsRepository.isChallenge(app.packageName)
-            }
+            when (tryOpenAppUseCase(app.packageName, overrideChallenge)) {
+                TryOpenAppResult.ShowChallenge -> {
+                    showOpenChallenge.value = true
+                    updateSelectedApp(app)
+                }
+                TryOpenAppResult.Launch -> {
+                    if (launchApp(getApplication(), app, onAppOpened)) {
+                        onAppLaunched(app)
 
-            if (hasChallenge) {
-                showOpenChallenge.value = true
-                updateSelectedApp(app)
-            } else {
-                if (launchApp(getApplication(), app, onAppOpened)) {
-                    onAppLaunched(app)
-
-                    // At the end of an open challenge countdown, it runs this openApp function again with overrideChallenge set to true so this is used to hide the challenge ui
-                    if (overrideChallenge) {
-                        showOpenChallenge.value = false
+                        // At the end of an open challenge countdown, it runs this openApp function again with overrideChallenge set to true so this is used to hide the challenge ui
+                        if (overrideChallenge) {
+                            showOpenChallenge.value = false
+                        }
                     }
                 }
             }
