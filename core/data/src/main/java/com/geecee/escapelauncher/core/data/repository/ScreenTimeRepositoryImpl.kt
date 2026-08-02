@@ -3,6 +3,8 @@ package com.geecee.escapelauncher.core.data.repository
 import android.util.Log
 import com.geecee.escapelauncher.core.data.database.AppUsageDao
 import com.geecee.escapelauncher.core.data.entity.AppUsageEntity
+import com.geecee.escapelauncher.core.domain.repository.ScreenTimeRepository
+import com.geecee.escapelauncher.core.model.AppUsage
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -74,10 +76,10 @@ class ScreenTimeRepositoryImpl @Inject constructor(
         return appUsageDao.getAppUsage("$packageName-$date")?.totalTime ?: 0L
     }
 
-    override suspend fun getScreenTimeListSorted(date: String): List<AppUsageEntity> {
+    override suspend fun getScreenTimeListSorted(date: String): List<AppUsage> {
         val usageList = appUsageDao.getUsageListForDate("%-$date")
         return usageList.map { usage ->
-            AppUsageEntity(
+            AppUsage(
                 packageName = usage.packageName.substringBeforeLast("-$date"),
                 totalTime = usage.totalTime
             )

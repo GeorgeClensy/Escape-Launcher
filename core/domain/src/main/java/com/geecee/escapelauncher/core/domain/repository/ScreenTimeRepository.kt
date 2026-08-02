@@ -1,6 +1,6 @@
-package com.geecee.escapelauncher.core.data.repository
+package com.geecee.escapelauncher.core.domain.repository
 
-import com.geecee.escapelauncher.core.data.entity.AppUsageEntity
+import com.geecee.escapelauncher.core.model.AppUsage
 
 interface ScreenTimeRepository {
     fun onAppOpened(packageName: String)
@@ -10,5 +10,5 @@ interface ScreenTimeRepository {
     suspend fun clearOldData()
     suspend fun getTotalUsageForDate(date: String): Long
     suspend fun getUsageForApp(packageName: String, date: String): Long
-    suspend fun getScreenTimeListSorted(date: String): List<AppUsageEntity>
+    suspend fun getScreenTimeListSorted(date: String): List<AppUsage>
 }

@@ -2,9 +2,9 @@ package com.geecee.escapelauncher.feature.screentime
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.geecee.escapelauncher.core.data.repository.ScreenTimeRepository
-import com.geecee.escapelauncher.core.data.repository.AppsRepository
-import com.geecee.escapelauncher.core.data.entity.AppUsageEntity
+import com.geecee.escapelauncher.core.domain.repository.ScreenTimeRepository
+import com.geecee.escapelauncher.core.domain.repository.AppsRepository
+import com.geecee.escapelauncher.core.model.AppUsage
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -31,11 +31,11 @@ class ScreenTimeViewModel @Inject constructor(
     private val _yesterdayTotalUsage = MutableStateFlow(0L)
     val yesterdayTotalUsage: StateFlow<Long> = _yesterdayTotalUsage.asStateFlow()
 
-    private val _appUsageList = MutableStateFlow<List<AppUsageEntity>>(emptyList())
-    val appUsageList: StateFlow<List<AppUsageEntity>> = _appUsageList.asStateFlow()
+    private val _appUsageList = MutableStateFlow<List<AppUsage>>(emptyList())
+    val appUsageList: StateFlow<List<AppUsage>> = _appUsageList.asStateFlow()
 
-    private val _yesterdayAppUsageList = MutableStateFlow<List<AppUsageEntity>>(emptyList())
-    val yesterdayAppUsageList: StateFlow<List<AppUsageEntity>> = _yesterdayAppUsageList.asStateFlow()
+    private val _yesterdayAppUsageList = MutableStateFlow<List<AppUsage>>(emptyList())
+    val yesterdayAppUsageList: StateFlow<List<AppUsage>> = _yesterdayAppUsageList.asStateFlow()
 
     val appUsageUiList: StateFlow<List<AppUsageUiModel>> = combine(
         appUsageList,

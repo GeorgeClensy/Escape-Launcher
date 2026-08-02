@@ -7,3 +7,7 @@ plugins {
 android {
     namespace = "com.geecee.escapelauncher.core.domain"
 }
+
+dependencies {
+    implementation(project(":core:model"))
+}

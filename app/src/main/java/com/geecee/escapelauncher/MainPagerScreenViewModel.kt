@@ -13,8 +13,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.geecee.escapelauncher.core.common.launchApp
-import com.geecee.escapelauncher.core.data.repository.AppsRepository
-import com.geecee.escapelauncher.core.data.repository.ModifiedAppsRepository
+import com.geecee.escapelauncher.core.domain.repository.AppsRepository
+import com.geecee.escapelauncher.core.domain.repository.ModifiedAppsRepository
 import com.geecee.escapelauncher.core.domain.repository.SettingsRepository
 import com.geecee.escapelauncher.core.model.InstalledApp
 import dagger.hilt.android.lifecycle.HiltViewModel

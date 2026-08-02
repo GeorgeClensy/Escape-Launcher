@@ -8,7 +8,7 @@ import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
-import com.geecee.escapelauncher.core.data.repository.ScreenTimeRepository
+import com.geecee.escapelauncher.core.domain.repository.ScreenTimeRepository
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import java.util.Calendar

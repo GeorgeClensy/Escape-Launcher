@@ -2,7 +2,10 @@ package com.geecee.escapelauncher.core.data.repository
 
 import com.geecee.escapelauncher.core.data.database.ModifiedAppsDao
 import com.geecee.escapelauncher.core.data.entity.ModifiedAppEntity
+import com.geecee.escapelauncher.core.domain.repository.ModifiedAppsRepository
+import com.geecee.escapelauncher.core.model.ModifiedApp
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -16,11 +19,13 @@ class ModifiedAppsRepositoryImpl @Inject constructor(
     override fun getChallengePackageIdsFlow(): Flow<List<String>> =
         modifiedAppsDao.getChallengePackageIdsFlow()
 
-    override fun getFavouriteAppsInOrderFlow(): Flow<List<ModifiedAppEntity>> =
-        modifiedAppsDao.getFavouriteAppsInOrderFlow()
+    override fun getFavouriteAppsInOrderFlow(): Flow<List<ModifiedApp>> =
+        modifiedAppsDao.getFavouriteAppsInOrderFlow().map { entities ->
+            entities.map { it.asExternalModel() }
+        }
 
-    override suspend fun getByPackageId(packageId: String): ModifiedAppEntity? {
-        return modifiedAppsDao.getByPackageId(packageId)
+    override suspend fun getByPackageId(packageId: String): ModifiedApp? {
+        return modifiedAppsDao.getByPackageId(packageId)?.asExternalModel()
     }
 
     override suspend fun setDisplayName(packageId: String, displayName: String?) {
@@ -120,8 +125,8 @@ class ModifiedAppsRepositoryImpl @Inject constructor(
         modifiedAppsDao.upsertAll(tidied)
     }
 
-    override suspend fun getFavouriteAppsInOrder(): List<ModifiedAppEntity> {
-        return modifiedAppsDao.getFavouriteAppsInOrder()
+    override suspend fun getFavouriteAppsInOrder(): List<ModifiedApp> {
+        return modifiedAppsDao.getFavouriteAppsInOrder().map { it.asExternalModel() }
     }
 
     override suspend fun getHiddenPackageIds(): List<String> {
@@ -140,3 +145,11 @@ class ModifiedAppsRepositoryImpl @Inject constructor(
         modifiedAppsDao.deleteByPackageId(packageId)
     }
 }
+
+fun ModifiedAppEntity.asExternalModel() = ModifiedApp(
+    packageId = packageId,
+    displayName = displayName,
+    isHidden = isHidden,
+    isChallenge = isChallenge,
+    favouritePosition = favouritePosition
+)
