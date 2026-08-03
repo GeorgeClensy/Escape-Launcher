@@ -95,7 +95,7 @@ class AppsListViewModel @Inject constructor(
         _bottomSheetApp.value = app
     }
     private val _bottomSheetApp = MutableStateFlow<InstalledApp?>(null)
-    val botttomSheetApp: StateFlow<InstalledApp?> = _bottomSheetApp.asStateFlow()
+    val bottomSheetApp: StateFlow<InstalledApp?> = _bottomSheetApp.asStateFlow()
 
     // Actions
     val bottomSheetActions: StateFlow<List<AppAction>> = _bottomSheetApp.flatMapLatest { app ->

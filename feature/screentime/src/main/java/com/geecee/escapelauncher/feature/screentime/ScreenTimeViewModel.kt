@@ -3,15 +3,12 @@ package com.geecee.escapelauncher.feature.screentime
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.geecee.escapelauncher.core.domain.repository.ScreenTimeRepository
-import com.geecee.escapelauncher.core.domain.repository.AppsRepository
-import com.geecee.escapelauncher.core.model.AppUsage
+import com.geecee.escapelauncher.core.domain.screentime.GetAppUsageUiListUseCase
+import com.geecee.escapelauncher.core.model.AppUsageUiModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -22,7 +19,7 @@ import javax.inject.Inject
 @HiltViewModel
 class ScreenTimeViewModel @Inject constructor(
     private val screenTimeRepository: ScreenTimeRepository,
-    private val appsRepository: AppsRepository
+    private val getAppUsageUiListUseCase: GetAppUsageUiListUseCase
 ) : ViewModel() {
 
     private val _totalUsage = MutableStateFlow(0L)
@@ -31,33 +28,8 @@ class ScreenTimeViewModel @Inject constructor(
     private val _yesterdayTotalUsage = MutableStateFlow(0L)
     val yesterdayTotalUsage: StateFlow<Long> = _yesterdayTotalUsage.asStateFlow()
 
-    private val _appUsageList = MutableStateFlow<List<AppUsage>>(emptyList())
-    val appUsageList: StateFlow<List<AppUsage>> = _appUsageList.asStateFlow()
-
-    private val _yesterdayAppUsageList = MutableStateFlow<List<AppUsage>>(emptyList())
-    val yesterdayAppUsageList: StateFlow<List<AppUsage>> = _yesterdayAppUsageList.asStateFlow()
-
-    val appUsageUiList: StateFlow<List<AppUsageUiModel>> = combine(
-        appUsageList,
-        yesterdayAppUsageList
-    ) { today, yesterday ->
-        today.map { appScreenTime ->
-            val yesterdayAppUsage = yesterday.find { it.packageName == appScreenTime.packageName }
-            val usageIncreased = appScreenTime.totalTime > (yesterdayAppUsage?.totalTime ?: 0L)
-            val appName = appsRepository.getAppNameFromPackageName(appScreenTime.packageName)
-
-            AppUsageUiModel(
-                packageName = appScreenTime.packageName,
-                appName = appName,
-                totalTime = appScreenTime.totalTime,
-                usageIncreased = usageIncreased
-            )
-        }.filter { it.appName != "null" }
-    }.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5000),
-        initialValue = emptyList()
-    )
+    private val _appUsageUiList = MutableStateFlow<List<AppUsageUiModel>>(emptyList())
+    val appUsageUiList: StateFlow<List<AppUsageUiModel>> = _appUsageUiList.asStateFlow()
 
     init {
         loadData()
@@ -68,13 +40,14 @@ class ScreenTimeViewModel @Inject constructor(
         val yesterday = getYesterdayDateString()
         
         viewModelScope.launch {
-            // Load Today
+            // Load Today Total
             _totalUsage.value = screenTimeRepository.getTotalUsageForDate(today)
-            _appUsageList.value = screenTimeRepository.getScreenTimeListSorted(today)
             
-            // Load Yesterday
+            // Load Yesterday Total
             _yesterdayTotalUsage.value = screenTimeRepository.getTotalUsageForDate(yesterday)
-            _yesterdayAppUsageList.value = screenTimeRepository.getScreenTimeListSorted(yesterday)
+
+            // Load UI List via UseCase
+            _appUsageUiList.value = getAppUsageUiListUseCase(today, yesterday)
         }
     }
 
@@ -96,7 +69,7 @@ class ScreenTimeViewModel @Inject constructor(
     }
 
     fun getScreenTime(packageName: String): Long {
-        return appUsageList.value.find { it.packageName == packageName }?.totalTime ?: 0L
+        return _appUsageUiList.value.find { it.packageName == packageName }?.totalTime ?: 0L
     }
 
     private fun getYesterdayDateString(): String {

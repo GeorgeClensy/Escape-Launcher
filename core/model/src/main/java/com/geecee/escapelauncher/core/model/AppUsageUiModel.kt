@@ -1,4 +1,4 @@
-package com.geecee.escapelauncher.feature.screentime
+package com.geecee.escapelauncher.core.model
 
 data class AppUsageUiModel(
     val packageName: String,

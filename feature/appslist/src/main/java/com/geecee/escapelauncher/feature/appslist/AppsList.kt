@@ -72,7 +72,7 @@ fun AppsList(
 ) {
     val context = LocalContext.current
     val haptics = LocalHapticFeedback.current
-    val appUsageList by screenTimeViewModel.appUsageList.collectAsState()
+    val appUsageList by screenTimeViewModel.appUsageUiList.collectAsState()
     val showScreenTimeApp by appsListViewModel.showScreenTimeApp.collectAsState(initial = false)
     val appsListAlignment by appsListViewModel.appsAlignment.collectAsState(initial = Alignment.CenterHorizontally)
     val hapticFeedbackEnabled by appsListViewModel.hapticFeedBackEnabled.collectAsState(initial = true)
@@ -86,7 +86,7 @@ fun AppsList(
     val searchText by appsListViewModel.searchText.collectAsState()
     val searchExpanded by appsListViewModel.searchExpanded.collectAsState()
     val showBottomSheet by appsListViewModel.showBottomSheet.collectAsState()
-    val bottomSheetApp by appsListViewModel.botttomSheetApp.collectAsState()
+    val bottomSheetApp by appsListViewModel.bottomSheetApp.collectAsState()
     val showWorkApps by appsListViewModel.showWorkApps.collectAsState()
 
     val bottomSheetActions by appsListViewModel.bottomSheetActions.collectAsState()

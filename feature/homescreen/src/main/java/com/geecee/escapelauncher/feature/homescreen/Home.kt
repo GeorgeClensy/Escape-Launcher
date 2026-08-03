@@ -99,7 +99,7 @@ fun HomeScreen(
     val widgetWidth by homeScreenViewModel.widgetWidth.collectAsState(initial = 250f)
     val widgetId by homeScreenViewModel.widgetId.collectAsState(initial = -1)
     val widgetHostManager = homeScreenViewModel.widgetHostManager
-    val appUsageList by screenTimeViewModel.appUsageList.collectAsState()
+    val appUsageList by screenTimeViewModel.appUsageUiList.collectAsState()
     val favoriteApps by homeScreenViewModel.favoriteApps.collectAsState()
     val showBottomSheet by homeScreenViewModel.showBottomSheet.collectAsState()
     val bottomSheetApp by homeScreenViewModel.bottomSheetApp.collectAsState()
