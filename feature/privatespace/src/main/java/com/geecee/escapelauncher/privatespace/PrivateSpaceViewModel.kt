@@ -1,38 +1,44 @@
 package com.geecee.escapelauncher.privatespace
 
-import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
-import android.os.Build
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.geecee.escapelauncher.core.model.InstalledApp
-import com.geecee.escapelauncher.core.common.PrivateSpaceStateReceiver
-import com.geecee.escapelauncher.core.common.getPrivateSpaceApps
-import com.geecee.escapelauncher.core.common.isDefaultLauncher
-import com.geecee.escapelauncher.core.common.isPrivateSpaceUnlocked
-import com.geecee.escapelauncher.core.common.lockPrivateSpace
-import com.geecee.escapelauncher.core.common.unlockPrivateSpace
+import com.geecee.escapelauncher.core.domain.managedprofiles.GetManagedProfileAppsUseCase
+import com.geecee.escapelauncher.core.domain.managedprofiles.ManagedProfileType
+import com.geecee.escapelauncher.core.domain.managedprofiles.ObserveManagedProfileUnlockedUseCase
+import com.geecee.escapelauncher.core.domain.managedprofiles.ToggleManagedProfileUseCase
+import com.geecee.escapelauncher.core.domain.managedprofiles.ToggleManagedProfileUseCaseOutput
 import com.geecee.escapelauncher.core.domain.repository.settings.LauncherBehaviorRepository
+import com.geecee.escapelauncher.core.model.InstalledApp
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class PrivateSpaceViewModel @Inject constructor(
-    @param:ApplicationContext private val context: Context,
+    getManagedProfileAppsUseCase: GetManagedProfileAppsUseCase,
+    observeManagedProfileUnlockedUseCase: ObserveManagedProfileUnlockedUseCase,
+    private val toggleManagedProfileUseCase: ToggleManagedProfileUseCase,
     private val launcherBehaviorRepository: LauncherBehaviorRepository
 ) : ViewModel() {
 
-    private val _isUnlocked = MutableStateFlow(false)
-    val isUnlocked: StateFlow<Boolean> = _isUnlocked.asStateFlow()
+    val isUnlocked: StateFlow<Boolean> = observeManagedProfileUnlockedUseCase(ManagedProfileType.PrivateSpace)
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = false
+        )
 
-    private val _privateSpaceApps = MutableStateFlow<List<InstalledApp>>(emptyList())
-    val privateSpaceApps: StateFlow<List<InstalledApp>> = _privateSpaceApps.asStateFlow()
+    val privateSpaceApps: StateFlow<List<InstalledApp>> = getManagedProfileAppsUseCase(ManagedProfileType.PrivateSpace)
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList()
+        )
 
     private val _showSettings = MutableStateFlow(false)
     val showSettings: StateFlow<Boolean> = _showSettings.asStateFlow()
@@ -40,63 +46,12 @@ class PrivateSpaceViewModel @Inject constructor(
         _showSettings.value = !_showSettings.value
     }
 
-
-    private var privateSpaceReceiver: PrivateSpaceStateReceiver? = null
-
-    init {
-        refreshPrivateSpaceApps()
-        registerReceiver()
-    }
-
-    private fun registerReceiver() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) {
-            privateSpaceReceiver = PrivateSpaceStateReceiver { isUnlocked ->
-                _isUnlocked.value = isUnlocked
-                if (isUnlocked) {
-                    refreshPrivateSpaceApps()
-                } else {
-                    _privateSpaceApps.value = emptyList()
-                }
-            }
-            val intentFilter = IntentFilter().apply {
-                addAction(Intent.ACTION_PROFILE_AVAILABLE)
-                addAction(Intent.ACTION_PROFILE_UNAVAILABLE)
-            }
-            context.registerReceiver(privateSpaceReceiver, intentFilter)
-        }
-    }
-
-    fun refreshPrivateSpaceApps() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) {
-            val unlocked = isPrivateSpaceUnlocked(context)
-            _isUnlocked.value = unlocked
-            if (unlocked) {
-                _privateSpaceApps.value = getPrivateSpaceApps(context).sortedBy { it.displayName.lowercase() }
-            } else {
-                _privateSpaceApps.value = emptyList()
-            }
-        }
-    }
-
     fun togglePrivateSpaceProfile(onLauncherNotDefault: () -> Unit) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) {
-            if (isDefaultLauncher(context)) {
-                if (isPrivateSpaceUnlocked(context)) {
-                    lockPrivateSpace(context)
-                } else {
-                    unlockPrivateSpace(context)
-                }
-                refreshPrivateSpaceApps()
-            } else {
-                onLauncherNotDefault()
+        viewModelScope.launch {
+            when (toggleManagedProfileUseCase(ManagedProfileType.PrivateSpace)) {
+                ToggleManagedProfileUseCaseOutput.FailedNotDefaultLauncher -> onLauncherNotDefault()
+                else -> { /* Success cases are handled by the Flow observers */ }
             }
-        }
-    }
-
-    override fun onCleared() {
-        super.onCleared()
-        privateSpaceReceiver?.let {
-            context.unregisterReceiver(it)
         }
     }
 

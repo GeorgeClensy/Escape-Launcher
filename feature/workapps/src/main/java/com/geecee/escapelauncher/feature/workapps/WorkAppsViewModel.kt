@@ -1,59 +1,46 @@
 package com.geecee.escapelauncher.feature.workapps
 
-import android.content.Context
-import android.os.Build
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.geecee.escapelauncher.core.domain.managedprofiles.GetManagedProfileAppsUseCase
+import com.geecee.escapelauncher.core.domain.managedprofiles.ManagedProfileType
+import com.geecee.escapelauncher.core.domain.managedprofiles.ObserveManagedProfileUnlockedUseCase
+import com.geecee.escapelauncher.core.domain.managedprofiles.ToggleManagedProfileUseCase
+import com.geecee.escapelauncher.core.domain.managedprofiles.ToggleManagedProfileUseCaseOutput
 import com.geecee.escapelauncher.core.model.InstalledApp
-import com.geecee.escapelauncher.core.common.getWorkApps
-import com.geecee.escapelauncher.core.common.isDefaultLauncher
-import com.geecee.escapelauncher.core.common.isWorkProfileUnlocked
-import com.geecee.escapelauncher.core.common.lockWorkProfile
-import com.geecee.escapelauncher.core.common.unlockWorkProfile
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class WorkAppsViewModel @Inject constructor(
-    @param:ApplicationContext private val context: Context
+    getManagedProfileAppsUseCase: GetManagedProfileAppsUseCase,
+    observeManagedProfileUnlockedUseCase: ObserveManagedProfileUnlockedUseCase,
+    private val toggleManagedProfileUseCase: ToggleManagedProfileUseCase
 ) : ViewModel() {
 
-    private val _isUnlocked = MutableStateFlow(false)
-    val isUnlocked: StateFlow<Boolean> = _isUnlocked.asStateFlow()
+    val isUnlocked: StateFlow<Boolean> = observeManagedProfileUnlockedUseCase(ManagedProfileType.WorkApps)
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = false
+        )
 
-    private val _workApps = MutableStateFlow<List<InstalledApp>>(emptyList())
-    val workApps: StateFlow<List<InstalledApp>> = _workApps.asStateFlow()
-
-    init {
-        refreshWorkApps()
-    }
-
-    fun refreshWorkApps() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) {
-            val unlocked = isWorkProfileUnlocked(context)
-            _isUnlocked.value = unlocked
-            if (unlocked) {
-                _workApps.value = getWorkApps(context).sortedBy { it.displayName.lowercase() }
-            } else {
-                _workApps.value = emptyList()
-            }
-        }
-    }
+    val workApps: StateFlow<List<InstalledApp>> = getManagedProfileAppsUseCase(ManagedProfileType.WorkApps)
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList()
+        )
 
     fun toggleWorkProfile(onLauncherNotDefault: () -> Unit) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) {
-            if (isDefaultLauncher(context)) {
-                if (isWorkProfileUnlocked(context)) {
-                    lockWorkProfile(context)
-                } else {
-                    unlockWorkProfile(context)
-                }
-                refreshWorkApps()
-            } else {
-                onLauncherNotDefault()
+        viewModelScope.launch {
+            when (toggleManagedProfileUseCase(ManagedProfileType.WorkApps)) {
+                ToggleManagedProfileUseCaseOutput.FailedNotDefaultLauncher -> onLauncherNotDefault()
+                else -> { /* Success cases are handled by the Flow observers */ }
             }
         }
     }
