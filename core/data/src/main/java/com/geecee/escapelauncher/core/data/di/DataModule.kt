@@ -4,8 +4,8 @@ import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import com.geecee.escapelauncher.core.data.datastore.settingsDataStore
-import com.geecee.escapelauncher.core.data.repository.settings.SettingsRepositoryImpl
-import com.geecee.escapelauncher.core.domain.repository.settings.SettingsRepository
+import com.geecee.escapelauncher.core.data.repository.settings.*
+import com.geecee.escapelauncher.core.domain.repository.settings.*
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -19,9 +19,52 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 abstract class DataModule {
     @Binds
-    abstract fun bindSettingsRepository(
-        impl: SettingsRepositoryImpl
-    ): SettingsRepository
+    @Singleton
+    abstract fun bindAppearanceRepository(
+        impl: AppearanceRepositoryImpl
+    ): AppearanceRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindClockRepository(
+        impl: ClockRepositoryImpl
+    ): ClockRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindLauncherBehaviorRepository(
+        impl: LauncherBehaviorRepositoryImpl
+    ): LauncherBehaviorRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindSearchSettingsRepository(
+        impl: SearchSettingsRepositoryImpl
+    ): SearchSettingsRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindWidgetSettingsRepository(
+        impl: WidgetSettingsRepositoryImpl
+    ): WidgetSettingsRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindOnboardingRepository(
+        impl: OnboardingRepositoryImpl
+    ): OnboardingRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindScreenTimeSettingsRepository(
+        impl: ScreenTimeSettingsRepositoryImpl
+    ): ScreenTimeSettingsRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindWeatherSettingsRepository(
+        impl: WeatherSettingsRepositoryImpl
+    ): WeatherSettingsRepository
 
     companion object {
         @Provides

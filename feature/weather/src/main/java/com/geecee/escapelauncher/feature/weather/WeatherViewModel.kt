@@ -4,7 +4,7 @@ import android.content.Context
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.geecee.escapelauncher.core.domain.repository.settings.SettingsRepository
+import com.geecee.escapelauncher.core.domain.repository.settings.WeatherSettingsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import jakarta.inject.Inject
@@ -16,9 +16,9 @@ import kotlinx.coroutines.launch
 @HiltViewModel
 class WeatherViewModel @Inject constructor(
     @param:ApplicationContext private val context: Context,
-    private val repository: SettingsRepository
+    private val weatherSettingsRepository: WeatherSettingsRepository
 ) : ViewModel() {
-    val weatherAppPackage = repository.weatherAppPackage
+    val weatherAppPackage = weatherSettingsRepository.weatherAppPackage
 
     val weatherText = mutableStateOf("")
     private val delayTime = 30 * 60 * 1000L // 30 Mins
@@ -29,7 +29,7 @@ class WeatherViewModel @Inject constructor(
 
     private fun startWeatherRefreshLoop() {
         viewModelScope.launch(Dispatchers.IO) {
-            repository.useFahrenheit.collect { useFahrenheit ->
+            weatherSettingsRepository.useFahrenheit.collect { useFahrenheit ->
                 // Restart the fetch loop whenever the setting changes
                 fetchWeather(useFahrenheit)
             }
@@ -38,7 +38,7 @@ class WeatherViewModel @Inject constructor(
         viewModelScope.launch(Dispatchers.IO) {
             while (true) {
                 delay(timeMillis = delayTime)
-                val useFahrenheit = repository.useFahrenheit.first()
+                val useFahrenheit = weatherSettingsRepository.useFahrenheit.first()
                 fetchWeather(useFahrenheit)
             }
         }
@@ -60,7 +60,7 @@ class WeatherViewModel @Inject constructor(
 
     fun forceUpdate() {
         viewModelScope.launch(Dispatchers.IO) {
-            val useFahrenheit = repository.useFahrenheit.first()
+            val useFahrenheit = weatherSettingsRepository.useFahrenheit.first()
             fetchWeather(useFahrenheit)
         }
     }

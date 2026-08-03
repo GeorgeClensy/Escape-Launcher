@@ -5,7 +5,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.geecee.escapelauncher.core.domain.repository.android.AppsRepository
 import com.geecee.escapelauncher.core.domain.repository.db.ModifiedAppsRepository
-import com.geecee.escapelauncher.core.domain.repository.settings.SettingsRepository
+import com.geecee.escapelauncher.core.domain.repository.settings.AppearanceRepository
+import com.geecee.escapelauncher.core.domain.repository.settings.LauncherBehaviorRepository
+import com.geecee.escapelauncher.core.domain.repository.settings.OnboardingRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.channels.BufferOverflow
@@ -17,11 +19,13 @@ import kotlinx.coroutines.launch
 class GlobalViewModel @Inject constructor(
     val modifiedAppsRepository: ModifiedAppsRepository,
     val appsRepository: AppsRepository,
-    settingsRepository: SettingsRepository
+    private val launcherBehaviorRepository: LauncherBehaviorRepository,
+    private val onboardingRepository: OnboardingRepository,
+    private val appearanceRepository: AppearanceRepository
 ) : ViewModel() {
-    val allowAnalytics = settingsRepository.allowAnalyitics
-    val firstTime = settingsRepository.firstTime
-    val showStatusBar = settingsRepository.showStatusBar
+    val allowAnalytics = launcherBehaviorRepository.allowAnalyitics
+    val firstTime = onboardingRepository.firstTime
+    val showStatusBar = appearanceRepository.showStatusBar
 
     private val _navigateHomeEvent = MutableSharedFlow<Unit>(
         replay = 0, onBufferOverflow = BufferOverflow.DROP_OLDEST, extraBufferCapacity = 1

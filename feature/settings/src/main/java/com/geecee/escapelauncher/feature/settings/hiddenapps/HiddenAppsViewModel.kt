@@ -4,7 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.geecee.escapelauncher.core.domain.repository.android.AppsRepository
 import com.geecee.escapelauncher.core.domain.repository.db.ModifiedAppsRepository
-import com.geecee.escapelauncher.core.domain.repository.settings.SettingsRepository
+import com.geecee.escapelauncher.core.domain.repository.settings.SearchSettingsRepository
+import com.geecee.escapelauncher.core.domain.repository.settings.LauncherBehaviorRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.SharingStarted
@@ -17,7 +18,8 @@ import kotlinx.coroutines.launch
 class HiddenAppsViewModel @Inject constructor(
     private val modifiedAppsRepository: ModifiedAppsRepository,
     val appsRepository: AppsRepository,
-    private val settingsRepository: SettingsRepository
+    private val searchSettingsRepository: SearchSettingsRepository,
+    private val launcherBehaviorRepository: LauncherBehaviorRepository
 ) : ViewModel() {
     val hiddenPackageIds: StateFlow<Set<String>> = modifiedAppsRepository.getHiddenPackageIdsFlow()
         .map { it.toSet() }
@@ -27,12 +29,12 @@ class HiddenAppsViewModel @Inject constructor(
             initialValue = emptySet()
         )
 
-    val showHiddenAppsInSearch = settingsRepository.showHiddenAppsInSearch
-    val hapticFeedBackEnabled = settingsRepository.hapticFeedBackEnabled
+    val showHiddenAppsInSearch = searchSettingsRepository.showHiddenAppsInSearch
+    val hapticFeedBackEnabled = launcherBehaviorRepository.hapticFeedBackEnabled
 
     fun setShowHiddenAppsInSearch(value: Boolean) {
         viewModelScope.launch {
-            settingsRepository.setShowHiddenAppsInSearch(value)
+            searchSettingsRepository.setShowHiddenAppsInSearch(value)
         }
     }
 

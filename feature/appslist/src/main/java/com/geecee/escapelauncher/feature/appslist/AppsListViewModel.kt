@@ -11,7 +11,7 @@ import com.geecee.escapelauncher.core.domain.apps.AppActionType
 import com.geecee.escapelauncher.core.domain.apps.GetAppActionsUseCase
 import com.geecee.escapelauncher.core.domain.search.SearchAppsUseCase
 import com.geecee.escapelauncher.core.domain.repository.db.ModifiedAppsRepository
-import com.geecee.escapelauncher.core.domain.repository.settings.SettingsRepository
+import com.geecee.escapelauncher.core.domain.repository.settings.*
 import com.geecee.escapelauncher.core.model.AppAction
 import com.geecee.escapelauncher.core.model.InstalledApp
 import com.geecee.escapelauncher.core.ui.R
@@ -19,23 +19,17 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import jakarta.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
 class AppsListViewModel @Inject constructor(
     @ApplicationContext context: Context,
-    settingsRepository: SettingsRepository,
+    private val appearanceRepository: AppearanceRepository,
+    private val searchSettingsRepository: SearchSettingsRepository,
+    private val launcherBehaviorRepository: LauncherBehaviorRepository,
+    private val screenTimeSettingsRepository: ScreenTimeSettingsRepository,
     private val modifiedAppsRepository: ModifiedAppsRepository,
     private val getAppActionsUseCase: GetAppActionsUseCase,
     private val searchAppsUseCase: SearchAppsUseCase
@@ -45,20 +39,20 @@ class AppsListViewModel @Inject constructor(
     val uiEvent = _uiEvent.asSharedFlow()
 
     // Settings
-    val showScreenTimeApp = settingsRepository.showScreenTimeApp
-    val appsAlignment = settingsRepository.appsAlignment.map { alignment ->
+    val showScreenTimeApp = screenTimeSettingsRepository.showScreenTimeApp
+    val appsAlignment = appearanceRepository.appsAlignment.map { alignment ->
         when (alignment) {
             "Left" -> Alignment.Start
             "Center" -> Alignment.CenterHorizontally
             else -> Alignment.End
         }
     }
-    val showSearchBox = settingsRepository.showSearchBox
-    val searchAutoOpen = settingsRepository.searchAutoOpen
-    val bottomSearch = settingsRepository.bottomSearch
-    val automaticallyOpenAppsInSearch = settingsRepository.automaticallyOpenAppsInSearch
-    val hiddenAppsInSearch = settingsRepository.showHiddenAppsInSearch
-    val hapticFeedBackEnabled = settingsRepository.hapticFeedBackEnabled
+    val showSearchBox = searchSettingsRepository.showSearchBox
+    val searchAutoOpen = searchSettingsRepository.searchAutoOpen
+    val bottomSearch = searchSettingsRepository.bottomSearch
+    val automaticallyOpenAppsInSearch = searchSettingsRepository.automaticallyOpenAppsInSearch
+    val hiddenAppsInSearch = searchSettingsRepository.showHiddenAppsInSearch
+    val hapticFeedBackEnabled = launcherBehaviorRepository.hapticFeedBackEnabled
 
     // Search
     private val _searchText = MutableStateFlow("")

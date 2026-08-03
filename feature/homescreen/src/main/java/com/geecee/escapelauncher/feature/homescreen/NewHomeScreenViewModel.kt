@@ -13,7 +13,7 @@ import com.geecee.escapelauncher.core.domain.apps.AppActionType
 import com.geecee.escapelauncher.core.domain.apps.GetAppActionsUseCase
 import com.geecee.escapelauncher.core.domain.apps.GetFavoriteAppsUseCase
 import com.geecee.escapelauncher.core.domain.repository.db.ModifiedAppsRepository
-import com.geecee.escapelauncher.core.domain.repository.settings.SettingsRepository
+import com.geecee.escapelauncher.core.domain.repository.settings.*
 import com.geecee.escapelauncher.core.model.AppAction
 import com.geecee.escapelauncher.core.model.InstalledApp
 import com.geecee.escapelauncher.core.ui.R
@@ -22,16 +22,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import jakarta.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlin.collections.map
 
@@ -39,7 +30,13 @@ import kotlin.collections.map
 @HiltViewModel
 class NewHomeScreenViewModel @Inject constructor(
     @ApplicationContext context: Context,
-    settingsRepository: SettingsRepository,
+    private val appearanceRepository: AppearanceRepository,
+    private val clockRepository: ClockRepository,
+    private val launcherBehaviorRepository: LauncherBehaviorRepository,
+    private val onboardingRepository: OnboardingRepository,
+    private val screenTimeSettingsRepository: ScreenTimeSettingsRepository,
+    private val weatherSettingsRepository: WeatherSettingsRepository,
+    private val widgetSettingsRepository: WidgetSettingsRepository,
     private val modifiedAppsRepository: ModifiedAppsRepository,
     getFavoriteAppsUseCase: GetFavoriteAppsUseCase,
     val widgetHostManager: WidgetHostManager,
@@ -53,17 +50,17 @@ class NewHomeScreenViewModel @Inject constructor(
     val uiEvent = _uiEvent.asSharedFlow()
 
     // Settings
-    val twelveHourClock = settingsRepository.twelveHourClock
-    val showClock = settingsRepository.showClock
-    val bigClock = settingsRepository.bigClock
-    val showDate = settingsRepository.showDate
-    val showScreenTimeHome = settingsRepository.showScreenTimeHome
-    val showWeather = settingsRepository.showWeather
-    val showScreenTimeApp = settingsRepository.showScreenTimeApp
-    val firstTimeHelp = settingsRepository.firstTimeHelp
-    val hapticFeedBackEnabled = settingsRepository.hapticFeedBackEnabled
+    val twelveHourClock = clockRepository.twelveHourClock
+    val showClock = clockRepository.showClock
+    val bigClock = clockRepository.bigClock
+    val showDate = clockRepository.showDate
+    val showScreenTimeHome = screenTimeSettingsRepository.showScreenTimeHome
+    val showWeather = weatherSettingsRepository.showWeather
+    val showScreenTimeApp = screenTimeSettingsRepository.showScreenTimeApp
+    val firstTimeHelp = onboardingRepository.firstTimeHelp
+    val hapticFeedBackEnabled = launcherBehaviorRepository.hapticFeedBackEnabled
 
-    val homeAlignment = settingsRepository.homeAlignment.map { alignment ->
+    val homeAlignment = appearanceRepository.homeAlignment.map { alignment ->
         when (alignment) {
             "Left" -> Alignment.Start
             "Center" -> Alignment.CenterHorizontally
@@ -71,7 +68,7 @@ class NewHomeScreenViewModel @Inject constructor(
         }
     }
 
-    val homeVAlignment = settingsRepository.homeVAlignment.map { alignment ->
+    val homeVAlignment = appearanceRepository.homeVAlignment.map { alignment ->
         when (alignment) {
             "Top" -> Arrangement.Top
             "Center" -> Arrangement.Center
@@ -79,10 +76,10 @@ class NewHomeScreenViewModel @Inject constructor(
         }
     }
 
-    val widgetOffset = settingsRepository.widgetOffset
-    val widgetHeight = settingsRepository.widgetHeight
-    val widgetWidth = settingsRepository.widgetWidth
-    val widgetId = settingsRepository.widgetId
+    val widgetOffset = widgetSettingsRepository.widgetOffset
+    val widgetHeight = widgetSettingsRepository.widgetHeight
+    val widgetWidth = widgetSettingsRepository.widgetWidth
+    val widgetId = widgetSettingsRepository.widgetId
 
     // Favorite Apps
     val favoriteApps: StateFlow<List<InstalledApp>> = getFavoriteAppsUseCase()

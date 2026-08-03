@@ -5,7 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.geecee.escapelauncher.core.common.AppConfiguration
 import com.geecee.escapelauncher.core.domain.repository.android.AppsRepository
-import com.geecee.escapelauncher.core.domain.repository.settings.SettingsRepository
+import com.geecee.escapelauncher.core.domain.repository.settings.*
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import jakarta.inject.Inject
@@ -42,32 +42,37 @@ data class MainSettingsUiState(
 class MainSettingsPageViewModel @Inject constructor(
     @param:ApplicationContext private val context: Context,
     appsRepository: AppsRepository,
-    private val repository: SettingsRepository,
+    private val appearanceRepository: AppearanceRepository,
+    private val clockRepository: ClockRepository,
+    private val launcherBehaviorRepository: LauncherBehaviorRepository,
+    private val searchSettingsRepository: SearchSettingsRepository,
+    private val screenTimeSettingsRepository: ScreenTimeSettingsRepository,
+    private val weatherSettingsRepository: WeatherSettingsRepository,
     val appConfiguration: AppConfiguration
 ) : ViewModel() {
 
     val uiState: StateFlow<MainSettingsUiState> = combine(
         listOf(
-            repository.hapticFeedBackEnabled,
-            repository.twelveHourClock,
-            repository.showClock,
-            repository.bigClock,
-            repository.showDate,
-            repository.showStatusBar,
-            repository.showScreenTimeHome,
-            repository.showWeather,
-            repository.useFahrenheit,
-            repository.showScreenTimeApp,
-            repository.homeAlignment,
-            repository.homeVAlignment,
-            repository.appsAlignment,
-            repository.doubleTapToLock,
-            repository.showSearchBox,
-            repository.searchAutoOpen,
-            repository.bottomSearch,
-            repository.automaticallyOpenAppsInSearch,
-            repository.hideScreenTimePage,
-            repository.allowAnalyitics
+            launcherBehaviorRepository.hapticFeedBackEnabled,
+            clockRepository.twelveHourClock,
+            clockRepository.showClock,
+            clockRepository.bigClock,
+            clockRepository.showDate,
+            appearanceRepository.showStatusBar,
+            screenTimeSettingsRepository.showScreenTimeHome,
+            weatherSettingsRepository.showWeather,
+            weatherSettingsRepository.useFahrenheit,
+            screenTimeSettingsRepository.showScreenTimeApp,
+            appearanceRepository.homeAlignment,
+            appearanceRepository.homeVAlignment,
+            appearanceRepository.appsAlignment,
+            launcherBehaviorRepository.doubleTapToLock,
+            searchSettingsRepository.showSearchBox,
+            searchSettingsRepository.searchAutoOpen,
+            searchSettingsRepository.bottomSearch,
+            searchSettingsRepository.automaticallyOpenAppsInSearch,
+            screenTimeSettingsRepository.hideScreenTimePage,
+            launcherBehaviorRepository.allowAnalyitics
         )
     ) { args: Array<Any?> ->
         MainSettingsUiState(
@@ -112,61 +117,61 @@ class MainSettingsPageViewModel @Inject constructor(
 
     fun setHapticFeedback(value: Boolean) {
         viewModelScope.launch {
-            repository.setHapticFeedback(value)
+            launcherBehaviorRepository.setHapticFeedback(value)
         }
     }
 
     fun setTwelveHourClock(value: Boolean) {
         viewModelScope.launch {
-            repository.setTwelveHourClock(value)
+            clockRepository.setTwelveHourClock(value)
         }
     }
 
     fun setShowClock(value: Boolean) {
         viewModelScope.launch {
-            repository.setShowClock(value)
+            clockRepository.setShowClock(value)
         }
     }
 
     fun setBigClock(value: Boolean) {
         viewModelScope.launch {
-            repository.setBigClock(value)
+            clockRepository.setBigClock(value)
         }
     }
 
     fun setShowDate(value: Boolean) {
         viewModelScope.launch {
-            repository.setShowDate(value)
+            clockRepository.setShowDate(value)
         }
     }
 
     fun setShowStatusBar(value: Boolean) {
         viewModelScope.launch {
-            repository.setShowStatusBar(value)
+            appearanceRepository.setShowStatusBar(value)
         }
     }
 
     fun setShowScreenTimeHome(value: Boolean) {
         viewModelScope.launch {
-            repository.setShowScreenTimeHome(value)
+            screenTimeSettingsRepository.setShowScreenTimeHome(value)
         }
     }
 
     fun setShowWeather(value: Boolean) {
         viewModelScope.launch {
-            repository.setShowWeather(value)
+            weatherSettingsRepository.setShowWeather(value)
         }
     }
 
     fun setUseFahrenheit(value: Boolean) {
         viewModelScope.launch {
-            repository.setUseFahrenheit(value)
+            weatherSettingsRepository.setUseFahrenheit(value)
         }
     }
 
     fun setShowScreenTimeApp(value: Boolean) {
         viewModelScope.launch {
-            repository.setShowScreenTimeApp(value)
+            screenTimeSettingsRepository.setShowScreenTimeApp(value)
         }
     }
 
@@ -177,7 +182,7 @@ class MainSettingsPageViewModel @Inject constructor(
             else -> "Right"
         }
         viewModelScope.launch {
-            repository.setHomeAlignment(value)
+            appearanceRepository.setHomeAlignment(value)
         }
     }
 
@@ -188,13 +193,13 @@ class MainSettingsPageViewModel @Inject constructor(
             else -> "Bottom"
         }
         viewModelScope.launch {
-            repository.setHomeVAlignment(value)
+            appearanceRepository.setHomeVAlignment(value)
         }
     }
 
     fun setWeatherAppPackage(value: String) {
         viewModelScope.launch {
-            repository.setWeatherAppPackage(value)
+            weatherSettingsRepository.setWeatherAppPackage(value)
         }
     }
 
@@ -205,49 +210,49 @@ class MainSettingsPageViewModel @Inject constructor(
             else -> "Right"
         }
         viewModelScope.launch {
-            repository.setAppsAlignment(value)
+            appearanceRepository.setAppsAlignment(value)
         }
     }
 
     fun setDoubleTapToLock(value: Boolean) {
         viewModelScope.launch {
-            repository.setDoubleTapToLock(value)
+            launcherBehaviorRepository.setDoubleTapToLock(value)
         }
     }
 
     fun setShowSearchBox(value: Boolean) {
         viewModelScope.launch {
-            repository.setShowSearchBox(value)
+            searchSettingsRepository.setShowSearchBox(value)
         }
     }
 
     fun setSearchAutoOpen(value: Boolean) {
         viewModelScope.launch {
-            repository.setSearchAutoOpen(value)
+            searchSettingsRepository.setSearchAutoOpen(value)
         }
     }
 
     fun setBottomSearch(value: Boolean) {
         viewModelScope.launch {
-            repository.setBottomSearch(value)
+            searchSettingsRepository.setBottomSearch(value)
         }
     }
 
     fun setAutomaticallyOpenAppsInSearch(value: Boolean) {
         viewModelScope.launch {
-            repository.setAutomaticallyOpenAppsInSearch(value)
+            searchSettingsRepository.setAutomaticallyOpenAppsInSearch(value)
         }
     }
 
     fun setHideScreenTimePage(value: Boolean) {
         viewModelScope.launch {
-            repository.setHideScreenTimePage(value)
+            screenTimeSettingsRepository.setHideScreenTimePage(value)
         }
     }
 
     fun setAllowAnalytics(value: Boolean) {
         viewModelScope.launch {
-            repository.setAllowAnalytics(value)
+            launcherBehaviorRepository.setAllowAnalytics(value)
         }
     }
 

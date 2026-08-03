@@ -16,7 +16,9 @@ import com.geecee.escapelauncher.core.common.launchApp
 import com.geecee.escapelauncher.core.domain.apps.GetFavoriteAppsUseCase
 import com.geecee.escapelauncher.core.domain.apps.TryOpenAppResult
 import com.geecee.escapelauncher.core.domain.apps.TryOpenAppUseCase
-import com.geecee.escapelauncher.core.domain.repository.settings.SettingsRepository
+import com.geecee.escapelauncher.core.domain.repository.settings.LauncherBehaviorRepository
+import com.geecee.escapelauncher.core.domain.repository.settings.OnboardingRepository
+import com.geecee.escapelauncher.core.domain.repository.settings.ScreenTimeSettingsRepository
 import com.geecee.escapelauncher.core.model.InstalledApp
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -32,23 +34,25 @@ import kotlin.time.Duration.Companion.milliseconds
 @HiltViewModel
 class MainPagerScreenViewModel @Inject constructor(
     @ApplicationContext context: Context,
-    private val repository: SettingsRepository,
+    private val onboardingRepository: OnboardingRepository,
+    private val screenTimeSettingsRepository: ScreenTimeSettingsRepository,
+    private val launcherBehaviorRepository: LauncherBehaviorRepository,
     private val getFavoriteAppsUseCase: GetFavoriteAppsUseCase,
     private val tryOpenAppUseCase: TryOpenAppUseCase
 ) : AndroidViewModel(context as Application) {
     fun setFirstTimeHelp(value: Boolean) {
         viewModelScope.launch {
-            repository.setFirstTimeHelp(value)
+            onboardingRepository.setFirstTimeHelp(value)
         }
     }
 
-    val hideScreenTimePage = repository.hideScreenTimePage.stateIn(
+    val hideScreenTimePage = screenTimeSettingsRepository.hideScreenTimePage.stateIn(
         scope = viewModelScope,
         started = SharingStarted.Eagerly,
         initialValue = false
     )
-    val doubleTapToLock = repository.doubleTapToLock
-    val hapticFeedBackEnabled = repository.hapticFeedBackEnabled
+    val doubleTapToLock = launcherBehaviorRepository.doubleTapToLock
+    val hapticFeedBackEnabled = launcherBehaviorRepository.hapticFeedBackEnabled
 
     var currentSelectedApp = mutableStateOf(InstalledApp("", "", ComponentName("", "")))
 
