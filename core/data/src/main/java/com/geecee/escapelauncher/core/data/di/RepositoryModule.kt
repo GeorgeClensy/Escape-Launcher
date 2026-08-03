@@ -1,11 +1,11 @@
 package com.geecee.escapelauncher.core.data.di
 
-import com.geecee.escapelauncher.core.data.repository.AppsRepositoryImpl
-import com.geecee.escapelauncher.core.data.repository.ModifiedAppsRepositoryImpl
-import com.geecee.escapelauncher.core.data.repository.ScreenTimeRepositoryImpl
-import com.geecee.escapelauncher.core.domain.repository.AppsRepository
-import com.geecee.escapelauncher.core.domain.repository.ModifiedAppsRepository
-import com.geecee.escapelauncher.core.domain.repository.ScreenTimeRepository
+import com.geecee.escapelauncher.core.data.repository.android.AppsRepositoryImpl
+import com.geecee.escapelauncher.core.data.repository.db.ModifiedAppsRepositoryImpl
+import com.geecee.escapelauncher.core.data.repository.db.ScreenTimeRepositoryImpl
+import com.geecee.escapelauncher.core.domain.repository.android.AppsRepository
+import com.geecee.escapelauncher.core.domain.repository.db.ModifiedAppsRepository
+import com.geecee.escapelauncher.core.domain.repository.db.ScreenTimeRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn

@@ -1,4 +1,4 @@
-package com.geecee.escapelauncher.core.domain.repository
+package com.geecee.escapelauncher.core.domain.repository.android
 
 import com.geecee.escapelauncher.core.model.InstalledApp
 import kotlinx.coroutines.flow.StateFlow

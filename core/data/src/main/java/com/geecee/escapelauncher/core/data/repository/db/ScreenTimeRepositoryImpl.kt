@@ -1,9 +1,9 @@
-package com.geecee.escapelauncher.core.data.repository
+package com.geecee.escapelauncher.core.data.repository.db
 
 import android.util.Log
 import com.geecee.escapelauncher.core.data.database.AppUsageDao
 import com.geecee.escapelauncher.core.data.entity.AppUsageEntity
-import com.geecee.escapelauncher.core.domain.repository.ScreenTimeRepository
+import com.geecee.escapelauncher.core.domain.repository.db.ScreenTimeRepository
 import com.geecee.escapelauncher.core.model.AppUsage
 import java.text.SimpleDateFormat
 import java.util.Calendar

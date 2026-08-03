@@ -13,7 +13,7 @@ import com.geecee.escapelauncher.core.common.isDefaultLauncher
 import com.geecee.escapelauncher.core.common.isPrivateSpaceUnlocked
 import com.geecee.escapelauncher.core.common.lockPrivateSpace
 import com.geecee.escapelauncher.core.common.unlockPrivateSpace
-import com.geecee.escapelauncher.core.domain.repository.SettingsRepository
+import com.geecee.escapelauncher.core.domain.repository.settings.SettingsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow

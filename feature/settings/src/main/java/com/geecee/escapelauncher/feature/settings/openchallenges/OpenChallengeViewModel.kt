@@ -3,7 +3,7 @@ package com.geecee.escapelauncher.feature.settings.openchallenges
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.geecee.escapelauncher.core.domain.challenges.GetOpenChallengeAppsUseCase
-import com.geecee.escapelauncher.core.domain.repository.ModifiedAppsRepository
+import com.geecee.escapelauncher.core.domain.repository.db.ModifiedAppsRepository
 import com.geecee.escapelauncher.core.model.InstalledApp
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject

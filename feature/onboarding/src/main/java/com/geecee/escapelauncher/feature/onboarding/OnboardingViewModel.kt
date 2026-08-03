@@ -3,7 +3,7 @@ package com.geecee.escapelauncher.feature.onboarding
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.geecee.escapelauncher.core.common.AppConfiguration
-import com.geecee.escapelauncher.core.domain.repository.SettingsRepository
+import com.geecee.escapelauncher.core.domain.repository.settings.SettingsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject

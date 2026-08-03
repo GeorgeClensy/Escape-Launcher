@@ -1,7 +1,7 @@
 package com.geecee.escapelauncher.core.domain.screentime
 
-import com.geecee.escapelauncher.core.domain.repository.AppsRepository
-import com.geecee.escapelauncher.core.domain.repository.ScreenTimeRepository
+import com.geecee.escapelauncher.core.domain.repository.android.AppsRepository
+import com.geecee.escapelauncher.core.domain.repository.db.ScreenTimeRepository
 import com.geecee.escapelauncher.core.model.AppUsageUiModel
 import jakarta.inject.Inject
 

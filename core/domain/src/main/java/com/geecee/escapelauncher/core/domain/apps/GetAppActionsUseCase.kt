@@ -1,6 +1,6 @@
 package com.geecee.escapelauncher.core.domain.apps
 
-import com.geecee.escapelauncher.core.domain.repository.ModifiedAppsRepository
+import com.geecee.escapelauncher.core.domain.repository.db.ModifiedAppsRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import jakarta.inject.Inject

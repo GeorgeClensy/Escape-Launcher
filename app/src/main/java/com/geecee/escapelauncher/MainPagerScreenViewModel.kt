@@ -16,7 +16,7 @@ import com.geecee.escapelauncher.core.common.launchApp
 import com.geecee.escapelauncher.core.domain.apps.GetFavoriteAppsUseCase
 import com.geecee.escapelauncher.core.domain.apps.TryOpenAppResult
 import com.geecee.escapelauncher.core.domain.apps.TryOpenAppUseCase
-import com.geecee.escapelauncher.core.domain.repository.SettingsRepository
+import com.geecee.escapelauncher.core.domain.repository.settings.SettingsRepository
 import com.geecee.escapelauncher.core.model.InstalledApp
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext

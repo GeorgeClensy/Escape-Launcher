@@ -1,4 +1,4 @@
-package com.geecee.escapelauncher.core.data.repository
+package com.geecee.escapelauncher.core.data.repository.android
 
 import android.content.Context
 import android.content.pm.LauncherApps
@@ -6,9 +6,11 @@ import android.os.Process
 import android.os.UserHandle
 import android.os.UserManager
 import com.geecee.escapelauncher.core.di.ApplicationScope
+import com.geecee.escapelauncher.core.domain.repository.android.AppsRepository
 import com.geecee.escapelauncher.core.model.InstalledApp
-import com.geecee.escapelauncher.core.domain.repository.AppsRepository
 import dagger.hilt.android.qualifiers.ApplicationContext
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -21,8 +23,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import javax.inject.Inject
-import javax.inject.Singleton
 import kotlin.time.Duration.Companion.milliseconds
 
 @OptIn(FlowPreview::class)
@@ -46,7 +46,8 @@ class AppsRepositoryImpl @Inject constructor(
             initialValue = emptyList()
         )
 
-    private val refreshTrigger = MutableSharedFlow<Unit>(replay = 1) // Using this to debounce rapid updates
+    private val refreshTrigger =
+        MutableSharedFlow<Unit>(replay = 1) // Using this to debounce rapid updates
 
     private val callback = object : LauncherApps.Callback() {
         override fun onPackageAdded(packageName: String, user: UserHandle) = reloadApps()

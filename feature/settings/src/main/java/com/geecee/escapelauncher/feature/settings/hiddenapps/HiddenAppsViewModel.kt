@@ -2,9 +2,9 @@ package com.geecee.escapelauncher.feature.settings.hiddenapps
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.geecee.escapelauncher.core.domain.repository.AppsRepository
-import com.geecee.escapelauncher.core.domain.repository.ModifiedAppsRepository
-import com.geecee.escapelauncher.core.domain.repository.SettingsRepository
+import com.geecee.escapelauncher.core.domain.repository.android.AppsRepository
+import com.geecee.escapelauncher.core.domain.repository.db.ModifiedAppsRepository
+import com.geecee.escapelauncher.core.domain.repository.settings.SettingsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.SharingStarted

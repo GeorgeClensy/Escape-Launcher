@@ -1,6 +1,6 @@
 package com.geecee.escapelauncher.core.domain.apps
 
-import com.geecee.escapelauncher.core.domain.repository.ModifiedAppsRepository
+import com.geecee.escapelauncher.core.domain.repository.db.ModifiedAppsRepository
 import jakarta.inject.Inject
 
 sealed class TryOpenAppResult {

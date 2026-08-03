@@ -2,7 +2,7 @@ package com.geecee.escapelauncher.feature.screentime
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.geecee.escapelauncher.core.domain.repository.ScreenTimeRepository
+import com.geecee.escapelauncher.core.domain.repository.db.ScreenTimeRepository
 import com.geecee.escapelauncher.core.domain.screentime.GetAppUsageUiListUseCase
 import com.geecee.escapelauncher.core.model.AppUsageUiModel
 import dagger.hilt.android.lifecycle.HiltViewModel

@@ -12,8 +12,8 @@ import com.geecee.escapelauncher.core.common.startShortcut
 import com.geecee.escapelauncher.core.domain.apps.AppActionType
 import com.geecee.escapelauncher.core.domain.apps.GetAppActionsUseCase
 import com.geecee.escapelauncher.core.domain.apps.GetFavoriteAppsUseCase
-import com.geecee.escapelauncher.core.domain.repository.ModifiedAppsRepository
-import com.geecee.escapelauncher.core.domain.repository.SettingsRepository
+import com.geecee.escapelauncher.core.domain.repository.db.ModifiedAppsRepository
+import com.geecee.escapelauncher.core.domain.repository.settings.SettingsRepository
 import com.geecee.escapelauncher.core.model.AppAction
 import com.geecee.escapelauncher.core.model.InstalledApp
 import com.geecee.escapelauncher.core.ui.R

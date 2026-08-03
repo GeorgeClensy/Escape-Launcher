@@ -4,8 +4,8 @@ import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import com.geecee.escapelauncher.core.data.datastore.settingsDataStore
-import com.geecee.escapelauncher.core.data.repository.SettingsRepositoryImpl
-import com.geecee.escapelauncher.core.domain.repository.SettingsRepository
+import com.geecee.escapelauncher.core.data.repository.settings.SettingsRepositoryImpl
+import com.geecee.escapelauncher.core.domain.repository.settings.SettingsRepository
 import dagger.Binds
 import dagger.Module
 import dagger.Provides

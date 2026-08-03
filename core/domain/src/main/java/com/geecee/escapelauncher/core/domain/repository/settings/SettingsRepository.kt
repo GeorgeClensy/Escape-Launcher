@@ -1,4 +1,4 @@
-package com.geecee.escapelauncher.core.domain.repository
+package com.geecee.escapelauncher.core.domain.repository.settings
 
 import kotlinx.coroutines.flow.Flow
 

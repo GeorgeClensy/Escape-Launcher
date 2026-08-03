@@ -1,8 +1,8 @@
-package com.geecee.escapelauncher.core.data.repository
+package com.geecee.escapelauncher.core.data.repository.db
 
 import com.geecee.escapelauncher.core.data.database.ModifiedAppsDao
 import com.geecee.escapelauncher.core.data.entity.ModifiedAppEntity
-import com.geecee.escapelauncher.core.domain.repository.ModifiedAppsRepository
+import com.geecee.escapelauncher.core.domain.repository.db.ModifiedAppsRepository
 import com.geecee.escapelauncher.core.model.ModifiedApp
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map

@@ -1,4 +1,4 @@
-package com.geecee.escapelauncher.core.domain.repository
+package com.geecee.escapelauncher.core.domain.repository.db
 
 import com.geecee.escapelauncher.core.model.AppUsage
 
