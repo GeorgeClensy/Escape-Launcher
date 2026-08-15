@@ -138,27 +138,29 @@ fun WorkApps(
                         style = MaterialTheme.typography.bodyMedium
                     )
 
-                    IconButton(
-                        onClick = {
-                            viewModel.toggleWorkProfile {
-                                Toast.makeText(
-                                    context,
-                                    resources.getString(R.string.launcher_must_be_default_to_pause_or_unpause_work_apps),
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                            }
-                        },
-                        colors = IconButtonColors(
-                            containerColor = MaterialTheme.colorScheme.surfaceContainer,
-                            contentColor = MaterialTheme.colorScheme.onSurface,
-                            disabledContainerColor = MaterialTheme.colorScheme.surfaceContainer,
-                            disabledContentColor = MaterialTheme.colorScheme.onSurface
-                        )
-                    ) {
-                        Icon(
-                            Icons.Rounded.WorkOff,
-                            contentDescription = stringResource(R.string.lock_work_profile)
-                        )
+                    if (viewModel.canToggleProfile) {
+                        IconButton(
+                            onClick = {
+                                viewModel.toggleWorkProfile {
+                                    Toast.makeText(
+                                        context,
+                                        resources.getString(R.string.launcher_must_be_default_to_pause_or_unpause_work_apps),
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                }
+                            },
+                            colors = IconButtonColors(
+                                containerColor = MaterialTheme.colorScheme.surfaceContainer,
+                                contentColor = MaterialTheme.colorScheme.onSurface,
+                                disabledContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+                                disabledContentColor = MaterialTheme.colorScheme.onSurface
+                            )
+                        ) {
+                            Icon(
+                                Icons.Rounded.WorkOff,
+                                contentDescription = stringResource(R.string.lock_work_profile)
+                            )
+                        }
                     }
                 }
 
@@ -207,24 +209,28 @@ fun WorkApps(
                     )
                 )
 
-                OutlinedButton(
-                    onClick = {
-                        viewModel.toggleWorkProfile {
-                            Toast.makeText(
-                                context,
-                                resources.getString(R.string.launcher_must_be_default_to_pause_or_unpause_work_apps),
-                                Toast.LENGTH_SHORT
-                            ).show()
-                        }
-                    },
-                    modifier = Modifier
-                        .padding(bottom = 30.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceContainer,
-                        contentColor = MaterialTheme.colorScheme.onSurface,
-                    )
-                ) {
-                    Text(stringResource(R.string.unpause))
+                if (viewModel.canToggleProfile) {
+                    OutlinedButton(
+                        onClick = {
+                            viewModel.toggleWorkProfile {
+                                Toast.makeText(
+                                    context,
+                                    resources.getString(R.string.launcher_must_be_default_to_pause_or_unpause_work_apps),
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
+                        },
+                        modifier = Modifier
+                            .padding(bottom = 30.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.surfaceContainer,
+                            contentColor = MaterialTheme.colorScheme.onSurface,
+                        )
+                    ) {
+                        Text(stringResource(R.string.unpause))
+                    }
+                } else {
+                    Spacer(Modifier.height(30.dp))
                 }
             }
         }

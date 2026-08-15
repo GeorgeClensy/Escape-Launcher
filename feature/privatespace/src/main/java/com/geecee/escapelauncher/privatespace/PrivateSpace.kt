@@ -96,19 +96,21 @@ fun PrivateSpace(
                             )
                         }
 
-                        IconButton(
-                            onClick = {
-                                viewModel.togglePrivateSpaceProfile(onLauncherNotDefault = {})
-                            }, modifier = Modifier, colors = IconButtonColors(
-                                containerColor = MaterialTheme.colorScheme.surfaceContainer,
-                                contentColor = MaterialTheme.colorScheme.onSurface,
-                                disabledContainerColor = MaterialTheme.colorScheme.surfaceContainer,
-                                disabledContentColor = MaterialTheme.colorScheme.onSurface
-                            )
-                        ) {
-                            Icon(
-                                Icons.Default.Lock, stringResource(R.string.lock_private_space)
-                            )
+                        if (viewModel.canToggleProfile) {
+                            IconButton(
+                                onClick = {
+                                    viewModel.togglePrivateSpaceProfile(onLauncherNotDefault = {})
+                                }, modifier = Modifier, colors = IconButtonColors(
+                                    containerColor = MaterialTheme.colorScheme.surfaceContainer,
+                                    contentColor = MaterialTheme.colorScheme.onSurface,
+                                    disabledContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+                                    disabledContentColor = MaterialTheme.colorScheme.onSurface
+                                )
+                            ) {
+                                Icon(
+                                    Icons.Default.Lock, stringResource(R.string.lock_private_space)
+                                )
+                            }
                         }
                     }
                 }
@@ -141,9 +143,11 @@ fun PrivateSpace(
                 text = stringResource(R.string.private_space),
                 iconContentDescription = stringResource(R.string.unlock_private_space),
                 unlockClick = {
+                    if (viewModel.canToggleProfile) {
                         viewModel.togglePrivateSpaceProfile(onLauncherNotDefault = {
                             //todo: do something here
                         })
+                    }
                 }
             )
         }

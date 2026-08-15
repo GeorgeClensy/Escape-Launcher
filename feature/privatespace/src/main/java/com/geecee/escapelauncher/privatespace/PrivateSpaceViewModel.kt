@@ -2,6 +2,7 @@ package com.geecee.escapelauncher.privatespace
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.geecee.escapelauncher.core.domain.managedprofiles.CanToggleManagedProfileUseCase
 import com.geecee.escapelauncher.core.domain.managedprofiles.GetManagedProfileAppsUseCase
 import com.geecee.escapelauncher.core.domain.managedprofiles.ManagedProfileType
 import com.geecee.escapelauncher.core.domain.managedprofiles.ObserveManagedProfileUnlockedUseCase
@@ -23,8 +24,11 @@ class PrivateSpaceViewModel @Inject constructor(
     getManagedProfileAppsUseCase: GetManagedProfileAppsUseCase,
     observeManagedProfileUnlockedUseCase: ObserveManagedProfileUnlockedUseCase,
     private val toggleManagedProfileUseCase: ToggleManagedProfileUseCase,
+    private val canToggleManagedProfileUseCase: CanToggleManagedProfileUseCase,
     private val launcherBehaviorRepository: LauncherBehaviorRepository
 ) : ViewModel() {
+
+    val canToggleProfile: Boolean = canToggleManagedProfileUseCase(ManagedProfileType.PrivateSpace)
 
     val isUnlocked: StateFlow<Boolean> = observeManagedProfileUnlockedUseCase(ManagedProfileType.PrivateSpace)
         .stateIn(

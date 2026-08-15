@@ -2,6 +2,7 @@ package com.geecee.escapelauncher.feature.workapps
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.geecee.escapelauncher.core.domain.managedprofiles.CanToggleManagedProfileUseCase
 import com.geecee.escapelauncher.core.domain.managedprofiles.GetManagedProfileAppsUseCase
 import com.geecee.escapelauncher.core.domain.managedprofiles.ManagedProfileType
 import com.geecee.escapelauncher.core.domain.managedprofiles.ObserveManagedProfileUnlockedUseCase
@@ -19,8 +20,11 @@ import javax.inject.Inject
 class WorkAppsViewModel @Inject constructor(
     getManagedProfileAppsUseCase: GetManagedProfileAppsUseCase,
     observeManagedProfileUnlockedUseCase: ObserveManagedProfileUnlockedUseCase,
-    private val toggleManagedProfileUseCase: ToggleManagedProfileUseCase
+    private val toggleManagedProfileUseCase: ToggleManagedProfileUseCase,
+    private val canToggleManagedProfileUseCase: CanToggleManagedProfileUseCase
 ) : ViewModel() {
+
+    val canToggleProfile: Boolean = canToggleManagedProfileUseCase(ManagedProfileType.WorkApps)
 
     val isUnlocked: StateFlow<Boolean> = observeManagedProfileUnlockedUseCase(ManagedProfileType.WorkApps)
         .stateIn(
