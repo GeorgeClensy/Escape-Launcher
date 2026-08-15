@@ -24,6 +24,20 @@ import kotlinx.coroutines.flow.onStart
 import javax.inject.Inject
 import javax.inject.Singleton
 
+/**
+ * Implementation of [ManagedProfileRepository] that uses Android's system services
+ * to interact with managed profiles.
+ *
+ * This implementation handles differences between Android versions, specifically:
+ * - **Private Space:** Supported on Android 15+ (API 35) using specific user types.
+ * - **Work Profiles:** Supported across all versions (API 26+). On Android 15+, it uses
+ *   `LauncherUserInfo` for precise detection. On older versions, it falls back to
+ *   identifying any profile that is not the primary user.
+ * - **Quiet Mode:** Used to lock/unlock profiles, supported on Android 9+ (API 28).
+ *
+ * @property context The application context.
+ * @property appsRepository Repository for general app management, used to trigger reloads.
+ */
 @Singleton
 class ManagedProfileRepositoryImpl @Inject constructor(
     @ApplicationContext private val context: Context,
