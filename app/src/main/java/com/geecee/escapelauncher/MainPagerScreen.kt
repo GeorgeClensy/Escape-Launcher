@@ -165,7 +165,9 @@ fun MainPagerScreen(
                     }
                 },
                 floatingContent = { onShowWorkApps ->
-                    if (viewModel.managedProfileExists(ManagedProfileType.WorkApps)) {
+                    if (viewModel.managedProfileExists(ManagedProfileType.WorkApps) &&
+                        viewModel.isManagedProfileSupported(ManagedProfileType.WorkApps)
+                    ) {
                         WorkAppsFab(
                             Modifier
                                 .align(Alignment.BottomEnd)
@@ -176,11 +178,13 @@ fun MainPagerScreen(
                     }
                 },
                 workAppsContent = { onClick, onLongClick ->
-                    WorkApps(
-                        modifier = Modifier.align(Alignment.Center),
-                        onAppClick = onClick,
-                        onAppLongClick = onLongClick
-                    )
+                    if (viewModel.isManagedProfileSupported(ManagedProfileType.WorkApps)) {
+                        WorkApps(
+                            modifier = Modifier.align(Alignment.Center),
+                            onAppClick = onClick,
+                            onAppLongClick = onLongClick
+                        )
+                    }
                 }
             )
         }
