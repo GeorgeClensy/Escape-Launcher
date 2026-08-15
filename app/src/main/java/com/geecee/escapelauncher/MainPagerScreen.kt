@@ -28,7 +28,6 @@ import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.geecee.escapelauncher.core.common.EscapeAccessibilityService
-import com.geecee.escapelauncher.core.common.doesWorkProfileExist
 import com.geecee.escapelauncher.core.common.isDefaultLauncher
 import com.geecee.escapelauncher.core.domain.managedprofiles.ManagedProfileType
 import com.geecee.escapelauncher.core.ui.R
@@ -166,8 +165,8 @@ fun MainPagerScreen(
                     }
                 },
                 floatingContent = { onShowWorkApps ->
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM && doesWorkProfileExist(
-                            context = context
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM && viewModel.managedProfileExists(
+                            ManagedProfileType.WorkApps
                         )
                     ) {
                         WorkAppsFab(
