@@ -8,6 +8,7 @@ import android.content.IntentFilter
 import android.content.pm.LauncherApps
 import android.content.pm.PackageManager
 import android.os.Build
+import android.os.Process
 import android.os.UserHandle
 import android.os.UserManager
 import com.geecee.escapelauncher.core.domain.managedprofiles.ManagedProfileType
@@ -36,18 +37,24 @@ class ManagedProfileRepositoryImpl @Inject constructor(
 
     init {
         _profileUpdateTrigger.tryEmit(Unit)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) {
-            val receiver = object : BroadcastReceiver() {
-                override fun onReceive(context: Context, intent: Intent) {
-                    _profileUpdateTrigger.tryEmit(Unit)
-                }
+
+        val receiver = object : BroadcastReceiver() {
+            override fun onReceive(context: Context, intent: Intent) {
+                _profileUpdateTrigger.tryEmit(Unit)
+                appsRepository.reloadApps()
             }
-            val filter = IntentFilter().apply {
+        }
+        val filter = IntentFilter().apply {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) {
                 addAction(Intent.ACTION_PROFILE_AVAILABLE)
                 addAction(Intent.ACTION_PROFILE_UNAVAILABLE)
             }
-            context.registerReceiver(receiver, filter)
+            addAction(Intent.ACTION_MANAGED_PROFILE_AVAILABLE)
+            addAction(Intent.ACTION_MANAGED_PROFILE_UNAVAILABLE)
+            addAction(Intent.ACTION_MANAGED_PROFILE_ADDED)
+            addAction(Intent.ACTION_MANAGED_PROFILE_REMOVED)
         }
+        context.registerReceiver(receiver, filter)
     }
 
     override fun getApps(type: ManagedProfileType): Flow<List<InstalledApp>> {
@@ -55,8 +62,6 @@ class ManagedProfileRepositoryImpl @Inject constructor(
             appsRepository.installedApps,
             _profileUpdateTrigger.onStart { emit(Unit) }
         ) { allApps, _ ->
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.VANILLA_ICE_CREAM) return@combine emptyList()
-
             val userHandle = getProfileUserHandle(type) ?: return@combine emptyList()
             if (userManager.isQuietModeEnabled(userHandle)) return@combine emptyList()
 
@@ -72,26 +77,26 @@ class ManagedProfileRepositoryImpl @Inject constructor(
     }
 
     override fun isUnlocked(type: ManagedProfileType): Boolean {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.VANILLA_ICE_CREAM) return false
-        val userHandle = getProfileUserHandle(type) ?: return false
+        val userHandle = getProfileUserHandle(type) ?: return true
         return !userManager.isQuietModeEnabled(userHandle)
     }
 
     override fun exists(type: ManagedProfileType): Boolean {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.VANILLA_ICE_CREAM) return false
         return getProfileUserHandle(type) != null
     }
 
     override suspend fun lock(type: ManagedProfileType) {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.VANILLA_ICE_CREAM) return
         val userHandle = getProfileUserHandle(type) ?: return
-        userManager.requestQuietModeEnabled(true, userHandle)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            userManager.requestQuietModeEnabled(true, userHandle)
+        }
     }
 
     override suspend fun unlock(type: ManagedProfileType) {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.VANILLA_ICE_CREAM) return
         val userHandle = getProfileUserHandle(type) ?: return
-        userManager.requestQuietModeEnabled(false, userHandle)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            userManager.requestQuietModeEnabled(false, userHandle)
+        }
     }
 
     override fun isDefaultLauncher(): Boolean {
@@ -109,15 +114,24 @@ class ManagedProfileRepositoryImpl @Inject constructor(
     }
 
     private fun getProfileUserHandle(type: ManagedProfileType): UserHandle? {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.VANILLA_ICE_CREAM) return null
+        return when (type) {
+            ManagedProfileType.PrivateSpace -> {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) {
+                    userManager.userProfiles.find {
+                        launcherApps.getLauncherUserInfo(it)?.userType == "android.os.usertype.profile.PRIVATE"
+                    }
+                } else null
+            }
 
-        val userType = when (type) {
-            ManagedProfileType.PrivateSpace -> "android.os.usertype.profile.PRIVATE"
-            ManagedProfileType.WorkApps -> UserManager.USER_TYPE_PROFILE_MANAGED
-        }
-
-        return userManager.userProfiles.find {
-            launcherApps.getLauncherUserInfo(it)?.userType == userType
+            ManagedProfileType.WorkApps -> {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) {
+                    userManager.userProfiles.find {
+                        launcherApps.getLauncherUserInfo(it)?.userType == UserManager.USER_TYPE_PROFILE_MANAGED
+                    }
+                } else {
+                    userManager.userProfiles.find { it != Process.myUserHandle() }
+                }
+            }
         }
     }
 }

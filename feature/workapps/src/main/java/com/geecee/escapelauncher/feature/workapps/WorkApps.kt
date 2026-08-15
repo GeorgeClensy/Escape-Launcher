@@ -1,8 +1,6 @@
 package com.geecee.escapelauncher.feature.workapps
 
-import android.os.Build
 import android.widget.Toast
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
@@ -78,7 +76,6 @@ fun WorkAppsFab(
  *
  * @author George Clensy
  */
-@RequiresApi(Build.VERSION_CODES.VANILLA_ICE_CREAM)
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun WorkAppItem(
@@ -109,7 +106,6 @@ fun WorkAppItem(
  * @author George Clensy
  */
 @OptIn(ExperimentalMaterial3Api::class)
-@RequiresApi(Build.VERSION_CODES.VANILLA_ICE_CREAM)
 @Composable
 fun WorkApps(
     modifier: Modifier = Modifier,
