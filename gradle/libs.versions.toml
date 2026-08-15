@@ -48,6 +48,8 @@ gson = "2.14.0"
 espressoCore = "3.7.0"
 junit = "4.13.2"
 junitVersion = "1.3.0"
+mockk = "1.13.17"
+kotlinxCoroutinesTest = "1.10.1"
 animationCore = "1.11.4"
 
 [libraries]
@@ -109,6 +111,8 @@ androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "j
 androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
 androidx-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
+mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
+kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "kotlinxCoroutinesTest" }
 [bundles]
 androidx-core = [
     "androidx-core-ktx",
@@ -143,7 +147,9 @@ hilt = [
     "androidx-lifecycle-runtime-ktx"
 ]
 unit-testing = [
-    "junit"
+    "junit",
+    "mockk",
+    "kotlinx-coroutines-test"
 ]
 android-testing = [
     "androidx-junit",
