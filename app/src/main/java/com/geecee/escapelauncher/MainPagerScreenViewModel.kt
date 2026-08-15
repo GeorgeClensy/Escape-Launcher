@@ -16,6 +16,8 @@ import com.geecee.escapelauncher.core.common.launchApp
 import com.geecee.escapelauncher.core.domain.apps.GetFavoriteAppsUseCase
 import com.geecee.escapelauncher.core.domain.apps.TryOpenAppResult
 import com.geecee.escapelauncher.core.domain.apps.TryOpenAppUseCase
+import com.geecee.escapelauncher.core.domain.managedprofiles.ManagedProfileExistsUseCase
+import com.geecee.escapelauncher.core.domain.managedprofiles.ManagedProfileType
 import com.geecee.escapelauncher.core.domain.repository.settings.LauncherBehaviorRepository
 import com.geecee.escapelauncher.core.domain.repository.settings.OnboardingRepository
 import com.geecee.escapelauncher.core.domain.repository.settings.ScreenTimeSettingsRepository
@@ -38,8 +40,10 @@ class MainPagerScreenViewModel @Inject constructor(
     private val screenTimeSettingsRepository: ScreenTimeSettingsRepository,
     private val launcherBehaviorRepository: LauncherBehaviorRepository,
     private val getFavoriteAppsUseCase: GetFavoriteAppsUseCase,
-    private val tryOpenAppUseCase: TryOpenAppUseCase
+    private val tryOpenAppUseCase: TryOpenAppUseCase,
+    private val managedProfileExistsUseCase: ManagedProfileExistsUseCase
 ) : AndroidViewModel(context as Application) {
+    fun managedProfileExists(type: ManagedProfileType): Boolean = managedProfileExistsUseCase(type)
     fun setFirstTimeHelp(value: Boolean) {
         viewModelScope.launch {
             onboardingRepository.setFirstTimeHelp(value)
