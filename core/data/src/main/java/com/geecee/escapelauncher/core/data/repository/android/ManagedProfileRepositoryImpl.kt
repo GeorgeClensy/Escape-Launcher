@@ -77,7 +77,7 @@ class ManagedProfileRepositoryImpl @Inject constructor(
     }
 
     override fun isUnlocked(type: ManagedProfileType): Boolean {
-        val userHandle = getProfileUserHandle(type) ?: return true
+        val userHandle = getProfileUserHandle(type) ?: return false
         return !userManager.isQuietModeEnabled(userHandle)
     }
 
@@ -129,6 +129,7 @@ class ManagedProfileRepositoryImpl @Inject constructor(
                         launcherApps.getLauncherUserInfo(it)?.userType == UserManager.USER_TYPE_PROFILE_MANAGED
                     }
                 } else {
+                    // Fallback for API 26-34: Typically only one other profile exists for the current user.
                     userManager.userProfiles.find { it != Process.myUserHandle() }
                 }
             }
