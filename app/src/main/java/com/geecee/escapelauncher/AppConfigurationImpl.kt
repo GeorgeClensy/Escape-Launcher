@@ -2,7 +2,7 @@
 
 package com.geecee.escapelauncher
 
-import com.geecee.escapelauncher.core.common.AppConfiguration
+import com.geecee.escapelauncher.core.domain.repository.AppConfiguration
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -17,6 +17,7 @@ class AppConfigurationImpl @Inject constructor() : AppConfiguration {
     override val appFlavour: String = BuildConfig.APP_FLAVOUR
 }
 
+@Suppress("unused") // It is used by hilt
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class AppModule {

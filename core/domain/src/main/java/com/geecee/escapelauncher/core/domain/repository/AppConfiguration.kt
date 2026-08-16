@@ -1,4 +1,4 @@
-package com.geecee.escapelauncher.core.common
+package com.geecee.escapelauncher.core.domain.repository
 
 interface AppConfiguration {
     val isFoss: Boolean

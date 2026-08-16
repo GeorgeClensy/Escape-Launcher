@@ -5,7 +5,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.ui.Alignment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.geecee.escapelauncher.core.common.AppConfiguration
+import com.geecee.escapelauncher.core.domain.repository.AppConfiguration
 import com.geecee.escapelauncher.core.common.getAppShortcuts
 import com.geecee.escapelauncher.core.common.isMainUserApp
 import com.geecee.escapelauncher.core.common.startShortcut
@@ -30,13 +30,13 @@ import kotlin.collections.map
 @HiltViewModel
 class NewHomeScreenViewModel @Inject constructor(
     @ApplicationContext context: Context,
-    private val appearanceRepository: AppearanceRepository,
-    private val clockRepository: ClockRepository,
-    private val launcherBehaviorRepository: LauncherBehaviorRepository,
-    private val onboardingRepository: OnboardingRepository,
-    private val screenTimeSettingsRepository: ScreenTimeSettingsRepository,
-    private val weatherSettingsRepository: WeatherSettingsRepository,
-    private val widgetSettingsRepository: WidgetSettingsRepository,
+    appearanceRepository: AppearanceRepository,
+    clockRepository: ClockRepository,
+    launcherBehaviorRepository: LauncherBehaviorRepository,
+    onboardingRepository: OnboardingRepository,
+    screenTimeSettingsRepository: ScreenTimeSettingsRepository,
+    weatherSettingsRepository: WeatherSettingsRepository,
+    widgetSettingsRepository: WidgetSettingsRepository,
     private val modifiedAppsRepository: ModifiedAppsRepository,
     getFavoriteAppsUseCase: GetFavoriteAppsUseCase,
     val widgetHostManager: WidgetHostManager,

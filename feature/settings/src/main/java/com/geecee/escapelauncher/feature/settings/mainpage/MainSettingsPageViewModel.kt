@@ -1,13 +1,11 @@
 package com.geecee.escapelauncher.feature.settings.mainpage
 
-import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.geecee.escapelauncher.core.common.AppConfiguration
+import com.geecee.escapelauncher.core.domain.repository.AppConfiguration
 import com.geecee.escapelauncher.core.domain.repository.android.AppsRepository
 import com.geecee.escapelauncher.core.domain.repository.settings.*
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -40,7 +38,6 @@ data class MainSettingsUiState(
 
 @HiltViewModel
 class MainSettingsPageViewModel @Inject constructor(
-    @param:ApplicationContext private val context: Context,
     appsRepository: AppsRepository,
     private val appearanceRepository: AppearanceRepository,
     private val clockRepository: ClockRepository,
