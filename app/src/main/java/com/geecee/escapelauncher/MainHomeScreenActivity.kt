@@ -129,7 +129,7 @@ class MainHomeScreenActivity : ComponentActivity() {
 
         // Keep splash screen visible until we know where to go and essential data is loaded
         splashScreen.setKeepOnScreenCondition {
-            startDestination == null || !globalViewModel.isAppsLoaded.value || !globalViewModel.isFavoritesLoaded.value || !globalViewModel.isSettingsLoaded.value
+            startDestination == null || !globalViewModel.initializationState.value.isAllLoaded
         }
 
         // Register screen off receiver

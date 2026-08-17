@@ -5,6 +5,8 @@ import com.geecee.escapelauncher.core.data.database.AppUsageDao
 import com.geecee.escapelauncher.core.data.entity.AppUsageEntity
 import com.geecee.escapelauncher.core.domain.repository.db.ScreenTimeRepository
 import com.geecee.escapelauncher.core.model.AppUsage
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -18,6 +20,15 @@ class ScreenTimeRepositoryImpl @Inject constructor(
     private val appUsageDao: AppUsageDao
 ) : ScreenTimeRepository {
     private val appSessions = ConcurrentHashMap<String, Long>()
+
+    override val allUsageFlow: Flow<List<AppUsage>> = appUsageDao.getAllUsageFlow().map { entities ->
+        entities.map { usage ->
+            AppUsage(
+                packageName = usage.packageName.substringBeforeLast("-"),
+                totalTime = usage.totalTime
+            )
+        }
+    }
 
     override fun onAppOpened(packageName: String) {
         appSessions[packageName] = System.currentTimeMillis()
@@ -72,6 +83,10 @@ class ScreenTimeRepositoryImpl @Inject constructor(
         return appUsageDao.getTotalUsageForDate("%-$date") ?: 0L
     }
 
+    override fun getTotalUsageForDateFlow(date: String): Flow<Long> {
+        return appUsageDao.getTotalUsageForDateFlow("%-$date").map { it ?: 0L }
+    }
+
     override suspend fun getUsageForApp(packageName: String, date: String): Long {
         return appUsageDao.getAppUsage("$packageName-$date")?.totalTime ?: 0L
     }
@@ -84,6 +99,17 @@ class ScreenTimeRepositoryImpl @Inject constructor(
                 totalTime = usage.totalTime
             )
         }.sortedByDescending { it.totalTime }
+    }
+
+    override fun getScreenTimeListSortedFlow(date: String): Flow<List<AppUsage>> {
+        return appUsageDao.getUsageListForDateFlow("%-$date").map { usageList ->
+            usageList.map { usage ->
+                AppUsage(
+                    packageName = usage.packageName.substringBeforeLast("-$date"),
+                    totalTime = usage.totalTime
+                )
+            }.sortedByDescending { it.totalTime }
+        }
     }
 
     private fun getCurrentDate(): String {

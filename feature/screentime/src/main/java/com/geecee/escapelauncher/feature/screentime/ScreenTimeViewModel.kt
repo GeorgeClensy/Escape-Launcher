@@ -6,10 +6,9 @@ import com.geecee.escapelauncher.core.domain.repository.db.ScreenTimeRepository
 import com.geecee.escapelauncher.core.domain.screentime.GetAppUsageUiListUseCase
 import com.geecee.escapelauncher.core.model.AppUsageUiModel
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.stateIn
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -19,37 +18,32 @@ import javax.inject.Inject
 @HiltViewModel
 class ScreenTimeViewModel @Inject constructor(
     private val screenTimeRepository: ScreenTimeRepository,
-    private val getAppUsageUiListUseCase: GetAppUsageUiListUseCase
+    getAppUsageUiListUseCase: GetAppUsageUiListUseCase
 ) : ViewModel() {
 
-    private val _totalUsage = MutableStateFlow(0L)
-    val totalUsage: StateFlow<Long> = _totalUsage.asStateFlow()
+    private val today = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
+    private val yesterday = getYesterdayDateString()
 
-    private val _yesterdayTotalUsage = MutableStateFlow(0L)
-    val yesterdayTotalUsage: StateFlow<Long> = _yesterdayTotalUsage.asStateFlow()
+    val totalUsage: StateFlow<Long> = screenTimeRepository.getTotalUsageForDateFlow(today)
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = 0L
+        )
 
-    private val _appUsageUiList = MutableStateFlow<List<AppUsageUiModel>>(emptyList())
-    val appUsageUiList: StateFlow<List<AppUsageUiModel>> = _appUsageUiList.asStateFlow()
+    val yesterdayTotalUsage: StateFlow<Long> = screenTimeRepository.getTotalUsageForDateFlow(yesterday)
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = 0L
+        )
 
-    init {
-        loadData()
-    }
-
-    fun loadData() {
-        val today = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
-        val yesterday = getYesterdayDateString()
-        
-        viewModelScope.launch {
-            // Load Today Total
-            _totalUsage.value = screenTimeRepository.getTotalUsageForDate(today)
-            
-            // Load Yesterday Total
-            _yesterdayTotalUsage.value = screenTimeRepository.getTotalUsageForDate(yesterday)
-
-            // Load UI List via UseCase
-            _appUsageUiList.value = getAppUsageUiListUseCase(today, yesterday)
-        }
-    }
+    val appUsageUiList: StateFlow<List<AppUsageUiModel>> = getAppUsageUiListUseCase(today, yesterday)
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList()
+        )
 
     fun onAppOpened(packageName: String) {
         screenTimeRepository.onAppOpened(packageName)
@@ -57,7 +51,6 @@ class ScreenTimeViewModel @Inject constructor(
 
     suspend fun onAppClosed(packageName: String) {
         screenTimeRepository.onAppClosed(packageName)
-        loadData() // Refresh after close
     }
 
     fun hasActiveSession(): Boolean {
@@ -69,7 +62,7 @@ class ScreenTimeViewModel @Inject constructor(
     }
 
     fun getScreenTime(packageName: String): Long {
-        return _appUsageUiList.value.find { it.packageName == packageName }?.totalTime ?: 0L
+        return appUsageUiList.value.find { it.packageName == packageName }?.totalTime ?: 0L
     }
 
     private fun getYesterdayDateString(): String {
