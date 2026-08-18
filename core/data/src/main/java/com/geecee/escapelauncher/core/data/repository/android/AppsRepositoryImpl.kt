@@ -5,8 +5,10 @@ import android.content.pm.LauncherApps
 import android.os.Process
 import android.os.UserHandle
 import android.os.UserManager
+import android.util.Log
 import com.geecee.escapelauncher.core.di.ApplicationScope
 import com.geecee.escapelauncher.core.domain.repository.android.AppsRepository
+import com.geecee.escapelauncher.core.model.AppShortcut
 import com.geecee.escapelauncher.core.model.InstalledApp
 import dagger.hilt.android.qualifiers.ApplicationContext
 import jakarta.inject.Inject
@@ -91,7 +93,7 @@ class AppsRepositoryImpl @Inject constructor(
                         )
                     }
                 }
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 // Handle cases where a profile might be locked or inaccessible
             }
         }
@@ -127,5 +129,47 @@ class AppsRepositoryImpl @Inject constructor(
             return it
         }
         return null
+    }
+
+    /**
+     * Retrieves shortcuts for the specified package.
+     *
+     * Uses [LauncherApps.getShortcuts] to fetch dynamic, manifest, and pinned shortcuts.
+     * Requires the app to be the default launcher; otherwise, a [SecurityException]
+     * will be caught and an empty list returned.
+     */
+    override fun getShortcuts(packageName: String): List<AppShortcut> {
+        val query = LauncherApps.ShortcutQuery().apply {
+            setPackage(packageName)
+            setQueryFlags(
+                LauncherApps.ShortcutQuery.FLAG_MATCH_DYNAMIC or
+                        LauncherApps.ShortcutQuery.FLAG_MATCH_MANIFEST or
+                        LauncherApps.ShortcutQuery.FLAG_MATCH_PINNED
+            )
+        }
+
+        return try {
+            launcherApps.getShortcuts(query, Process.myUserHandle())
+                ?.sortedBy { it.rank }
+                ?.map { AppShortcut(it.id, it.shortLabel?.toString() ?: "", it.rank) }
+                ?: emptyList()
+        } catch (e: SecurityException) {
+            Log.e("AppsRepository", "SecurityException while getting shortcuts", e)
+            emptyList()
+        } catch (e: Exception) {
+            Log.e("AppsRepository", "Error getting shortcuts", e)
+            emptyList()
+        }
+    }
+
+    /**
+     * Starts the shortcut identified by [shortcutId] for the given [packageName].
+     */
+    override fun startShortcut(packageName: String, shortcutId: String) {
+        try {
+            launcherApps.startShortcut(packageName, shortcutId, null, null, Process.myUserHandle())
+        } catch (e: Exception) {
+            Log.e("AppsRepository", "Error starting shortcut", e)
+        }
     }
 }

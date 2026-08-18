@@ -1,14 +1,13 @@
 package com.geecee.escapelauncher.feature.appslist
 
-import android.content.Context
 import androidx.compose.ui.Alignment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.geecee.escapelauncher.core.common.getAppShortcuts
 import com.geecee.escapelauncher.core.common.isMainUserApp
-import com.geecee.escapelauncher.core.common.startShortcut
 import com.geecee.escapelauncher.core.domain.apps.AppActionType
 import com.geecee.escapelauncher.core.domain.apps.GetAppActionsUseCase
+import com.geecee.escapelauncher.core.domain.apps.GetAppShortcutsUseCase
+import com.geecee.escapelauncher.core.domain.apps.StartShortcutUseCase
 import com.geecee.escapelauncher.core.domain.search.SearchAppsUseCase
 import com.geecee.escapelauncher.core.domain.repository.db.ModifiedAppsRepository
 import com.geecee.escapelauncher.core.domain.repository.settings.*
@@ -16,7 +15,6 @@ import com.geecee.escapelauncher.core.model.AppAction
 import com.geecee.escapelauncher.core.model.InstalledApp
 import com.geecee.escapelauncher.core.ui.R
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
 import jakarta.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.*
@@ -25,14 +23,15 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
 class AppsListViewModel @Inject constructor(
-    @ApplicationContext context: Context,
-    private val appearanceRepository: AppearanceRepository,
-    private val searchSettingsRepository: SearchSettingsRepository,
-    private val launcherBehaviorRepository: LauncherBehaviorRepository,
-    private val screenTimeSettingsRepository: ScreenTimeSettingsRepository,
+    appearanceRepository: AppearanceRepository,
+    searchSettingsRepository: SearchSettingsRepository,
+    launcherBehaviorRepository: LauncherBehaviorRepository,
+    screenTimeSettingsRepository: ScreenTimeSettingsRepository,
     private val modifiedAppsRepository: ModifiedAppsRepository,
     private val getAppActionsUseCase: GetAppActionsUseCase,
-    private val searchAppsUseCase: SearchAppsUseCase
+    private val getAppShortcutsUseCase: GetAppShortcutsUseCase,
+    private val startShortcutUseCase: StartShortcutUseCase,
+    searchAppsUseCase: SearchAppsUseCase
 ) : ViewModel() {
     // UI Events
     private val _uiEvent = MutableSharedFlow<AppsListUiEvent>()
@@ -160,11 +159,11 @@ class AppsListViewModel @Inject constructor(
     val shortcutActions: StateFlow<List<AppAction>> = _bottomSheetApp.map { app ->
         if (app == null || !app.isMainUserApp()) return@map emptyList()
         
-        getAppShortcuts(context, app.packageName).map { shortcut ->
+        getAppShortcutsUseCase(app.packageName).map { shortcut ->
             AppAction(
                 label = shortcut.label,
                 onClick = { clickedApp ->
-                    startShortcut(context, clickedApp.packageName, shortcut.id)
+                    startShortcutUseCase(clickedApp.packageName, shortcut.id)
                     _showBottomSheet.value = false
                     viewModelScope.launch {
                         _uiEvent.emit(AppsListUiEvent.NavigateHome)

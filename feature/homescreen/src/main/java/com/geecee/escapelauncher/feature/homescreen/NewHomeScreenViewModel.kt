@@ -1,17 +1,12 @@
 package com.geecee.escapelauncher.feature.homescreen
 
-import android.content.Context
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.ui.Alignment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.geecee.escapelauncher.core.domain.repository.AppConfiguration
-import com.geecee.escapelauncher.core.common.getAppShortcuts
 import com.geecee.escapelauncher.core.common.isMainUserApp
-import com.geecee.escapelauncher.core.common.startShortcut
-import com.geecee.escapelauncher.core.domain.apps.AppActionType
-import com.geecee.escapelauncher.core.domain.apps.GetAppActionsUseCase
-import com.geecee.escapelauncher.core.domain.apps.GetFavoriteAppsUseCase
+import com.geecee.escapelauncher.core.domain.apps.*
 import com.geecee.escapelauncher.core.domain.repository.db.ModifiedAppsRepository
 import com.geecee.escapelauncher.core.domain.repository.settings.*
 import com.geecee.escapelauncher.core.model.AppAction
@@ -19,7 +14,6 @@ import com.geecee.escapelauncher.core.model.InstalledApp
 import com.geecee.escapelauncher.core.ui.R
 import com.geecee.escapelauncher.feature.newwidgets.WidgetHostManager
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
 import jakarta.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.*
@@ -29,7 +23,6 @@ import kotlin.collections.map
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
 class NewHomeScreenViewModel @Inject constructor(
-    @ApplicationContext context: Context,
     appearanceRepository: AppearanceRepository,
     clockRepository: ClockRepository,
     launcherBehaviorRepository: LauncherBehaviorRepository,
@@ -41,7 +34,9 @@ class NewHomeScreenViewModel @Inject constructor(
     getFavoriteAppsUseCase: GetFavoriteAppsUseCase,
     val widgetHostManager: WidgetHostManager,
     appConfiguration: AppConfiguration,
-    private val getAppActionsUseCase: GetAppActionsUseCase
+    private val getAppActionsUseCase: GetAppActionsUseCase,
+    private val getAppShortcutsUseCase: GetAppShortcutsUseCase,
+    private val startShortcutUseCase: StartShortcutUseCase
 ) : ViewModel() {
     val isFoss = appConfiguration.isFoss
 
@@ -171,11 +166,11 @@ class NewHomeScreenViewModel @Inject constructor(
     val shortcutActions: StateFlow<List<AppAction>> = _bottomSheetApp.map { app ->
         if (app == null || !app.isMainUserApp()) return@map emptyList()
         
-        getAppShortcuts(context, app.packageName).map { shortcut ->
+        getAppShortcutsUseCase(app.packageName).map { shortcut ->
             AppAction(
                 label = shortcut.label,
                 onClick = { clickedApp ->
-                    startShortcut(context, clickedApp.packageName, shortcut.id)
+                    startShortcutUseCase(clickedApp.packageName, shortcut.id)
                     _showBottomSheet.value = false
                     viewModelScope.launch {
                         _uiEvent.emit(HomeUiEvent.NavigateHome)
