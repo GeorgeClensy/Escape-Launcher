@@ -11,15 +11,15 @@ object DefaultSettings {
     const val TWELVE_HOUR_CLOCK = false
     const val SHOW_CLOCK = true
     const val BIG_CLOCK = false
-    const val SHOW_DATE = false
-    const val SHOW_STATUS_BAR = false
-    const val SHOW_SCREEN_TIME_HOME = false
-    const val SHOW_WEATHER = false
+    const val SHOW_DATE = true
+    const val SHOW_STATUS_BAR = true
+    const val SHOW_SCREEN_TIME_HOME = true
+    const val SHOW_WEATHER = true
     const val USE_FAHRENHEIT = false
-    const val SHOW_SCREEN_TIME_APP = false
+    const val SHOW_SCREEN_TIME_APP = true
     const val FIRST_TIME_HELP = true
     const val HOME_V_ALIGNMENT = "Center"
-    const val HOME_ALIGNMENT = "Center"
+    const val HOME_ALIGNMENT = "Left"
 
     // Alignment Indices
     const val ALIGNMENT_LEFT_INDEX = 0
@@ -33,7 +33,7 @@ object DefaultSettings {
     const val WEATHER_APP_PACKAGE = ""
 
     // Apps List
-    const val APPS_ALIGNMENT = "Center"
+    const val APPS_ALIGNMENT = "Left"
 
     // Widget
     const val WIDGET_OFFSET = 0f
@@ -43,7 +43,7 @@ object DefaultSettings {
 
     // Theme
     const val THEME = 13
-    const val FONT = "Jost"
+    const val FONT = "Outfit"
 
     // Search
     const val SHOW_SEARCH_BOX = true
@@ -52,7 +52,7 @@ object DefaultSettings {
     const val AUTOMATICALLY_OPEN_APPS_IN_SEARCH = false
 
     // Misc
-    const val DOUBLE_TAP_TO_LOCK = false
+    const val DOUBLE_TAP_TO_LOCK = true
     const val HIDE_SCREEN_TIME_PAGE = false
     const val SHOW_HIDDEN_APPS_IN_SEARCH = false
     const val FIRST_TIME = true
