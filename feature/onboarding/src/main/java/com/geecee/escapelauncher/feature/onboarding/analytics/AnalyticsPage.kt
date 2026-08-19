@@ -22,6 +22,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.geecee.escapelauncher.core.common.DefaultSettings
 import com.geecee.escapelauncher.core.common.loadTextFromAssets
 import com.geecee.escapelauncher.core.theme.EscapeThemePreview
 import com.geecee.escapelauncher.core.ui.R
@@ -34,7 +35,7 @@ fun AnalyticsPage(
     analyticsViewModel: AnalyticsViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
-    val allowAnalytics by analyticsViewModel.allowAnalytics.collectAsState(initial = false)
+    val allowAnalytics by analyticsViewModel.allowAnalytics.collectAsState(initial = DefaultSettings.ALLOW_ANALYTICS)
 
     Box(
         modifier

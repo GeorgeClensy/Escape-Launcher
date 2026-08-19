@@ -27,12 +27,14 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.geecee.escapelauncher.core.common.DefaultSettings
 import com.geecee.escapelauncher.core.common.EscapeAccessibilityService
 import com.geecee.escapelauncher.core.common.isDefaultLauncher
 import com.geecee.escapelauncher.core.domain.managedprofiles.ManagedProfileType
 import com.geecee.escapelauncher.core.ui.R
 import com.geecee.escapelauncher.core.ui.composables.OpenChallenge
 import com.geecee.escapelauncher.feature.appslist.AppsList
+import com.geecee.escapelauncher.feature.appslist.AppsListViewModel
 import com.geecee.escapelauncher.feature.homescreen.HomeScreen
 import com.geecee.escapelauncher.feature.screentime.ScreenTimeDashboard
 import com.geecee.escapelauncher.feature.screentime.ScreenTimeViewModel
@@ -57,12 +59,15 @@ import kotlin.time.Duration.Companion.milliseconds
 fun MainPagerScreen(
     viewModel: MainPagerScreenViewModel = hiltViewModel(),
     globalViewModel: GlobalViewModel = hiltViewModel(),
+    appsListViewModel: AppsListViewModel = hiltViewModel(),
     screenTimeViewModel: ScreenTimeViewModel = hiltViewModel(LocalActivity.current as ComponentActivity),
     onOpenSettings: () -> Unit
 ) {
     val hideScreenTimePage by viewModel.hideScreenTimePage.collectAsState()
-    val doubleTapToLock by viewModel.doubleTapToLock.collectAsState(initial = false)
-    val hapticFeedbackEnabled by viewModel.hapticFeedBackEnabled.collectAsState(initial = true)
+    val doubleTapToLock by viewModel.doubleTapToLock.collectAsState(initial = DefaultSettings.DOUBLE_TAP_TO_LOCK)
+    val hapticFeedbackEnabled by viewModel.hapticFeedBackEnabled.collectAsState(initial = DefaultSettings.HAPTIC_FEEDBACK)
+    val isHiddenPrivateSpace by viewModel.isHiddenPrivateSpace.collectAsState(initial = DefaultSettings.HIDE_PRIVATE_SPACE)
+    val appsListSearchText by appsListViewModel.searchText.collectAsState() // The apps list is defined here and passed into the apps list so I can get the search text here so I can hide the private spaced based on the search text.
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
     val resources = LocalResources.current
@@ -129,6 +134,7 @@ fun MainPagerScreen(
             )
 
             appsListPageIndex -> AppsList(
+                appsListViewModel = appsListViewModel,
                 scrollState = viewModel.appsListScrollState,
                 isBeingShown = viewModel.pagerState.currentPage == appsListPageIndex,
                 onGoHomeRequest = {
@@ -155,12 +161,14 @@ fun MainPagerScreen(
                             ManagedProfileType.PrivateSpace
                         )
                     ) {
-                        item {
-                            PrivateSpace(
-                                modifier = Modifier,
-                                onAppClick = onClick,
-                                onAppLongClick = onLongClick
-                            )
+                        if ((isHiddenPrivateSpace && appsListSearchText == resources.getString(R.string.private_space_search_term)) || !isHiddenPrivateSpace) {
+                            item {
+                                PrivateSpace(
+                                    modifier = Modifier,
+                                    onAppClick = onClick,
+                                    onAppLongClick = onLongClick
+                                )
+                            }
                         }
                     }
                 },

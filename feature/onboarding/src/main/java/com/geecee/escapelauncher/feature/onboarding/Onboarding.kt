@@ -27,6 +27,7 @@ import com.geecee.escapelauncher.core.ui.utils.doHapticFeedBack
 import com.geecee.escapelauncher.feature.onboarding.accessibility.AccessibilityPage
 import com.geecee.escapelauncher.feature.onboarding.analytics.AnalyticsPage
 import com.geecee.escapelauncher.feature.onboarding.favorites.FavoritesPage
+import com.geecee.escapelauncher.core.common.DefaultSettings
 import com.geecee.escapelauncher.feature.onboarding.finished.FinishedPage
 import com.geecee.escapelauncher.feature.onboarding.launcher.DefaultLauncherPage
 import com.geecee.escapelauncher.feature.onboarding.statistics.StatisticsPage
@@ -41,7 +42,7 @@ fun Onboarding(
 ) {
     val coroutineScope = rememberCoroutineScope()
     val haptics = LocalHapticFeedback.current
-    val hapticFeedbackEnabled by viewModel.hapticFeedBackEnabled.collectAsState(initial = true)
+    val hapticFeedbackEnabled by viewModel.hapticFeedBackEnabled.collectAsState(initial = DefaultSettings.HAPTIC_FEEDBACK)
     val screens = viewModel.screens
     val isOnDefaultLauncherPage by viewModel.startFromLauncherPage.collectAsState(initial = null)
     if (isOnDefaultLauncherPage == null) return

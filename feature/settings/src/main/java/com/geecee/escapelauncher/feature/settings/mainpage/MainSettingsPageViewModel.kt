@@ -2,6 +2,7 @@ package com.geecee.escapelauncher.feature.settings.mainpage
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.geecee.escapelauncher.core.common.DefaultSettings
 import com.geecee.escapelauncher.core.domain.repository.AppConfiguration
 import com.geecee.escapelauncher.core.domain.repository.android.AppsRepository
 import com.geecee.escapelauncher.core.domain.repository.settings.*
@@ -14,26 +15,26 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 data class MainSettingsUiState(
-    val hapticFeedBackEnabled: Boolean = true,
-    val twelveHourClock: Boolean = false,
-    val showClock: Boolean = true,
-    val bigClock: Boolean = false,
-    val showDate: Boolean = false,
-    val showStatusBar: Boolean = false,
-    val showScreenTimeHome: Boolean = false,
-    val showWeather: Boolean = false,
-    val useFahrenheit: Boolean = false,
-    val showScreenTimeApp: Boolean = false,
-    val homeAlignment: Int = 1,
-    val homeVAlignment: Int = 1,
-    val appsAlignment: Int = 1,
-    val doubleTapToLock: Boolean = false,
-    val showSearchBox: Boolean = true,
-    val searchAutoOpen: Boolean = false,
-    val bottomSearch: Boolean = false,
-    val automaticallyOpenAppsInSearch: Boolean = false,
-    val hideScreenTimePage: Boolean = false,
-    val allowAnalytics: Boolean = false
+    val hapticFeedBackEnabled: Boolean = DefaultSettings.HAPTIC_FEEDBACK,
+    val twelveHourClock: Boolean = DefaultSettings.TWELVE_HOUR_CLOCK,
+    val showClock: Boolean = DefaultSettings.SHOW_CLOCK,
+    val bigClock: Boolean = DefaultSettings.BIG_CLOCK,
+    val showDate: Boolean = DefaultSettings.SHOW_DATE,
+    val showStatusBar: Boolean = DefaultSettings.SHOW_STATUS_BAR,
+    val showScreenTimeHome: Boolean = DefaultSettings.SHOW_SCREEN_TIME_HOME,
+    val showWeather: Boolean = DefaultSettings.SHOW_WEATHER,
+    val useFahrenheit: Boolean = DefaultSettings.USE_FAHRENHEIT,
+    val showScreenTimeApp: Boolean = DefaultSettings.SHOW_SCREEN_TIME_APP,
+    val homeAlignment: Int = DefaultSettings.ALIGNMENT_CENTER_INDEX,
+    val homeVAlignment: Int = DefaultSettings.ALIGNMENT_CENTER_INDEX,
+    val appsAlignment: Int = DefaultSettings.ALIGNMENT_CENTER_INDEX,
+    val doubleTapToLock: Boolean = DefaultSettings.DOUBLE_TAP_TO_LOCK,
+    val showSearchBox: Boolean = DefaultSettings.SHOW_SEARCH_BOX,
+    val searchAutoOpen: Boolean = DefaultSettings.SEARCH_AUTO_OPEN,
+    val bottomSearch: Boolean = DefaultSettings.BOTTOM_SEARCH,
+    val automaticallyOpenAppsInSearch: Boolean = DefaultSettings.AUTOMATICALLY_OPEN_APPS_IN_SEARCH,
+    val hideScreenTimePage: Boolean = DefaultSettings.HIDE_SCREEN_TIME_PAGE,
+    val allowAnalytics: Boolean = DefaultSettings.ALLOW_ANALYTICS
 )
 
 @HiltViewModel

@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import com.geecee.escapelauncher.core.ui.R
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.geecee.escapelauncher.core.common.DefaultSettings
 import com.geecee.escapelauncher.core.theme.ThemeViewModel
 import com.geecee.escapelauncher.core.theme.type.getFontFamily
 import com.geecee.escapelauncher.core.ui.composables.EscapeHeader
@@ -36,7 +37,7 @@ fun ChooseFont(
     themeViewModel: ThemeViewModel = hiltViewModel(),
     goBack: () -> Unit
 ) {
-    val selectedFont by themeViewModel.font.collectAsState(initial = "Jost")
+    val selectedFont by themeViewModel.font.collectAsState(initial = DefaultSettings.FONT)
 
     val fontNames = listOf(
         "Jost",
