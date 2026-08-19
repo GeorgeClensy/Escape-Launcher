@@ -48,10 +48,12 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.geecee.escapelauncher.core.analytics.analyticsProxy
+import com.geecee.escapelauncher.core.common.DefaultSettings
 import com.geecee.escapelauncher.core.common.formatScreenTime
 import com.geecee.escapelauncher.core.common.goToAppInfo
 import com.geecee.escapelauncher.core.common.uninstallApp
 import com.geecee.escapelauncher.core.model.InstalledApp
+import com.geecee.escapelauncher.core.ui.DefaultSettingsUi
 import com.geecee.escapelauncher.core.ui.composables.Clock
 import com.geecee.escapelauncher.core.ui.composables.FirstTimeHelp
 import com.geecee.escapelauncher.core.ui.composables.GlanceWidget
@@ -83,21 +85,21 @@ fun HomeScreen(
 ) {
     val context = LocalContext.current
     val timeParts by clockViewModel.timeParts.collectAsState()
-    val twelveHourClock by homeScreenViewModel.twelveHourClock.collectAsState(initial = false)
-    val showClock by homeScreenViewModel.showClock.collectAsState(initial = true)
-    val bigClock by homeScreenViewModel.bigClock.collectAsState(initial = false)
-    val showDate by homeScreenViewModel.showDate.collectAsState(initial = false)
-    val showScreenTimeHome by homeScreenViewModel.showScreenTimeHome.collectAsState(initial = false)
-    val showWeather by homeScreenViewModel.showWeather.collectAsState(initial = false)
-    val showScreenTimeApp by homeScreenViewModel.showScreenTimeApp.collectAsState(initial = false)
-    val firstTimeHelp by homeScreenViewModel.firstTimeHelp.collectAsState(initial = true)
-    val homeAlignment by homeScreenViewModel.homeAlignment.collectAsState(initial = Alignment.CenterHorizontally)
-    val homeVAlignment by homeScreenViewModel.homeVAlignment.collectAsState(initial = Arrangement.Center)
-    val widgetOffsetPref by homeScreenViewModel.widgetOffset.collectAsState(initial = 0f)
-    val hapticFeedbackEnabled by homeScreenViewModel.hapticFeedBackEnabled.collectAsState(initial = true)
-    val widgetHeight by homeScreenViewModel.widgetHeight.collectAsState(initial = 125f)
-    val widgetWidth by homeScreenViewModel.widgetWidth.collectAsState(initial = 250f)
-    val widgetId by homeScreenViewModel.widgetId.collectAsState(initial = -1)
+    val twelveHourClock by homeScreenViewModel.twelveHourClock.collectAsState(initial = DefaultSettings.TWELVE_HOUR_CLOCK)
+    val showClock by homeScreenViewModel.showClock.collectAsState(initial = DefaultSettings.SHOW_CLOCK)
+    val bigClock by homeScreenViewModel.bigClock.collectAsState(initial = DefaultSettings.BIG_CLOCK)
+    val showDate by homeScreenViewModel.showDate.collectAsState(initial = DefaultSettings.SHOW_DATE)
+    val showScreenTimeHome by homeScreenViewModel.showScreenTimeHome.collectAsState(initial = DefaultSettings.SHOW_SCREEN_TIME_HOME)
+    val showWeather by homeScreenViewModel.showWeather.collectAsState(initial = DefaultSettings.SHOW_WEATHER)
+    val showScreenTimeApp by homeScreenViewModel.showScreenTimeApp.collectAsState(initial = DefaultSettings.SHOW_SCREEN_TIME_APP)
+    val firstTimeHelp by homeScreenViewModel.firstTimeHelp.collectAsState(initial = DefaultSettings.FIRST_TIME_HELP)
+    val homeAlignment by homeScreenViewModel.homeAlignment.collectAsState(initial = DefaultSettingsUi.HOME_ALIGNMENT)
+    val homeVAlignment by homeScreenViewModel.homeVAlignment.collectAsState(initial = DefaultSettingsUi.HOME_V_ALIGNMENT)
+    val widgetOffsetPref by homeScreenViewModel.widgetOffset.collectAsState(initial = DefaultSettings.WIDGET_OFFSET)
+    val hapticFeedbackEnabled by homeScreenViewModel.hapticFeedBackEnabled.collectAsState(initial = DefaultSettings.HAPTIC_FEEDBACK)
+    val widgetHeight by homeScreenViewModel.widgetHeight.collectAsState(initial = DefaultSettings.WIDGET_HEIGHT)
+    val widgetWidth by homeScreenViewModel.widgetWidth.collectAsState(initial = DefaultSettings.WIDGET_WIDTH)
+    val widgetId by homeScreenViewModel.widgetId.collectAsState(initial = DefaultSettings.WIDGET_ID)
     val widgetHostManager = homeScreenViewModel.widgetHostManager
     val appUsageList by screenTimeViewModel.appUsageUiList.collectAsState()
     val favoriteApps by homeScreenViewModel.favoriteApps.collectAsState()
@@ -363,7 +365,7 @@ fun HomeWeatherImpl(
 ) {
     val context = LocalContext.current
     val resources = LocalResources.current
-    val weatherAppPackage by weatherViewModel.weatherAppPackage.collectAsState(initial = "")
+    val weatherAppPackage by weatherViewModel.weatherAppPackage.collectAsState(initial = DefaultSettings.WEATHER_APP_PACKAGE)
 
     AnimatedVisibility(
         weatherViewModel.weatherText.value != "",

@@ -24,6 +24,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.geecee.escapelauncher.core.common.DefaultSettings
 import com.geecee.escapelauncher.core.common.launchApp
 import com.geecee.escapelauncher.core.ui.R
 import com.geecee.escapelauncher.core.ui.composables.EscapeHeader
@@ -57,9 +58,9 @@ fun HiddenApps(
     val installedApps by hiddenAppsViewModel.installedApps.collectAsState()
     val coroutineScope = rememberCoroutineScope()
     val haptics = LocalHapticFeedback.current
-    val hapticFeedbackEnabled by hiddenAppsViewModel.hapticFeedBackEnabled.collectAsState(initial = true)
+    val hapticFeedbackEnabled by hiddenAppsViewModel.hapticFeedBackEnabled.collectAsState(initial = DefaultSettings.HAPTIC_FEEDBACK)
     val hiddenPackageIds by hiddenAppsViewModel.hiddenPackageIds.collectAsState()
-    val showHiddenAppsInSearch by hiddenAppsViewModel.showHiddenAppsInSearch.collectAsState(initial = false)
+    val showHiddenAppsInSearch by hiddenAppsViewModel.showHiddenAppsInSearch.collectAsState(initial = DefaultSettings.SHOW_HIDDEN_APPS_IN_SEARCH)
 
     LazyColumn(
         verticalArrangement = Arrangement.Top,

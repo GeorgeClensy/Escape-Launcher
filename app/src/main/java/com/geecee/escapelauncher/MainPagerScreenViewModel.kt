@@ -61,6 +61,8 @@ class MainPagerScreenViewModel @Inject constructor(
     val doubleTapToLock = launcherBehaviorRepository.doubleTapToLock
     val hapticFeedBackEnabled = launcherBehaviorRepository.hapticFeedBackEnabled
 
+    val isHiddenPrivateSpace = launcherBehaviorRepository.hidePrivateSpace
+
     var currentSelectedApp = mutableStateOf(InstalledApp("", "", ComponentName("", "")))
 
     var showOpenChallenge = mutableStateOf(false)

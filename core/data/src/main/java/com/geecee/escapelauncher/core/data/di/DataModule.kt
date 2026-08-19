@@ -66,6 +66,12 @@ abstract class DataModule {
         impl: WeatherSettingsRepositoryImpl
     ): WeatherSettingsRepository
 
+    @Binds
+    @Singleton
+    abstract fun bindSettingsManager(
+        impl: SettingsManagerImpl
+    ): SettingsManager
+
     companion object {
         @Provides
         @Singleton

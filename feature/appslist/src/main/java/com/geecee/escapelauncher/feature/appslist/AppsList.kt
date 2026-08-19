@@ -37,12 +37,14 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.geecee.escapelauncher.core.ui.R
+import com.geecee.escapelauncher.core.common.DefaultSettings
 import com.geecee.escapelauncher.core.common.formatScreenTime
 import com.geecee.escapelauncher.core.common.goToAppInfo
 import com.geecee.escapelauncher.core.common.launchApp
 import com.geecee.escapelauncher.core.common.uninstallApp
 import com.geecee.escapelauncher.core.model.InstalledApp
 import com.geecee.escapelauncher.core.theme.colours.transparentHalf
+import com.geecee.escapelauncher.core.ui.DefaultSettingsUi
 import com.geecee.escapelauncher.core.ui.composables.AnimatedPillSearchBar
 import com.geecee.escapelauncher.core.ui.composables.AppsListHeader
 import com.geecee.escapelauncher.core.ui.composables.HomeScreenBottomSheet
@@ -73,14 +75,14 @@ fun AppsList(
     val context = LocalContext.current
     val haptics = LocalHapticFeedback.current
     val appUsageList by screenTimeViewModel.appUsageUiList.collectAsState()
-    val showScreenTimeApp by appsListViewModel.showScreenTimeApp.collectAsState(initial = false)
-    val appsListAlignment by appsListViewModel.appsAlignment.collectAsState(initial = Alignment.CenterHorizontally)
-    val hapticFeedbackEnabled by appsListViewModel.hapticFeedBackEnabled.collectAsState(initial = true)
-    val showSearchBox by appsListViewModel.showSearchBox.collectAsState(initial = true)
-    val bottomSearchBox by appsListViewModel.bottomSearch.collectAsState(initial = false)
-    val autoOpenSearch by appsListViewModel.searchAutoOpen.collectAsState(initial = false)
+    val showScreenTimeApp by appsListViewModel.showScreenTimeApp.collectAsState(initial = DefaultSettings.SHOW_SCREEN_TIME_APP)
+    val appsListAlignment by appsListViewModel.appsAlignment.collectAsState(initial = DefaultSettingsUi.APPS_ALIGNMENT)
+    val hapticFeedbackEnabled by appsListViewModel.hapticFeedBackEnabled.collectAsState(initial = DefaultSettings.HAPTIC_FEEDBACK)
+    val showSearchBox by appsListViewModel.showSearchBox.collectAsState(initial = DefaultSettings.SHOW_SEARCH_BOX)
+    val bottomSearchBox by appsListViewModel.bottomSearch.collectAsState(initial = DefaultSettings.BOTTOM_SEARCH)
+    val autoOpenSearch by appsListViewModel.searchAutoOpen.collectAsState(initial = DefaultSettings.SEARCH_AUTO_OPEN)
     val autoOpenAppInSearch by appsListViewModel.automaticallyOpenAppsInSearch.collectAsState(
-        initial = false
+        initial = DefaultSettings.AUTOMATICALLY_OPEN_APPS_IN_SEARCH
     )
     val apps by appsListViewModel.apps.collectAsState()
     val searchText by appsListViewModel.searchText.collectAsState()

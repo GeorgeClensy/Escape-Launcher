@@ -28,6 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.geecee.escapelauncher.core.common.DefaultSettings
 import com.geecee.escapelauncher.core.model.InstalledApp
 import com.geecee.escapelauncher.core.ui.R
 import com.geecee.escapelauncher.core.ui.composables.LockedAppFolderUI
@@ -56,7 +57,7 @@ fun PrivateSpace(
     val isUnlocked by viewModel.isUnlocked.collectAsState()
     val privateApps by viewModel.privateSpaceApps.collectAsState()
     val showSettings by viewModel.showSettings.collectAsState()
-    val hiddenPrivateSpaceSetting by viewModel.hiddenPrivateSpace.collectAsState(initial = false)
+    val hiddenPrivateSpaceSetting by viewModel.hiddenPrivateSpace.collectAsState(initial = DefaultSettings.HIDE_PRIVATE_SPACE)
 
     LockedFolderCard(
         modifier = modifier

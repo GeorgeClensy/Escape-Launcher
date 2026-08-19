@@ -16,6 +16,7 @@ dependencies {
     implementation(project(":core:model"))
     implementation(project(":core:domain"))
     implementation(project(":core:di"))
+    implementation(project(":core:common"))
 
     implementation(libs.androidx.work.runtime.ktx)
     implementation(libs.hilt.android)

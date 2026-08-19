@@ -12,6 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalResources
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.geecee.escapelauncher.core.common.DefaultSettings
 import com.geecee.escapelauncher.core.common.EscapeAccessibilityService
 import com.geecee.escapelauncher.core.ui.R
 import com.geecee.escapelauncher.core.ui.composables.EscapeHeader
@@ -29,9 +30,9 @@ fun DevOptions(
 ) {
     val context = LocalContext.current
     val resources = LocalResources.current
-    val firstTimeHelp by viewModel.firstTimeHelp.collectAsState(initial = true)
-    val firstTime by viewModel.firstTime.collectAsState(initial = true)
-    val doubleTapToLock by viewModel.doubleTapToLock.collectAsState(initial = false)
+    val firstTimeHelp by viewModel.firstTimeHelp.collectAsState(initial = DefaultSettings.FIRST_TIME_HELP)
+    val firstTime by viewModel.firstTime.collectAsState(initial = DefaultSettings.FIRST_TIME)
+    val doubleTapToLock by viewModel.doubleTapToLock.collectAsState(initial = DefaultSettings.DOUBLE_TAP_TO_LOCK)
 
     LazyColumn(
         verticalArrangement = Arrangement.Top,

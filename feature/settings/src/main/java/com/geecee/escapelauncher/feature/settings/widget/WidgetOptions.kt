@@ -20,6 +20,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.IntOffset
+import com.geecee.escapelauncher.core.common.DefaultSettings
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.geecee.escapelauncher.core.ui.composables.EscapeHeader
@@ -45,10 +46,10 @@ fun WidgetOptions(
     var showCustomPicker by remember { mutableStateOf(false) }
     var selectedProviderInfo by remember { mutableStateOf<AppWidgetProviderInfo?>(null) } // This is the data for the widget, it tells the launcher which actual widget were working with
 
-    val widgetOffset by viewModel.widgetOffset.collectAsState(initial = 0f)
-    val widgetHeight by viewModel.widgetHeight.collectAsState(initial = 125f)
-    val widgetWidth by viewModel.widgetWidth.collectAsState(initial = 250f)
-    val widgetId by viewModel.widgetId.collectAsState(initial = AppWidgetManager.INVALID_APPWIDGET_ID)
+    val widgetOffset by viewModel.widgetOffset.collectAsState(initial = DefaultSettings.WIDGET_OFFSET)
+    val widgetHeight by viewModel.widgetHeight.collectAsState(initial = DefaultSettings.WIDGET_HEIGHT)
+    val widgetWidth by viewModel.widgetWidth.collectAsState(initial = DefaultSettings.WIDGET_WIDTH)
+    val widgetId by viewModel.widgetId.collectAsState(initial = DefaultSettings.WIDGET_ID)
 
     // Modular Widget Addition Flow
     selectedProviderInfo?.let { info ->
