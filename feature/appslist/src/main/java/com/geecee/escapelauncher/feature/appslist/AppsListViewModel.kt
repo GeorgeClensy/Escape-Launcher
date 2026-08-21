@@ -8,7 +8,9 @@ import com.geecee.escapelauncher.core.domain.apps.AppActionType
 import com.geecee.escapelauncher.core.domain.apps.LaunchAppUseCase
 import com.geecee.escapelauncher.core.domain.apps.GetAppActionsUseCase
 import com.geecee.escapelauncher.core.domain.apps.GetAppShortcutsUseCase
+import com.geecee.escapelauncher.core.domain.apps.OpenAppDetailsUseCase
 import com.geecee.escapelauncher.core.domain.apps.StartShortcutUseCase
+import com.geecee.escapelauncher.core.domain.apps.UninstallAppUseCase
 import com.geecee.escapelauncher.core.domain.search.SearchAppsUseCase
 import com.geecee.escapelauncher.core.domain.repository.db.ModifiedAppsRepository
 import com.geecee.escapelauncher.core.domain.repository.settings.*
@@ -33,6 +35,8 @@ class AppsListViewModel @Inject constructor(
     private val getAppShortcutsUseCase: GetAppShortcutsUseCase,
     private val startShortcutUseCase: StartShortcutUseCase,
     private val launchAppUseCase: LaunchAppUseCase,
+    private val uninstallAppUseCase: UninstallAppUseCase,
+    private val openAppDetailsUseCase: OpenAppDetailsUseCase,
     searchAppsUseCase: SearchAppsUseCase
 ) : ViewModel() {
     // UI Events
@@ -101,9 +105,8 @@ class AppsListViewModel @Inject constructor(
                     AppActionType.Uninstall -> AppAction(
                         labelRes = R.string.uninstall,
                         onClick = { clickedApp ->
-                            viewModelScope.launch {
-                                _uiEvent.emit(AppsListUiEvent.UninstallApp(clickedApp))
-                            }
+                            uninstallAppUseCase(clickedApp)
+                            _showBottomSheet.value = false
                         }
                     )
                     is AppActionType.ToggleFavorite -> AppAction(
@@ -134,9 +137,8 @@ class AppsListViewModel @Inject constructor(
                     AppActionType.AppInfo -> AppAction(
                         labelRes = R.string.app_info,
                         onClick = { clickedApp ->
-                            viewModelScope.launch {
-                                _uiEvent.emit(AppsListUiEvent.ShowAppInfo(clickedApp))
-                            }
+                            openAppDetailsUseCase(clickedApp)
+                            _showBottomSheet.value = false
                         }
                     )
                     AppActionType.AddChallenge -> AppAction(
@@ -193,6 +195,4 @@ class AppsListViewModel @Inject constructor(
 
 sealed class AppsListUiEvent {
     data object NavigateHome : AppsListUiEvent()
-    data class UninstallApp(val app: InstalledApp) : AppsListUiEvent()
-    data class ShowAppInfo(val app: InstalledApp) : AppsListUiEvent()
 }

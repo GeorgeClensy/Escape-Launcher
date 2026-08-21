@@ -3,6 +3,7 @@ package com.geecee.escapelauncher.core.theme
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.geecee.escapelauncher.core.domain.repository.settings.AppearanceRepository
+import com.geecee.escapelauncher.core.domain.system.SetWallpaperUseCase
 import com.geecee.escapelauncher.core.theme.colours.AppColourScheme
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
@@ -14,7 +15,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ThemeViewModel @Inject constructor(
-    private val appearanceRepository: AppearanceRepository
+    private val appearanceRepository: AppearanceRepository,
+    private val setWallpaperUseCase: SetWallpaperUseCase
 ): ViewModel() {
     val theme: StateFlow<AppColourScheme> =
         appearanceRepository.theme
@@ -29,6 +31,10 @@ class ThemeViewModel @Inject constructor(
         viewModelScope.launch {
             appearanceRepository.setTheme(scheme.id)
         }
+    }
+
+    fun setWallpaper(color: Int) {
+        setWallpaperUseCase(color)
     }
 
     val font = appearanceRepository.font

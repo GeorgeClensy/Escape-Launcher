@@ -9,10 +9,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import com.geecee.escapelauncher.core.common.setSolidColorWallpaperHomeScreen
 import com.geecee.escapelauncher.core.theme.colours.AppColourScheme
 import com.geecee.escapelauncher.core.theme.ThemeViewModel
 import com.geecee.escapelauncher.core.theme.colours.resolveColorScheme
@@ -32,7 +30,6 @@ import com.geecee.escapelauncher.core.ui.utils.toAndroidColor
 fun ThemeOptions(
     goBack: () -> Unit, themeViewModel: ThemeViewModel = hiltViewModel()
 ) {
-    val context = LocalContext.current
     val scheme by themeViewModel.theme.collectAsState()
     val selectableThemes = AppColourScheme.selectableThemes
 
@@ -51,9 +48,7 @@ fun ThemeOptions(
                 isTopOfGroup = true,
                 isBottomOfGroup = true,
                 onClick = {
-                    setSolidColorWallpaperHomeScreen(
-                        context, colour.toAndroidColor()
-                    )
+                    themeViewModel.setWallpaper(colour.toAndroidColor())
                 })
         }
 

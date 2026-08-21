@@ -3,11 +3,14 @@ package com.geecee.escapelauncher.feature.settings.mainpage
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.geecee.escapelauncher.core.common.DefaultSettings
+import com.geecee.escapelauncher.core.domain.launcher.GetIsDefaultLauncherUseCase
+import com.geecee.escapelauncher.core.domain.launcher.SetDefaultLauncherUseCase
 import com.geecee.escapelauncher.core.domain.repository.AppConfiguration
 import com.geecee.escapelauncher.core.domain.repository.android.AppsRepository
 import com.geecee.escapelauncher.core.domain.repository.settings.*
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -34,7 +37,8 @@ data class MainSettingsUiState(
     val bottomSearch: Boolean = DefaultSettings.BOTTOM_SEARCH,
     val automaticallyOpenAppsInSearch: Boolean = DefaultSettings.AUTOMATICALLY_OPEN_APPS_IN_SEARCH,
     val hideScreenTimePage: Boolean = DefaultSettings.HIDE_SCREEN_TIME_PAGE,
-    val allowAnalytics: Boolean = DefaultSettings.ALLOW_ANALYTICS
+    val allowAnalytics: Boolean = DefaultSettings.ALLOW_ANALYTICS,
+    val isDefaultLauncher: Boolean = false
 )
 
 @HiltViewModel
@@ -46,32 +50,35 @@ class MainSettingsPageViewModel @Inject constructor(
     private val searchSettingsRepository: SearchSettingsRepository,
     private val screenTimeSettingsRepository: ScreenTimeSettingsRepository,
     private val weatherSettingsRepository: WeatherSettingsRepository,
+    private val getIsDefaultLauncherUseCase: GetIsDefaultLauncherUseCase,
+    private val setDefaultLauncherUseCase: SetDefaultLauncherUseCase,
     val appConfiguration: AppConfiguration
 ) : ViewModel() {
 
+    private val _isDefaultLauncher = MutableStateFlow(false)
+
     val uiState: StateFlow<MainSettingsUiState> = combine(
-        listOf(
-            launcherBehaviorRepository.hapticFeedBackEnabled,
-            clockRepository.twelveHourClock,
-            clockRepository.showClock,
-            clockRepository.bigClock,
-            clockRepository.showDate,
-            appearanceRepository.showStatusBar,
-            screenTimeSettingsRepository.showScreenTimeHome,
-            weatherSettingsRepository.showWeather,
-            weatherSettingsRepository.useFahrenheit,
-            screenTimeSettingsRepository.showScreenTimeApp,
-            appearanceRepository.homeAlignment,
-            appearanceRepository.homeVAlignment,
-            appearanceRepository.appsAlignment,
-            launcherBehaviorRepository.doubleTapToLock,
-            searchSettingsRepository.showSearchBox,
-            searchSettingsRepository.searchAutoOpen,
-            searchSettingsRepository.bottomSearch,
-            searchSettingsRepository.automaticallyOpenAppsInSearch,
-            screenTimeSettingsRepository.hideScreenTimePage,
-            launcherBehaviorRepository.allowAnalyitics
-        )
+        launcherBehaviorRepository.hapticFeedBackEnabled,
+        clockRepository.twelveHourClock,
+        clockRepository.showClock,
+        clockRepository.bigClock,
+        clockRepository.showDate,
+        appearanceRepository.showStatusBar,
+        screenTimeSettingsRepository.showScreenTimeHome,
+        weatherSettingsRepository.showWeather,
+        weatherSettingsRepository.useFahrenheit,
+        screenTimeSettingsRepository.showScreenTimeApp,
+        appearanceRepository.homeAlignment,
+        appearanceRepository.homeVAlignment,
+        appearanceRepository.appsAlignment,
+        launcherBehaviorRepository.doubleTapToLock,
+        searchSettingsRepository.showSearchBox,
+        searchSettingsRepository.searchAutoOpen,
+        searchSettingsRepository.bottomSearch,
+        searchSettingsRepository.automaticallyOpenAppsInSearch,
+        screenTimeSettingsRepository.hideScreenTimePage,
+        launcherBehaviorRepository.allowAnalyitics,
+        _isDefaultLauncher
     ) { args: Array<Any?> ->
         MainSettingsUiState(
             hapticFeedBackEnabled = args[0] as Boolean,
@@ -105,13 +112,26 @@ class MainSettingsPageViewModel @Inject constructor(
             bottomSearch = args[16] as Boolean,
             automaticallyOpenAppsInSearch = args[17] as Boolean,
             hideScreenTimePage = args[18] as Boolean,
-            allowAnalytics = args[19] as Boolean
+            allowAnalytics = args[19] as Boolean,
+            isDefaultLauncher = args[20] as Boolean
         )
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
         initialValue = MainSettingsUiState()
     )
+
+    fun updateLauncherStatus() {
+        _isDefaultLauncher.value = getIsDefaultLauncherUseCase()
+    }
+
+    fun promptSetDefaultLauncher() {
+        setDefaultLauncherUseCase()
+    }
+
+    init {
+        updateLauncherStatus()
+    }
 
     fun setHapticFeedback(value: Boolean) {
         viewModelScope.launch {

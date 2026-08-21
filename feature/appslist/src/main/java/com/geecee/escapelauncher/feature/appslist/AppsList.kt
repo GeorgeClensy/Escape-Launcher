@@ -39,8 +39,6 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.geecee.escapelauncher.core.ui.R
 import com.geecee.escapelauncher.core.common.DefaultSettings
 import com.geecee.escapelauncher.core.common.formatScreenTime
-import com.geecee.escapelauncher.core.common.goToAppInfo
-import com.geecee.escapelauncher.core.common.uninstallApp
 import com.geecee.escapelauncher.core.model.InstalledApp
 import com.geecee.escapelauncher.core.theme.colours.transparentHalf
 import com.geecee.escapelauncher.core.ui.DefaultSettingsUi
@@ -71,7 +69,6 @@ fun AppsList(
     floatingContent: @Composable BoxScope.(onShowWorkApps: () -> Unit) -> Unit = { _ -> },
     workAppsContent: @Composable BoxScope.(onAppClick: (InstalledApp) -> Unit, onAppLongClick: (InstalledApp) -> Unit) -> Unit = { _, _ -> },
 ) {
-    val context = LocalContext.current
     val haptics = LocalHapticFeedback.current
     val appUsageList by screenTimeViewModel.appUsageUiList.collectAsState()
     val showScreenTimeApp by appsListViewModel.showScreenTimeApp.collectAsState(initial = DefaultSettings.SHOW_SCREEN_TIME_APP)
@@ -111,8 +108,6 @@ fun AppsList(
         appsListViewModel.uiEvent.collectLatest { event ->
             when (event) {
                 is AppsListUiEvent.NavigateHome -> onGoHomeRequest()
-                is AppsListUiEvent.UninstallApp -> uninstallApp(context, event.app)
-                is AppsListUiEvent.ShowAppInfo -> goToAppInfo(context, event.app)
             }
         }
     }

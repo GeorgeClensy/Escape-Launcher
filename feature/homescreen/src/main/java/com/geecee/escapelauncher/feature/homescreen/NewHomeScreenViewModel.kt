@@ -20,6 +20,8 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlin.collections.map
+import com.geecee.escapelauncher.core.domain.apps.UninstallAppUseCase
+import com.geecee.escapelauncher.core.domain.apps.OpenAppDetailsUseCase
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
@@ -38,6 +40,8 @@ class NewHomeScreenViewModel @Inject constructor(
     private val getAppActionsUseCase: GetAppActionsUseCase,
     private val getAppShortcutsUseCase: GetAppShortcutsUseCase,
     private val startShortcutUseCase: StartShortcutUseCase,
+    private val uninstallAppUseCase: UninstallAppUseCase,
+    private val openAppDetailsUseCase: OpenAppDetailsUseCase,
     private val analyticsProxy: AnalyticsProxy
 ) : ViewModel() {
     val isFoss = appConfiguration.isFoss
@@ -112,9 +116,8 @@ class NewHomeScreenViewModel @Inject constructor(
                     AppActionType.Uninstall -> AppAction(
                         labelRes = R.string.uninstall,
                         onClick = { clickedApp ->
-                            viewModelScope.launch {
-                                _uiEvent.emit(HomeUiEvent.UninstallApp(clickedApp))
-                            }
+                            uninstallAppUseCase(clickedApp)
+                            _showBottomSheet.value = false
                         }
                     )
                     is AppActionType.ToggleFavorite -> AppAction(
@@ -145,9 +148,8 @@ class NewHomeScreenViewModel @Inject constructor(
                     AppActionType.AppInfo -> AppAction(
                         labelRes = R.string.app_info,
                         onClick = { clickedApp ->
-                            viewModelScope.launch {
-                                _uiEvent.emit(HomeUiEvent.ShowAppInfo(clickedApp))
-                            }
+                            openAppDetailsUseCase(clickedApp)
+                            _showBottomSheet.value = false
                         }
                     )
                     AppActionType.AddChallenge -> AppAction(
@@ -193,6 +195,4 @@ class NewHomeScreenViewModel @Inject constructor(
 
 sealed class HomeUiEvent {
     data object NavigateHome : HomeUiEvent()
-    data class UninstallApp(val app: InstalledApp) : HomeUiEvent()
-    data class ShowAppInfo(val app: InstalledApp) : HomeUiEvent()
 }

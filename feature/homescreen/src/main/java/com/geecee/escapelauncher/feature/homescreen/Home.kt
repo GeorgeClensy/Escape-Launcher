@@ -49,8 +49,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.geecee.escapelauncher.core.common.DefaultSettings
 import com.geecee.escapelauncher.core.common.formatScreenTime
-import com.geecee.escapelauncher.core.common.goToAppInfo
-import com.geecee.escapelauncher.core.common.uninstallApp
 import com.geecee.escapelauncher.core.model.InstalledApp
 import com.geecee.escapelauncher.core.ui.DefaultSettingsUi
 import com.geecee.escapelauncher.core.ui.composables.Clock
@@ -120,8 +118,6 @@ fun HomeScreen(
         homeScreenViewModel.uiEvent.collectLatest { event ->
             when (event) {
                 is HomeUiEvent.NavigateHome -> onGoHomeRequest()
-                is HomeUiEvent.UninstallApp -> uninstallApp(context, event.app)
-                is HomeUiEvent.ShowAppInfo -> goToAppInfo(context, event.app)
             }
         }
     }

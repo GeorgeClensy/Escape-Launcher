@@ -16,19 +16,24 @@ import com.geecee.escapelauncher.core.domain.apps.GetFavoriteAppsUseCase
 import com.geecee.escapelauncher.core.domain.apps.LaunchAppUseCase
 import com.geecee.escapelauncher.core.domain.apps.TryOpenAppResult
 import com.geecee.escapelauncher.core.domain.apps.TryOpenAppUseCase
+import com.geecee.escapelauncher.core.domain.launcher.GetIsDefaultLauncherUseCase
 import com.geecee.escapelauncher.core.domain.managedprofiles.IsManagedProfileSupportedUseCase
 import com.geecee.escapelauncher.core.domain.managedprofiles.ManagedProfileExistsUseCase
 import com.geecee.escapelauncher.core.domain.managedprofiles.ManagedProfileType
-import com.geecee.escapelauncher.core.domain.repository.settings.LauncherBehaviorRepository
 import com.geecee.escapelauncher.core.domain.repository.settings.OnboardingRepository
 import com.geecee.escapelauncher.core.domain.repository.settings.ScreenTimeSettingsRepository
+import com.geecee.escapelauncher.core.domain.repository.settings.LauncherBehaviorRepository
+import com.geecee.escapelauncher.core.domain.system.LockScreenUseCase
 import com.geecee.escapelauncher.core.model.InstalledApp
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import jakarta.inject.Inject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -44,7 +49,9 @@ class MainPagerScreenViewModel @Inject constructor(
     private val tryOpenAppUseCase: TryOpenAppUseCase,
     private val launchAppUseCase: LaunchAppUseCase,
     private val managedProfileExistsUseCase: ManagedProfileExistsUseCase,
-    private val isManagedProfileSupportedUseCase: IsManagedProfileSupportedUseCase
+    private val isManagedProfileSupportedUseCase: IsManagedProfileSupportedUseCase,
+    private val getIsDefaultLauncherUseCase: GetIsDefaultLauncherUseCase,
+    private val lockScreenUseCase: LockScreenUseCase
 ) : AndroidViewModel(context as Application) {
     fun managedProfileExists(type: ManagedProfileType): Boolean = managedProfileExistsUseCase(type)
     fun isManagedProfileSupported(type: ManagedProfileType): Boolean = isManagedProfileSupportedUseCase(type)
@@ -63,6 +70,17 @@ class MainPagerScreenViewModel @Inject constructor(
     val hapticFeedBackEnabled = launcherBehaviorRepository.hapticFeedBackEnabled
 
     val isHiddenPrivateSpace = launcherBehaviorRepository.hidePrivateSpace
+
+    private val _isDefaultLauncher = MutableStateFlow(false)
+    val isDefaultLauncher: StateFlow<Boolean> = _isDefaultLauncher.asStateFlow()
+
+    fun updateLauncherStatus() {
+        _isDefaultLauncher.value = getIsDefaultLauncherUseCase()
+    }
+
+    fun lockScreen() {
+        lockScreenUseCase()
+    }
 
     var currentSelectedApp = mutableStateOf(InstalledApp("", "", ComponentName("", "")))
 
@@ -103,6 +121,7 @@ class MainPagerScreenViewModel @Inject constructor(
     }
 
     init {
+        updateLauncherStatus()
         viewModelScope.launch {
             getFavoriteAppsUseCase().collect { newFavoriteApps ->
                 withContext(Dispatchers.Main) {

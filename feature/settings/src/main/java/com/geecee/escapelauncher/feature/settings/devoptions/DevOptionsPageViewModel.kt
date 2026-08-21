@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.geecee.escapelauncher.core.domain.repository.settings.OnboardingRepository
 import com.geecee.escapelauncher.core.domain.repository.settings.WeatherSettingsRepository
 import com.geecee.escapelauncher.core.domain.repository.settings.LauncherBehaviorRepository
+import com.geecee.escapelauncher.core.domain.system.LockScreenUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import jakarta.inject.Inject
@@ -13,10 +14,10 @@ import kotlinx.coroutines.launch
 
 @HiltViewModel
 class DevOptionsPageViewModel @Inject constructor(
-    @ApplicationContext context: Context,
     private val onboardingRepository: OnboardingRepository,
     private val weatherSettingsRepository: WeatherSettingsRepository,
-    private val launcherBehaviorRepository: LauncherBehaviorRepository
+    private val launcherBehaviorRepository: LauncherBehaviorRepository,
+    private val lockScreenUseCase: LockScreenUseCase
 ) : ViewModel() {
     val firstTimeHelp = onboardingRepository.firstTimeHelp
     fun setFirstTimeHelp(value: Boolean) {
@@ -39,4 +40,8 @@ class DevOptionsPageViewModel @Inject constructor(
     }
 
     val doubleTapToLock = launcherBehaviorRepository.doubleTapToLock
+
+    fun lockScreen() {
+        lockScreenUseCase()
+    }
 }

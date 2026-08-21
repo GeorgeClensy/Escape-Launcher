@@ -1,7 +1,6 @@
 package com.geecee.escapelauncher
 
 import android.os.Build
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.LocalActivity
@@ -28,8 +27,6 @@ import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.geecee.escapelauncher.core.common.DefaultSettings
-import com.geecee.escapelauncher.core.common.EscapeAccessibilityService
-import com.geecee.escapelauncher.core.common.isDefaultLauncher
 import com.geecee.escapelauncher.core.domain.managedprofiles.ManagedProfileType
 import com.geecee.escapelauncher.core.ui.R
 import com.geecee.escapelauncher.core.ui.composables.OpenChallenge
@@ -79,6 +76,8 @@ fun MainPagerScreen(
         }
     }
 
+    val isDefaultLauncher by viewModel.isDefaultLauncher.collectAsState()
+
     // Home Screen Pages
     HorizontalPager(
         state = viewModel.pagerState,
@@ -98,16 +97,7 @@ fun MainPagerScreen(
                     // Turn screen off
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
                         if (doubleTapToLock) {
-                            val service = EscapeAccessibilityService.instance
-                            if (service != null) {
-                                service.lockScreen()
-                            } else {
-                                Toast.makeText(
-                                    context,
-                                    resources.getString(R.string.accessibility_not_granted_msg),
-                                    Toast.LENGTH_LONG
-                                ).show()
-                            }
+                            viewModel.lockScreen()
                         }
                     }
                 }
@@ -157,7 +147,7 @@ fun MainPagerScreen(
                         }
                     }
                     //Private Space
-                    else if (isDefaultLauncher(context = context) && Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM && viewModel.managedProfileExists(
+                    else if (isDefaultLauncher && Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM && viewModel.managedProfileExists(
                             ManagedProfileType.PrivateSpace
                         )
                     ) {

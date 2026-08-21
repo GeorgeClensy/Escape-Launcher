@@ -10,11 +10,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalResources
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.geecee.escapelauncher.core.common.DefaultSettings
-import com.geecee.escapelauncher.core.common.EscapeAccessibilityService
-import com.geecee.escapelauncher.core.ui.R
 import com.geecee.escapelauncher.core.ui.composables.EscapeHeader
 import com.geecee.escapelauncher.core.ui.composables.SettingsButton
 import com.geecee.escapelauncher.core.ui.composables.SettingsSwitch
@@ -29,7 +26,6 @@ fun DevOptions(
     goBack: () -> Unit
 ) {
     val context = LocalContext.current
-    val resources = LocalResources.current
     val firstTimeHelp by viewModel.firstTimeHelp.collectAsState(initial = DefaultSettings.FIRST_TIME_HELP)
     val firstTime by viewModel.firstTime.collectAsState(initial = DefaultSettings.FIRST_TIME)
     val doubleTapToLock by viewModel.doubleTapToLock.collectAsState(initial = DefaultSettings.DOUBLE_TAP_TO_LOCK)
@@ -87,16 +83,7 @@ fun DevOptions(
                 isBottomOfGroup = true,
                 onClick = {
                     if (doubleTapToLock) {
-                        val service = EscapeAccessibilityService.instance
-                        if (service != null) {
-                            service.lockScreen()
-                        } else {
-                            Toast.makeText(
-                                context,
-                                resources.getString(R.string.accessibility_not_granted_msg),
-                                Toast.LENGTH_LONG
-                            ).show()
-                        }
+                        viewModel.lockScreen()
                     }
                 }
             )

@@ -27,9 +27,6 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.geecee.escapelauncher.feature.settings.SettingsNavKey
 import com.geecee.escapelauncher.core.common.EscapeAccessibilityService
 import com.geecee.escapelauncher.core.common.configureStatusBar
-import com.geecee.escapelauncher.core.common.isDefaultLauncher
-import com.geecee.escapelauncher.core.common.showLauncherSelector
-import com.geecee.escapelauncher.core.common.showLauncherSettingsMenu
 import com.geecee.escapelauncher.core.ui.R
 import com.geecee.escapelauncher.core.ui.composables.EscapeHeader
 import com.geecee.escapelauncher.core.ui.composables.EscapeSubhead
@@ -396,13 +393,7 @@ fun MainSettingsPage(
                 true,
                 isTopOfGroup = true,
                 onClick = {
-                    activity?.let {
-                        if (!isDefaultLauncher(it)) {
-                            it.showLauncherSelector()
-                        } else {
-                            showLauncherSettingsMenu(it)
-                        }
-                    }
+                    mainSettingsPageViewModel.promptSetDefaultLauncher()
                 })
         }
 
