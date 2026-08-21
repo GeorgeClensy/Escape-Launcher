@@ -16,7 +16,8 @@ import kotlinx.coroutines.launch
 @HiltViewModel
 class WeatherViewModel @Inject constructor(
     @param:ApplicationContext private val context: Context,
-    private val weatherSettingsRepository: WeatherSettingsRepository
+    private val weatherSettingsRepository: WeatherSettingsRepository,
+    private val weatherProxy: WeatherProxy
 ) : ViewModel() {
     val weatherAppPackage = weatherSettingsRepository.weatherAppPackage
 
@@ -44,7 +45,7 @@ class WeatherViewModel @Inject constructor(
         }
     }
 
-    private suspend fun fetchWeather(useFahrenheit: Boolean) {
+    private fun fetchWeather(useFahrenheit: Boolean) {
         weatherProxy.getWeather(context, useFahrenheit) { result ->
             viewModelScope.launch(Dispatchers.Main) {
                 if (!result.contains("error", ignoreCase = true) && !result.contains(
