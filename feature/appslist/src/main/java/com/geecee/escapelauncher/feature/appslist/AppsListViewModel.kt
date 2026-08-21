@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.geecee.escapelauncher.core.common.isMainUserApp
 import com.geecee.escapelauncher.core.domain.apps.AppActionType
+import com.geecee.escapelauncher.core.domain.apps.LaunchAppUseCase
 import com.geecee.escapelauncher.core.domain.apps.GetAppActionsUseCase
 import com.geecee.escapelauncher.core.domain.apps.GetAppShortcutsUseCase
 import com.geecee.escapelauncher.core.domain.apps.StartShortcutUseCase
@@ -31,6 +32,7 @@ class AppsListViewModel @Inject constructor(
     private val getAppActionsUseCase: GetAppActionsUseCase,
     private val getAppShortcutsUseCase: GetAppShortcutsUseCase,
     private val startShortcutUseCase: StartShortcutUseCase,
+    private val launchAppUseCase: LaunchAppUseCase,
     searchAppsUseCase: SearchAppsUseCase
 ) : ViewModel() {
     // UI Events
@@ -182,6 +184,10 @@ class AppsListViewModel @Inject constructor(
     val showWorkApps: StateFlow<Boolean> = _showWorkApps.asStateFlow()
     fun setShowWorkApps(show: Boolean) {
         _showWorkApps.value = show
+    }
+
+    fun launchApp(app: InstalledApp, onAppOpened: ((String) -> Unit)? = null): Boolean {
+        return launchAppUseCase(app, onAppOpened)
     }
 }
 

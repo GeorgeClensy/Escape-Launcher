@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.ui.Alignment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.geecee.escapelauncher.core.analytics.AnalyticsProxy
 import com.geecee.escapelauncher.core.domain.repository.AppConfiguration
 import com.geecee.escapelauncher.core.common.isMainUserApp
 import com.geecee.escapelauncher.core.domain.apps.*
@@ -36,7 +37,8 @@ class NewHomeScreenViewModel @Inject constructor(
     appConfiguration: AppConfiguration,
     private val getAppActionsUseCase: GetAppActionsUseCase,
     private val getAppShortcutsUseCase: GetAppShortcutsUseCase,
-    private val startShortcutUseCase: StartShortcutUseCase
+    private val startShortcutUseCase: StartShortcutUseCase,
+    private val analyticsProxy: AnalyticsProxy
 ) : ViewModel() {
     val isFoss = appConfiguration.isFoss
 
@@ -95,6 +97,10 @@ class NewHomeScreenViewModel @Inject constructor(
     val bottomSheetApp: StateFlow<InstalledApp?> = _bottomSheetApp.asStateFlow()
     fun setBottomSheetApp(app: InstalledApp?) {
         _bottomSheetApp.value = app
+    }
+
+    fun logException(e: Exception) {
+        analyticsProxy.recordException(e)
     }
 
     // Actions

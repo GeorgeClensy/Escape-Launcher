@@ -9,6 +9,3 @@ interface AnalyticsProxy {
 
     fun recordException(exception: Exception)
 }
-
-// Global accessor that will be provided by the flavour-specific implementations
-lateinit var analyticsProxy: AnalyticsProxy

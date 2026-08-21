@@ -25,7 +25,6 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.geecee.escapelauncher.core.common.DefaultSettings
-import com.geecee.escapelauncher.core.common.launchApp
 import com.geecee.escapelauncher.core.ui.R
 import com.geecee.escapelauncher.core.ui.composables.EscapeHeader
 import com.geecee.escapelauncher.core.ui.composables.EscapeSubhead
@@ -37,6 +36,7 @@ import com.geecee.escapelauncher.core.ui.utils.doHapticFeedBack
 import com.geecee.escapelauncher.feature.screentime.ScreenTimeViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlin.time.Duration.Companion.milliseconds
 
 
 /**
@@ -54,7 +54,6 @@ fun HiddenApps(
     goToManageHiddenApps: () -> Unit,
     goBack: () -> Unit
 ) {
-    val context = LocalContext.current
     val installedApps by hiddenAppsViewModel.installedApps.collectAsState()
     val coroutineScope = rememberCoroutineScope()
     val haptics = LocalHapticFeedback.current
@@ -119,7 +118,7 @@ fun HiddenApps(
                                 )
 
                         app?.let {
-                            launchApp(context = context, app = app)
+                            hiddenAppsViewModel.launchApp(app)
                             screenTimeViewModel.onAppOpened(app.packageName)
                         }
                     },
@@ -130,7 +129,7 @@ fun HiddenApps(
                         visible = false
                         // Remove from your list after a short delay to let animation run
                         coroutineScope.launch {
-                            delay(500)
+                            delay(500.milliseconds)
                             hiddenAppsViewModel.unhideApp(appPackageName)
                         }
                     },

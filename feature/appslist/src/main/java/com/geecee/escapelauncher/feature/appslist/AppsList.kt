@@ -40,7 +40,6 @@ import com.geecee.escapelauncher.core.ui.R
 import com.geecee.escapelauncher.core.common.DefaultSettings
 import com.geecee.escapelauncher.core.common.formatScreenTime
 import com.geecee.escapelauncher.core.common.goToAppInfo
-import com.geecee.escapelauncher.core.common.launchApp
 import com.geecee.escapelauncher.core.common.uninstallApp
 import com.geecee.escapelauncher.core.model.InstalledApp
 import com.geecee.escapelauncher.core.theme.colours.transparentHalf
@@ -231,7 +230,7 @@ fun AppsList(
             ) {
                 workAppsContent(
                     { app -> // onAppClick
-                        launchApp(context = context, app = app)
+                        appsListViewModel.launchApp(app = app)
                         onGoHomeRequest()
                     },
                     { app -> // onAppLongClick

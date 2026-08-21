@@ -49,7 +49,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.drawable.toBitmap
-import com.geecee.escapelauncher.core.analytics.analyticsProxy
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -64,7 +64,8 @@ import kotlinx.coroutines.withContext
 @Composable
 fun CustomWidgetPicker(
     onWidgetSelected: (AppWidgetProviderInfo) -> Unit,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    viewModel: WidgetPickerViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
 
@@ -114,7 +115,8 @@ fun CustomWidgetPicker(
                         WidgetAppItem(
                             widgetAppData = appInfo,
                             widgets = widgets,
-                            onWidgetSelected = onWidgetSelected
+                            onWidgetSelected = onWidgetSelected,
+                            viewModel = viewModel
                         )
                     }
                 }
@@ -135,7 +137,8 @@ fun CustomWidgetPicker(
 fun WidgetAppItem(
     widgetAppData: WidgetAppData,
     widgets: List<WidgetInfo>,
-    onWidgetSelected: (AppWidgetProviderInfo) -> Unit
+    onWidgetSelected: (AppWidgetProviderInfo) -> Unit,
+    viewModel: WidgetPickerViewModel
 ) {
     var expanded by remember { mutableStateOf(false) }
     val rotationState by animateFloatAsState(targetValue = if (expanded) 180f else 0f) // The rotation of the arrow
@@ -170,11 +173,7 @@ fun WidgetAppItem(
                         try {
                             widgetAppData.icon?.toBitmap()?.asImageBitmap()
                         } catch (e: Exception) {
-                            analyticsProxy.logCustomKey(
-                                "Widget Picker App Icon loading failed: ",
-                                widgetAppData.packageName
-                            )
-                            analyticsProxy.recordException(e)
+                            viewModel.logIconError(widgetAppData.packageName, e)
                             null
                         }
                     }
@@ -239,7 +238,8 @@ fun WidgetAppItem(
                         widgets.forEach { widget ->
                             WidgetPreview(
                                 widget = widget,
-                                onClick = { onWidgetSelected(widget.provider) }
+                                onClick = { onWidgetSelected(widget.provider) },
+                                viewModel = viewModel
                             )
                         }
                     }
@@ -259,7 +259,8 @@ fun WidgetAppItem(
 @Composable
 fun WidgetPreview(
     widget: WidgetInfo,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    viewModel: WidgetPickerViewModel
 ) {
     val context = LocalContext.current
 
@@ -287,11 +288,7 @@ fun WidgetPreview(
                             imageLoading = false
                         }
                     } catch (e: Exception) {
-                        analyticsProxy.logCustomKey(
-                            "Widget Picker Preview failed: ",
-                            widget.label + " from app" + widget.provider
-                        )
-                        analyticsProxy.recordException(e)
+                        viewModel.logIconError(widget.label + " from app" + widget.provider, e)
                         withContext(Dispatchers.Main) {
                             imageLoading = false
                         }

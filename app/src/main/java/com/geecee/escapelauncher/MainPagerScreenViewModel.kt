@@ -12,8 +12,8 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.geecee.escapelauncher.core.common.launchApp
 import com.geecee.escapelauncher.core.domain.apps.GetFavoriteAppsUseCase
+import com.geecee.escapelauncher.core.domain.apps.LaunchAppUseCase
 import com.geecee.escapelauncher.core.domain.apps.TryOpenAppResult
 import com.geecee.escapelauncher.core.domain.apps.TryOpenAppUseCase
 import com.geecee.escapelauncher.core.domain.managedprofiles.IsManagedProfileSupportedUseCase
@@ -38,10 +38,11 @@ import kotlin.time.Duration.Companion.milliseconds
 class MainPagerScreenViewModel @Inject constructor(
     @ApplicationContext context: Context,
     private val onboardingRepository: OnboardingRepository,
-    private val screenTimeSettingsRepository: ScreenTimeSettingsRepository,
-    private val launcherBehaviorRepository: LauncherBehaviorRepository,
+    screenTimeSettingsRepository: ScreenTimeSettingsRepository,
+    launcherBehaviorRepository: LauncherBehaviorRepository,
     private val getFavoriteAppsUseCase: GetFavoriteAppsUseCase,
     private val tryOpenAppUseCase: TryOpenAppUseCase,
+    private val launchAppUseCase: LaunchAppUseCase,
     private val managedProfileExistsUseCase: ManagedProfileExistsUseCase,
     private val isManagedProfileSupportedUseCase: IsManagedProfileSupportedUseCase
 ) : AndroidViewModel(context as Application) {
@@ -142,7 +143,7 @@ class MainPagerScreenViewModel @Inject constructor(
                     updateSelectedApp(app)
                 }
                 TryOpenAppResult.Launch -> {
-                    if (launchApp(getApplication(), app, onAppOpened)) {
+                    if (launchAppUseCase(app, onAppOpened)) {
                         onAppLaunched(app)
 
                         // At the end of an open challenge countdown, it runs this openApp function again with overrideChallenge set to true so this is used to hide the challenge ui

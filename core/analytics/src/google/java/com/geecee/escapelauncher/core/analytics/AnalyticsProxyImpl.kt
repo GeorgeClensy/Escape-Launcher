@@ -5,7 +5,9 @@ import com.google.firebase.Firebase
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.analytics.analytics
 import com.google.firebase.crashlytics.crashlytics
-class AnalyticsProxyImpl : AnalyticsProxy {
+import jakarta.inject.Inject
+
+class AnalyticsProxyImpl @Inject constructor() : AnalyticsProxy {
     val crashlytics = Firebase.crashlytics
 
     override fun configureAnalytics(context: Context, enabled: Boolean) {

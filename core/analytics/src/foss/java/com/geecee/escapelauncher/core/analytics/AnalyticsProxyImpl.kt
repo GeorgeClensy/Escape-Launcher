@@ -1,8 +1,9 @@
 package com.geecee.escapelauncher.core.analytics
 
 import android.content.Context
+import jakarta.inject.Inject
 
-class AnalyticsProxyImpl : AnalyticsProxy {
+class AnalyticsProxyImpl @Inject constructor() : AnalyticsProxy {
     override fun configureAnalytics(context: Context, enabled: Boolean) {
         // No-op for FOSS build
     }

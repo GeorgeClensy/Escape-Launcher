@@ -2,10 +2,12 @@ package com.geecee.escapelauncher.feature.settings.hiddenapps
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.geecee.escapelauncher.core.domain.apps.LaunchAppUseCase
 import com.geecee.escapelauncher.core.domain.repository.android.AppsRepository
 import com.geecee.escapelauncher.core.domain.repository.db.ModifiedAppsRepository
 import com.geecee.escapelauncher.core.domain.repository.settings.SearchSettingsRepository
 import com.geecee.escapelauncher.core.domain.repository.settings.LauncherBehaviorRepository
+import com.geecee.escapelauncher.core.model.InstalledApp
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.SharingStarted
@@ -19,13 +21,14 @@ class HiddenAppsViewModel @Inject constructor(
     private val modifiedAppsRepository: ModifiedAppsRepository,
     val appsRepository: AppsRepository,
     private val searchSettingsRepository: SearchSettingsRepository,
-    private val launcherBehaviorRepository: LauncherBehaviorRepository
+    launcherBehaviorRepository: LauncherBehaviorRepository,
+    private val launchAppUseCase: LaunchAppUseCase
 ) : ViewModel() {
     val hiddenPackageIds: StateFlow<Set<String>> = modifiedAppsRepository.getHiddenPackageIdsFlow()
         .map { it.toSet() }
         .stateIn(
             scope = viewModelScope,
-            started = SharingStarted.Companion.WhileSubscribed(5000),
+            started = SharingStarted.WhileSubscribed(5000),
             initialValue = emptySet()
         )
 
@@ -48,6 +51,10 @@ class HiddenAppsViewModel @Inject constructor(
         viewModelScope.launch {
             modifiedAppsRepository.setHidden(packageId, false)
         }
+    }
+
+    fun launchApp(app: InstalledApp) {
+        launchAppUseCase(app)
     }
 
     val installedApps = appsRepository.mainUserApps

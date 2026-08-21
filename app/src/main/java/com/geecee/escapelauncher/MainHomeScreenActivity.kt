@@ -31,7 +31,7 @@ import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import androidx.compose.material3.MaterialTheme
-import com.geecee.escapelauncher.core.analytics.analyticsProxy
+import com.geecee.escapelauncher.core.analytics.AnalyticsProxy
 import com.geecee.escapelauncher.core.cloudmessaging.messagingInitializer
 import com.geecee.escapelauncher.core.common.configureNavBar
 import com.geecee.escapelauncher.core.common.configureStatusBar
@@ -76,6 +76,9 @@ class MainHomeScreenActivity : ComponentActivity() {
     private val globalViewModel: GlobalViewModel by viewModels()
     private val mainPagerViewModel: MainPagerScreenViewModel by viewModels()
     private val screenTimeViewModel: ScreenTimeViewModel by viewModels()
+
+    @Inject
+    lateinit var analyticsProxy: AnalyticsProxy
 
     @Inject
     lateinit var widgetHostManager: WidgetHostManager

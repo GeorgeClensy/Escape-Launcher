@@ -47,7 +47,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import com.geecee.escapelauncher.core.analytics.analyticsProxy
 import com.geecee.escapelauncher.core.common.DefaultSettings
 import com.geecee.escapelauncher.core.common.formatScreenTime
 import com.geecee.escapelauncher.core.common.goToAppInfo
@@ -239,7 +238,7 @@ fun HomeScreen(
                                     }
                                     context.startActivity(intent)
                                 } catch (e: Exception) {
-                                    analyticsProxy.recordException(e)
+                                    homeScreenViewModel.logException(e)
                                 }
                             }
                         )
@@ -261,7 +260,7 @@ fun HomeScreen(
                     }
 
                     if (showWeather) {
-                        @Suppress("KotlinConstantConditions") // This is to stop the IS_FOSS is always true cuz it's a foss sync in android studio
+                        @Suppress("KotlinConstantConditions") // This is to stop the IS_FOSS is always true cuz it's a FOSS sync in Android Studio
                         if (!homeScreenViewModel.isFoss) {
                             HomeWeatherImpl(alignment = homeAlignment)
                         }
