@@ -2,8 +2,14 @@ package com.geecee.escapelauncher.core.domain.repository.android
 
 import android.graphics.Rect
 import com.geecee.escapelauncher.core.model.InstalledApp
+import kotlinx.coroutines.flow.Flow
 
 interface SystemActionsRepository {
+    /**
+     * A flow providing the current enabled state of the accessibility service.
+     */
+    val isAccessibilityServiceEnabled: Flow<Boolean>
+
     /**
      * Triggers the system uninstallation dialog for the given app.
      */

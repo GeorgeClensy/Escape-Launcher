@@ -16,17 +16,28 @@ import android.provider.Settings
 import androidx.annotation.RequiresPermission
 import androidx.core.graphics.createBitmap
 import androidx.core.net.toUri
-import com.geecee.escapelauncher.core.common.EscapeAccessibilityService
+import com.geecee.escapelauncher.core.data.system.EscapeAccessibilityService
 import com.geecee.escapelauncher.core.domain.repository.android.SystemActionsRepository
 import com.geecee.escapelauncher.core.model.InstalledApp
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
+import kotlin.time.Duration.Companion.milliseconds
 
 @Singleton
 class SystemActionsRepositoryImpl @Inject constructor(
     @ApplicationContext private val context: Context
 ) : SystemActionsRepository {
+
+    override val isAccessibilityServiceEnabled: Flow<Boolean> = flow {
+        while (true) {
+            emit(EscapeAccessibilityService.instance != null)
+            delay(1000.milliseconds)
+        }
+    }
 
     override fun uninstallApp(app: InstalledApp) {
         val intent = Intent(Intent.ACTION_DELETE).apply {

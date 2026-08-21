@@ -1,4 +1,4 @@
-package com.geecee.escapelauncher.core.common
+package com.geecee.escapelauncher.core.data.system
 
 import android.accessibilityservice.AccessibilityService
 import android.annotation.SuppressLint

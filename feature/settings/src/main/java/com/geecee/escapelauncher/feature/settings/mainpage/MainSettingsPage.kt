@@ -27,7 +27,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.core.net.toUri
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.geecee.escapelauncher.feature.settings.SettingsNavKey
-import com.geecee.escapelauncher.core.common.EscapeAccessibilityService
 import com.geecee.escapelauncher.core.common.configureStatusBar
 import com.geecee.escapelauncher.core.ui.R
 import com.geecee.escapelauncher.core.ui.composables.EscapeHeader
@@ -219,11 +218,11 @@ fun MainSettingsPage(
                     onCheckedChange = {
                         mainSettingsPageViewModel.setDoubleTapToLock(it)
                     },
-                    isBottomOfGroup = EscapeAccessibilityService.instance != null
+                    isBottomOfGroup = uiState.isAccessibilityServiceEnabled
                 )
             }
 
-            if (EscapeAccessibilityService.instance == null) {
+            if (!uiState.isAccessibilityServiceEnabled) {
                 item(key = "enable_accessibility") {
                     SettingsButton(
                         label = stringResource(R.string.enable_accessibility),
