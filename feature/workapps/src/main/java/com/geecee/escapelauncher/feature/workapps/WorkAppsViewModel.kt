@@ -8,10 +8,12 @@ import com.geecee.escapelauncher.core.domain.managedprofiles.ManagedProfileType
 import com.geecee.escapelauncher.core.domain.managedprofiles.ObserveManagedProfileUnlockedUseCase
 import com.geecee.escapelauncher.core.domain.managedprofiles.ToggleManagedProfileUseCase
 import com.geecee.escapelauncher.core.domain.managedprofiles.ToggleManagedProfileUseCaseOutput
+import com.geecee.escapelauncher.core.domain.repository.android.AppsRepository
 import com.geecee.escapelauncher.core.model.InstalledApp
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -21,7 +23,8 @@ class WorkAppsViewModel @Inject constructor(
     getManagedProfileAppsUseCase: GetManagedProfileAppsUseCase,
     observeManagedProfileUnlockedUseCase: ObserveManagedProfileUnlockedUseCase,
     private val toggleManagedProfileUseCase: ToggleManagedProfileUseCase,
-    private val canToggleManagedProfileUseCase: CanToggleManagedProfileUseCase
+    canToggleManagedProfileUseCase: CanToggleManagedProfileUseCase,
+    appsRepository: AppsRepository
 ) : ViewModel() {
 
     val canToggleProfile: Boolean = canToggleManagedProfileUseCase(ManagedProfileType.WorkApps)
@@ -33,7 +36,10 @@ class WorkAppsViewModel @Inject constructor(
             initialValue = false
         )
 
-    val workApps: StateFlow<List<InstalledApp>> = getManagedProfileAppsUseCase(ManagedProfileType.WorkApps)
+    val workApps: StateFlow<List<InstalledApp>> = combine(
+        getManagedProfileAppsUseCase(ManagedProfileType.WorkApps),
+        appsRepository.installedApps
+    ) { apps, _ -> apps }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
