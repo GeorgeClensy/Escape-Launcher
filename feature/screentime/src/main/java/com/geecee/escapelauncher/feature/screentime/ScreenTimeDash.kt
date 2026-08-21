@@ -34,6 +34,7 @@ import com.geecee.escapelauncher.core.theme.colours.escapeGreen
 import com.geecee.escapelauncher.core.theme.colours.escapeRed
 import com.geecee.escapelauncher.core.common.formatScreenTime
 
+//todo: Probably move this function to a useCase or something idk
 /**
  * This function works out if the screen time is over the recommended and if it is finds out how many per cent over it is
  */

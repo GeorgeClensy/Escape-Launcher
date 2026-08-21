@@ -12,6 +12,7 @@ import android.widget.Toast
 import androidx.annotation.RequiresApi
 import com.geecee.escapelauncher.core.ui.R
 
+//todo: this should probably go in a domain or something
 /**
  * Checks if the device has `com.samsung.knox.securefolder` installed with `context.packageManager.getPackageInfo()`
  * Requires Android Pie (API 29) or higher as secure folder was added in Android Pie.
