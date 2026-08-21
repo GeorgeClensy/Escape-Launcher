@@ -32,7 +32,7 @@ import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import androidx.compose.material3.MaterialTheme
 import com.geecee.escapelauncher.core.analytics.AnalyticsProxy
-import com.geecee.escapelauncher.core.cloudmessaging.messagingInitializer
+import com.geecee.escapelauncher.core.cloudmessaging.MessagingInitializer
 import com.geecee.escapelauncher.core.common.configureNavBar
 import com.geecee.escapelauncher.core.common.configureStatusBar
 import com.geecee.escapelauncher.core.common.formatScreenTime
@@ -79,6 +79,8 @@ class MainHomeScreenActivity : ComponentActivity() {
 
     @Inject
     lateinit var analyticsProxy: AnalyticsProxy
+    @Inject
+    lateinit var messagingInitializer: MessagingInitializer
 
     @Inject
     lateinit var widgetHostManager: WidgetHostManager

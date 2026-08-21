@@ -4,8 +4,9 @@ import android.content.Context
 import android.util.Log
 import com.google.firebase.Firebase
 import com.google.firebase.messaging.messaging
+import jakarta.inject.Inject
 
-class MessagingInitializerImpl : MessagingInitializer {
+class MessagingInitializerImpl @Inject constructor(): MessagingInitializer {
     override fun initialize(context: Context) {
         Firebase.messaging.token.addOnCompleteListener { task ->
             if (!task.isSuccessful) {
