@@ -32,8 +32,8 @@ class OnboardingViewModel @Inject constructor(
         _isDefaultLauncher.value = getIsDefaultLauncherUseCase()
     }
 
-    fun promptSetDefaultLauncher() {
-        setDefaultLauncherUseCase()
+    fun getPromptDefaultLauncherIntent(): android.content.Intent {
+        return setDefaultLauncherUseCase()
     }
 
     init {

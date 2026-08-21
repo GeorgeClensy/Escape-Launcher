@@ -6,6 +6,8 @@ import android.os.Build
 import android.provider.Settings
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.LocalActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.fillMaxSize
@@ -64,6 +66,11 @@ fun MainSettingsPage(
     val installedApps by mainSettingsPageViewModel.installedApps.collectAsState()
     val uiState by mainSettingsPageViewModel.uiState.collectAsState()
     var showWeatherAppPicker by remember { mutableStateOf(false) }
+
+    // To show the default launcher prompt, the activity must be started for a result so this is required instead of Context.startActivity
+    val roleLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { _ -> }
 
     LazyColumn(
         verticalArrangement = Arrangement.Top,
@@ -393,7 +400,8 @@ fun MainSettingsPage(
                 true,
                 isTopOfGroup = true,
                 onClick = {
-                    mainSettingsPageViewModel.promptSetDefaultLauncher()
+                    val intent = mainSettingsPageViewModel.getPromptDefaultLauncherIntent()
+                    roleLauncher.launch(intent)
                 })
         }
 

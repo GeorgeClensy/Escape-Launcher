@@ -20,9 +20,9 @@ interface SystemActionsRepository {
     fun isDefaultLauncher(): Boolean
 
     /**
-     * Prompts the user to set Escape Launcher as the default home app.
+     * Returns an Intent to prompt the user to set Escape Launcher as the default home app.
      */
-    fun promptSetDefaultLauncher()
+    fun getPromptDefaultLauncherIntent(): android.content.Intent
 
     /**
      * Sets a solid color as the system wallpaper for the home screen.

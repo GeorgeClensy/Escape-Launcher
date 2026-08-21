@@ -65,27 +65,25 @@ class SystemActionsRepositoryImpl @Inject constructor(
         }
     }
 
-    override fun promptSetDefaultLauncher() {
+    override fun getPromptDefaultLauncherIntent(): Intent {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             val roleManager = context.getSystemService(RoleManager::class.java)
-            if (roleManager?.isRoleAvailable(RoleManager.ROLE_HOME) == true) {
-                val intent = roleManager.createRequestRoleIntent(RoleManager.ROLE_HOME).apply {
-                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                }
-                context.startActivity(intent)
-            } else {
-                openLauncherSettings()
-            }
-        } else {
-            openLauncherSettings()
-        }
-    }
 
-    private fun openLauncherSettings() {
-        val intent = Intent(Settings.ACTION_HOME_SETTINGS).apply {
-            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            if (roleManager != null) {
+                // If we are already default
+                if (roleManager.isRoleHeld(RoleManager.ROLE_HOME)) {
+                    return Intent(Settings.ACTION_HOME_SETTINGS)
+                }
+
+                // If we aren't default
+                if (roleManager.isRoleAvailable(RoleManager.ROLE_HOME)) {
+                    return roleManager.createRequestRoleIntent(RoleManager.ROLE_HOME)
+                }
+            }
         }
-        context.startActivity(intent)
+
+        // Fallback to full settings page
+        return Intent(Settings.ACTION_HOME_SETTINGS)
     }
 
     @RequiresPermission(Manifest.permission.SET_WALLPAPER)

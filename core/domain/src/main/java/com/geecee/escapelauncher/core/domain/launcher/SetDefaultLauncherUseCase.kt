@@ -6,7 +6,7 @@ import jakarta.inject.Inject
 class SetDefaultLauncherUseCase @Inject constructor(
     private val systemActionsRepository: SystemActionsRepository
 ) {
-    operator fun invoke() {
-        systemActionsRepository.promptSetDefaultLauncher()
+    operator fun invoke(): android.content.Intent {
+        return systemActionsRepository.getPromptDefaultLauncherIntent()
     }
 }

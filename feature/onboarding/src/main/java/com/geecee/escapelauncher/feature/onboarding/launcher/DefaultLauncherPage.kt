@@ -1,5 +1,7 @@
 package com.geecee.escapelauncher.feature.onboarding.launcher
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -33,6 +35,11 @@ fun DefaultLauncherPage(
 ) {
     val isDefaultLauncher by viewModel.isDefaultLauncher.collectAsState()
 
+    // To show the default launcher prompt, the activity must be started for a result so this is required instead of Context.startActivity
+    val roleLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { _ -> }
+
     Box(
         modifier
             .fillMaxSize()
@@ -62,7 +69,8 @@ fun DefaultLauncherPage(
                 SettingsNavigationItem(
                     label = stringResource(R.string.set_launcher),
                     onClick = {
-                        viewModel.promptSetDefaultLauncher()
+                        val intent = viewModel.getPromptDefaultLauncherIntent()
+                        roleLauncher.launch(intent)
                     },
                     diagonalArrow = true,
                     isTopOfGroup = true,
@@ -72,7 +80,8 @@ fun DefaultLauncherPage(
                 SettingsNavigationItem(
                     label = stringResource(R.string.already_default),
                     onClick = {
-                        viewModel.promptSetDefaultLauncher()
+                        val intent = viewModel.getPromptDefaultLauncherIntent()
+                        roleLauncher.launch(intent)
                     },
                     diagonalArrow = true,
                     repalceIconWichCheck = true,
