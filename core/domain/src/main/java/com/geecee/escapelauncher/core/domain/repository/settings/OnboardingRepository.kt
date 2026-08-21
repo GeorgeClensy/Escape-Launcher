@@ -7,6 +7,4 @@ interface OnboardingRepository {
     suspend fun setFirstTime(enabled: Boolean)
     val firstTimeHelp: Flow<Boolean>
     suspend fun setFirstTimeHelp(enabled: Boolean)
-    val isOnDefaultLauncherOnboarding: Flow<Boolean>
-    suspend fun setOnDefaultLauncherOnboarding(value: Boolean)
 }

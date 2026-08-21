@@ -44,16 +44,11 @@ fun Onboarding(
     val haptics = LocalHapticFeedback.current
     val hapticFeedbackEnabled by viewModel.hapticFeedBackEnabled.collectAsState(initial = DefaultSettings.HAPTIC_FEEDBACK)
     val screens = viewModel.screens
-    val isOnDefaultLauncherPage by viewModel.startFromLauncherPage.collectAsState(initial = null)
-    if (isOnDefaultLauncherPage == null) return
+    val currentPageIndex by viewModel.currentPageIndex.collectAsState()
 
     val pagerState = rememberPagerState(
         pageCount = { screens.size },
-        initialPage = if (isOnDefaultLauncherPage == true) {
-            screens.indexOf(OnboardingScreen.DEFAULT_LAUNCHER).coerceAtLeast(0)
-        } else {
-            0
-        }
+        initialPage = currentPageIndex
     )
 
     // Set StartFromLauncherPage

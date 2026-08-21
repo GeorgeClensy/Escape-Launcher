@@ -21,8 +21,4 @@ class OnboardingRepositoryImpl @Inject constructor(
     override suspend fun setFirstTimeHelp(enabled: Boolean) {
         dataStore.edit { it[PreferencesKeys.FIRST_TIME_HELP] = enabled }
     }
-    override val isOnDefaultLauncherOnboarding: Flow<Boolean> = dataStore.data.map { it[PreferencesKeys.IS_ON_DEAFAULT_LAUNCHER_ONBOARDING_PAGE] ?: DefaultSettings.IS_ON_DEAFAULT_LAUNCHER_ONBOARDING_PAGE }
-    override suspend fun setOnDefaultLauncherOnboarding(value: Boolean) {
-        dataStore.edit { it[PreferencesKeys.IS_ON_DEAFAULT_LAUNCHER_ONBOARDING_PAGE] = value }
-    }
 }

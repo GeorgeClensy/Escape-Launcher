@@ -1,11 +1,11 @@
 package com.geecee.escapelauncher.feature.onboarding
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.geecee.escapelauncher.core.domain.launcher.GetIsDefaultLauncherUseCase
 import com.geecee.escapelauncher.core.domain.launcher.SetDefaultLauncherUseCase
 import com.geecee.escapelauncher.core.domain.onboarding.GetOnboardingScreenUseCase
-import com.geecee.escapelauncher.core.domain.onboarding.OnboardingScreen
 import com.geecee.escapelauncher.core.domain.repository.settings.OnboardingRepository
 import com.geecee.escapelauncher.core.domain.repository.settings.LauncherBehaviorRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -21,7 +21,8 @@ class OnboardingViewModel @Inject constructor(
     launcherBehaviorRepository: LauncherBehaviorRepository,
     getOnboardingScreensUseCase: GetOnboardingScreenUseCase,
     private val getIsDefaultLauncherUseCase: GetIsDefaultLauncherUseCase,
-    private val setDefaultLauncherUseCase: SetDefaultLauncherUseCase
+    private val setDefaultLauncherUseCase: SetDefaultLauncherUseCase,
+    private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
     val screens = getOnboardingScreensUseCase()
 
@@ -46,22 +47,15 @@ class OnboardingViewModel @Inject constructor(
         }
     }
 
-    val startFromLauncherPage = onboardingRepository.isOnDefaultLauncherOnboarding
-
-    fun setStartFromLauncherPage(value: Boolean) {
-        viewModelScope.launch {
-            onboardingRepository.setOnDefaultLauncherOnboarding(value)
-        }
-    }
+    val currentPageIndex: StateFlow<Int> = savedStateHandle.getStateFlow(KEY_CURRENT_PAGE_INDEX, 0)
 
     val hapticFeedBackEnabled = launcherBehaviorRepository.hapticFeedBackEnabled
 
     fun onPageSettled(pageIndex: Int) {
-        val launcherPageIndex = screens.indexOf(OnboardingScreen.DEFAULT_LAUNCHER)
-        if (pageIndex != launcherPageIndex) {
-            setStartFromLauncherPage(false)
-        } else {
-            setStartFromLauncherPage(true)
-        }
+        savedStateHandle[KEY_CURRENT_PAGE_INDEX] = pageIndex
+    }
+
+    companion object {
+        private const val KEY_CURRENT_PAGE_INDEX = "current_page_index"
     }
 }

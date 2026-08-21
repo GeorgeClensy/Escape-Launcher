@@ -56,5 +56,4 @@ object DefaultSettings {
     const val HIDE_SCREEN_TIME_PAGE = false
     const val SHOW_HIDDEN_APPS_IN_SEARCH = false
     const val FIRST_TIME = true
-    const val IS_ON_DEAFAULT_LAUNCHER_ONBOARDING_PAGE = false
 }
