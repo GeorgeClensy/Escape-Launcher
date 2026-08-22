@@ -14,4 +14,5 @@ dependencies {
     implementation(project(":core:theme"))
     implementation(project(":core:model"))
     implementation(project(":core:common"))
+    implementation(libs.reorderable)
 }

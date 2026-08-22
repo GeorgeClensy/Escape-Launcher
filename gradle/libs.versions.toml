@@ -27,6 +27,7 @@ room = "2.8.4"
 runtimeSaveable = "1.11.4"
 workRuntimeKtx = "2.11.2"
 material = "1.14.0"
+reorderable = "3.1.0"
 
 # Dependency Injection (Hilt)
 hilt = "2.60.1"
@@ -95,6 +96,7 @@ androidx-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-toolin
 androidx-compose-animation-core = { group = "androidx.compose.animation", name = "animation-core", version.ref = "animationCore" }
 lottie-compose = { module = "com.airbnb.android:lottie-compose", version.ref = "lottieCompose" }
 google-android-material = { group = "com.google.android.material", name = "material", version.ref = "material" }
+reorderable = { module = "sh.calvin.reorderable:reorderable", version.ref = "reorderable" }
 
 # Dependency Injection (Hilt)
 androidx-hilt-common = { group = "androidx.hilt", name = "hilt-common", version.ref = "hiltCommon" }
@@ -113,6 +115,7 @@ androidx-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-man
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
 kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "kotlinxCoroutinesTest" }
+
 [bundles]
 androidx-core = [
     "androidx-core-ktx",

@@ -35,7 +35,7 @@ import com.geecee.escapelauncher.core.theme.motion.exitTransition
 import com.geecee.escapelauncher.core.theme.motion.popEnterTransition
 import com.geecee.escapelauncher.core.theme.motion.popExitTransition
 import com.geecee.escapelauncher.core.ui.R
-import com.geecee.escapelauncher.core.ui.composables.BulkManager
+import com.geecee.escapelauncher.core.ui.composables.ReorderableSelectionLazyColumn
 import com.geecee.escapelauncher.core.ui.composables.PrivacyPolicyDialog
 import com.geecee.escapelauncher.feature.settings.devoptions.DevOptions
 import com.geecee.escapelauncher.feature.settings.font.ChooseFont
@@ -156,14 +156,15 @@ fun Settings(
                 entry<SettingsNavKey.OpenChallenges> {
                     val openChallengeAppIds by openChallengeViewModel.challengeAppIds.collectAsState()
 
-                    BulkManager(
+                    ReorderableSelectionLazyColumn(
                         items = installedApps,
+                        selectedItems = installedApps.filter { item -> openChallengeAppIds.any { it.packageName == item.packageName } },
                         id = { it.packageName },
                         label = { it.displayName },
-                        selectedIdsOverride = openChallengeAppIds.map { it.packageName }.toSet(),
                         title = stringResource(R.string.manage_open_challenges),
                         onBackClicked = { backStack.removeLastOrNull() },
-                        onItemClicked = { app, selected ->
+                        onItemMoved = { _, _ -> },
+                        onItemSelected = { app, selected ->
                             if (selected) {
                                 openChallengeViewModel.removeChallengeFromApp(app.packageName)
                             } else {
@@ -186,14 +187,15 @@ fun Settings(
                 entry<SettingsNavKey.BulkHiddenApps> {
                     val hiddenPackageIds by hiddenAppsViewModel.hiddenPackageIds.collectAsState()
 
-                    BulkManager(
+                    ReorderableSelectionLazyColumn(
                         items = installedApps,
+                        selectedItems = installedApps.filter { item -> hiddenPackageIds.contains(item.packageName) },
                         id = { it.packageName },
                         label = { it.displayName },
-                        selectedIdsOverride = hiddenPackageIds,
                         title = stringResource(R.string.manage_hidden_apps),
                         onBackClicked = { backStack.removeLastOrNull() },
-                        onItemClicked = { app, selected ->
+                        onItemMoved = { _, _ -> },
+                        onItemSelected = { app, selected ->
                             if (selected) {
                                 hiddenAppsViewModel.unhideApp(app.packageName)
                             } else {
@@ -202,13 +204,13 @@ fun Settings(
                         })
                 }
                 entry<SettingsNavKey.BulkFavouriteApps> {
-                    BulkManager(
+                    ReorderableSelectionLazyColumn(
                         items = installedApps,
+                        selectedItems = favouriteApps,
                         id = { it.packageName },
                         label = { it.displayName },
-                        preSelectedItems = favouriteApps,
                         title = stringResource(R.string.manage_favourite_apps),
-                        reorderable = true,
+                        reorderEnabled = true,
                         onItemMoved = { fromIndex, toIndex ->
                             val app = favouriteApps[fromIndex]
                             coroutineScope.launch {
@@ -218,7 +220,7 @@ fun Settings(
                             }
                         },
                         onBackClicked = { backStack.removeLastOrNull() },
-                        onItemClicked = { app, selected ->
+                        onItemSelected = { app, selected ->
                             coroutineScope.launch {
                                 if (selected) {
                                     settingsViewModel.modifiedAppsRepository.removeFavourite(app.packageName)

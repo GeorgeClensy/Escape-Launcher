@@ -20,7 +20,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.geecee.escapelauncher.core.theme.EscapeThemePreview
 import com.geecee.escapelauncher.core.ui.R
-import com.geecee.escapelauncher.core.ui.composables.BulkManager
+import com.geecee.escapelauncher.core.ui.composables.ReorderableSelectionLazyColumn
 import kotlinx.coroutines.delay
 import kotlin.time.Duration.Companion.milliseconds
 
@@ -46,23 +46,22 @@ fun FavoritesPage(
             .padding(start = 30.dp, end = 30.dp)
     ) {
         if (showList) {
-            BulkManager(
+            ReorderableSelectionLazyColumn(
                 items = installedApps,
+                selectedItems = favoriteApps,
                 id = { it.packageName },
                 label = { it.displayName },
-                preSelectedItems = favoriteApps,
                 title = stringResource(R.string.choose_your_favourite_apps),
-                reorderable = true,
+                reorderEnabled = true,
                 onItemMoved = { fromIndex, toIndex ->
                     val app = favoriteApps[fromIndex]
                     viewModel.reorderFavorite(app.packageName, fromIndex, toIndex)
                 },
                 onBackClicked = { },
-                hideTitle = false,
                 hideBack = true,
                 topPadding = false,
                 titleColor = MaterialTheme.colorScheme.primary,
-                onItemClicked = { app, selected ->
+                onItemSelected = { app, selected ->
                     if (selected) {
                         viewModel.removeFavorite(app.packageName)
                     } else {
