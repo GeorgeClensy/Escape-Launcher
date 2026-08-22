@@ -155,8 +155,6 @@ fun PrivateSpace(
     }
 }
 
-//todo: add private space settings again
-
 /**
  * UI component for displaying a single Private Space app item.
  *
