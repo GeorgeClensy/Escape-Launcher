@@ -1,0 +1,144 @@
+package com.geecee.escapelauncher.feature.screentime
+
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.LocalActivity
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.geecee.escapelauncher.core.ui.composables.AppUsage
+import com.geecee.escapelauncher.core.ui.composables.AppUsages
+import com.geecee.escapelauncher.core.ui.composables.ScreenTime
+import com.geecee.escapelauncher.core.ui.composables.ScreenTimeInfoBox
+import com.geecee.escapelauncher.core.ui.composables.SettingsSpacer
+import com.geecee.escapelauncher.core.ui.R
+import com.geecee.escapelauncher.core.theme.colours.escapeGreen
+import com.geecee.escapelauncher.core.theme.colours.escapeRed
+import com.geecee.escapelauncher.core.common.formatScreenTime
+
+//todo: Probably move this function to a useCase or something idk
+/**
+ * This function works out if the screen time is over the recommended and if it is finds out how many per cent over it is
+ */
+fun calculateOveragePercentage(screenTime: Long): Int {
+    val recommendedTime: Double = 0.5 * 60 * 60 * 1000 // 1 hour in milliseconds
+
+    // If screen time is less than or equal to the recommended time, return 0%
+    if (screenTime <= recommendedTime) {
+        return 0
+    }
+
+    // Calculate the overage percentage
+    val overage = screenTime - recommendedTime
+    val percentage = (overage.toFloat() / recommendedTime) * 100
+
+    return percentage.toInt()
+}
+
+/**
+ * Parent UI for ScreenTimeDashboard
+ */
+@Composable
+fun ScreenTimeDashboard(
+    screenTimeViewModel: ScreenTimeViewModel = hiltViewModel(LocalActivity.current as ComponentActivity)
+) {
+    val todayUsage by screenTimeViewModel.totalUsage.collectAsState()
+    val yesterdayUsage by screenTimeViewModel.yesterdayTotalUsage.collectAsState()
+    val appUsageUiList by screenTimeViewModel.appUsageUiList.collectAsState()
+
+    // UI for ScreenTime screen
+    Column(
+        Modifier
+            .fillMaxSize()
+            .padding(15.dp, 0.dp)
+            .verticalScroll(rememberScrollState())
+    ) {
+        Spacer(Modifier.height(120.dp))
+
+        ScreenTime(
+            formatScreenTime(todayUsage),
+            todayUsage > yesterdayUsage,
+            Modifier
+        )
+
+        Spacer(Modifier.height(15.dp))
+
+        Row(
+            Modifier
+                .widthIn(max = 400.dp)
+                .fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(15.dp)
+        ) {
+            val totalDayHours = 16
+            val totalMs = totalDayHours * 60L * 60 * 1000
+
+            val percentOfYourDayOnYourPhone = ((todayUsage.toDouble() / totalMs) * 100).toInt()
+            ScreenTimeInfoBox(
+                text = stringResource(R.string.of_your_day_spent_on_your_phone),
+                percent = ((todayUsage.toDouble() / totalMs) * 100).toInt(),
+                percentageColour = if (percentOfYourDayOnYourPhone < 10) escapeGreen else escapeRed,
+                modifier = Modifier
+                    .weight(1f)
+                    .aspectRatio(1f)
+            )
+
+            val percentHigherThanRec = calculateOveragePercentage(todayUsage)
+            ScreenTimeInfoBox(
+                text = stringResource(R.string.higher_we_rec),
+                percent = percentHigherThanRec,
+                percentageColour = if (percentHigherThanRec < 1) escapeGreen else escapeRed,
+                modifier = Modifier
+                    .weight(1f)
+                    .aspectRatio(1f)
+            )
+        }
+
+        Spacer(Modifier.height(15.dp))
+
+        AppUsages(Modifier) {
+            if (appUsageUiList.isNotEmpty()) {
+                appUsageUiList.forEach { appUsageUi ->
+                    AppUsage(
+                        appUsageUi.appName,
+                        appUsageUi.usageIncreased,
+                        if (appUsageUi.totalTime > 60000) formatScreenTime(
+                            appUsageUi.totalTime
+                        ) else "<1m",
+                        Modifier
+                    )
+                }
+            } else {
+                Text(
+                    text = stringResource(R.string.no_apps_used),
+                    modifier = Modifier.align(Alignment.CenterHorizontally),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            }
+        }
+
+        Spacer(Modifier.height(15.dp))
+
+        SettingsSpacer()
+        SettingsSpacer()
+
+    }
+}

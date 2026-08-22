@@ -1,0 +1,14 @@
+plugins {
+    alias(libs.plugins.escapelauncher.android.feature)
+}
+
+android {
+    namespace = "com.geecee.escapelauncher.feature.securefolder"
+}
+
+dependencies {
+    implementation(project(":core:domain"))
+    implementation(project(":core:ui"))
+    implementation(project(":core:common"))
+    implementation(project(":core:theme"))
+}

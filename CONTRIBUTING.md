@@ -17,7 +17,11 @@ To contribute code:
 1. Fork the repository and make your changes on a new branch.
 2. Create a pull request describing your changes.
 
-I will review all contributions, but some may be declined if they conflict with the project’s goals or coding standards. If you’re unsure where to start, check the Projects or Issues tabs. You can comment on an issue you’re interested in and I can assign it to you.
+I will review all contributions, but some may be declined if they conflict with the project’s goals or coding standards. If you’re unsure where to start, check the Projects or Issues tabs. You can comment on an issue you’re interested in and I can assign it to you. Please avoid using AI to "vibe code" a PR without any human input. Use of generative AI is fine, I do it myself, just as long as you do it responsibily and make sure it follows the [style guide](./STYLE_GUIDE.md). You shouldn't be able to tell the code is AI generated.
+
+## Localisation
+
+You can also help by translating the app's strings. To do this: clone the repo, go to ./core/ui/res/values-en and copy string.xml into ./core/ui/res/values-NEW-LANG-CODE/strings.xml. Then edit the strings.xml and create a PR. You can see a list of all the language codes [here](https://gist.github.com/lopspower/ce384ef98f3d79e61ec78dc9e512644f). I will check your translations with AI and then will merge your branch.
 
 ## Contributing Financially
 

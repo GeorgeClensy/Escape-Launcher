@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="Theme" translatable="false">Theme</string>
+    <string name="dTheme" translatable="false">dTheme</string>
+    <string name="lTheme" translatable="false">lTheme</string>
+    <string name="Analytics" translatable="false">Analytics</string>
+    <string name="HomeAlignment" translatable="false">HomeAlignment</string>
+    <string name="HomeVAlignment" translatable="false">HomeVAlignment</string>
+    <string name="AppsAlignment" translatable="false">AppsAlignment</string>
+    <string name="ShowSearchBox" translatable="false">showSearchBox</string>
+    <string name="SearchAutoOpen" translatable="false">searchAutoOpen</string>
+    <string name="ShowClock" translatable="false">ShowClock</string>
+    <string name="BigClock" translatable="false">BigClock</string>
+    <string name="ScreenTimeOnApp" translatable="false">screenTimeOnApp</string>
+    <string name="ScreenTimeOnHome" translatable="false">screenTimeOnHome</string>
+    <string name="Font" translatable="false">font</string>
+    <string name="FirstTime" translatable="false">FirstTime</string>
+    <string name="FirstTimeAppDrawHelp" translatable="false">FirstTimeAppDrawHelp</string>
+    <string name="SearchHiddenPrivateSpace" translatable="false">searchHiddenPrivateSpace</string>
+    <string name="WasChangingLauncher" translatable="false">WasChangingLauncher</string>
+    <string name="autoThemeSwitch" translatable="false">AutoThemeSwitch</string>
+    <string name="show_date" translatable="false">ShowDate</string>
+    <string name="twelve_hour_clock" translatable="false">TwelveHourClock</string>
+    <string name="hideScreenTimePage" translatable="false">HideScreenTimePage</string>
+    <string name="showHiddenAppsInSearch" translatable="false">ShowHiddenAppsInSearch</string>
+    <string name="bottomSearch" translatable="false">bottomSearch</string>
+    <string name="appsListAutoSearch" translatable="false">AppsListAutoSearch</string>
+    <string name="weather_app_package" translatable="false">weather_app_package</string>
+    <string name="DoubleTapToLock" translatable="false">DoubleTapToLock</string>
+    <string name="UseFahrenheit" translatable="false">UseFahrenheit</string>
+</resources>

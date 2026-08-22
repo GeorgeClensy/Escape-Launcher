@@ -1,25 +1,51 @@
-*.iml
-.gradle
-/local.properties
-/.idea/caches
-/.idea/libraries
-/.idea/modules.xml
-/.idea/workspace.xml
-/.idea/navEditor.xml
-/.idea/assetWizardSettings.xml
-.DS_Store
-/build
-/captures
-.externalNativeBuild
-.cxx
+# Gradle and Build artifacts
+.gradle/
+build/
+*/build/
 local.properties
+
+# Android specific
+*.iml
+*.apk
+*.ap_
+*.dex
+*.class
+bin/
+gen/
+captures/
+.externalNativeBuild/
+.cxx/
+app/prod/release/
+crash-reports/
+.kotlin/
+
+# IDE - IntelliJ / Android Studio
+.idea/*
+!.idea/icon.svg
+*.iws
+*.ipr
+*.ids
+out/
+.fleet/
+.vs/
+
+# System / OS
+.DS_Store
+Thumbs.db
+
+# Secrets and Configs
 google-services.json
-/.fleet
-.vs
-/.idea/
-app/.idea/
-app/prod/release/app-prod-release.apk
-app/prod/release/output-metadata.json
-app/prod/release/baselineProfiles/0/app-prod-release.dm
-app/prod/release/baselineProfiles/1/app-prod-release.dm
-/crash-reports
+mock-google-services.json
+fabric.properties
+*-key.jks
+*.keystore
+!debug.keystore
+
+# Temporary / Log files
+*.log
+*.temp
+*.tmp
+
+# AI
+.artifacts
+graphify-out/

@@ -1,4 +1,5 @@
 pluginManagement {
+    includeBuild("build-logic")
     repositories {
         google {
             content {
@@ -9,7 +10,6 @@ pluginManagement {
         }
         mavenCentral()
         gradlePluginPortal()
-        google()
     }
 }
 dependencyResolutionManagement {
@@ -24,3 +24,22 @@ dependencyResolutionManagement {
 
 rootProject.name = "Escape Launcher"
 include(":app")
+include(":core:ui")
+include(":core:model")
+include(":core:data")
+include(":core:domain")
+include(":core:common")
+include(":feature:homescreen")
+include(":feature:workapps")
+include(":feature:privatespace")
+include(":feature:securefolder")
+include(":feature:settings")
+include(":feature:weather")
+include(":feature:screentime")
+include(":core:di")
+include(":core:theme")
+include(":feature:appslist")
+include(":core:analytics")
+include(":core:cloudmessaging")
+include(":feature:newwidgets")
+include(":feature:onboarding")

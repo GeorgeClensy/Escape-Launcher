@@ -1,13 +1,8 @@
 package com.geecee.escapelauncher
 
 import android.Manifest
-import android.app.Activity
-import android.content.BroadcastReceiver
-import android.content.ComponentName
-import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -17,238 +12,164 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.compose.animation.animateContentSize
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.lifecycleScope
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
-import com.geecee.escapelauncher.ui.theme.BackgroundColor
-import com.geecee.escapelauncher.ui.views.HomeScreenPageManager
-import com.geecee.escapelauncher.ui.views.Onboarding
-import com.geecee.escapelauncher.ui.views.Settings
-import com.geecee.escapelauncher.utils.AppUtils
-import com.geecee.escapelauncher.utils.AppUtils.configureAnalytics
-import com.geecee.escapelauncher.utils.InstalledApp
-import com.geecee.escapelauncher.utils.PrivateSpaceStateReceiver
-import com.geecee.escapelauncher.utils.ScreenOffReceiver
-import com.geecee.escapelauncher.utils.getBooleanSetting
-import com.geecee.escapelauncher.utils.managers.ScreenTimeManager
-import com.geecee.escapelauncher.utils.managers.scheduleDailyCleanup
-import com.geecee.escapelauncher.utils.messagingInitializer
+import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
+import androidx.navigation3.runtime.NavKey
+import androidx.navigation3.runtime.entryProvider
+import androidx.navigation3.runtime.rememberNavBackStack
+import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
+import androidx.navigation3.ui.NavDisplay
+import androidx.compose.material3.MaterialTheme
+import com.geecee.escapelauncher.core.analytics.AnalyticsProxy
+import com.geecee.escapelauncher.core.cloudmessaging.MessagingInitializer
+import com.geecee.escapelauncher.core.common.configureNavBar
+import com.geecee.escapelauncher.core.common.configureStatusBar
+import com.geecee.escapelauncher.core.common.formatScreenTime
+import com.geecee.escapelauncher.core.common.hasPermission
+import com.geecee.escapelauncher.core.data.worker.ClearOldDataWorker
+import com.geecee.escapelauncher.core.theme.EscapeTheme
+import com.geecee.escapelauncher.core.theme.motion.enterTransition
+import com.geecee.escapelauncher.core.theme.motion.exitTransition
+import com.geecee.escapelauncher.core.theme.motion.popEnterTransition
+import com.geecee.escapelauncher.core.theme.motion.popExitTransition
+import com.geecee.escapelauncher.core.ui.recievers.ScreenOffReceiver
+import com.geecee.escapelauncher.feature.newwidgets.WidgetHostManager
+import com.geecee.escapelauncher.feature.onboarding.Onboarding
+import com.geecee.escapelauncher.feature.screentime.ScreenTimeViewModel
+import com.geecee.escapelauncher.feature.settings.Settings
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.serialization.Serializable
+import javax.inject.Inject
+import kotlin.time.Duration.Companion.milliseconds
 
+/**
+ * Type-safe navigation keys for the top-level app destinations.
+ */
+sealed interface AppNavKey : NavKey {
+    @Serializable
+    data object Home : AppNavKey
+
+    @Serializable
+    data object Settings : AppNavKey
+
+    @Serializable
+    data object Onboarding : AppNavKey
+}
+
+@AndroidEntryPoint
 class MainHomeScreenActivity : ComponentActivity() {
-    private lateinit var privateSpaceReceiver: PrivateSpaceStateReceiver
+    private val globalViewModel: GlobalViewModel by viewModels()
+    private val mainPagerViewModel: MainPagerScreenViewModel by viewModels()
+    private val screenTimeViewModel: ScreenTimeViewModel by viewModels()
+
+    @Inject
+    lateinit var analyticsProxy: AnalyticsProxy
+    @Inject
+    lateinit var messagingInitializer: MessagingInitializer
+
+    @Inject
+    lateinit var widgetHostManager: WidgetHostManager
     private lateinit var screenOffReceiver: ScreenOffReceiver
-    private lateinit var packageChangeReceiver: BroadcastReceiver
-
-    private val homeScreenModel by viewModels<HomeScreenModel> {
-        HomeScreenModelFactory(application, viewModel)
-    }
-    private val viewModel: MainAppViewModel by viewModels()
-
-    private val pushNotificationPermissionLauncher = registerForActivityResult(
+    private val permissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
-    ) { _ ->
-    }
+    ) { _ -> }
 
-    fun requestLocationPermission(context: Context, activity: Activity) {
-        if (ContextCompat.checkSelfPermission(
-                context,
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            ActivityCompat.requestPermissions(
-                activity,
-                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
-                1001
-            )
+    override fun onStart() {
+        super.onStart()
+
+        // Start listening for widgets
+        try {
+            widgetHostManager.startListening()
+        } catch (e: Exception) {
+            Log.e("Widgets", "Error starting AppWidgetHost in onStart", e)
         }
     }
 
-    /**
-     * Main Entry point
-     */
     override fun onCreate(savedInstanceState: Bundle?) {
-        // Setup analytics
-        configureAnalytics(
-            this,
-            getBooleanSetting(
-                this,
-                this.resources.getString(R.string.Analytics),
-                false
-            )
-        )
-
         // Setup Splashscreen
         val splashScreen = installSplashScreen()
         super.onCreate(savedInstanceState)
-        splashScreen.setKeepOnScreenCondition {
-            !viewModel.isReady
+
+        // Setup analytics
+        lifecycleScope.launch {
+            globalViewModel.allowAnalytics.collect { enabled ->
+                analyticsProxy.configureAnalytics(this@MainHomeScreenActivity, enabled)
+                Log.d("Analytics", "Analytics are $enabled")
+            }
         }
 
-        // Make full screen
+        // Sort out the window
         enableEdgeToEdge()
-        AppUtils.configureFullScreenMode(window)
-
-        // Set up the screen time tracking
-        ScreenTimeManager.initialize(this)
-        scheduleDailyCleanup(this)
-
-        // Efficient bulk load of screen time
-        viewModel.reloadScreenTimeCache()
-
-        // Set up the application content
-        setContent {
-            AppUtils.SetUpTheme(viewModel = viewModel, content = {
-                SetupNavHost(determineStartDestination(LocalContext.current))
-            })
+        lifecycleScope.launch {
+            globalViewModel.showStatusBar.collect { show ->
+                window.configureStatusBar(hide = !show)
+                window.configureNavBar(hide = false)
+            }
         }
 
-        // Assign window
-        viewModel.setWindow(window)
+        // Set up the screen time tracking clean-up
+        ClearOldDataWorker.scheduleDailyCleanup(this)
+
+        // Determine start destination before hiding splash screen
+        var startDestination by mutableStateOf<AppNavKey?>(null)
+        lifecycleScope.launch {
+            val isFirstTime = globalViewModel.firstTime.first()
+            startDestination = if (isFirstTime) AppNavKey.Onboarding else AppNavKey.Home
+        }
+
+        // Keep splash screen visible until we know where to go and essential data is loaded
+        splashScreen.setKeepOnScreenCondition {
+            startDestination == null || !globalViewModel.initializationState.value.isAllLoaded
+        }
 
         // Register screen off receiver
         screenOffReceiver = ScreenOffReceiver {
             // Screen turned off
-            if (viewModel.isAppOpened) {
+            if (screenTimeViewModel.hasActiveSession()) {
                 lifecycleScope.launch(Dispatchers.IO) {
-                    val packageName = homeScreenModel.currentSelectedApp.value.packageName
-                    ScreenTimeManager.onAppClosed(packageName)
+                    val packageName = screenTimeViewModel.getActiveSessionPackageName() ?: ""
+                    if (packageName.isNotEmpty()) {
+                        screenTimeViewModel.onAppClosed(packageName)
 
-                    // Update screen time for just this app in the cache
-                    viewModel.updateAppScreenTime(packageName)
-
-                    // Trigger UI refresh
-                    viewModel.shouldReloadScreenTime.value++
-
-                    Log.i(
-                        "INFO",
-                        "Screen turned off with app " + homeScreenModel.currentSelectedApp.value.packageName + " open, stopping screen time counting at " + AppUtils.formatScreenTime(
-                            viewModel.getCachedScreenTime(homeScreenModel.currentSelectedApp.value.packageName)
+                        Log.i(
+                            "INFO",
+                            "Screen turned off with app $packageName open, stopping screen time counting at " + formatScreenTime(
+                                screenTimeViewModel.getScreenTime(packageName)
+                            )
                         )
-                    )
-
-                    // Reset state
-                    homeScreenModel.currentSelectedApp =
-                        mutableStateOf(InstalledApp("", "", ComponentName("", "")))
+                    }
                 }
-                viewModel.isAppOpened = false
             }
         }
         val filter = IntentFilter(Intent.ACTION_SCREEN_OFF)
         registerReceiver(screenOffReceiver, filter)
 
-        //Private space receiver
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) {
-            privateSpaceReceiver = PrivateSpaceStateReceiver { isUnlocked ->
-                viewModel.isPrivateSpaceUnlocked.value = isUnlocked
-            }
-            val intentFilter = IntentFilter().apply {
-                addAction(Intent.ACTION_PROFILE_AVAILABLE)
-                addAction(Intent.ACTION_PROFILE_UNAVAILABLE)
-            }
-            registerReceiver(privateSpaceReceiver, intentFilter)
-        }
+        // Subscribe to notifications via flavour-specific initializer
+        messagingInitializer.initialize(this)
 
-        // Package change receiver
-        packageChangeReceiver = object : BroadcastReceiver() {
-            override fun onReceive(context: Context, intent: Intent) {
-                when (intent.action) {
-                    Intent.ACTION_PACKAGE_ADDED,
-                    Intent.ACTION_PACKAGE_REMOVED,
-                    Intent.ACTION_PACKAGE_REPLACED -> {
-                        Log.i("INFO", "Package changed: ${intent.action}")
-                        lifecycleScope.launch(Dispatchers.Default) {
-                            homeScreenModel.loadApps()
-                        }
-                    }
+        // Set up the application content
+        setContent {
+            val destination = startDestination
+            if (destination != null) {
+                EscapeTheme {
+                    SetupNavDisplay(destination)
                 }
             }
-        }
-        val packageFilter = IntentFilter().apply {
-            addAction(Intent.ACTION_PACKAGE_ADDED)
-            addAction(Intent.ACTION_PACKAGE_REMOVED)
-            addAction(Intent.ACTION_PACKAGE_REPLACED)
-            addDataScheme("package")
-        }
-        registerReceiver(packageChangeReceiver, packageFilter)
-
-        // Subscribe to notifications via flavor-specific initializer
-        messagingInitializer.initialize(this)
-    }
-
-    override fun onResume() {
-        super.onResume()
-
-        // Check if we need to update screen time when coming back from an app
-        if (viewModel.isAppOpened) {
-            lifecycleScope.launch(Dispatchers.IO) {
-                val packageName = homeScreenModel.currentSelectedApp.value.packageName
-                ScreenTimeManager.onAppClosed(packageName)
-
-                // Update screen time for just this app in the cache
-                viewModel.updateAppScreenTime(packageName)
-
-                // Trigger UI refresh
-                viewModel.shouldReloadScreenTime.value++
-
-                // Reset state
-                homeScreenModel.currentSelectedApp =
-                    mutableStateOf(InstalledApp("", "", ComponentName("", "")))
-            }
-            viewModel.isAppOpened = false
-        }
-
-        // Reset home
-        try {
-            AppUtils.resetHome(homeScreenModel, viewModel.shouldGoHomeOnResume.value)
-            viewModel.shouldGoHomeOnResume.value = false
-        } catch (ex: Exception) {
-            Log.e("ERROR", ex.toString())
-        }
-
-
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-
-        // Stop the receivers
-        if (::privateSpaceReceiver.isInitialized) {
-            unregisterReceiver(privateSpaceReceiver)
-        }
-        if (::screenOffReceiver.isInitialized) {
-            unregisterReceiver(screenOffReceiver)
-        }
-        if (::packageChangeReceiver.isInitialized) {
-            unregisterReceiver(packageChangeReceiver)
-        }
-    }
-
-    override fun onPause() {
-        super.onPause()
-
-        try {
-            AppUtils.resetHome(homeScreenModel, true)
-        } catch (ex: Exception) {
-            Log.e("ERROR", ex.toString())
         }
     }
 
@@ -256,62 +177,78 @@ class MainHomeScreenActivity : ComponentActivity() {
         super.onNewIntent(intent)
         setIntent(intent)
 
+        // Responsible for taking you to the favourites page when you press the home button
         if (intent.action == Intent.ACTION_MAIN && intent.hasCategory(Intent.CATEGORY_HOME)) {
-            AppUtils.resetHome(homeScreenModel)
-            viewModel.requestToGoHome()
+            // Only navigate home if we've finished onboarding
+            lifecycleScope.launch {
+                val isFirstTime = globalViewModel.firstTime.first()
+                if (!isFirstTime) {
+                    globalViewModel.requestToGoHome()
+                }
+            }
         }
     }
 
-    /**
-     * Determines the start location for the NavHost
-     *
-     * @param context The context of the app
-     *
-     * @author George Clensy
-     *
-     * @see Settings
-     *
-     * @return Returns "home" if it is not the first time and "onboarding" if it is
-     */
-    private fun determineStartDestination(context: Context): String {
-        return when {
-            getBooleanSetting(
-                context,
-                context.resources.getString(R.string.FirstTime),
-                true
-            ) -> "onboarding"
+    override fun onResume() {
+        super.onResume()
 
-            else -> "home"
+        // Check if we need to update screen time when coming back from an app
+        if (screenTimeViewModel.hasActiveSession()) {
+            lifecycleScope.launch(Dispatchers.IO) {
+                val packageName = screenTimeViewModel.getActiveSessionPackageName() ?: ""
+                if (packageName.isNotEmpty()) {
+                    screenTimeViewModel.onAppClosed(packageName)
+                }
+            }
         }
     }
 
+    override fun onStop() {
+        super.onStop()
+
+        // Stop listening for widgets
+        try {
+            widgetHostManager.stopListening()
+        } catch (e: Exception) {
+            Log.e("Widgets", "Error stopping AppWidgetHost in onStop", e)
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+
+        // Stop the screen off receivers
+        if (::screenOffReceiver.isInitialized) {
+            unregisterReceiver(screenOffReceiver)
+        }
+    }
+
+
     /**
-     * Sets up main navigation host for the app
+     * Sets up main navigation display for the app
      *
      * @param startDestination Where to start
      */
     @Composable
-    private fun SetupNavHost(startDestination: String) {
-        val navController = rememberNavController()
+    private fun SetupNavDisplay(startDestination: AppNavKey) {
+        val backStack = rememberNavBackStack(startDestination)
 
-        LaunchedEffect(viewModel.navigateHomeEvent) {
-            viewModel.navigateHomeEvent.collectLatest {
-                if (navController.currentDestination?.route != "home") {
-                    homeScreenModel.goToMainPage()
-                    homeScreenModel.appsListScrollState.scrollToItem(0)
-                    navController.navigate("home") {
-                        popUpTo(navController.graph.startDestinationId)
-                        launchSingleTop = true
+        // Responsible for going home when navigateHomeEvent happens
+        LaunchedEffect(globalViewModel.navigateHomeEvent) {
+            globalViewModel.navigateHomeEvent.collect {
+                // Clear the back stack and set Home as the only entry
+                if (backStack.lastOrNull() !is AppNavKey.Home) {
+                    backStack.removeAll { it !is AppNavKey.Home }
+                    if (backStack.isEmpty()) {
+                        backStack.add(AppNavKey.Home)
                     }
                 }
-                else {
-                    launch {
-                        homeScreenModel.animatedGoToMainPage()
-                    }
-                    launch {
-                        delay(550)
-                        homeScreenModel.appsListScrollState.scrollToItem(0)
-                    }
+                launch {
+                    mainPagerViewModel.animatedGoToMainPage()
+                }
+                launch {
+                    delay(300.milliseconds)
+                    mainPagerViewModel.appsListScrollState.scrollToItem(0)
                 }
             }
         }
@@ -319,64 +256,63 @@ class MainHomeScreenActivity : ComponentActivity() {
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(color = BackgroundColor)
+                .background(color = MaterialTheme.colorScheme.surface)
                 .animateContentSize()
         ) {
-            NavHost(navController, startDestination = startDestination) {
-                composable(
-                    "home",
-                    enterTransition = { fadeIn(tween(300)) },
-                    exitTransition = { fadeOut(tween(300)) }) {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                        pushNotificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
-                    }
-
-                    requestLocationPermission(
-                        this@MainHomeScreenActivity,
-                        this@MainHomeScreenActivity
-                    )
-
-                    HomeScreenPageManager(
-                        viewModel,
-                        homeScreenModel
-                    ) { navController.navigate("settings") }
-
-                    AppUtils.configureFullScreenMode(window)
-                }
-                composable(
-                    "settings",
-                    enterTransition = { fadeIn(tween(300)) },
-                    exitTransition = { fadeOut(tween(300)) }) {
-                    Settings(
-                        viewModel,
-                        homeScreenModel = homeScreenModel,
-                        {
-                            navController.navigate("home") {
-                                popUpTo("settings") {
-                                    inclusive = true
+            NavDisplay(
+                backStack = backStack,
+                onBack = { backStack.removeLastOrNull() },
+                entryDecorators = listOf(
+                    rememberSaveableStateHolderNavEntryDecorator(),
+                    rememberViewModelStoreNavEntryDecorator(),
+                ),
+                entryProvider = entryProvider {
+                    entry<AppNavKey.Home> {
+                        // Ask for permissions as soon as you get to the homepage. Bad.
+                        LaunchedEffect(Unit) {
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                                if (!hasPermission(Manifest.permission.POST_NOTIFICATIONS)) {
+                                    permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
                                 }
-                                launchSingleTop = true
                             }
-                        },
-                        this@MainHomeScreenActivity,
-                    )
 
-                    AppUtils.configureFullScreenMode(window)
-                }
-                composable(
-                    "onboarding",
-                    enterTransition = { fadeIn(tween(900)) },
-                    exitTransition = { fadeOut(tween(300)) }) {
-                    AppUtils.configureOnboardingFullScreen(window)
+                            if (!hasPermission(Manifest.permission.ACCESS_FINE_LOCATION)) {
+                                permissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+                            }
+                        }
 
-                    Onboarding(
-                        mainAppNavController = navController,
-                        mainAppViewModel = viewModel,
-                        homeScreenModel = homeScreenModel,
-                        activity = this@MainHomeScreenActivity
-                    )
+                        MainPagerScreen(
+                            viewModel = mainPagerViewModel,
+                            onOpenSettings = { backStack.add(AppNavKey.Settings) }
+                        )
+                    }
+                    entry<AppNavKey.Settings> {
+                        Settings(
+                            goBack = {
+                                backStack.removeLastOrNull()
+                            },
+                            activity = this@MainHomeScreenActivity,
+                        )
+                    }
+                    entry<AppNavKey.Onboarding> {
+                        Onboarding(
+                            onFinished = {
+                                backStack.clear()
+                                backStack.add(AppNavKey.Home)
+                            }
+                        )
+                    }
+                },
+                transitionSpec = {
+                    enterTransition() togetherWith exitTransition()
+                },
+                popTransitionSpec = {
+                    popEnterTransition() togetherWith popExitTransition()
+                },
+                predictivePopTransitionSpec = {
+                    popEnterTransition() togetherWith popExitTransition()
                 }
-            }
+            )
         }
     }
 }
