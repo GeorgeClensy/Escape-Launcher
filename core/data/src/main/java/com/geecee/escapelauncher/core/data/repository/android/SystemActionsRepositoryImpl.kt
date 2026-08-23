@@ -8,12 +8,14 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.LauncherApps
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.Rect
 import android.os.Build
 import android.provider.Settings
 import androidx.annotation.RequiresPermission
+import androidx.core.content.FileProvider
 import androidx.core.graphics.createBitmap
 import androidx.core.net.toUri
 import com.geecee.escapelauncher.core.data.system.EscapeAccessibilityService
@@ -25,6 +27,8 @@ import javax.inject.Singleton
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import java.io.File
+import java.io.FileOutputStream
 import kotlin.time.Duration.Companion.milliseconds
 
 @Singleton
@@ -114,7 +118,42 @@ class SystemActionsRepositoryImpl @Inject constructor(
         canvas.drawRect(0f, 0f, width.toFloat(), height.toFloat(), paint)
 
         try {
-            wallpaperManager.setBitmap(bitmap, null, true, WallpaperManager.FLAG_SYSTEM)
+            val cachePath = File(context.cacheDir, "images")
+            cachePath.mkdirs()
+            val file = File(cachePath, "solid_color_wallpaper.png")
+            val stream = FileOutputStream(file)
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream)
+            stream.close()
+
+            val imageUri = FileProvider.getUriForFile(
+                context,
+                "${context.packageName}.fileprovider",
+                file
+            )
+
+            val intent = wallpaperManager.getCropAndSetWallpaperIntent(imageUri).apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            }
+            context.startActivity(intent)
+
+        } catch (_: IllegalArgumentException) {
+            try {
+                val cachePath = File(context.cacheDir, "images")
+                val file = File(cachePath, "solid_color_wallpaper.png")
+                val imageUri = FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
+
+                val fallbackIntent = Intent(Intent.ACTION_ATTACH_DATA).apply {
+                    addCategory(Intent.CATEGORY_DEFAULT)
+                    setDataAndType(imageUri, "image/*")
+                    putExtra("mimeType", "image/*")
+                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                }
+                context.startActivity(Intent.createChooser(fallbackIntent, "Set Wallpaper As:"))
+            } catch (fallbackEx: Exception) {
+                fallbackEx.printStackTrace()
+            }
         } catch (e: Exception) {
             e.printStackTrace()
         }
