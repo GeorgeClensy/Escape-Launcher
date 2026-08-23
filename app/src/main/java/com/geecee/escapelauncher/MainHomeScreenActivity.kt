@@ -12,10 +12,10 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.compose.animation.animateContentSize
-import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -30,7 +30,6 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
-import androidx.compose.material3.MaterialTheme
 import com.geecee.escapelauncher.core.analytics.AnalyticsProxy
 import com.geecee.escapelauncher.core.cloudmessaging.MessagingInitializer
 import com.geecee.escapelauncher.core.common.configureNavBar
@@ -41,8 +40,6 @@ import com.geecee.escapelauncher.core.data.worker.ClearOldDataWorker
 import com.geecee.escapelauncher.core.theme.EscapeTheme
 import com.geecee.escapelauncher.core.theme.motion.enterTransition
 import com.geecee.escapelauncher.core.theme.motion.exitTransition
-import com.geecee.escapelauncher.core.theme.motion.popEnterTransition
-import com.geecee.escapelauncher.core.theme.motion.popExitTransition
 import com.geecee.escapelauncher.core.ui.recievers.ScreenOffReceiver
 import com.geecee.escapelauncher.feature.newwidgets.WidgetHostManager
 import com.geecee.escapelauncher.feature.onboarding.Onboarding
@@ -122,7 +119,7 @@ class MainHomeScreenActivity : ComponentActivity() {
             }
         }
 
-        // Set up the screen time tracking clean-up
+        // Set up the screen time tracking cleanup
         ClearOldDataWorker.scheduleDailyCleanup(this)
 
         // Determine start destination before hiding splash screen
@@ -159,7 +156,7 @@ class MainHomeScreenActivity : ComponentActivity() {
         val filter = IntentFilter(Intent.ACTION_SCREEN_OFF)
         registerReceiver(screenOffReceiver, filter)
 
-        // Subscribe to notifications via flavour-specific initializer
+        // Subscribe to notifications via flavor-specific initializer
         messagingInitializer.initialize(this)
 
         // Set up the application content
@@ -304,13 +301,13 @@ class MainHomeScreenActivity : ComponentActivity() {
                     }
                 },
                 transitionSpec = {
-                    enterTransition() togetherWith exitTransition()
+                    enterTransition()
                 },
                 popTransitionSpec = {
-                    popEnterTransition() togetherWith popExitTransition()
+                    exitTransition()
                 },
                 predictivePopTransitionSpec = {
-                    popEnterTransition() togetherWith popExitTransition()
+                   exitTransition()
                 }
             )
         }

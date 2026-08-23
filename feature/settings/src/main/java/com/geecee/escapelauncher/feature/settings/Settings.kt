@@ -6,7 +6,6 @@ import android.app.Activity
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -32,11 +31,9 @@ import androidx.navigation3.ui.NavDisplay
 import com.geecee.escapelauncher.core.common.loadTextFromAssets
 import com.geecee.escapelauncher.core.theme.motion.enterTransition
 import com.geecee.escapelauncher.core.theme.motion.exitTransition
-import com.geecee.escapelauncher.core.theme.motion.popEnterTransition
-import com.geecee.escapelauncher.core.theme.motion.popExitTransition
 import com.geecee.escapelauncher.core.ui.R
-import com.geecee.escapelauncher.core.ui.composables.ReorderableSelectionLazyColumn
 import com.geecee.escapelauncher.core.ui.composables.PrivacyPolicyDialog
+import com.geecee.escapelauncher.core.ui.composables.ReorderableSelectionLazyColumn
 import com.geecee.escapelauncher.feature.settings.devoptions.DevOptions
 import com.geecee.escapelauncher.feature.settings.font.ChooseFont
 import com.geecee.escapelauncher.feature.settings.font.FontLicenceDialog
@@ -126,13 +123,13 @@ fun Settings(
                 }
             },
             transitionSpec = {
-                enterTransition() togetherWith exitTransition()
+                enterTransition()
             },
             popTransitionSpec = {
-                popEnterTransition() togetherWith popExitTransition()
+                exitTransition()
             },
             predictivePopTransitionSpec = {
-                popEnterTransition() togetherWith popExitTransition()
+                exitTransition()
             },
             entryDecorators = listOf(
                 rememberSaveableStateHolderNavEntryDecorator(),
@@ -172,7 +169,8 @@ fun Settings(
                         },
                         modifier = Modifier
                             .background(MaterialTheme.colorScheme.background)
-                            .padding(horizontal = 20.dp))
+                            .padding(horizontal = 20.dp)
+                    )
                 }
                 entry<SettingsNavKey.ChooseFont> {
                     ChooseFont(context = context) { backStack.removeLastOrNull() }
@@ -191,7 +189,11 @@ fun Settings(
 
                     ReorderableSelectionLazyColumn(
                         items = installedApps,
-                        selectedItems = installedApps.filter { item -> hiddenPackageIds.contains(item.packageName) },
+                        selectedItems = installedApps.filter { item ->
+                            hiddenPackageIds.contains(
+                                item.packageName
+                            )
+                        },
                         id = { it.packageName },
                         label = { it.displayName },
                         title = stringResource(R.string.manage_hidden_apps),
@@ -206,7 +208,8 @@ fun Settings(
                         },
                         modifier = Modifier
                             .background(MaterialTheme.colorScheme.background)
-                            .padding(horizontal = 20.dp))
+                            .padding(horizontal = 20.dp)
+                    )
                 }
                 entry<SettingsNavKey.BulkFavouriteApps> {
                     ReorderableSelectionLazyColumn(
@@ -236,7 +239,8 @@ fun Settings(
                         },
                         modifier = Modifier
                             .background(MaterialTheme.colorScheme.background)
-                            .padding(horizontal = 20.dp))
+                            .padding(horizontal = 20.dp)
+                    )
                 }
                 entry<SettingsNavKey.FontLicences> {
                     FontLicenceDialog(context = context) {
