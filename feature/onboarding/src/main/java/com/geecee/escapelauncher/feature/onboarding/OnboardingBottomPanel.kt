@@ -36,7 +36,7 @@ fun OnboardingBottomPanel(
     Surface(
         modifier = modifier
             .shadow(elevation = 8.dp, shape = shape, clip = true),
-        color = MaterialTheme.colorScheme.surfaceContainerHigh,
+        color = MaterialTheme.colorScheme.surfaceContainerHighest,
         shape = shape
     ) {
         Box(
