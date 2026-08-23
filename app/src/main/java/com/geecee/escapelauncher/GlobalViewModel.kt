@@ -26,6 +26,7 @@ class GlobalViewModel @Inject constructor(
     val allowAnalytics = launcherBehaviorRepository.allowAnalyitics
     val firstTime = onboardingRepository.firstTime
     val showStatusBar = appearanceRepository.showStatusBar
+    val showWallpaper = appearanceRepository.showWallpaper
 
     private val _navigateHomeEvent = MutableSharedFlow<Unit>(
         replay = 0, onBufferOverflow = BufferOverflow.DROP_OLDEST, extraBufferCapacity = 1

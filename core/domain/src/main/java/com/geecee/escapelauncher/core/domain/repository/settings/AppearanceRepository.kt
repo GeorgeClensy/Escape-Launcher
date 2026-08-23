@@ -15,4 +15,6 @@ interface AppearanceRepository {
     suspend fun setAppsAlignment(alignment: String)
     val showStatusBar: Flow<Boolean>
     suspend fun setShowStatusBar(enabled: Boolean)
+    val showWallpaper: Flow<Boolean>
+    suspend fun setShowWallpaper(enabled: Boolean)
 }

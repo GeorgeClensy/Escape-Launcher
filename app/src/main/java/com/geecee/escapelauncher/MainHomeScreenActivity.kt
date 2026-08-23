@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -159,6 +160,7 @@ class MainHomeScreenActivity : ComponentActivity() {
         // Subscribe to notifications via flavor-specific initializer
         messagingInitializer.initialize(this)
 
+
         // Set up the application content
         setContent {
             val destination = startDestination
@@ -229,6 +231,7 @@ class MainHomeScreenActivity : ComponentActivity() {
     @Composable
     private fun SetupNavDisplay(startDestination: AppNavKey) {
         val backStack = rememberNavBackStack(startDestination)
+        val showWallpaper by globalViewModel.showWallpaper.collectAsState(initial = false)
 
         // Responsible for going home when navigateHomeEvent happens
         LaunchedEffect(globalViewModel.navigateHomeEvent) {
@@ -271,10 +274,13 @@ class MainHomeScreenActivity : ComponentActivity() {
             }
         }
 
+        if(!showWallpaper){
+            Box(Modifier.background(color = MaterialTheme.colorScheme.surface).fillMaxSize())
+        }
+
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(color = MaterialTheme.colorScheme.surface)
                 .animateContentSize()
         ) {
             NavDisplay(

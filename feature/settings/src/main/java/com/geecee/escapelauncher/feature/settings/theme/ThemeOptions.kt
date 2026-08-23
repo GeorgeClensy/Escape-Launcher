@@ -25,6 +25,7 @@ import com.geecee.escapelauncher.core.ui.R
 import com.geecee.escapelauncher.core.ui.composables.EscapeHeader
 import com.geecee.escapelauncher.core.ui.composables.SettingsButton
 import com.geecee.escapelauncher.core.ui.composables.SettingsSpacer
+import com.geecee.escapelauncher.core.ui.composables.SettingsSwitch
 import com.geecee.escapelauncher.core.ui.utils.toAndroidColor
 
 /**
@@ -38,6 +39,7 @@ fun ThemeOptions(
     goBack: () -> Unit, themeViewModel: ThemeViewModel = hiltViewModel()
 ) {
     val scheme by themeViewModel.theme.collectAsState()
+    val showWallpaper by themeViewModel.showWallpaper.collectAsState(initial = false)
     val selectableThemes = AppColourScheme.selectableThemes
 
     Box(
@@ -55,6 +57,20 @@ fun ThemeOptions(
 
             item {
                 EscapeHeader(goBack, stringResource(R.string.theme))
+            }
+
+            item {
+                SettingsSwitch(
+                    label = stringResource(R.string.show_wallpaper),
+                    checked = showWallpaper,
+                    onCheckedChange = { themeViewModel.setShowWallpaper(it) },
+                    isTopOfGroup = true,
+                    isBottomOfGroup = true
+                )
+            }
+
+            item {
+                SettingsSpacer()
             }
 
             item {

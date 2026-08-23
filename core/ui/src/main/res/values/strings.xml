@@ -80,6 +80,7 @@
     <string name="hide_private_space_in_search">Hidden private space</string>
     <string name="haptic_feedback">Haptic feedback</string>
     <string name="done">Done</string>
+    <string name="show_wallpaper">Show Wallpaper</string>
     <string name="match_system_wallpaper">Match system wallpaper with theme</string>
     <string name="date">Date</string>
     <string name="home_screen_options">Home Screen Options</string>

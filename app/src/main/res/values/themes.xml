@@ -1,11 +1,19 @@
 <resources>
     <style name="Theme.EscapeLauncher" parent="Theme.AppCompat.NoActionBar">
+
+    </style>
+
+    <style name="Theme.EscapeLauncherWallpaper" parent="Theme.AppCompat.NoActionBar">
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowShowWallpaper">true</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
     </style>
 
     <style name="Theme.EscapeLauncher.Splash" parent="Theme.SplashScreen">
         <item name="windowSplashScreenBackground">@color/splash_background</item>
         <item name="windowSplashScreenAnimatedIcon">@drawable/square_icon</item>
         <item name="windowSplashScreenAnimationDuration">500</item>
-        <item name="postSplashScreenTheme">@style/Theme.EscapeLauncher</item>
+        <item name="postSplashScreenTheme">@style/Theme.EscapeLauncherWallpaper</item>
     </style>
 </resources>

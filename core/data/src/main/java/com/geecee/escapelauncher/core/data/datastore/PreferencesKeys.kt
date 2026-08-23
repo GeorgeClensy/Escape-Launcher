@@ -39,6 +39,7 @@ object PreferencesKeys {
 
     //Theme
     val THEME = intPreferencesKey(name = "theme")
+    val SHOW_WALLPAPER = booleanPreferencesKey(name = "show_wallpaper")
     val FONT = stringPreferencesKey(name = "font")
 
     //Search

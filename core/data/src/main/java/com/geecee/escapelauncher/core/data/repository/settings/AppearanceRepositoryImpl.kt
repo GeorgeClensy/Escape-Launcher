@@ -37,4 +37,8 @@ class AppearanceRepositoryImpl @Inject constructor(
     override suspend fun setShowStatusBar(enabled: Boolean) {
         dataStore.edit { it[PreferencesKeys.SHOW_STATUS_BAR] = enabled }
     }
+    override val showWallpaper: Flow<Boolean> = dataStore.data.map { it[PreferencesKeys.SHOW_WALLPAPER] ?: DefaultSettings.SHOW_WALLPAPER }
+    override suspend fun setShowWallpaper(enabled: Boolean) {
+        dataStore.edit { it[PreferencesKeys.SHOW_WALLPAPER] = enabled }
+    }
 }

@@ -43,6 +43,7 @@ object DefaultSettings {
 
     // Theme
     const val THEME = 13
+    const val SHOW_WALLPAPER = false
     const val FONT = "Outfit"
 
     // Search
