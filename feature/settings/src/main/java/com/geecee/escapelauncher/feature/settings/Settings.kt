@@ -112,7 +112,6 @@ fun Settings(
         modifier = Modifier
             .fillMaxSize()
             .background(color = MaterialTheme.colorScheme.surface)
-            .padding(20.dp, 0.dp, 20.dp, 0.dp)
     ) {
 
         val backStack = rememberNavBackStack(SettingsNavKey.MainSettingsPage)
@@ -170,7 +169,10 @@ fun Settings(
                             } else {
                                 openChallengeViewModel.addChallengeToApp(app.packageName)
                             }
-                        })
+                        },
+                        modifier = Modifier
+                            .background(MaterialTheme.colorScheme.background)
+                            .padding(horizontal = 20.dp))
                 }
                 entry<SettingsNavKey.ChooseFont> {
                     ChooseFont(context = context) { backStack.removeLastOrNull() }
@@ -201,7 +203,10 @@ fun Settings(
                             } else {
                                 hiddenAppsViewModel.hideApp(app.packageName)
                             }
-                        })
+                        },
+                        modifier = Modifier
+                            .background(MaterialTheme.colorScheme.background)
+                            .padding(horizontal = 20.dp))
                 }
                 entry<SettingsNavKey.BulkFavouriteApps> {
                     ReorderableSelectionLazyColumn(
@@ -228,7 +233,10 @@ fun Settings(
                                     settingsViewModel.modifiedAppsRepository.addFavourite(app.packageName)
                                 }
                             }
-                        })
+                        },
+                        modifier = Modifier
+                            .background(MaterialTheme.colorScheme.background)
+                            .padding(horizontal = 20.dp))
                 }
                 entry<SettingsNavKey.FontLicences> {
                     FontLicenceDialog(context = context) {

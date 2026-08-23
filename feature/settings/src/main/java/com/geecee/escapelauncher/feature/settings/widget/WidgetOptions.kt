@@ -2,6 +2,7 @@ package com.geecee.escapelauncher.feature.settings.widget
 
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProviderInfo
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -10,6 +11,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -79,114 +81,122 @@ fun WidgetOptions(
         )
     }
 
-    LazyColumn(
-        verticalArrangement = Arrangement.Top,
-        horizontalAlignment = Alignment.Start,
-        modifier = modifier.fillMaxSize()
+    Box(
+        modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
     ) {
-        item(key = "header") { EscapeHeader(onBackClick, stringResource(R.string.widget)) }
+        LazyColumn(
+            verticalArrangement = Arrangement.Top,
+            horizontalAlignment = Alignment.Start,
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 20.dp)
+        ) {
+            item(key = "header") { EscapeHeader(onBackClick, stringResource(R.string.widget)) }
 
-        item(key = "remove_widget") {
-            SettingsButton(
-                label = stringResource(R.string.remove_widget),
-                isTopOfGroup = true,
-                onClick = {
-                    if (widgetId != AppWidgetManager.INVALID_APPWIDGET_ID) {
-                        viewModel.widgetHostManager.deleteWidgetId(widgetId)
-                        viewModel.setWidgetId(AppWidgetManager.INVALID_APPWIDGET_ID)
+            item(key = "remove_widget") {
+                SettingsButton(
+                    label = stringResource(R.string.remove_widget),
+                    isTopOfGroup = true,
+                    onClick = {
+                        if (widgetId != AppWidgetManager.INVALID_APPWIDGET_ID) {
+                            viewModel.widgetHostManager.deleteWidgetId(widgetId)
+                            viewModel.setWidgetId(AppWidgetManager.INVALID_APPWIDGET_ID)
+                        }
+                    }
+                )
+            }
+
+            item(key = "select_widget") {
+                SettingsButton(
+                    label = stringResource(R.string.select_widget),
+                    isBottomOfGroup = true,
+                    onClick = { showCustomPicker = true }
+                )
+            }
+
+            item(key = "spacer1") { SettingsSpacer() }
+
+            if (widgetId != AppWidgetManager.INVALID_APPWIDGET_ID) {
+                item(key = "widget_renderer") {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 16.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        WidgetRenderer(
+                            appWidgetId = widgetId,
+                            widgetHostManager = viewModel.widgetHostManager,
+                            modifier = Modifier
+                                .offset {
+                                    IntOffset(
+                                        (widgetOffset.dp).toPx().toInt(), 0
+                                    )
+                                }
+                                .size(widgetWidth.dp, widgetHeight.dp)
+                        )
                     }
                 }
-            )
-        }
-
-        item(key = "select_widget") {
-            SettingsButton(
-                label = stringResource(R.string.select_widget),
-                isBottomOfGroup = true,
-                onClick = { showCustomPicker = true }
-            )
-        }
-
-        item(key = "spacer1") { SettingsSpacer() }
-
-        if (widgetId != AppWidgetManager.INVALID_APPWIDGET_ID) {
-            item(key = "widget_renderer") {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 16.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    WidgetRenderer(
-                        appWidgetId = widgetId,
-                        widgetHostManager = viewModel.widgetHostManager,
-                        modifier = Modifier
-                            .offset {
-                                IntOffset(
-                                    (widgetOffset.dp).toPx().toInt(), 0
-                                )
-                            }
-                            .size(widgetWidth.dp, widgetHeight.dp)
-                    )
-                }
+                item(key = "spacer2") { SettingsSpacer() }
             }
-            item(key = "spacer2") { SettingsSpacer() }
-        }
 
-        // Offset slider
-        item(key = "offset_slider") {
-            SettingsSlider(
-                label = stringResource(R.string.offset),
-                value = widgetOffset,
-                onValueChange = {
-                    viewModel.setWidgetOffset(it)
-                },
-                valueRange = -20f..20f,
-                steps = 19,
-                resetButtonContentDescription = stringResource(R.string.reset_to_default),
-                onReset = {
-                    viewModel.setWidgetOffset(0f)
-                },
-                isTopOfGroup = true
-            )
-        }
+            // Offset slider
+            item(key = "offset_slider") {
+                SettingsSlider(
+                    label = stringResource(R.string.offset),
+                    value = widgetOffset,
+                    onValueChange = {
+                        viewModel.setWidgetOffset(it)
+                    },
+                    valueRange = -20f..20f,
+                    steps = 19,
+                    resetButtonContentDescription = stringResource(R.string.reset_to_default),
+                    onReset = {
+                        viewModel.setWidgetOffset(0f)
+                    },
+                    isTopOfGroup = true
+                )
+            }
 
-        // Height slider
-        item(key = "height_slider") {
-            SettingsSlider(
-                label = stringResource(R.string.height),
-                value = widgetHeight,
-                onValueChange = {
-                    viewModel.setWidgetHeight(it)
-                },
-                valueRange = 100f..400f,
-                steps = 9,
-                resetButtonContentDescription = stringResource(R.string.reset_to_default),
-                onReset = {
-                    viewModel.setWidgetHeight(125f)
-                }
-            )
-        }
+            // Height slider
+            item(key = "height_slider") {
+                SettingsSlider(
+                    label = stringResource(R.string.height),
+                    value = widgetHeight,
+                    onValueChange = {
+                        viewModel.setWidgetHeight(it)
+                    },
+                    valueRange = 100f..400f,
+                    steps = 9,
+                    resetButtonContentDescription = stringResource(R.string.reset_to_default),
+                    onReset = {
+                        viewModel.setWidgetHeight(125f)
+                    }
+                )
+            }
 
-        // Width slider
-        item(key = "width_slider") {
-            SettingsSlider(
-                label = stringResource(R.string.width),
-                value = widgetWidth,
-                onValueChange = {
-                    viewModel.setWidgetWidth(it)
-                },
-                valueRange = 100f..400f,
-                steps = 9,
-                resetButtonContentDescription = stringResource(R.string.reset_to_default),
-                onReset = {
-                    viewModel.setWidgetWidth(250f)
-                },
-                isBottomOfGroup = true
-            )
-        }
+            // Width slider
+            item(key = "width_slider") {
+                SettingsSlider(
+                    label = stringResource(R.string.width),
+                    value = widgetWidth,
+                    onValueChange = {
+                        viewModel.setWidgetWidth(it)
+                    },
+                    valueRange = 100f..400f,
+                    steps = 9,
+                    resetButtonContentDescription = stringResource(R.string.reset_to_default),
+                    onReset = {
+                        viewModel.setWidgetWidth(250f)
+                    },
+                    isBottomOfGroup = true
+                )
+            }
 
-        item(key = "spacer3") { SettingsSpacer() }
-        item(key = "spacer4") { SettingsSpacer() }
+            item(key = "spacer3") { SettingsSpacer() }
+            item(key = "spacer4") { SettingsSpacer() }
+        }
     }
 }

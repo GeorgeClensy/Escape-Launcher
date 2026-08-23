@@ -35,7 +35,7 @@ fun exitTransition() = slideOutHorizontally(
 ) + fadeOut(
     animationSpec = tween(TRANSITION_DURATION / 4, easing = EmphasizedAccelerateEasing)
 ) + scaleOut(
-    targetScale = 0.92f, // Escala hacia abajo para dar efecto de profundidad sin desaparecer por completo
+    targetScale = 0.92f,
     animationSpec = tween(durationMillis = TRANSITION_DURATION, easing = EmphasizedAccelerateEasing)
 )
 
