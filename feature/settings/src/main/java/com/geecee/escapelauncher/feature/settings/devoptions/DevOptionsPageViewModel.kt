@@ -1,6 +1,5 @@
 package com.geecee.escapelauncher.feature.settings.devoptions
 
-import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.geecee.escapelauncher.core.domain.repository.settings.OnboardingRepository
@@ -8,7 +7,6 @@ import com.geecee.escapelauncher.core.domain.repository.settings.WeatherSettings
 import com.geecee.escapelauncher.core.domain.repository.settings.LauncherBehaviorRepository
 import com.geecee.escapelauncher.core.domain.system.LockScreenUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
 import jakarta.inject.Inject
 import kotlinx.coroutines.launch
 
@@ -16,7 +14,7 @@ import kotlinx.coroutines.launch
 class DevOptionsPageViewModel @Inject constructor(
     private val onboardingRepository: OnboardingRepository,
     private val weatherSettingsRepository: WeatherSettingsRepository,
-    private val launcherBehaviorRepository: LauncherBehaviorRepository,
+    launcherBehaviorRepository: LauncherBehaviorRepository,
     private val lockScreenUseCase: LockScreenUseCase
 ) : ViewModel() {
     val firstTimeHelp = onboardingRepository.firstTimeHelp
@@ -43,5 +41,11 @@ class DevOptionsPageViewModel @Inject constructor(
 
     fun lockScreen() {
         lockScreenUseCase()
+    }
+
+    fun requestReplayOnboarding() {
+        viewModelScope.launch {
+            onboardingRepository.replayOnboardingEvent.emit(Unit)
+        }
     }
 }

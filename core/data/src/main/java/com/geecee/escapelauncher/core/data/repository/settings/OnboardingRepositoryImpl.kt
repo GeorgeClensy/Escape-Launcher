@@ -7,12 +7,17 @@ import com.geecee.escapelauncher.core.common.DefaultSettings
 import com.geecee.escapelauncher.core.data.datastore.PreferencesKeys
 import com.geecee.escapelauncher.core.domain.repository.settings.OnboardingRepository
 import jakarta.inject.Inject
+import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.map
 
 class OnboardingRepositoryImpl @Inject constructor(
     private val dataStore: DataStore<Preferences>
 ) : OnboardingRepository {
+    override val replayOnboardingEvent = MutableSharedFlow<Unit>(
+        replay = 0, onBufferOverflow = BufferOverflow.DROP_OLDEST, extraBufferCapacity = 1
+    )
     override val firstTime: Flow<Boolean> = dataStore.data.map { it[PreferencesKeys.FIRST_TIME] ?: DefaultSettings.FIRST_TIME }
     override suspend fun setFirstTime(enabled: Boolean) {
         dataStore.edit { it[PreferencesKeys.FIRST_TIME] = enabled }

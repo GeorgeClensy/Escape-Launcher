@@ -38,6 +38,9 @@ class GlobalViewModel @Inject constructor(
         }
     }
 
+
+    val replayOnBoardingEvent = onboardingRepository.replayOnboardingEvent.asSharedFlow()
+
     /**
      * The initialization state for the splash screen.
      * Combines multiple data loading signals to determine when the app is ready for interaction.

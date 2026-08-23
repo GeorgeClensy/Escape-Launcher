@@ -10,8 +10,11 @@ import androidx.activity.compose.LocalActivity
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -89,7 +92,7 @@ fun HomeScreen(
     val showScreenTimeHome by homeScreenViewModel.showScreenTimeHome.collectAsState(initial = DefaultSettings.SHOW_SCREEN_TIME_HOME)
     val showWeather by homeScreenViewModel.showWeather.collectAsState(initial = DefaultSettings.SHOW_WEATHER)
     val showScreenTimeApp by homeScreenViewModel.showScreenTimeApp.collectAsState(initial = DefaultSettings.SHOW_SCREEN_TIME_APP)
-    val firstTimeHelp by homeScreenViewModel.firstTimeHelp.collectAsState(initial = DefaultSettings.FIRST_TIME_HELP)
+    val firstTimeHelp by homeScreenViewModel.firstTimeHelp.collectAsState(initial = false)
     val homeAlignment by homeScreenViewModel.homeAlignment.collectAsState(initial = DefaultSettingsUi.HOME_ALIGNMENT)
     val homeVAlignment by homeScreenViewModel.homeVAlignment.collectAsState(initial = DefaultSettingsUi.HOME_V_ALIGNMENT)
     val widgetOffsetPref by homeScreenViewModel.widgetOffset.collectAsState(initial = DefaultSettings.WIDGET_OFFSET)
@@ -202,7 +205,8 @@ fun HomeScreen(
                     horizontalArrangement = Arrangement.spacedBy(10.dp),
                 ) {
                     if (showDate) {
-                        val dateFormat = remember { SimpleDateFormat("EEE d MMM", Locale.getDefault()) }
+                        val dateFormat =
+                            remember { SimpleDateFormat("EEE d MMM", Locale.getDefault()) }
                         var dateText by remember { mutableStateOf(dateFormat.format(Date())) }
 
                         LaunchedEffect(Unit) {
@@ -256,7 +260,7 @@ fun HomeScreen(
                     }
 
                     if (showWeather) {
-                        @Suppress("KotlinConstantConditions") // This is to stop the IS_FOSS is always true cuz it's a FOSS sync in Android Studio
+                        @Suppress("KotlinConstantConditions", "RedundantSuppression") // This is to stop the IS_FOSS is always true cuz it's a FOSS sync in Android Studio
                         if (!homeScreenViewModel.isFoss) {
                             HomeWeatherImpl(alignment = homeAlignment)
                         }
@@ -320,17 +324,20 @@ fun HomeScreen(
                 )
             }
 
-            //First time help
-            if (firstTimeHelp) {
-                item {
-                    Spacer(Modifier.height(15.dp))
-                }
+            item {
+                AnimatedVisibility(
+                    visible = firstTimeHelp,
+                    enter = slideInVertically() + fadeIn(),
+                    exit = slideOutVertically() + fadeOut()
+                ) {
+                    Column {
+                        Spacer(Modifier.height(15.dp))
 
-                item {
-                    FirstTimeHelp(
-                        swipeForAllAppsText = stringResource(R.string.swipe_for_all_apps),
-                        holdForSettingsText = stringResource(R.string.hold_for_settings)
-                    )
+                        FirstTimeHelp(
+                            swipeForAllAppsText = stringResource(R.string.swipe_for_all_apps),
+                            holdForSettingsText = stringResource(R.string.hold_for_settings)
+                        )
+                    }
                 }
             }
 

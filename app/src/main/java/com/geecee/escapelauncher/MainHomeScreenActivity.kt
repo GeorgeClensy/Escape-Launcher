@@ -250,6 +250,27 @@ class MainHomeScreenActivity : ComponentActivity() {
             }
         }
 
+        // Go back to onboarding
+        LaunchedEffect(globalViewModel.replayOnBoardingEvent) {
+            globalViewModel.replayOnBoardingEvent.collect {
+                // Clear the back stack and set Onboarding as the only entry
+                if (backStack.lastOrNull() !is AppNavKey.Onboarding) {
+                    backStack.removeAll { it !is AppNavKey.Onboarding }
+                    if (backStack.isEmpty()) {
+                        backStack.add(AppNavKey.Onboarding)
+                    }
+                }
+                // Make sure the home is clean for when we get back there
+                launch {
+                    mainPagerViewModel.animatedGoToMainPage()
+                }
+                launch {
+                    delay(300.milliseconds)
+                    mainPagerViewModel.appsListScrollState.scrollToItem(0)
+                }
+            }
+        }
+
         Box(
             modifier = Modifier
                 .fillMaxSize()

@@ -28,6 +28,7 @@ import kotlin.system.exitProcess
 @Composable
 fun DevOptions(
     viewModel: DevOptionsPageViewModel = hiltViewModel(),
+
     goBack: () -> Unit
 ) {
     val context = LocalContext.current
@@ -66,6 +67,15 @@ fun DevOptions(
                     label = "Force Stop",
                     onClick = {
                         exitProcess(0)
+                    }
+                )
+            }
+
+            item(key = "replay_onboarding") {
+                SettingsButton(
+                    label = "Replay Onboarding",
+                    onClick = {
+                        viewModel.requestReplayOnboarding()
                     }
                 )
             }
