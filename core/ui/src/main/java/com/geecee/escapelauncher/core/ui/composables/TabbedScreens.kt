@@ -46,6 +46,7 @@ import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
@@ -163,20 +164,24 @@ fun Tab(
                 Modifier
                     .padding(5.dp)
                     .align(Alignment.Center),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(5.dp)
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 AnimatedVisibility(showIcon) {
                     Icon(
                         imageVector = icon,
                         contentDescription = text,
-                        modifier = Modifier.size(28.dp)
+                        modifier = Modifier
+                            .size(28.dp)
+                            .graphicsLayer {
+                                compositingStrategy = CompositingStrategy.Offscreen
+                            }
                     )
                 }
                 AnimatedVisibility(showText) {
                     Text(
                         text = text,
                         style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.padding(start = if (showIcon) 5.dp else 0.dp)
                     )
                 }
             }
@@ -294,7 +299,6 @@ fun PrevTab() {
     EscapeThemePreview {
         Row {
             Tab(
-                //modifier = Modifier.size(width = 300.dp, height = 56.dp),
                 text = "Apps", icon = Icons.Rounded.Apps
             )
         }
