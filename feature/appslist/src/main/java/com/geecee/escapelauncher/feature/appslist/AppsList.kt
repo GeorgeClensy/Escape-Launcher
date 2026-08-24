@@ -10,12 +10,15 @@ import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyListState
@@ -46,6 +49,7 @@ import com.geecee.escapelauncher.core.model.InstalledApp
 import com.geecee.escapelauncher.core.theme.colours.transparentHalf
 import com.geecee.escapelauncher.core.ui.DefaultSettingsUi
 import com.geecee.escapelauncher.core.ui.composables.AnimatedPillSearchBar
+import com.geecee.escapelauncher.core.ui.composables.AppsListHeader
 import com.geecee.escapelauncher.core.ui.composables.HomeScreenBottomSheet
 import com.geecee.escapelauncher.core.ui.composables.HomeScreenItem
 import com.geecee.escapelauncher.core.ui.composables.ListGradient
@@ -145,13 +149,17 @@ fun AppsList(
                 ),
             horizontalAlignment = appsListAlignment,
         ) {
-            // Apps list title
+//            // Apps list title
 //            item {
-//                AppsListHeader(stringResource(R.string.all_apps))
+//                AppsListHeader(stringResource(R.string.apps))
 //            }
-//
+
             item {
-                Spacer(modifier = Modifier.height(140.dp))
+                val statusBarHeight =
+                    WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
+                Spacer(
+                    modifier = Modifier.height(statusBarHeight + 10.dp)
+                )
             }
 
             item {
