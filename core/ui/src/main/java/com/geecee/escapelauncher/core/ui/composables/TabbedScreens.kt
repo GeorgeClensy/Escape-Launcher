@@ -33,6 +33,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -192,10 +193,12 @@ fun TabbedScreenView(
     var selectedTabIndex by remember { mutableIntStateOf(0) }
     val scrollState = rememberScrollState()
 
-    val showLeftFade =
-        if (!reverse) scrollState.value > 0 else scrollState.value < scrollState.maxValue
-    val showRightFade =
-        if (!reverse) scrollState.value < scrollState.maxValue else scrollState.value > 0
+    val showLeftFade by remember(reverse) {
+        derivedStateOf { if (!reverse) scrollState.value > 0 else scrollState.value < scrollState.maxValue }
+    }
+    val showRightFade by remember(reverse) {
+        derivedStateOf { if (!reverse) scrollState.value < scrollState.maxValue else scrollState.value > 0 }
+    }
 
     val leftAlpha by animateFloatAsState(
         targetValue = if (showLeftFade) 1f else 0f,
