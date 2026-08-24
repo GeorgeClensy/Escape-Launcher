@@ -2,9 +2,7 @@ name: Build Android APK
 
 on:
   push:
-    branches: [ "master", "refactor" ]
   pull_request:
-    branches: [ "master", "refactor" ]
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch: 
 
