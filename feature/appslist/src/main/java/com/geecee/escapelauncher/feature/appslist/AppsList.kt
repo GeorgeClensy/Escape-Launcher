@@ -21,6 +21,10 @@ import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.List
+import androidx.compose.material.icons.filled.AttachMoney
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -30,7 +34,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -43,11 +46,12 @@ import com.geecee.escapelauncher.core.model.InstalledApp
 import com.geecee.escapelauncher.core.theme.colours.transparentHalf
 import com.geecee.escapelauncher.core.ui.DefaultSettingsUi
 import com.geecee.escapelauncher.core.ui.composables.AnimatedPillSearchBar
-import com.geecee.escapelauncher.core.ui.composables.AppsListHeader
 import com.geecee.escapelauncher.core.ui.composables.HomeScreenBottomSheet
 import com.geecee.escapelauncher.core.ui.composables.HomeScreenItem
 import com.geecee.escapelauncher.core.ui.composables.ListGradient
 import com.geecee.escapelauncher.core.ui.composables.SettingsSpacer
+import com.geecee.escapelauncher.core.ui.composables.TabbedScreen
+import com.geecee.escapelauncher.core.ui.composables.TabbedScreenView
 import com.geecee.escapelauncher.core.ui.utils.doHapticFeedBack
 import com.geecee.escapelauncher.feature.screentime.ScreenTimeViewModel
 import kotlinx.coroutines.flow.collectLatest
@@ -133,12 +137,41 @@ fun AppsList(
             state = scrollState,
             modifier = Modifier
                 .fillMaxSize()
-                .padding(30.dp, 0.dp),
+                .padding(
+                    start = if (appsListAlignment == Alignment.Start) 30.dp else 0.dp,
+                    top = 0.dp,
+                    bottom = 0.dp,
+                    end = if (appsListAlignment == Alignment.End) 30.dp else 0.dp
+                ),
             horizontalAlignment = appsListAlignment,
         ) {
             // Apps list title
+//            item {
+//                AppsListHeader(stringResource(R.string.all_apps))
+//            }
+//
             item {
-                AppsListHeader(stringResource(R.string.all_apps))
+                Spacer(modifier = Modifier.height(140.dp))
+            }
+
+            item {
+                TabbedScreenView(
+                    screens = listOf(
+                        TabbedScreen(
+                            title = "All Apps",
+                            icon = Icons.AutoMirrored.Filled.List,
+                            content = {}),
+                        TabbedScreen(
+                            title = "Private", icon = Icons.Default.Lock, content = {}),
+                        TabbedScreen(
+                            title = "Money", icon = Icons.Default.AttachMoney, content = {})
+                    ),
+                    reverse = appsListAlignment == Alignment.End
+                )
+            }
+
+            item {
+                Spacer(modifier = Modifier.height(15.dp))
             }
 
             // Search box
@@ -223,15 +256,12 @@ fun AppsList(
                     )
                     .background(transparentHalf)
             ) {
-                workAppsContent(
-                    { app -> // onAppClick
-                        appsListViewModel.launchApp(app = app)
-                        onGoHomeRequest()
-                    },
-                    { app -> // onAppLongClick
-                        handleAppLongClick(app)
-                    }
-                )
+                workAppsContent({ app -> // onAppClick
+                    appsListViewModel.launchApp(app = app)
+                    onGoHomeRequest()
+                }, { app -> // onAppLongClick
+                    handleAppLongClick(app)
+                })
             }
         }
 
@@ -240,8 +270,7 @@ fun AppsList(
             modifier = Modifier
                 .align(alignment = Alignment.BottomCenter)
                 .padding(30.dp, 25.dp)
-                .fillMaxWidth(),
-            horizontalAlignment = appsListAlignment
+                .fillMaxWidth(), horizontalAlignment = appsListAlignment
         ) {
             if (showSearchBox && bottomSearchBox) {
                 Spacer(modifier = Modifier.height(15.dp))
