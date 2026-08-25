@@ -1,8 +1,15 @@
 package com.geecee.escapelauncher.core.ui.composables
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.foundation.clickable
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
@@ -23,10 +30,10 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.SolidColor
@@ -35,6 +42,9 @@ import androidx.compose.ui.platform.SoftwareKeyboardController
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlin.time.Duration.Companion.milliseconds
 
 /**
  * Search Bar for apps list that collapses into a pill
@@ -49,6 +59,8 @@ fun AnimatedPillSearchBar(
     modifier: Modifier = Modifier,
     autoFocus: Boolean = false
 ) {
+    val scope = rememberCoroutineScope()
+
     var textFieldValue by remember { mutableStateOf(TextFieldValue(searchText)) }
 
     // Sync internal state with external searchText
@@ -60,10 +72,22 @@ fun AnimatedPillSearchBar(
 
     // Animation Specs
     val width by animateDpAsState(
-        targetValue = if (isExpanded) 280.dp else 56.dp, label = "widthAnimation"
+        targetValue = if (isExpanded) 280.dp else 56.dp,
+        label = "widthAnimation",
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioLowBouncy, stiffness = Spring.StiffnessLow
+        )
     )
-    val alpha by animateFloatAsState(
-        targetValue = if (isExpanded) 1f else 0f, label = "alphaAnimation"
+    val interactionSource =  remember { MutableInteractionSource() }
+    val isPressed by interactionSource.collectIsPressedAsState()
+    var isMorphed by remember { mutableStateOf(false) }
+    val radius = if (isMorphed || isPressed) 16.dp else 28.dp
+    val animatedRadius by animateDpAsState(
+        targetValue = radius,
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessVeryLow
+        ),
+        label = "SearchBoxCornerAnimation"
     )
 
     val focusRequester = remember { FocusRequester() }
@@ -73,6 +97,8 @@ fun AnimatedPillSearchBar(
     LaunchedEffect(isExpanded, autoFocus) {
         if (isExpanded) {
             focusRequester.requestFocus()
+
+            delay(150.milliseconds)
             keyboardController?.show()
         } else {
             keyboardController?.hide()
@@ -80,16 +106,29 @@ fun AnimatedPillSearchBar(
     }
 
     Surface(
+        shape = RoundedCornerShape(animatedRadius),
         modifier = modifier
             .width(width)
             .height(56.dp)
-            .clickable { onExpandedChange(!isExpanded) },
-        shape = RoundedCornerShape(28.dp),
+            .combinedClickable(
+                interactionSource = interactionSource
+            ) {
+                if (!isMorphed) {
+                    isMorphed = true
+                    scope.launch {
+                        delay(200.milliseconds)
+                        isMorphed = false
+                    }
+                } else {
+                    isMorphed = false
+                }
+
+                onExpandedChange(!isExpanded)
+            },
         color = MaterialTheme.colorScheme.secondary
     ) {
         Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.CenterStart
+            modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.CenterStart
         ) {
             Icon(
                 imageVector = Icons.Default.Search,
@@ -100,7 +139,11 @@ fun AnimatedPillSearchBar(
                     .size(24.dp)
             )
 
-            if (isExpanded) {
+            AnimatedVisibility(
+                visible = isExpanded,
+                enter = fadeIn(animationSpec = tween(300)),
+                exit = fadeOut(animationSpec = tween(300))
+            ) {
                 BasicTextField(
                     value = textFieldValue,
                     onValueChange = {
@@ -110,7 +153,7 @@ fun AnimatedPillSearchBar(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(start = 48.dp, end = 16.dp)
-                        .alpha(alpha)
+                        //.alpha(alpha)
                         .focusRequester(focusRequester),
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
@@ -128,8 +171,7 @@ fun AnimatedPillSearchBar(
                         ) {
                             innerTextField()
                         }
-                    }
-                )
+                    })
             }
         }
     }
