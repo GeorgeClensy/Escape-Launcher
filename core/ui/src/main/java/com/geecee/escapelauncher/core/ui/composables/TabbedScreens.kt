@@ -33,6 +33,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableIntState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -193,6 +194,7 @@ fun Tab(
 @Composable
 fun TabBar(
     screens: List<TabbedScreen>,
+    selectedTabIndex: MutableIntState,
     modifier: Modifier = Modifier,
     reverse: Boolean = false,
 
@@ -204,8 +206,6 @@ fun TabBar(
     onSearchTextChanged: (String) -> Unit = {},
     onSearchDone: (String, SoftwareKeyboardController?) -> Unit = { _, _ -> }
 ) {
-    var selectedTabIndex by remember { mutableIntStateOf(0) }
-
     val scrollState = rememberScrollState()
 
     val showLeftFade by remember(reverse) {
@@ -227,7 +227,7 @@ fun TabBar(
     // Go to all apps when search pressed (for now, we may implement searching within lists later)
     LaunchedEffect(searchExpanded) {
         if(searchExpanded) {
-            selectedTabIndex = 0
+            selectedTabIndex.intValue = 0
         }
     }
 
@@ -285,11 +285,11 @@ fun TabBar(
             Tab(
                 text = screen.title,
                 icon = screen.icon,
-                selected = selectedTabIndex == screens.indexOf(screen),
-                showText = selectedTabIndex == screens.indexOf(screen),
+                selected = selectedTabIndex.intValue == screens.indexOf(screen),
+                showText = selectedTabIndex.intValue == screens.indexOf(screen),
                 disabled = searchExpanded,
                 onClick = {
-                    selectedTabIndex = screens.indexOf(screen)
+                    selectedTabIndex.intValue = screens.indexOf(screen)
                 })
         }
 
@@ -336,7 +336,8 @@ fun PrevTabBar() {
                         title = "Private", icon = Icons.Default.Lock),
                     TabbedScreen(
                         title = "Money", icon = Icons.Default.AttachMoney),
-                )
+                ),
+                selectedTabIndex = remember { mutableIntStateOf(0) }
             )
         }
     }

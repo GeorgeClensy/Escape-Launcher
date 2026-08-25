@@ -26,12 +26,14 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.AttachMoney
 import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Work
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -105,6 +107,8 @@ fun AppsList(
         doHapticFeedBack(haptics, hapticFeedbackEnabled)
     }
 
+    val selectedTabIndex = remember { mutableIntStateOf(0) }
+
     // Handle UI Events from ViewModel
     LaunchedEffect(Unit) {
         appsListViewModel.uiEvent.collectLatest { event ->
@@ -129,7 +133,8 @@ fun AppsList(
         modifier
             .fillMaxSize()
             .imePadding()
-    ) {
+    )
+    {
         // The main column with all the items in
         LazyColumn(
             state = scrollState,
@@ -166,8 +171,9 @@ fun AppsList(
                         TabbedScreen(
                             title = "Private", icon = Icons.Default.Lock),
                         TabbedScreen(
-                            title = "Money", icon = Icons.Default.AttachMoney)
+                            title = "Work", icon = Icons.Default.Work)
                     ),
+                    selectedTabIndex = selectedTabIndex,
                     reverse = appsListAlignment == Alignment.End,
                     showSearch = showSearchBox,
                     searchText = searchText,
