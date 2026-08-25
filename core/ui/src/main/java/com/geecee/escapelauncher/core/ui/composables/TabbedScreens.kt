@@ -60,7 +60,9 @@ import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.milliseconds
 
 data class TabbedScreen(
-    var title: String, var icon: ImageVector
+    var title: String,
+    var icon: ImageVector,
+    var content: @Composable () -> Unit = {}
 )
 
 @Composable

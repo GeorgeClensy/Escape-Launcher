@@ -5,7 +5,6 @@ import androidx.activity.compose.LocalActivity
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
@@ -15,14 +14,11 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
-import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material.icons.filled.Work
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -59,12 +55,11 @@ fun AppsList(
     modifier: Modifier = Modifier,
     scrollState: LazyListState,
     isBeingShown: Boolean,
+    tabs: List<TabbedScreen> = emptyList(),
     onAppOpened: (app: InstalledApp) -> Unit = {},
     onGoHomeRequest: () -> Unit = {},
     appsListViewModel: AppsListViewModel = hiltViewModel(),
     screenTimeViewModel: ScreenTimeViewModel = hiltViewModel(LocalActivity.current as ComponentActivity),
-    extraListItems: LazyListScope.(onAppClick: (InstalledApp) -> Unit, onAppLongClick: (InstalledApp) -> Unit) -> Unit = { _, _ -> },
-    workAppsContent: @Composable BoxScope.(onAppClick: (InstalledApp) -> Unit, onAppLongClick: (InstalledApp) -> Unit) -> Unit = { _, _ -> },
 ) {
     val haptics = LocalHapticFeedback.current
     val appUsageList by screenTimeViewModel.appUsageUiList.collectAsState()
@@ -155,13 +150,10 @@ fun AppsList(
                 TabBar(
                     screens = listOf(
                         TabbedScreen(
-                            title = "All Apps", icon = Icons.AutoMirrored.Filled.List
-                        ), TabbedScreen(
-                            title = "Private", icon = Icons.Default.Lock
-                        ), TabbedScreen(
-                            title = "Work", icon = Icons.Default.Work
+                            title = "All Apps",
+                            icon = Icons.AutoMirrored.Filled.List
                         )
-                    ),
+                    ) + tabs,
                     selectedTabIndex = selectedTabIndex,
                     reverse = appsListAlignment == Alignment.End,
                     showSearch = showSearchBox,
@@ -210,18 +202,9 @@ fun AppsList(
                     }
                 }
 
-                1 -> {
-                    extraListItems(handleAppClick, handleAppLongClick)
-                }
-
-                2 -> {
+                else -> {
                     item {
-                        workAppsContent({ app -> // onAppClick
-                            appsListViewModel.launchApp(app = app)
-                            onGoHomeRequest()
-                        }, { app -> // onAppLongClick
-                            handleAppLongClick(app)
-                        })
+                        tabs[selectedTabIndex.intValue - 1].content()
                     }
                 }
             }
