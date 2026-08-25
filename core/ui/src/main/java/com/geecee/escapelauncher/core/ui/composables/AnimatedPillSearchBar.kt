@@ -75,7 +75,7 @@ fun AnimatedPillSearchBar(
         targetValue = if (isExpanded) 280.dp else 56.dp,
         label = "widthAnimation",
         animationSpec = spring(
-            dampingRatio = Spring.DampingRatioLowBouncy, stiffness = Spring.StiffnessLow
+            dampingRatio = Spring.DampingRatioLowBouncy, stiffness = Spring.StiffnessMediumLow
         )
     )
     val interactionSource =  remember { MutableInteractionSource() }

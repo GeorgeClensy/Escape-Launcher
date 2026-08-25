@@ -11,8 +11,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Work
 import androidx.compose.material.icons.rounded.WorkOff
@@ -164,7 +162,7 @@ fun WorkApps(
 
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.verticalScroll(rememberScrollState())
+                    //modifier = Modifier.verticalScroll(rememberScrollState())
                 ) {
                     workApps.forEach { app ->
                         WorkAppItem(app.displayName, {
