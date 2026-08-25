@@ -9,12 +9,10 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
@@ -38,24 +36,20 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalHapticFeedback
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import com.geecee.escapelauncher.core.ui.R
 import com.geecee.escapelauncher.core.common.DefaultSettings
 import com.geecee.escapelauncher.core.common.formatScreenTime
 import com.geecee.escapelauncher.core.model.InstalledApp
 import com.geecee.escapelauncher.core.theme.colours.transparentHalf
 import com.geecee.escapelauncher.core.ui.DefaultSettingsUi
-import com.geecee.escapelauncher.core.ui.composables.AnimatedPillSearchBar
-import com.geecee.escapelauncher.core.ui.composables.AppsListHeader
 import com.geecee.escapelauncher.core.ui.composables.HomeScreenBottomSheet
 import com.geecee.escapelauncher.core.ui.composables.HomeScreenItem
 import com.geecee.escapelauncher.core.ui.composables.ListGradient
 import com.geecee.escapelauncher.core.ui.composables.SettingsSpacer
 import com.geecee.escapelauncher.core.ui.composables.TabbedScreen
-import com.geecee.escapelauncher.core.ui.composables.TabbedScreenView
+import com.geecee.escapelauncher.core.ui.composables.TabBar
 import com.geecee.escapelauncher.core.ui.utils.doHapticFeedBack
 import com.geecee.escapelauncher.feature.screentime.ScreenTimeViewModel
 import kotlinx.coroutines.flow.collectLatest
@@ -163,56 +157,44 @@ fun AppsList(
             }
 
             item {
-                TabbedScreenView(
+                TabBar(
                     screens = listOf(
                         TabbedScreen(
                             title = "All Apps",
-                            icon = Icons.AutoMirrored.Filled.List,
-                            content = {}),
+                            icon = Icons.AutoMirrored.Filled.List
+                        ),
                         TabbedScreen(
-                            title = "Private", icon = Icons.Default.Lock, content = {}),
+                            title = "Private", icon = Icons.Default.Lock),
                         TabbedScreen(
-                            title = "Money", icon = Icons.Default.AttachMoney, content = {})
+                            title = "Money", icon = Icons.Default.AttachMoney)
                     ),
-                    reverse = appsListAlignment == Alignment.End
+                    reverse = appsListAlignment == Alignment.End,
+                    showSearch = showSearchBox,
+                    searchText = searchText,
+                    searchExpanded = searchExpanded,
+                    onSearchExpandedChange = {
+                        appsListViewModel.onSearchExpandedChanged(it)
+                        doHapticFeedBack(haptics, hapticFeedbackEnabled)
+                    },
+                    onSearchTextChanged = { query ->
+                        appsListViewModel.onSearchTextChanged(query)
+                        if (autoOpenAppInSearch && query.length >= 2 && apps.size == 1) {
+                            handleAppClick(apps.first())
+                        }
+                    },
+                    onSearchDone = { _, keyboardController ->
+                        if (apps.isNotEmpty()) {
+                            keyboardController?.hide()
+                            handleAppClick(apps.first())
+                        } else {
+                            doHapticFeedBack(haptics, hapticFeedbackEnabled)
+                        }
+                    }
                 )
             }
 
             item {
                 Spacer(modifier = Modifier.height(15.dp))
-            }
-
-            // Search box
-            item {
-                if (showSearchBox && !bottomSearchBox) {
-                    Spacer(modifier = Modifier.height(15.dp))
-
-                    AnimatedPillSearchBar(
-                        closedText = stringResource(R.string.search),
-                        searchText = searchText,
-                        isExpanded = searchExpanded,
-                        autoFocus = autoOpenSearch,
-                        onExpandedChange = {
-                            appsListViewModel.onSearchExpandedChanged(it)
-                            doHapticFeedBack(haptics, hapticFeedbackEnabled)
-                        },
-                        onSearchTextChanged = { query ->
-                            appsListViewModel.onSearchTextChanged(query)
-                            if (autoOpenAppInSearch && query.length >= 2 && apps.size == 1) {
-                                handleAppClick(apps.first())
-                            }
-                        },
-                        onSearchDone = { _, keboardController ->
-                            if (apps.isNotEmpty()) {
-                                keboardController?.hide()
-                                handleAppClick(apps.first())
-                            } else {
-                                doHapticFeedBack(haptics, hapticFeedbackEnabled)
-                            }
-                        })
-
-                    Spacer(modifier = Modifier.height(15.dp))
-                }
             }
 
             // Apps
@@ -270,44 +252,6 @@ fun AppsList(
                 }, { app -> // onAppLongClick
                     handleAppLongClick(app)
                 })
-            }
-        }
-
-        // Bottom search box
-        Column(
-            modifier = Modifier
-                .align(alignment = Alignment.BottomCenter)
-                .padding(30.dp, 25.dp)
-                .fillMaxWidth(), horizontalAlignment = appsListAlignment
-        ) {
-            if (showSearchBox && bottomSearchBox) {
-                Spacer(modifier = Modifier.height(15.dp))
-
-                AnimatedPillSearchBar(
-                    closedText = stringResource(R.string.search),
-                    searchText = searchText,
-                    isExpanded = searchExpanded,
-                    autoFocus = autoOpenSearch,
-                    onExpandedChange = {
-                        appsListViewModel.onSearchExpandedChanged(it)
-                        doHapticFeedBack(haptics, hapticFeedbackEnabled)
-                    },
-                    onSearchTextChanged = { query ->
-                        appsListViewModel.onSearchTextChanged(query)
-                        if (autoOpenAppInSearch && query.length >= 2 && apps.size == 1) {
-                            handleAppClick(apps.first())
-                        }
-                    },
-                    onSearchDone = { _, keboardController ->
-                        if (apps.isNotEmpty()) {
-                            keboardController?.hide()
-                            handleAppClick(apps.first())
-                        } else {
-                            doHapticFeedBack(haptics, hapticFeedbackEnabled)
-                        }
-                    })
-
-                SettingsSpacer()
             }
         }
     }

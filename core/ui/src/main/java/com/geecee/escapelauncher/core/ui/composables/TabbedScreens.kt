@@ -25,7 +25,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.AttachMoney
 import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.rounded.Apps
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardColors
@@ -33,6 +32,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -49,6 +49,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.SoftwareKeyboardController
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -58,7 +59,7 @@ import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.milliseconds
 
 data class TabbedScreen(
-    var title: String, var icon: ImageVector, var content: @Composable () -> Unit
+    var title: String, var icon: ImageVector
 )
 
 @Composable
@@ -190,12 +191,21 @@ fun Tab(
 }
 
 @Composable
-fun TabbedScreenView(
+fun TabBar(
     screens: List<TabbedScreen>,
     modifier: Modifier = Modifier,
-    reverse: Boolean = false
+    reverse: Boolean = false,
+
+    // Search stuff
+    showSearch: Boolean = true,
+    searchText: String = "",
+    searchExpanded: Boolean = false,
+    onSearchExpandedChange: (Boolean) -> Unit = {},
+    onSearchTextChanged: (String) -> Unit = {},
+    onSearchDone: (String, SoftwareKeyboardController?) -> Unit = { _, _ -> }
 ) {
     var selectedTabIndex by remember { mutableIntStateOf(0) }
+
     val scrollState = rememberScrollState()
 
     val showLeftFade by remember(reverse) {
@@ -213,6 +223,13 @@ fun TabbedScreenView(
         targetValue = if (showRightFade) 1f else 0f,
         label = "RightFadeAlpha"
     )
+
+    // Go to all apps when search pressed (for now, we may implement searching within lists later)
+    LaunchedEffect(searchExpanded) {
+        if(searchExpanded) {
+            selectedTabIndex = 0
+        }
+    }
 
     Row(
         modifier = modifier
@@ -252,14 +269,14 @@ fun TabbedScreenView(
             Spacer(Modifier.width(15.dp))
         }
 
-        if (!reverse) {
-            Tab(
-                text = "",
-                icon = Icons.Default.Search,
-                showText = false,
-                useSecondaryColors = true,
-                unselectedRadius = 56.dp,
-                selected = false
+        if (!reverse && showSearch) {
+            AnimatedPillSearchBar(
+                searchText = searchText,
+                isExpanded = searchExpanded,
+                autoFocus = false,
+                onExpandedChange = onSearchExpandedChange,
+                onSearchTextChanged = onSearchTextChanged,
+                onSearchDone = onSearchDone
             )
         }
 
@@ -270,19 +287,20 @@ fun TabbedScreenView(
                 icon = screen.icon,
                 selected = selectedTabIndex == screens.indexOf(screen),
                 showText = selectedTabIndex == screens.indexOf(screen),
+                disabled = searchExpanded,
                 onClick = {
                     selectedTabIndex = screens.indexOf(screen)
                 })
         }
 
-        if (reverse) {
-            Tab(
-                text = "",
-                icon = Icons.Default.Search,
-                showText = false,
-                useSecondaryColors = true,
-                unselectedRadius = 56.dp,
-                selected = false
+        if (reverse && showSearch) {
+            AnimatedPillSearchBar(
+                searchText = searchText,
+                isExpanded = searchExpanded,
+                autoFocus = false,
+                onExpandedChange = onSearchExpandedChange,
+                onSearchTextChanged = onSearchTextChanged,
+                onSearchDone = onSearchDone
             )
         }
 
@@ -307,17 +325,17 @@ fun PrevTab() {
 
 @Preview
 @Composable
-fun PrevTabbedScreenView() {
+fun PrevTabBar() {
     EscapeThemePreview {
         Box(Modifier.fillMaxSize()) {
-            TabbedScreenView(
+            TabBar(
                 listOf(
                     TabbedScreen(
-                        title = "All Apps", icon = Icons.AutoMirrored.Filled.List, content = {}),
+                        title = "All Apps", icon = Icons.AutoMirrored.Filled.List),
                     TabbedScreen(
-                        title = "Private", icon = Icons.Default.Lock, content = {}),
+                        title = "Private", icon = Icons.Default.Lock),
                     TabbedScreen(
-                        title = "Money", icon = Icons.Default.AttachMoney, content = {}),
+                        title = "Money", icon = Icons.Default.AttachMoney),
                 )
             )
         }

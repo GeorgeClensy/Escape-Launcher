@@ -3,7 +3,8 @@ package com.geecee.escapelauncher.core.ui.composables
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -17,7 +18,6 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -41,7 +41,6 @@ import androidx.compose.ui.unit.dp
  */
 @Composable
 fun AnimatedPillSearchBar(
-    closedText: String,
     searchText: String,
     isExpanded: Boolean,
     onExpandedChange: (Boolean) -> Unit,
@@ -61,12 +60,10 @@ fun AnimatedPillSearchBar(
 
     // Animation Specs
     val width by animateDpAsState(
-        targetValue = if (isExpanded) 280.dp else 150.dp,
-        label = "widthAnimation"
+        targetValue = if (isExpanded) 280.dp else 56.dp, label = "widthAnimation"
     )
     val alpha by animateFloatAsState(
-        targetValue = if (isExpanded) 1f else 0f,
-        label = "alphaAnimation"
+        targetValue = if (isExpanded) 1f else 0f, label = "alphaAnimation"
     )
 
     val focusRequester = remember { FocusRequester() }
@@ -88,27 +85,22 @@ fun AnimatedPillSearchBar(
             .height(56.dp)
             .clickable { onExpandedChange(!isExpanded) },
         shape = RoundedCornerShape(28.dp),
-        color = MaterialTheme.colorScheme.primary
+        color = MaterialTheme.colorScheme.secondary
     ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(horizontal = 12.dp)
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.CenterStart
         ) {
             Icon(
                 imageVector = Icons.Default.Search,
                 contentDescription = "Search",
-                tint = MaterialTheme.colorScheme.surface,
-                modifier = Modifier.size(24.dp)
+                tint = MaterialTheme.colorScheme.onSecondary,
+                modifier = Modifier
+                    .padding(start = 16.dp)
+                    .size(24.dp)
             )
 
-            if (!isExpanded) {
-                Text(
-                    text = closedText,
-                    color = MaterialTheme.colorScheme.surface,
-                    style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier.padding(start = 4.dp)
-                )
-            } else {
+            if (isExpanded) {
                 BasicTextField(
                     value = textFieldValue,
                     onValueChange = {
@@ -116,8 +108,8 @@ fun AnimatedPillSearchBar(
                         onSearchTextChanged(it.text)
                     },
                     modifier = Modifier
-                        .weight(1f)
-                        .padding(start = 4.dp)
+                        .fillMaxSize()
+                        .padding(start = 48.dp, end = 16.dp)
                         .alpha(alpha)
                         .focusRequester(focusRequester),
                     singleLine = true,
@@ -128,7 +120,15 @@ fun AnimatedPillSearchBar(
                     textStyle = MaterialTheme.typography.bodyMedium.copy(
                         color = MaterialTheme.colorScheme.surface
                     ),
-                    cursorBrush = SolidColor(MaterialTheme.colorScheme.surface)
+                    cursorBrush = SolidColor(MaterialTheme.colorScheme.onSecondary),
+                    decorationBox = { innerTextField ->
+                        Box(
+                            contentAlignment = Alignment.CenterStart,
+                            modifier = Modifier.fillMaxSize()
+                        ) {
+                            innerTextField()
+                        }
+                    }
                 )
             }
         }
