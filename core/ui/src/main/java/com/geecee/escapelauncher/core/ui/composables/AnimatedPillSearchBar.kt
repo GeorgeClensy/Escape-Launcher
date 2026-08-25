@@ -96,9 +96,8 @@ fun AnimatedPillSearchBar(
     // Handle Auto-focus and Expansion changes
     LaunchedEffect(isExpanded, autoFocus) {
         if (isExpanded) {
-            focusRequester.requestFocus()
-
             delay(150.milliseconds)
+            focusRequester.requestFocus()
             keyboardController?.show()
         } else {
             keyboardController?.hide()
