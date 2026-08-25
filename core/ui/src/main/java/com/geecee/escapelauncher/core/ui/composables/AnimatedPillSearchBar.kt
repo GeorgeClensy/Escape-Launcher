@@ -153,7 +153,6 @@ fun AnimatedPillSearchBar(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(start = 48.dp, end = 16.dp)
-                        //.alpha(alpha)
                         .focusRequester(focusRequester),
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
@@ -161,7 +160,7 @@ fun AnimatedPillSearchBar(
                         onSearchDone(textFieldValue.text.trim(), keyboardController)
                     }),
                     textStyle = MaterialTheme.typography.bodyMedium.copy(
-                        color = MaterialTheme.colorScheme.surface
+                        color = MaterialTheme.colorScheme.onSecondary
                     ),
                     cursorBrush = SolidColor(MaterialTheme.colorScheme.onSecondary),
                     decorationBox = { innerTextField ->

@@ -7,12 +7,16 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
@@ -29,6 +33,10 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -39,7 +47,6 @@ import com.geecee.escapelauncher.core.model.InstalledApp
 import com.geecee.escapelauncher.core.ui.DefaultSettingsUi
 import com.geecee.escapelauncher.core.ui.composables.HomeScreenBottomSheet
 import com.geecee.escapelauncher.core.ui.composables.HomeScreenItem
-import com.geecee.escapelauncher.core.ui.composables.ListGradient
 import com.geecee.escapelauncher.core.ui.composables.TabBar
 import com.geecee.escapelauncher.core.ui.composables.TabbedScreen
 import com.geecee.escapelauncher.core.ui.utils.doHapticFeedBack
@@ -126,61 +133,32 @@ fun AppsList(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(
-                    start = if (appsListAlignment == Alignment.Start) 30.dp else 0.dp,
-                    top = 0.dp,
-                    bottom = 0.dp,
-                    end = if (appsListAlignment == Alignment.End) 30.dp else 0.dp
-                ),
+                    horizontal = 30.dp,
+                    vertical = 0.dp,
+                )
+                .drawWithContent {
+                    drawContent()
+
+                    val fadeHeight = 180.dp.toPx()
+
+                    drawRect(
+                        brush = Brush.verticalGradient(
+                            colors = listOf(
+                                Color.Transparent,
+                                Color.Black.copy(alpha = 1f),
+                                Color.Black.copy(alpha = 1f)
+                            ), startY = size.height - fadeHeight, endY = size.height
+                        ), blendMode = BlendMode.DstOut
+                    )
+                },
             horizontalAlignment = appsListAlignment,
         ) {
-//            // Apps list title
-//            item {
-//                AppsListHeader(stringResource(R.string.apps))
-//            }
-
             item {
                 val statusBarHeight =
                     WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
                 Spacer(
                     modifier = Modifier.height(statusBarHeight + 10.dp)
                 )
-            }
-
-            item {
-                TabBar(
-                    screens = listOf(
-                        TabbedScreen(
-                            title = "All Apps",
-                            icon = Icons.AutoMirrored.Filled.List
-                        )
-                    ) + tabs,
-                    selectedTabIndex = selectedTabIndex,
-                    reverse = appsListAlignment == Alignment.End,
-                    showSearch = showSearchBox,
-                    searchText = searchText,
-                    searchExpanded = searchExpanded,
-                    onSearchExpandedChange = {
-                        appsListViewModel.onSearchExpandedChanged(it)
-                        doHapticFeedBack(haptics, hapticFeedbackEnabled)
-                    },
-                    onSearchTextChanged = { query ->
-                        appsListViewModel.onSearchTextChanged(query)
-                        if (autoOpenAppInSearch && query.length >= 2 && apps.size == 1) {
-                            handleAppClick(apps.first())
-                        }
-                    },
-                    onSearchDone = { _, keyboardController ->
-                        if (apps.isNotEmpty()) {
-                            keyboardController?.hide()
-                            handleAppClick(apps.first())
-                        } else {
-                            doHapticFeedBack(haptics, hapticFeedbackEnabled)
-                        }
-                    })
-            }
-
-            item {
-                Spacer(modifier = Modifier.height(15.dp))
             }
 
             when (selectedTabIndex.intValue) {
@@ -214,7 +192,57 @@ fun AppsList(
             }
         }
 
-        ListGradient() // Adds a gradient to the bottom of the screen just to make it a bit nicer
+        TabBar(
+            modifier = Modifier
+                .align(
+                    if (appsListAlignment == Alignment.End) {
+                        Alignment.BottomEnd
+                    }
+                    else if (appsListAlignment == Alignment.CenterHorizontally) {
+                        Alignment.BottomCenter
+                    }
+                    else {
+                        Alignment.BottomStart
+                    }
+                )
+                .windowInsetsPadding(
+                    WindowInsets.safeDrawing.only(WindowInsetsSides.Bottom)
+                )
+                .padding(
+                    start = if (appsListAlignment == Alignment.Start || appsListAlignment == Alignment.CenterHorizontally) 30.dp else 0.dp,
+                    top = 0.dp,
+                    bottom = 30.dp,
+                    end = if (appsListAlignment == Alignment.End || appsListAlignment == Alignment.CenterHorizontally) 30.dp else 0.dp
+                ),
+            screens = listOf(
+                TabbedScreen(
+                    title = "All Apps", icon = Icons.AutoMirrored.Filled.List
+                )
+            ) + tabs,
+            selectedTabIndex = selectedTabIndex,
+            reverse = appsListAlignment == Alignment.End,
+            showSearch = showSearchBox,
+            searchText = searchText,
+            searchExpanded = searchExpanded,
+            onSearchExpandedChange = {
+                appsListViewModel.onSearchExpandedChanged(it)
+                doHapticFeedBack(haptics, hapticFeedbackEnabled)
+            },
+            onSearchTextChanged = { query ->
+                appsListViewModel.onSearchTextChanged(query)
+                if (autoOpenAppInSearch && query.length >= 2 && apps.size == 1) {
+                    handleAppClick(apps.first())
+                }
+            },
+            onSearchDone = { _, keyboardController ->
+                if (apps.isNotEmpty()) {
+                    keyboardController?.hide()
+                    handleAppClick(apps.first())
+                } else {
+                    doHapticFeedBack(haptics, hapticFeedbackEnabled)
+                }
+            })
+
     }
 
 
