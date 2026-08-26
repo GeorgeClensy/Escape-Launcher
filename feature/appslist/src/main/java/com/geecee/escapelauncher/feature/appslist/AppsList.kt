@@ -4,6 +4,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.LocalActivity
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
@@ -152,6 +153,7 @@ fun AppsList(
                     )
                 },
             horizontalAlignment = appsListAlignment,
+            verticalArrangement = Arrangement.Bottom
         ) {
             item {
                 val statusBarHeight =
@@ -195,14 +197,16 @@ fun AppsList(
         TabBar(
             modifier = Modifier
                 .align(
-                    if (appsListAlignment == Alignment.End) {
-                        Alignment.BottomEnd
-                    }
-                    else if (appsListAlignment == Alignment.CenterHorizontally) {
-                        Alignment.BottomCenter
-                    }
-                    else {
-                        Alignment.BottomStart
+                    when (appsListAlignment) {
+                        Alignment.End -> {
+                            Alignment.BottomEnd
+                        }
+                        Alignment.CenterHorizontally -> {
+                            Alignment.BottomCenter
+                        }
+                        else -> {
+                            Alignment.BottomStart
+                        }
                     }
                 )
                 .windowInsetsPadding(
