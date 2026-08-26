@@ -4,13 +4,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import com.geecee.escapelauncher.core.ui.R
+import com.geecee.escapelauncher.core.theme.EscapeThemePreview
 import com.geecee.escapelauncher.core.ui.composables.LockedAppFolderUI
 import com.geecee.escapelauncher.core.ui.composables.LockedFolderCard
-import com.geecee.escapelauncher.core.theme.EscapeThemePreview
+import com.geecee.escapelauncher.core.ui.vectors.getPrivateSpaceLockedImage
 
 /**
- * Button to launch the secure folder on samsung phones.
+ * Button to launch the secure folder on Samsung phones.
  *
  * @author George Clensy
  */
@@ -20,8 +20,9 @@ fun SecureFolderButton() {
 
     LockedFolderCard {
         LockedAppFolderUI(
-            text = stringResource(R.string.launch_secure_folder),
-            iconContentDescription = stringResource(R.string.launch_secure_folder)
+            text = stringResource(com.geecee.escapelauncher.core.ui.R.string.launch_secure_folder),
+            image = getPrivateSpaceLockedImage(),
+            iconContentDescription = stringResource(com.geecee.escapelauncher.core.ui.R.string.launch_secure_folder)
         ) {
             launchSecureFolder(context = context)
         }

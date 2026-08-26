@@ -130,8 +130,7 @@ fun AppsList(
     ) {
         // The main column with all the items in
         LazyColumn(
-            state = scrollState,
-            modifier = Modifier
+            state = scrollState, modifier = Modifier
                 .fillMaxSize()
                 .padding(
                     horizontal = 30.dp,
@@ -139,28 +138,31 @@ fun AppsList(
                 )
                 .drawWithContent {
                     drawContent()
+                    if (scrollState.canScrollForward || scrollState.canScrollBackward) {
+                        val fadeHeight = 180.dp.toPx()
 
-                    val fadeHeight = 180.dp.toPx()
-
-                    drawRect(
-                        brush = Brush.verticalGradient(
-                            colors = listOf(
-                                Color.Transparent,
-                                Color.Black.copy(alpha = 1f),
-                                Color.Black.copy(alpha = 1f)
-                            ), startY = size.height - fadeHeight, endY = size.height
-                        ), blendMode = BlendMode.DstOut
-                    )
-                },
-            horizontalAlignment = appsListAlignment,
-            verticalArrangement = Arrangement.Bottom
+                        drawRect(
+                            brush = Brush.verticalGradient(
+                                colors = listOf(
+                                    Color.Transparent,
+                                    Color.Black.copy(alpha = 1f),
+                                    Color.Black.copy(alpha = 1f)
+                                ), startY = size.height - fadeHeight, endY = size.height
+                            ), blendMode = BlendMode.DstOut
+                        )
+                    }
+                }, horizontalAlignment = appsListAlignment, verticalArrangement = Arrangement.Bottom
         ) {
-            item {
-                val statusBarHeight =
-                    WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
-                Spacer(
-                    modifier = Modifier.height(statusBarHeight + 10.dp)
-                )
+            val isAllApps = selectedTabIndex.intValue == 0
+
+            if (isAllApps) {
+                item {
+                    val statusBarHeight =
+                        WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
+                    Spacer(
+                        modifier = Modifier.height(statusBarHeight + 10.dp)
+                    )
+                }
             }
 
             when (selectedTabIndex.intValue) {
@@ -184,13 +186,15 @@ fun AppsList(
 
                 else -> {
                     item {
-                        tabs[selectedTabIndex.intValue - 1].content()
+                        tabs[selectedTabIndex.intValue - 1].content(this)
                     }
                 }
             }
 
-            item {
-                Spacer(modifier = Modifier.height(120.dp))
+            if (isAllApps) {
+                item {
+                    Spacer(modifier = Modifier.height(120.dp))
+                }
             }
         }
 
@@ -201,9 +205,11 @@ fun AppsList(
                         Alignment.End -> {
                             Alignment.BottomEnd
                         }
+
                         Alignment.CenterHorizontally -> {
                             Alignment.BottomCenter
                         }
+
                         else -> {
                             Alignment.BottomStart
                         }

@@ -32,6 +32,8 @@
     <string name="app_info">App Info</string>
     <string name="search">Search</string>
     <string name="unlock_private_space">Unlock Private Space</string>
+    <string name="unlock">Unlock</string>
+    <string name="private_space_is_locked">Private spaced is locked. Unlock to use your private apps.</string>
     <string name="lock_private_space">Lock Private Space</string>
     <string name="private_space">Private Space</string>
     <string name="private_space_settings">Private Space Settings</string>

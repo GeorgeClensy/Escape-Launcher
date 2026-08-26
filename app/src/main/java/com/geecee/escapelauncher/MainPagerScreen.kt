@@ -87,14 +87,19 @@ fun MainPagerScreen(
         ) {
             TabbedScreen(
                 title = "Private", icon = Icons.Default.Lock, content = {
-                        PrivateSpace(modifier = Modifier, onAppClick = { app ->
+                    PrivateSpace(
+                        modifier = Modifier
+                            .fillParentMaxSize()
+                            .fillMaxSize(),
+                        onAppClick = { app ->
                             viewModel.openApp(
                                 app = app, overrideChallenge = false, onAppOpened = {
                                     screenTimeViewModel.onAppOpened(it)
                                     appsListViewModel.onSearchExpandedChanged(false)
                                     doHapticFeedBack(haptics, hapticFeedbackEnabled)
                                 })
-                        }, onAppLongClick = { app ->
+                        },
+                        onAppLongClick = { app ->
                             appsListViewModel.setBottomSheetVisible(true)
                             appsListViewModel.setBottomSheetApp(app)
                             doHapticFeedBack(haptics, hapticFeedbackEnabled)

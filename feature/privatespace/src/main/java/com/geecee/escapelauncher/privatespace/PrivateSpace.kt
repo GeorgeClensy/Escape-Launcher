@@ -8,9 +8,12 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Settings
@@ -32,8 +35,8 @@ import com.geecee.escapelauncher.core.common.DefaultSettings
 import com.geecee.escapelauncher.core.model.InstalledApp
 import com.geecee.escapelauncher.core.ui.R
 import com.geecee.escapelauncher.core.ui.composables.LockedAppFolderUI
-import com.geecee.escapelauncher.core.ui.composables.LockedFolderCard
 import com.geecee.escapelauncher.core.ui.composables.SettingsSwitch
+import com.geecee.escapelauncher.core.ui.vectors.getPrivateSpaceLockedImage
 
 /**
  * Android 15+ Private space UI with apps, settings button and lock button
@@ -59,31 +62,51 @@ fun PrivateSpace(
     val showSettings by viewModel.showSettings.collectAsState()
     val hiddenPrivateSpaceSetting by viewModel.hiddenPrivateSpace.collectAsState(initial = DefaultSettings.HIDE_PRIVATE_SPACE)
 
-    LockedFolderCard(
-        modifier = modifier
-    ) {
-        if (isUnlocked) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Box(
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(20.dp)
-                ) {
-                    Text(
-                        stringResource(R.string.private_space),
-                        style = MaterialTheme.typography.bodyMedium,
-                        modifier = Modifier.align(Alignment.CenterStart)
-                    )
+    if (isUnlocked) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            val statusBarHeight =
+                WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
+            Spacer(
+                modifier = Modifier.height(statusBarHeight + 10.dp)
+            )
 
-                    Row(
-                        Modifier.align(Alignment.CenterEnd)
+            Box(
+                Modifier
+                    .fillMaxWidth()
+                    .padding(20.dp)
+            ) {
+                Text(
+                    stringResource(R.string.private_space),
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.align(Alignment.CenterStart)
+                )
+
+                Row(
+                    Modifier.align(Alignment.CenterEnd)
+                ) {
+                    IconButton(
+                        onClick = {
+                            viewModel.toggleSettings()
+                        }, modifier = Modifier, colors = IconButtonColors(
+                            containerColor = MaterialTheme.colorScheme.surfaceContainer,
+                            contentColor = MaterialTheme.colorScheme.onSurface,
+                            disabledContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+                            disabledContentColor = MaterialTheme.colorScheme.onSurface
+                        )
                     ) {
+                        Icon(
+                            Icons.Default.Settings,
+                            stringResource(R.string.private_space_settings)
+                        )
+                    }
+
+                    if (viewModel.canToggleProfile) {
                         IconButton(
                             onClick = {
-                                viewModel.toggleSettings()
+                                viewModel.togglePrivateSpaceProfile(onLauncherNotDefault = {})
                             }, modifier = Modifier, colors = IconButtonColors(
                                 containerColor = MaterialTheme.colorScheme.surfaceContainer,
                                 contentColor = MaterialTheme.colorScheme.onSurface,
@@ -92,66 +115,50 @@ fun PrivateSpace(
                             )
                         ) {
                             Icon(
-                                Icons.Default.Settings,
-                                stringResource(R.string.private_space_settings)
+                                Icons.Default.Lock, stringResource(R.string.lock_private_space)
                             )
                         }
-
-                        if (viewModel.canToggleProfile) {
-                            IconButton(
-                                onClick = {
-                                    viewModel.togglePrivateSpaceProfile(onLauncherNotDefault = {})
-                                }, modifier = Modifier, colors = IconButtonColors(
-                                    containerColor = MaterialTheme.colorScheme.surfaceContainer,
-                                    contentColor = MaterialTheme.colorScheme.onSurface,
-                                    disabledContainerColor = MaterialTheme.colorScheme.surfaceContainer,
-                                    disabledContentColor = MaterialTheme.colorScheme.onSurface
-                                )
-                            ) {
-                                Icon(
-                                    Icons.Default.Lock, stringResource(R.string.lock_private_space)
-                                )
-                            }
-                        }
                     }
                 }
-
-                if (!showSettings) {
-                    privateApps.forEach { app ->
-                        PrivateAppItem(app.displayName, {
-                            onAppLongClick(app)
-                        }) {
-                            onAppClick(app)
-                        }
-                    }
-                }
-                else {
-                    SettingsSwitch(
-                        label = stringResource(R.string.hide_private_space_in_search),
-                        checked = hiddenPrivateSpaceSetting,
-                        onCheckedChange = { enabled ->
-                            viewModel.setHiddenPrivateSpace(enabled)
-                        },
-                        isTopOfGroup = true,
-                        isBottomOfGroup = true,
-                    )
-                }
-
-                Spacer(Modifier.height(20.dp))
             }
-        } else {
-            LockedAppFolderUI(
-                text = stringResource(R.string.private_space),
-                iconContentDescription = stringResource(R.string.unlock_private_space),
-                unlockClick = {
-                    if (viewModel.canToggleProfile) {
-                        viewModel.togglePrivateSpaceProfile(onLauncherNotDefault = {
-                            //todo: do something here
-                        })
+
+            if (!showSettings) {
+                privateApps.forEach { app ->
+                    PrivateAppItem(app.displayName, {
+                        onAppLongClick(app)
+                    }) {
+                        onAppClick(app)
                     }
                 }
-            )
+            } else {
+                SettingsSwitch(
+                    label = stringResource(R.string.hide_private_space_in_search),
+                    checked = hiddenPrivateSpaceSetting,
+                    onCheckedChange = { enabled ->
+                        viewModel.setHiddenPrivateSpace(enabled)
+                    },
+                    isTopOfGroup = true,
+                    isBottomOfGroup = true,
+                )
+            }
+
+            Spacer(Modifier.height(120.dp))
         }
+    } else {
+         LockedAppFolderUI(
+            text = stringResource(R.string.private_space),
+            image = getPrivateSpaceLockedImage(),
+            iconContentDescription = stringResource(R.string.unlock_private_space),
+            subhead = stringResource(R.string.private_space_is_locked),
+            modifier = modifier.padding(bottom = 86.dp), // Pad the bottom now so it looks centered against the tabs
+            unlockClick = {
+                if (viewModel.canToggleProfile) {
+                    viewModel.togglePrivateSpaceProfile(onLauncherNotDefault = {
+                        //todo: do something here
+                    })
+                }
+            }
+        )
     }
 }
 
