@@ -1,9 +1,15 @@
 package com.geecee.escapelauncher.core.ui.composables
 
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -11,6 +17,11 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -22,6 +33,9 @@ import androidx.compose.ui.unit.dp
 import com.geecee.escapelauncher.core.theme.EscapeThemePreview
 import com.geecee.escapelauncher.core.ui.R
 import com.geecee.escapelauncher.core.ui.vectors.getPrivateSpaceLockedImage
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlin.time.Duration.Companion.milliseconds
 
 /**
  * UI for a locked folder to be used at the bottom of the apps list.
@@ -44,6 +58,20 @@ fun LockedAppFolderUI(
     iconContentDescription: String,
     unlockClick: () -> Unit
 ) {
+    val scope = rememberCoroutineScope()
+    val interactionSource = remember { MutableInteractionSource() }
+    var isMorphed by remember { mutableStateOf(false) }
+    val isPressed by interactionSource.collectIsPressedAsState()
+
+    val buttonHeight = if (isMorphed || isPressed) 90.dp else 100.dp
+
+    val animatedButtonHeight by animateDpAsState(
+        targetValue = buttonHeight, animationSpec = spring(
+            dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow
+        ), label = "UnlockButtonAnimation"
+    )
+
+
     Box(
         modifier = modifier
     ) {
@@ -81,7 +109,23 @@ fun LockedAppFolderUI(
             Spacer(Modifier.height(25.dp))
 
             Button(
-                onClick = unlockClick, modifier = Modifier.size(height = 100.dp, width = 200.dp)
+                onClick = {
+                    if (!isMorphed) {
+                        isMorphed = true
+                        scope.launch {
+                            delay(200.milliseconds)
+                            isMorphed = false
+                        }
+                    } else {
+                        isMorphed = false
+                    }
+
+                    unlockClick()
+                },
+                interactionSource = interactionSource,
+                modifier = Modifier
+                    .height(height = animatedButtonHeight)
+                    .aspectRatio(2f)
             ) {
                 Text(
                     text = stringResource(R.string.unlock),

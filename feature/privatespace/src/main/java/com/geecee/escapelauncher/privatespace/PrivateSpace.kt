@@ -2,6 +2,9 @@ package com.geecee.escapelauncher.privatespace
 
 import android.os.Build
 import androidx.annotation.RequiresApi
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
@@ -62,7 +65,11 @@ fun PrivateSpace(
     val showSettings by viewModel.showSettings.collectAsState()
     val hiddenPrivateSpaceSetting by viewModel.hiddenPrivateSpace.collectAsState(initial = DefaultSettings.HIDE_PRIVATE_SPACE)
 
-    if (isUnlocked) {
+    AnimatedVisibility(
+        visible = isUnlocked,
+        enter = slideInVertically(),
+        exit = slideOutVertically()
+    ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.fillMaxWidth()
@@ -144,7 +151,13 @@ fun PrivateSpace(
 
             Spacer(Modifier.height(120.dp))
         }
-    } else {
+    }
+
+    AnimatedVisibility(
+        visible = !isUnlocked,
+        enter = slideInVertically(),
+        exit = slideOutVertically()
+    ) {
          LockedAppFolderUI(
             text = stringResource(R.string.private_space),
             image = getPrivateSpaceLockedImage(),
