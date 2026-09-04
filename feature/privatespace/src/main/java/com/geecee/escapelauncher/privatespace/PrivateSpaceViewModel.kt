@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.geecee.escapelauncher.core.domain.managedprofiles.CanToggleManagedProfileUseCase
 import com.geecee.escapelauncher.core.domain.managedprofiles.GetManagedProfileAppsUseCase
+import com.geecee.escapelauncher.core.domain.managedprofiles.IsManagedProfileUnlockedUseCase
 import com.geecee.escapelauncher.core.domain.managedprofiles.ManagedProfileType
 import com.geecee.escapelauncher.core.domain.managedprofiles.ObserveManagedProfileUnlockedUseCase
 import com.geecee.escapelauncher.core.domain.managedprofiles.ToggleManagedProfileUseCase
@@ -26,6 +27,7 @@ import javax.inject.Inject
 class PrivateSpaceViewModel @Inject constructor(
     getManagedProfileAppsUseCase: GetManagedProfileAppsUseCase,
     observeManagedProfileUnlockedUseCase: ObserveManagedProfileUnlockedUseCase,
+    isManagedProfileUnlockedUseCase: IsManagedProfileUnlockedUseCase,
     private val toggleManagedProfileUseCase: ToggleManagedProfileUseCase,
     canToggleManagedProfileUseCase: CanToggleManagedProfileUseCase,
     private val launcherBehaviorRepository: LauncherBehaviorRepository,
@@ -38,7 +40,7 @@ class PrivateSpaceViewModel @Inject constructor(
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
-            initialValue = false
+            initialValue = isManagedProfileUnlockedUseCase(ManagedProfileType.PrivateSpace)
         )
 
     val privateSpaceApps: StateFlow<List<InstalledApp>> = getManagedProfileAppsUseCase(ManagedProfileType.PrivateSpace)

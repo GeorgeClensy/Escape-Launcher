@@ -22,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.geecee.escapelauncher.core.theme.EscapeThemePreview
 import kotlinx.coroutines.delay
@@ -35,6 +36,7 @@ fun BouncyMorphingFab(
     contentDescription: String,
     containerColor: Color,
     contentColor: Color,
+    radius: Dp = 16.dp,
     onClick: () -> Unit
 ) {
     val interactionSource = remember { MutableInteractionSource() }
@@ -42,7 +44,7 @@ fun BouncyMorphingFab(
     var isMorphed by remember { mutableStateOf(false) }
     val isPressed by interactionSource.collectIsPressedAsState()
 
-    val radius = if (isMorphed || isPressed) 32.dp else 16.dp
+    val radius = if (isMorphed || isPressed) 32.dp else radius
 
     val animatedRadius by animateDpAsState(
         targetValue = radius,

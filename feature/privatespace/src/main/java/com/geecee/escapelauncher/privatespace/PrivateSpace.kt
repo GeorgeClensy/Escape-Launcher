@@ -7,6 +7,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -14,7 +15,6 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.only
@@ -39,6 +39,7 @@ import com.geecee.escapelauncher.core.model.InstalledApp
 import com.geecee.escapelauncher.core.ui.DefaultSettingsUi
 import com.geecee.escapelauncher.core.ui.R
 import com.geecee.escapelauncher.core.ui.composables.BouncyMorphingFab
+import com.geecee.escapelauncher.core.ui.composables.HomeScreenItem
 import com.geecee.escapelauncher.core.ui.composables.LockedAppFolderUI
 import com.geecee.escapelauncher.core.ui.vectors.getPrivateSpaceLockedImage
 
@@ -65,90 +66,78 @@ fun PrivateSpace(
     val privateApps by viewModel.privateSpaceApps.collectAsState()
     val appsListAlignment by viewModel.appsAlignment.collectAsState(initial = DefaultSettingsUi.APPS_ALIGNMENT)
 
-    AnimatedVisibility(
-        visible = isUnlocked, enter = fadeIn(), exit = fadeOut()
-    ) {
-        Box(Modifier.fillMaxSize()) {
-            Column(
-                horizontalAlignment = appsListAlignment,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                privateApps.forEach { app ->
-                    PrivateAppItem(app.displayName, {
-                        onAppLongClick(app)
-                    }) {
-                        onAppClick(app)
+    Box(modifier) {
+        AnimatedVisibility(
+            visible = isUnlocked, enter = fadeIn(), exit = fadeOut()
+        ) {
+            Box(Modifier.fillMaxSize()) {
+                Column(
+                    horizontalAlignment = appsListAlignment,
+                    verticalArrangement = Arrangement.Bottom,
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    privateApps.forEach { app ->
+                        HomeScreenItem(appName = app.displayName, onAppLongClick = {
+                            onAppLongClick(app)
+                        }, onAppClick = {
+                            onAppClick(app)
+                        }, alignment = appsListAlignment)
                     }
+
+                    Spacer(modifier = Modifier.height(15.dp))
+
+                    Spacer(
+                        modifier = Modifier.height(
+                            WindowInsets.navigationBars.asPaddingValues()
+                                .calculateBottomPadding() + 30.dp + 56.dp
+                        )
+                    )
                 }
 
-                Spacer(modifier = Modifier.height(WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + 30.dp + 56.dp))
-            }
-
-            if (viewModel.canToggleProfile) {
-                BouncyMorphingFab(
-                    icon = Icons.Default.Lock,
-                    contentDescription = stringResource(R.string.lock_private_space),
-                    onClick = {
-                        viewModel.togglePrivateSpaceProfile(onLauncherNotDefault = {})
-                    },
-                    modifier = Modifier
-                        .align(if (appsListAlignment == Alignment.End) Alignment.BottomStart else Alignment.BottomEnd)
-                        .padding(bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + 30.dp + 56.dp + 15.dp), // Pad the bottom now so it looks alright above the tabs
-                    containerColor = MaterialTheme.colorScheme.surfaceContainer,
-                    contentColor = MaterialTheme.colorScheme.onSurface
-                )
+                if (viewModel.canToggleProfile) {
+                    BouncyMorphingFab(
+                        icon = Icons.Default.Lock,
+                        contentDescription = stringResource(R.string.lock_private_space),
+                        onClick = {
+                            viewModel.togglePrivateSpaceProfile(onLauncherNotDefault = {})
+                        },
+                        modifier = Modifier
+                            .align(if (appsListAlignment == Alignment.End) Alignment.BottomStart else Alignment.BottomEnd)
+                            .padding(
+                                bottom = WindowInsets.navigationBars.asPaddingValues()
+                                    .calculateBottomPadding() + 30.dp + 56.dp + 15.dp
+                            ), // Pad the bottom now so it looks alright above the tabs
+                        containerColor = MaterialTheme.colorScheme.tertiary,
+                        contentColor = MaterialTheme.colorScheme.onTertiary,
+                        radius = 24.dp
+                    )
+                }
             }
         }
+
+        AnimatedVisibility(
+            visible = !isUnlocked, enter = fadeIn(), exit = fadeOut()
+        ) {
+            LockedAppFolderUI(
+                text = stringResource(R.string.private_space),
+                image = getPrivateSpaceLockedImage(),
+                iconContentDescription = stringResource(R.string.unlock_private_space),
+                subhead = stringResource(R.string.private_space_is_locked),
+                modifier = modifier
+                    .padding(
+                        bottom = 86.dp,
+                        top = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
+                    ) // Pad the bottom now so it looks centered against the tabs
+                    .windowInsetsPadding(
+                        WindowInsets.safeDrawing.only(WindowInsetsSides.Bottom)
+                    ),
+                unlockClick = {
+                    if (viewModel.canToggleProfile) {
+                        viewModel.togglePrivateSpaceProfile(onLauncherNotDefault = {
+                            //todo: do something here
+                        })
+                    }
+                })
+        }
     }
-
-    AnimatedVisibility(
-        visible = !isUnlocked, enter = fadeIn(), exit = fadeOut()
-    ) {
-        LockedAppFolderUI(
-            text = stringResource(R.string.private_space),
-            image = getPrivateSpaceLockedImage(),
-            iconContentDescription = stringResource(R.string.unlock_private_space),
-            subhead = stringResource(R.string.private_space_is_locked),
-            modifier = modifier
-                .padding(
-                    bottom = 86.dp,
-                    top = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
-                ) // Pad the bottom now so it looks centered against the tabs
-                .windowInsetsPadding(
-                    WindowInsets.safeDrawing.only(WindowInsetsSides.Bottom)
-                ),
-            unlockClick = {
-                if (viewModel.canToggleProfile) {
-                    viewModel.togglePrivateSpaceProfile(onLauncherNotDefault = {
-                        //todo: do something here
-                    })
-                }
-            })
-    }
-}
-
-/**
- * UI component for displaying a single Private Space app item.
- *
- * @param appName The name of the app
- * @param onLongClick The action to perform when the app is long clicked
- * @param onClick The action to perform when the app is clicked
- *
- * @author George Clensy
- */
-@OptIn(ExperimentalFoundationApi::class)
-@Composable
-fun PrivateAppItem(
-    appName: String, onLongClick: () -> Unit, onClick: () -> Unit
-) {
-    val modifier = Modifier
-        .padding(vertical = 15.dp)
-        .combinedClickable(onClick = onClick, onLongClick = onLongClick)
-
-    Text(
-        appName,
-        modifier = modifier,
-        color = MaterialTheme.colorScheme.onSurface,
-        style = MaterialTheme.typography.bodyMedium
-    )
 }
