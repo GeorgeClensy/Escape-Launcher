@@ -1,5 +1,6 @@
 package com.geecee.escapelauncher.privatespace
 
+import androidx.compose.ui.Alignment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.geecee.escapelauncher.core.domain.managedprofiles.CanToggleManagedProfileUseCase
@@ -8,6 +9,7 @@ import com.geecee.escapelauncher.core.domain.managedprofiles.ManagedProfileType
 import com.geecee.escapelauncher.core.domain.managedprofiles.ObserveManagedProfileUnlockedUseCase
 import com.geecee.escapelauncher.core.domain.managedprofiles.ToggleManagedProfileUseCase
 import com.geecee.escapelauncher.core.domain.managedprofiles.ToggleManagedProfileUseCaseOutput
+import com.geecee.escapelauncher.core.domain.repository.settings.AppearanceRepository
 import com.geecee.escapelauncher.core.domain.repository.settings.LauncherBehaviorRepository
 import com.geecee.escapelauncher.core.model.InstalledApp
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -15,6 +17,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -24,8 +27,9 @@ class PrivateSpaceViewModel @Inject constructor(
     getManagedProfileAppsUseCase: GetManagedProfileAppsUseCase,
     observeManagedProfileUnlockedUseCase: ObserveManagedProfileUnlockedUseCase,
     private val toggleManagedProfileUseCase: ToggleManagedProfileUseCase,
-    private val canToggleManagedProfileUseCase: CanToggleManagedProfileUseCase,
-    private val launcherBehaviorRepository: LauncherBehaviorRepository
+    canToggleManagedProfileUseCase: CanToggleManagedProfileUseCase,
+    private val launcherBehaviorRepository: LauncherBehaviorRepository,
+    appearanceRepository: AppearanceRepository
 ) : ViewModel() {
 
     val canToggleProfile: Boolean = canToggleManagedProfileUseCase(ManagedProfileType.PrivateSpace)
@@ -63,6 +67,14 @@ class PrivateSpaceViewModel @Inject constructor(
     fun setHiddenPrivateSpace(enabled: Boolean) {
         viewModelScope.launch {
             launcherBehaviorRepository.setHidePrivateSpace(enabled)
+        }
+    }
+
+    val appsAlignment = appearanceRepository.appsAlignment.map { alignment ->
+        when (alignment) {
+            "Left" -> Alignment.Start
+            "Center" -> Alignment.CenterHorizontally
+            else -> Alignment.End
         }
     }
 }
