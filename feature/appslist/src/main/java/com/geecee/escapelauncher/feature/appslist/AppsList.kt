@@ -6,6 +6,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
@@ -13,6 +14,8 @@ import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.isImeVisible
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
@@ -57,7 +60,7 @@ import kotlinx.coroutines.flow.collectLatest
 /**
  * Main App List composable
  */
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun AppsList(
     modifier: Modifier = Modifier,
@@ -123,6 +126,9 @@ fun AppsList(
         }
     }
 
+    val heightToTopOfTabs = if(!WindowInsets.isImeVisible) WindowInsets.navigationBars.asPaddingValues()
+        .calculateBottomPadding() + 30.dp + 56.dp else 30.dp + 56.dp
+
     Box(
         modifier
             .fillMaxSize()
@@ -139,7 +145,7 @@ fun AppsList(
                 .drawWithContent {
                     drawContent()
                     if (scrollState.canScrollForward || scrollState.canScrollBackward) {
-                        val fadeHeight = 180.dp.toPx()
+                        val fadeHeight = heightToTopOfTabs.toPx() + 50.dp.toPx()
 
                         drawRect(
                             brush = Brush.verticalGradient(
@@ -193,7 +199,7 @@ fun AppsList(
 
             if (isAllApps) {
                 item {
-                    Spacer(modifier = Modifier.height(120.dp))
+                    Spacer(modifier = Modifier.height(heightToTopOfTabs))
                 }
             }
         }
