@@ -6,6 +6,9 @@ import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.gestures.waitForUpOrCancellation
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
@@ -45,12 +48,17 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.boundsInParent
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.SoftwareKeyboardController
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
@@ -229,10 +237,12 @@ fun TabBar(
 
     // Go to all apps when search pressed (for now, we may implement searching within lists later)
     LaunchedEffect(searchExpanded) {
-        if(searchExpanded) {
+        if (searchExpanded) {
             selectedTabIndex.intValue = 0
         }
     }
+
+    var searchBarBounds by remember { mutableStateOf(Rect.Zero) }
 
     Row(
         modifier = modifier
@@ -265,7 +275,23 @@ fun TabBar(
             .horizontalScroll(
                 state = scrollState,
                 reverseScrolling = reverse
-            ),
+            )
+            .pointerInput(searchExpanded) {
+                if (!searchExpanded) return@pointerInput
+
+                awaitEachGesture {
+                    // Intercept down event before child views consume it
+                    val downEvent = awaitFirstDown(pass = PointerEventPass.Initial)
+
+                    // Only proceed if the tap occurred outside the search bar bounds
+                    if (!searchBarBounds.contains(downEvent.position)) {
+                        val upEvent = waitForUpOrCancellation(pass = PointerEventPass.Initial)
+                        if (upEvent != null) {
+                            onSearchExpandedChange(false)
+                        }
+                    }
+                }
+            },
         horizontalArrangement = Arrangement.spacedBy(5.dp)
     ) {
         if (reverse) {
@@ -274,6 +300,9 @@ fun TabBar(
 
         if (!reverse && showSearch) {
             AnimatedPillSearchBar(
+                modifier = Modifier.onGloballyPositioned { coordinates ->
+                    searchBarBounds = coordinates.boundsInParent()
+                },
                 searchText = searchText,
                 isExpanded = searchExpanded,
                 autoFocus = false,
@@ -334,11 +363,14 @@ fun PrevTabBar() {
             TabBar(
                 listOf(
                     TabbedScreen(
-                        title = "All Apps", icon = Icons.AutoMirrored.Filled.List),
+                        title = "All Apps", icon = Icons.AutoMirrored.Filled.List
+                    ),
                     TabbedScreen(
-                        title = "Private", icon = Icons.Default.Lock),
+                        title = "Private", icon = Icons.Default.Lock
+                    ),
                     TabbedScreen(
-                        title = "Money", icon = Icons.Default.AttachMoney),
+                        title = "Money", icon = Icons.Default.AttachMoney
+                    ),
                 ),
                 selectedTabIndex = remember { mutableIntStateOf(0) }
             )
