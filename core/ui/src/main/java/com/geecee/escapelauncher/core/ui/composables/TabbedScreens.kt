@@ -6,6 +6,7 @@ import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
+import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.waitForUpOrCancellation
@@ -14,17 +15,32 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.ime
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyItemScope
+import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.AttachMoney
@@ -71,7 +87,7 @@ import kotlin.time.Duration.Companion.milliseconds
 data class TabbedScreen(
     var title: String,
     var icon: ImageVector,
-    var content: @Composable LazyItemScope.() -> Unit = {}
+    var content: @Composable BoxScope.(PaddingValues) -> Unit = {}
 )
 
 @Composable
@@ -123,20 +139,16 @@ fun Tab(
     }
 
     val containerColor by animateColorAsState(
-        targetValue = targetContainerColor,
-        label = "containerColor"
+        targetValue = targetContainerColor, label = "containerColor"
     )
     val disabledContainerColor by animateColorAsState(
-        targetValue = targetDisabledContainerColor,
-        label = "disabledContainerColor"
+        targetValue = targetDisabledContainerColor, label = "disabledContainerColor"
     )
     val contentColor by animateColorAsState(
-        targetValue = targetContentColor,
-        label = "contentColor"
+        targetValue = targetContentColor, label = "contentColor"
     )
     val disabledContentColor by animateColorAsState(
-        targetValue = targetDisabledContentColor,
-        label = "disabledContentColor"
+        targetValue = targetDisabledContentColor, label = "disabledContentColor"
     )
 
     val innerHorizontalPadding by animateDpAsState(
@@ -187,8 +199,7 @@ fun Tab(
                             .size(28.dp)
                             .graphicsLayer {
                                 compositingStrategy = CompositingStrategy.Offscreen
-                            }
-                    )
+                            })
                 }
                 AnimatedVisibility(showText) {
                     Text(
@@ -227,12 +238,10 @@ fun TabBar(
     }
 
     val leftAlpha by animateFloatAsState(
-        targetValue = if (showLeftFade) 1f else 0f,
-        label = "LeftFadeAlpha"
+        targetValue = if (showLeftFade) 1f else 0f, label = "LeftFadeAlpha"
     )
     val rightAlpha by animateFloatAsState(
-        targetValue = if (showRightFade) 1f else 0f,
-        label = "RightFadeAlpha"
+        targetValue = if (showRightFade) 1f else 0f, label = "RightFadeAlpha"
     )
 
     // Go to all apps when search pressed (for now, we may implement searching within lists later)
@@ -258,8 +267,7 @@ fun TabBar(
                         colors = listOf(Color.Black.copy(alpha = leftAlpha), Color.Transparent),
                         startX = 0f,
                         endX = fadeWidth
-                    ),
-                    blendMode = BlendMode.DstOut
+                    ), blendMode = BlendMode.DstOut
                 )
 
                 // Right edge fade
@@ -268,13 +276,11 @@ fun TabBar(
                         colors = listOf(Color.Transparent, Color.Black.copy(alpha = rightAlpha)),
                         startX = size.width - fadeWidth,
                         endX = size.width
-                    ),
-                    blendMode = BlendMode.DstOut
+                    ), blendMode = BlendMode.DstOut
                 )
             }
             .horizontalScroll(
-                state = scrollState,
-                reverseScrolling = reverse
+                state = scrollState, reverseScrolling = reverse
             )
             .pointerInput(searchExpanded) {
                 if (!searchExpanded) return@pointerInput
@@ -291,8 +297,7 @@ fun TabBar(
                         }
                     }
                 }
-            },
-        horizontalArrangement = Arrangement.spacedBy(5.dp)
+            }, horizontalArrangement = Arrangement.spacedBy(5.dp)
     ) {
         if (reverse) {
             Spacer(Modifier.width(15.dp))
@@ -342,6 +347,100 @@ fun TabBar(
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+fun TabScreen(
+    modifier: Modifier = Modifier,
+    screens: List<TabbedScreen>,
+    selectedTabIndex: MutableIntState,
+    alignment: Alignment.Horizontal = Alignment.Start,
+
+    // Search stuff
+    showSearch: Boolean = true,
+    searchText: String = "",
+    searchExpanded: Boolean = false,
+    onSearchExpandedChange: (Boolean) -> Unit = {},
+    onSearchTextChanged: (String) -> Unit = {},
+    onSearchDone: (String, SoftwareKeyboardController?) -> Unit = { _, _ -> }
+) {
+    val topOfTabBarHeight =
+        56.dp + 30.dp + WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+
+    val pagerState = rememberPagerState(
+        initialPage = 0, initialPageOffsetFraction = 0f, pageCount = { screens.size })
+
+    LaunchedEffect(selectedTabIndex.intValue) {
+        pagerState.animateScrollToPage(selectedTabIndex.intValue)
+    }
+
+    Box(modifier = modifier) {
+        HorizontalPager(
+            state = pagerState, modifier = Modifier.fillMaxSize(), userScrollEnabled = false
+        ) { page ->
+            Box(Modifier.fillMaxSize()) {
+                screens[page].content(this, PaddingValues(bottom = topOfTabBarHeight))
+            }
+        }
+
+        Box(
+            modifier = Modifier
+                .padding(
+                    bottom = WindowInsets.ime.asPaddingValues().calculateBottomPadding()
+                )
+                .fillMaxWidth()
+                .height(topOfTabBarHeight)
+                .background(
+                    Brush.verticalGradient(
+                        colors = listOf(
+                            Color.Transparent,
+                            MaterialTheme.colorScheme.surface,
+                            MaterialTheme.colorScheme.surface,
+                            MaterialTheme.colorScheme.surface
+                        )
+                    )
+                )
+                .align(Alignment.BottomCenter)
+        )
+
+        TabBar(
+            modifier = Modifier
+                .align(
+                    when (alignment) {
+                        Alignment.End -> {
+                            Alignment.BottomEnd
+                        }
+
+                        Alignment.CenterHorizontally -> {
+                            Alignment.BottomCenter
+                        }
+
+                        else -> {
+                            Alignment.BottomStart
+                        }
+                    }
+                )
+                .windowInsetsPadding(
+                    WindowInsets.safeDrawing.only(WindowInsetsSides.Bottom)
+                )
+                .padding(
+                    start = if (alignment == Alignment.Start || alignment == Alignment.CenterHorizontally) 30.dp else 0.dp,
+                    top = 0.dp,
+                    bottom = 30.dp,
+                    end = if (alignment == Alignment.End || alignment == Alignment.CenterHorizontally) 30.dp else 0.dp
+                ),
+            screens = screens,
+            selectedTabIndex = selectedTabIndex,
+            reverse = alignment == Alignment.End,
+            showSearch = showSearch,
+            searchText = searchText,
+            searchExpanded = searchExpanded,
+            onSearchExpandedChange = onSearchExpandedChange,
+            onSearchTextChanged = onSearchTextChanged,
+            onSearchDone = onSearchDone
+        )
+    }
+}
+
 //Previews
 @Preview(device = "id:pixel_10")
 @Composable
@@ -359,20 +458,64 @@ fun PrevTab() {
 @Composable
 fun PrevTabBar() {
     EscapeThemePreview {
-        Box(Modifier.fillMaxSize()) {
-            TabBar(
-                listOf(
-                    TabbedScreen(
-                        title = "All Apps", icon = Icons.AutoMirrored.Filled.List
-                    ),
-                    TabbedScreen(
-                        title = "Private", icon = Icons.Default.Lock
-                    ),
-                    TabbedScreen(
-                        title = "Money", icon = Icons.Default.AttachMoney
-                    ),
+        TabBar(
+            listOf(
+                TabbedScreen(
+                    title = "All Apps", icon = Icons.AutoMirrored.Filled.List
                 ),
-                selectedTabIndex = remember { mutableIntStateOf(0) }
+                TabbedScreen(
+                    title = "Private", icon = Icons.Default.Lock
+                ),
+                TabbedScreen(
+                    title = "Money", icon = Icons.Default.AttachMoney
+                ),
+            ), selectedTabIndex = remember { mutableIntStateOf(0) })
+    }
+}
+
+@Preview(device = "id:pixel_6a")
+@Composable
+fun PrevTabScreen() {
+    EscapeThemePreview {
+        Box(
+            Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.surface)
+        ) {
+            TabScreen(
+                screens = listOf(
+                TabbedScreen(
+                    title = "All Apps", icon = Icons.Rounded.Apps, content = { padding ->
+                        Column(
+                            modifier = Modifier
+                                .padding(horizontal = 30.dp)
+                                .align(Alignment.BottomStart)
+                                .fillMaxSize()
+                                .verticalScroll(rememberScrollState()),
+                            verticalArrangement = Arrangement.Bottom
+                        ) {
+                            Spacer(Modifier.height(30.dp))
+                            repeat(30) {
+                                Text(
+                                    "App List Item $it",
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    color = MaterialTheme.colorScheme.onSurface,
+                                    modifier = Modifier.padding(vertical = 10.dp)
+                                )
+                            }
+                            Spacer(Modifier.height(padding.calculateBottomPadding()))
+                        }
+                    }),
+                TabbedScreen(
+                    title = "Private", icon = Icons.Default.Lock, content = {
+                        Text("Locked Content", Modifier.padding(16.dp))
+                    }),
+                TabbedScreen(
+                    title = "Money", icon = Icons.Default.AttachMoney
+                ),
+            ),
+                selectedTabIndex = remember { mutableIntStateOf(0) },
+                modifier = Modifier.fillMaxSize()
             )
         }
     }

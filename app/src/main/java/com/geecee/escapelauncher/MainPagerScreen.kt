@@ -15,17 +15,25 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Work
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material.icons.rounded.Apps
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.platform.SoftwareKeyboardController
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.geecee.escapelauncher.core.common.DefaultSettings
 import com.geecee.escapelauncher.core.domain.managedprofiles.ManagedProfileType
+import com.geecee.escapelauncher.core.model.InstalledApp
+import com.geecee.escapelauncher.core.ui.DefaultSettingsUi
 import com.geecee.escapelauncher.core.ui.composables.OpenChallenge
+import com.geecee.escapelauncher.core.ui.composables.TabScreen
 import com.geecee.escapelauncher.core.ui.composables.TabbedScreen
 import com.geecee.escapelauncher.core.ui.utils.doHapticFeedBack
 import com.geecee.escapelauncher.feature.appslist.AppsList
@@ -89,7 +97,6 @@ fun MainPagerScreen(
                 title = "Private", icon = Icons.Default.Lock, content = {
                     PrivateSpace(
                         modifier = Modifier
-                            .fillParentMaxSize()
                             .fillMaxSize(),
                         onAppClick = { app ->
                             viewModel.openApp(
@@ -134,6 +141,23 @@ fun MainPagerScreen(
         }
     )
 
+    val screenTimePageIndex = if (!hideScreenTimePage) 0 else -1
+    val homePageIndex = if (hideScreenTimePage) 0 else 1
+    val appsListPageIndex = if (hideScreenTimePage) 1 else 2
+
+    val isAppsListVisible = viewModel.pagerState.currentPage == appsListPageIndex
+    val autoOpenSearch by appsListViewModel.searchAutoOpen.collectAsState(initial = DefaultSettings.SEARCH_AUTO_OPEN)
+
+    LaunchedEffect(isAppsListVisible) {
+        if (!isAppsListVisible) {
+            appsListViewModel.onSearchExpandedChanged(false)
+            appsListViewModel.setBottomSheetVisible(visibility = false)
+            appsListViewModel.setShowWorkApps(show = false)
+        } else if (autoOpenSearch) {
+            appsListViewModel.onSearchExpandedChanged(true)
+        }
+    }
+
     // Home Screen Pages
     HorizontalPager(
         state = viewModel.pagerState,
@@ -157,10 +181,6 @@ fun MainPagerScreen(
                     }
                 })
     ) { page ->
-        val screenTimePageIndex = if (!hideScreenTimePage) 0 else -1
-        val homePageIndex = if (hideScreenTimePage) 0 else 1
-        val appsListPageIndex = if (hideScreenTimePage) 1 else 2
-
         when (page) {
             screenTimePageIndex -> ScreenTimeDashboard()
 
@@ -171,21 +191,69 @@ fun MainPagerScreen(
                     })
             }, onGoHomeRequest = { globalViewModel.requestToGoHome() })
 
-            appsListPageIndex -> AppsList(
-                appsListViewModel = appsListViewModel,
-                scrollState = viewModel.appsListScrollState,
-                isBeingShown = viewModel.pagerState.currentPage == appsListPageIndex,
-                onGoHomeRequest = {
-                    globalViewModel.requestToGoHome()
-                },
-                onAppOpened = { app ->
+            appsListPageIndex -> {
+                val searchText by appsListViewModel.searchText.collectAsState()
+                val searchExpanded by appsListViewModel.searchExpanded.collectAsState()
+                val showSearchBox by appsListViewModel.showSearchBox.collectAsState(initial = DefaultSettings.SHOW_SEARCH_BOX)
+                val appsListAlignment by appsListViewModel.appsAlignment.collectAsState(initial = DefaultSettingsUi.APPS_ALIGNMENT)
+                val selectedTabIndex = remember { mutableIntStateOf(0) }
+                val apps by appsListViewModel.apps.collectAsState()
+                val autoOpenAppInSearch by appsListViewModel.automaticallyOpenAppsInSearch.collectAsState(initial = DefaultSettings.AUTOMATICALLY_OPEN_APPS_IN_SEARCH)
+
+                val handleAppClick: (InstalledApp) -> Unit = { app ->
                     viewModel.openApp(
                         app = app, overrideChallenge = false, onAppOpened = {
                             screenTimeViewModel.onAppOpened(it)
+                            appsListViewModel.onSearchExpandedChanged(false)
+                            doHapticFeedBack(haptics, hapticFeedbackEnabled)
                         })
-                },
-                tabs = appsListTabs.filterNotNull()
-            )
+                }
+
+                TabScreen(
+                    screens = listOf(
+                        TabbedScreen(
+                            title = "All Apps",
+                            icon = Icons.Rounded.Apps,
+                            content = { padding ->
+                                AppsList(
+                                    padding = padding,
+                                    onAppOpened = { app ->
+                                        handleAppClick(app)
+                                    },
+                                    onGoHomeRequest = {
+                                        globalViewModel.requestToGoHome()
+                                    },
+                                    appsListViewModel = appsListViewModel,
+                                    screenTimeViewModel = screenTimeViewModel
+                                )
+                            }
+                        )
+                    ) + appsListTabs.filterNotNull(),
+                    selectedTabIndex = selectedTabIndex,
+                    alignment = appsListAlignment,
+                    showSearch = showSearchBox,
+                    searchText = searchText,
+                    searchExpanded = searchExpanded,
+                    onSearchExpandedChange = {
+                        appsListViewModel.onSearchExpandedChanged(it)
+                        doHapticFeedBack(haptics, hapticFeedbackEnabled)
+                    },
+                    onSearchTextChanged = { query: String ->
+                        appsListViewModel.onSearchTextChanged(query)
+                        if (autoOpenAppInSearch && query.length >= 2 && apps.size == 1) {
+                            handleAppClick(apps.first())
+                        }
+                    },
+                    onSearchDone = { _: String, keyboardController: SoftwareKeyboardController? ->
+                        if (apps.isNotEmpty()) {
+                            keyboardController?.hide()
+                            handleAppClick(apps.first())
+                        } else {
+                            doHapticFeedBack(haptics, hapticFeedbackEnabled)
+                        }
+                    }
+                )
+            }
         }
     }
 

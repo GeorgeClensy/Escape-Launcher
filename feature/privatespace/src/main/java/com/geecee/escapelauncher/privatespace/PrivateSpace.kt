@@ -70,7 +70,7 @@ fun PrivateSpace(
         AnimatedVisibility(
             visible = isUnlocked, enter = fadeIn(), exit = fadeOut()
         ) {
-            Box(Modifier.fillMaxSize()) {
+            Box(Modifier.fillMaxSize().padding(horizontal = 30.dp)) {
                 Column(
                     horizontalAlignment = appsListAlignment,
                     verticalArrangement = Arrangement.Bottom,
