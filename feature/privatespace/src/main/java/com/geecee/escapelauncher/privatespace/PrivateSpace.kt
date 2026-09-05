@@ -5,8 +5,6 @@ import androidx.annotation.RequiresApi
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -22,11 +20,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -53,7 +51,6 @@ import com.geecee.escapelauncher.core.ui.vectors.getPrivateSpaceLockedImage
  *
  * @author George Clensy
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @RequiresApi(Build.VERSION_CODES.VANILLA_ICE_CREAM)
 @Composable
 fun PrivateSpace(
@@ -65,6 +62,9 @@ fun PrivateSpace(
     val isUnlocked by viewModel.isUnlocked.collectAsState()
     val privateApps by viewModel.privateSpaceApps.collectAsState()
     val appsListAlignment by viewModel.appsAlignment.collectAsState(initial = DefaultSettingsUi.APPS_ALIGNMENT)
+    val scrollState = rememberScrollState()
+
+    val heightToTopOfTabs = 30.dp + 56.dp
 
     Box(modifier) {
         AnimatedVisibility(
@@ -74,8 +74,16 @@ fun PrivateSpace(
                 Column(
                     horizontalAlignment = appsListAlignment,
                     verticalArrangement = Arrangement.Bottom,
-                    modifier = Modifier.fillMaxSize()
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .verticalScroll(scrollState)
                 ) {
+                    val statusBarHeight =
+                        WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
+                    Spacer(
+                        modifier = Modifier.height(statusBarHeight + 10.dp)
+                    )
+
                     privateApps.forEach { app ->
                         HomeScreenItem(appName = app.displayName, onAppLongClick = {
                             onAppLongClick(app)
@@ -89,7 +97,7 @@ fun PrivateSpace(
                     Spacer(
                         modifier = Modifier.height(
                             WindowInsets.navigationBars.asPaddingValues()
-                                .calculateBottomPadding() + 30.dp + 56.dp
+                                .calculateBottomPadding() + heightToTopOfTabs
                         )
                     )
                 }
@@ -105,7 +113,7 @@ fun PrivateSpace(
                             .align(if (appsListAlignment == Alignment.End) Alignment.BottomStart else Alignment.BottomEnd)
                             .padding(
                                 bottom = WindowInsets.navigationBars.asPaddingValues()
-                                    .calculateBottomPadding() + 30.dp + 56.dp + 15.dp
+                                    .calculateBottomPadding() + heightToTopOfTabs + 15.dp
                             ), // Pad the bottom now so it looks alright above the tabs
                         containerColor = MaterialTheme.colorScheme.tertiary,
                         contentColor = MaterialTheme.colorScheme.onTertiary,
