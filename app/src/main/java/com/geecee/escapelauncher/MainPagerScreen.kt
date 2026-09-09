@@ -62,7 +62,7 @@ import kotlin.time.Duration.Companion.milliseconds
 @Composable
 fun MainPagerScreen(
     viewModel: MainPagerScreenViewModel = hiltViewModel(),
-    globalViewModel: GlobalViewModel = hiltViewModel(),
+    globalViewModel: GlobalViewModel = hiltViewModel(LocalActivity.current as ComponentActivity),
     appsListViewModel: AppsListViewModel = hiltViewModel(),
     screenTimeViewModel: ScreenTimeViewModel = hiltViewModel(LocalActivity.current as ComponentActivity),
     onOpenSettings: () -> Unit
