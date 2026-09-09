@@ -1,6 +1,7 @@
 package com.geecee.escapelauncher.core.theme
 
 import android.app.Activity
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -28,7 +29,7 @@ fun EscapeTheme(
 ) {
     val context = LocalContext.current
     val colorScheme by themeViewModel.theme.collectAsState(AppColourScheme.ESCAPE_THEME)
-    val font by themeViewModel.font.collectAsState("Jost")
+    val font by themeViewModel.font.collectAsState("Outfit") // Must match DefaultSettings.FONT
 
     val fontFamily = remember(fontName, font) {
         getFontFamily(
@@ -37,7 +38,11 @@ fun EscapeTheme(
         )
     }
 
-    val resolvedColorScheme = (theme ?: colorScheme).resolveColorScheme()
+    // Generating a scheme from a seed walks ~50 HCT colours; only redo it when the input changes
+    val selectedScheme = theme ?: colorScheme
+    val isDark = isSystemInDarkTheme()
+    val resolvedColorScheme = remember(selectedScheme, isDark) { selectedScheme.resolveColorScheme(context, isDark) }
+    val typography = remember(fontFamily) { escapeType(fontFamily) }
 
     // Keep status bar icons readable against the themed background (dark icons on a light surface)
     val view = LocalView.current
@@ -52,7 +57,7 @@ fun EscapeTheme(
 
     MaterialTheme(
         colorScheme = resolvedColorScheme,
-        typography = escapeType(fontFamily),
+        typography = typography,
         content = content
     )
 }

@@ -24,7 +24,8 @@ fun WidgetRenderer(
 ) {
     val context = LocalContext.current
     
-    if (appWidgetId == AppWidgetManager.INVALID_APPWIDGET_ID) return
+    // Widget IDs are always positive; 0 is INVALID_APPWIDGET_ID and -1 is the launcher's "no widget" default
+    if (appWidgetId <= AppWidgetManager.INVALID_APPWIDGET_ID) return
 
     // Create or retrieve the host view
     val hostView = remember(appWidgetId) {
