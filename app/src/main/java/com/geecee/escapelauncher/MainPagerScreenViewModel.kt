@@ -8,11 +8,9 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.pager.PagerState
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.geecee.escapelauncher.core.domain.apps.GetFavoriteAppsUseCase
 import com.geecee.escapelauncher.core.domain.apps.LaunchAppUseCase
 import com.geecee.escapelauncher.core.domain.apps.TryOpenAppResult
 import com.geecee.escapelauncher.core.domain.apps.TryOpenAppUseCase
@@ -28,24 +26,22 @@ import com.geecee.escapelauncher.core.model.InstalledApp
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import jakarta.inject.Inject
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import kotlin.time.Duration.Companion.milliseconds
 
 @HiltViewModel
 class MainPagerScreenViewModel @Inject constructor(
     @ApplicationContext context: Context,
     private val onboardingRepository: OnboardingRepository,
-    screenTimeSettingsRepository: ScreenTimeSettingsRepository,
+    private val screenTimeSettingsRepository: ScreenTimeSettingsRepository,
     launcherBehaviorRepository: LauncherBehaviorRepository,
-    private val getFavoriteAppsUseCase: GetFavoriteAppsUseCase,
     private val tryOpenAppUseCase: TryOpenAppUseCase,
     private val launchAppUseCase: LaunchAppUseCase,
     private val managedProfileExistsUseCase: ManagedProfileExistsUseCase,
@@ -88,8 +84,6 @@ class MainPagerScreenViewModel @Inject constructor(
 
     val interactionSource = MutableInteractionSource()
 
-    val favoriteApps = mutableStateListOf<InstalledApp>()
-
     val appsListScrollState = LazyListState()
 
     val pagerState = PagerState(
@@ -122,13 +116,14 @@ class MainPagerScreenViewModel @Inject constructor(
 
     init {
         updateLauncherStatus()
+
+        // The pager is constructed before DataStore has emitted, so `hideScreenTimePage` is still
+        // its placeholder value at that point. Re-anchor the pager on the main page once the real
+        // value is known, and again whenever the setting is toggled (the page indices shift).
         viewModelScope.launch {
-            getFavoriteAppsUseCase().collect { newFavoriteApps ->
-                withContext(Dispatchers.Main) {
-                    favoriteApps.clear()
-                    favoriteApps.addAll(newFavoriteApps)
-                }
-            }
+            screenTimeSettingsRepository.hideScreenTimePage
+                .distinctUntilChanged()
+                .collect { hide -> pagerState.scrollToPage(if (hide) 0 else 1) }
         }
     }
 
