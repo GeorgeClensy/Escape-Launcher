@@ -121,6 +121,7 @@ fun TodoPage(
     val configured = uiState.syncStatus.state != TodoSyncStatus.State.NOT_CONFIGURED
     val hasDone = uiState.items.any { it.task.checked }
     val primary = MaterialTheme.colorScheme.primary
+    val statusText = statusText(uiState.syncStatus)
 
     Column(Modifier.fillMaxSize()) {
         LazyColumn(
@@ -140,13 +141,18 @@ fun TodoPage(
                 )
             }
 
-            item(key = "status") {
-                SyncStatusLine(
-                    status = uiState.syncStatus,
-                    modifier = Modifier
-                        .padding(top = 6.dp)
-                        .then(if (configured) Modifier else Modifier.clickable { onOpenSettings() })
-                )
+            statusText?.let { status ->
+                item(key = "status") {
+                    Text(
+                        text = status,
+                        color = primary,
+                        style = MaterialTheme.typography.bodySmall,
+                        modifier = Modifier
+                            .padding(top = 6.dp)
+                            .then(if (configured) Modifier else Modifier.clickable { onOpenSettings() })
+                            .alpha(MutedAlpha)
+                    )
+                }
             }
 
             item(key = "gap") { Spacer(Modifier.height(40.dp)) }
@@ -490,26 +496,19 @@ private fun InlineTaskField(
 }
 
 /**
- * One muted line under the title. Silent while everything is fine; speaks up when the page is
- * not connected, offline with unsent edits, or Todoist refused the token.
+ * Nothing is shown while everything works. The line only appears when the page is not connected,
+ * offline with unsent edits, or Todoist refused the token.
  */
 @Composable
-private fun SyncStatusLine(status: TodoSyncStatus, modifier: Modifier = Modifier) {
+private fun statusText(status: TodoSyncStatus): String? {
     val pendingText = if (status.pendingCount > 0) stringResource(R.string.sync_pending, status.pendingCount) else null
-    val text = when (status.state) {
+    return when (status.state) {
         TodoSyncStatus.State.NOT_CONFIGURED -> stringResource(R.string.connect_todoist_in_settings)
         TodoSyncStatus.State.OFFLINE -> listOfNotNull(stringResource(R.string.sync_offline), pendingText).joinToString(" · ")
         TodoSyncStatus.State.AUTH_ERROR -> stringResource(R.string.sync_auth_error)
         TodoSyncStatus.State.ERROR -> listOfNotNull(stringResource(R.string.sync_error), pendingText).joinToString(" · ")
-        TodoSyncStatus.State.SYNCING, TodoSyncStatus.State.IDLE -> pendingText
+        TodoSyncStatus.State.SYNCING, TodoSyncStatus.State.IDLE -> null
     }
-
-    Text(
-        text = text.orEmpty(),
-        color = MaterialTheme.colorScheme.primary,
-        style = MaterialTheme.typography.bodySmall,
-        modifier = modifier.alpha(MutedAlpha)
-    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
