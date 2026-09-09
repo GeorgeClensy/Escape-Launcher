@@ -40,7 +40,7 @@ class ClearOldDataWorker @AssistedInject constructor(
 
             WorkManager.getInstance(context).enqueueUniquePeriodicWork(
                 "ClearOldDataWorker",
-                ExistingPeriodicWorkPolicy.UPDATE,
+                ExistingPeriodicWorkPolicy.KEEP,
                 workRequest
             )
         }

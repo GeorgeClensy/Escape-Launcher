@@ -55,7 +55,7 @@
     <string name="hide_private_space_in_search">Espacio privado oculto</string>
     <string name="haptic_feedback">Respuesta háptica</string>
     <string name="done">Hecho</string>
-    <string name="syncLightDark">Sincronizar con sistema claro/oscuro</string>
+    <string name="show_wallpaper">Mostrar fondo de pantalla</string>
     <string name="match_system_wallpaper">Sincronizar fondo con tema</string>
     <string name="date">Fecha</string>
     <string name="home_screen_options">Opciones de Inicio</string>

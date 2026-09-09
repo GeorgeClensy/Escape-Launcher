@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Fonts are looked up by name at runtime via Resources.getIdentifier (see FontResolver), so the
+    release resource shrinker sees no static reference to them and strips every res/font entry.
+-->
+<resources xmlns:tools="http://schemas.android.com/tools"
+    tools:keep="@font/*" />

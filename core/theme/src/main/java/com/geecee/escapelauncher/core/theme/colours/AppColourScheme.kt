@@ -1,5 +1,6 @@
 package com.geecee.escapelauncher.core.theme.colours
 
+import android.content.Context
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.ColorScheme
@@ -60,14 +61,19 @@ enum class AppColourScheme(val id: Int, val seedColor: Color? = null) {
  */
 @Composable
 fun AppColourScheme.resolveColorScheme(): ColorScheme {
-    val isDark = isSystemInDarkTheme()
+    return resolveColorScheme(LocalContext.current, isSystemInDarkTheme())
+}
 
+/**
+ * Non-composable variant of [resolveColorScheme] so callers can cache the result with `remember`;
+ * generating a scheme from a seed evaluates ~50 HCT colours and shouldn't run every recomposition.
+ */
+fun AppColourScheme.resolveColorScheme(context: Context, isDark: Boolean): ColorScheme {
     return when (this) {
         AppColourScheme.ESCAPE_THEME -> darkSchemeEscapeTheme
-        
+
         AppColourScheme.SYSTEM -> {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                val context = LocalContext.current
                 if (isDark) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
             } else {
                 if (isDark) darkColorScheme() else lightColorScheme()
