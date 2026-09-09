@@ -79,7 +79,7 @@
     <string name="hide_private_space_in_search">Spazio privato nascosto</string>
     <string name="haptic_feedback">Feedback aptico</string>
     <string name="done">Fatto</string>
-    <string name="syncLightDark">Sincronizza con sistema chiaro/scuro</string>
+    <string name="show_wallpaper">Mostra sfondo</string>
     <string name="match_system_wallpaper">Adatta sfondo sistema al tema</string>
     <string name="date">Data</string>
     <string name="home_screen_options">Opzioni Schermata Home</string>

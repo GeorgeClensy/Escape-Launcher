@@ -51,11 +51,6 @@
             </intent-filter>
         </activity>
 
-        <activity
-            android:name="com.geecee.escapelauncher.feature.newwidgets.ConfigureWidgetActivity"
-            android:theme="@android:style/Theme.Translucent.NoTitleBar"
-            android:exported="false" />
-
         <service
             android:name=".core.data.system.EscapeAccessibilityService"
             android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE"
@@ -70,9 +65,21 @@
                 android:resource="@xml/accessibility_service_config" />
         </service>
 
+        <!-- WorkManager is initialised on demand from EscapeApplication with a Hilt worker factory -->
+        <provider
+            android:name="androidx.startup.InitializationProvider"
+            android:authorities="${applicationId}.androidx-startup"
+            android:exported="false"
+            tools:node="merge">
+            <meta-data
+                android:name="androidx.work.WorkManagerInitializer"
+                android:value="androidx.startup"
+                tools:node="remove" />
+        </provider>
+
         <provider
             android:name="androidx.core.content.FileProvider"
-            android:authorities="com.geecee.escapelauncher.dev.fileprovider"
+            android:authorities="${applicationId}.fileprovider"
             android:exported="false"
             android:grantUriPermissions="true">
             <meta-data
