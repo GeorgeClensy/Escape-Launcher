@@ -12,7 +12,9 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
@@ -43,7 +45,12 @@ class OnboardingViewModel @Inject constructor(
 
     fun completeOnboarding() {
         viewModelScope.launch {
-            onboardingRepository.setFirstTime(false)
+            // The caller immediately pops this nav entry, which clears this ViewModel and cancels
+            // viewModelScope. Make sure the DataStore write still completes or the user would be
+            // shown onboarding again on the next launch.
+            withContext(NonCancellable) {
+                onboardingRepository.setFirstTime(false)
+            }
         }
     }
 

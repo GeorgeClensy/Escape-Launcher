@@ -43,7 +43,8 @@ class ScreenTimeRepositoryImpl @Inject constructor(
     }
 
     override suspend fun onAppClosed(packageName: String): Int {
-        val openTime = appSessions[packageName] ?: return 0
+        // Remove first so a concurrent close (screen-off receiver + onResume) can't double count
+        val openTime = appSessions.remove(packageName) ?: return 0
         val usageTime = System.currentTimeMillis() - openTime
         val currentDate = getCurrentDate()
         val appKey = "$packageName-$currentDate"
@@ -58,7 +59,6 @@ class ScreenTimeRepositoryImpl @Inject constructor(
                     totalTime = updatedTime
                 )
             )
-            appSessions.remove(packageName)
             1
         } catch (e: Exception) {
             Log.e("ScreenTimeRepository", "Error saving app usage: ${e.message}")

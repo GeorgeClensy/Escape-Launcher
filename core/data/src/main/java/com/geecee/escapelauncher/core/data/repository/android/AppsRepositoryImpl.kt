@@ -2,6 +2,8 @@ package com.geecee.escapelauncher.core.data.repository.android
 
 import android.content.Context
 import android.content.pm.LauncherApps
+import android.os.Handler
+import android.os.Looper
 import android.os.Process
 import android.os.UserHandle
 import android.os.UserManager
@@ -15,6 +17,7 @@ import jakarta.inject.Inject
 import jakarta.inject.Singleton
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -22,7 +25,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.milliseconds
@@ -49,7 +51,7 @@ class AppsRepositoryImpl @Inject constructor(
         )
 
     private val refreshTrigger =
-        MutableSharedFlow<Unit>(replay = 1) // Using this to debounce rapid updates
+        MutableSharedFlow<Unit>(replay = 1, onBufferOverflow = BufferOverflow.DROP_OLDEST) // Using this to debounce rapid updates
 
     private val callback = object : LauncherApps.Callback() {
         override fun onPackageAdded(packageName: String, user: UserHandle) = reloadApps()
@@ -60,13 +62,17 @@ class AppsRepositoryImpl @Inject constructor(
     }
 
     init {
-        launcherApps.registerCallback(callback)
+        // registerCallback creates a Handler on the calling thread, so give it an explicit looper
+        // in case this repository is first constructed off the main thread (e.g. from a worker)
+        launcherApps.registerCallback(callback, Handler(Looper.getMainLooper()))
 
-        // Listen for triggers and perform the actual reload with a debounce
+        // Load the initial list straight away; the splash screen waits on it
+        scope.launch { performReload() }
+
+        // Package change callbacks are debounced so batch installs/updates only trigger one reload
         scope.launch {
             refreshTrigger
-                .onStart { emit(Unit) }
-                .debounce(500.milliseconds) // Wait 500ms for batch installs/updates to settle
+                .debounce(500.milliseconds)
                 .collect { performReload() }
         }
     }
@@ -149,6 +155,9 @@ class AppsRepositoryImpl @Inject constructor(
         }
 
         return try {
+            // getShortcuts throws a SecurityException unless we are the default launcher
+            if (!launcherApps.hasShortcutHostPermission()) return emptyList()
+
             launcherApps.getShortcuts(query, Process.myUserHandle())
                 ?.sortedBy { it.rank }
                 ?.map { AppShortcut(it.id, it.shortLabel?.toString() ?: "", it.rank) }
