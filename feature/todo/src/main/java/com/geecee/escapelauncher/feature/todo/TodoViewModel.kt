@@ -27,6 +27,7 @@ data class TodoUiState(
     val items: List<TodoItemUi> = emptyList(),
     val syncStatus: TodoSyncStatus = TodoSyncStatus(),
     val projectName: String = "",
+    val connected: Boolean = false,
     val loaded: Boolean = false
 )
 
@@ -40,8 +41,8 @@ class TodoViewModel @Inject constructor(
     val hapticFeedBackEnabled = launcherBehaviorRepository.hapticFeedBackEnabled
 
     /**
-     * Completing a top-level task removes it from the list in Todoist. Keep it visible, struck
-     * through, until the page is left so a mis-tap can be undone in place.
+     * Completing a top-level task removes it from the list. Keep it visible, struck through,
+     * until the page is left so a mis-tap can be undone in place.
      */
     private val recentlyCompleted = MutableStateFlow<Set<String>>(emptySet())
 
@@ -49,14 +50,21 @@ class TodoViewModel @Inject constructor(
         repository.tasks,
         repository.syncStatus,
         settings.todoistProjectName,
+        settings.todoistToken,
         recentlyCompleted
-    ) { tasks, status, projectName, recent ->
+    ) { tasks, status, projectName, token, recent ->
         val steps = tasks.filter { it.parentId != null }.groupBy { it.parentId!! }
         val items = tasks
             .filter { it.parentId == null && (!it.checked || it.id in recent) }
             .sortedBy { it.order }
             .map { task -> TodoItemUi(task, steps[task.id].orEmpty().sortedBy { it.order }) }
-        TodoUiState(items = items, syncStatus = status, projectName = projectName, loaded = true)
+        TodoUiState(
+            items = items,
+            syncStatus = status,
+            projectName = projectName,
+            connected = token.isNotBlank(),
+            loaded = true
+        )
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5_000),
@@ -71,7 +79,7 @@ class TodoViewModel @Inject constructor(
         recentlyCompleted.value = emptySet()
     }
 
-    /** Hides the completed tasks that are still on screen. They are already done in Todoist. */
+    /** Hides the completed tasks that are still on screen. They stay marked done underneath. */
     fun clearDone() {
         recentlyCompleted.value = emptySet()
     }

@@ -105,10 +105,7 @@ fun MainPagerScreen(
         when (pages.getOrNull(page)) {
             PagerPage.SCREEN_TIME -> ScreenTimeDashboard()
 
-            PagerPage.TODO -> TodoPage(
-                isBeingShown = viewModel.pagerState.currentPage == page,
-                onOpenSettings = onOpenSettings
-            )
+            PagerPage.TODO -> TodoPage(isBeingShown = viewModel.pagerState.currentPage == page)
 
             PagerPage.HOME -> HomeScreen(
                 onAppOpened = { app ->

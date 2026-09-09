@@ -88,7 +88,6 @@ private const val MutedAlpha = 0.5f
 @Composable
 fun TodoPage(
     isBeingShown: Boolean,
-    onOpenSettings: () -> Unit,
     viewModel: TodoViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -118,7 +117,6 @@ fun TodoPage(
         }
     }
 
-    val configured = uiState.syncStatus.state != TodoSyncStatus.State.NOT_CONFIGURED
     val hasDone = uiState.items.any { it.task.checked }
     val primary = MaterialTheme.colorScheme.primary
     val statusText = statusText(uiState.syncStatus)
@@ -149,7 +147,6 @@ fun TodoPage(
                         style = MaterialTheme.typography.bodySmall,
                         modifier = Modifier
                             .padding(top = 6.dp)
-                            .then(if (configured) Modifier else Modifier.clickable { onOpenSettings() })
                             .alpha(MutedAlpha)
                     )
                 }
@@ -157,11 +154,9 @@ fun TodoPage(
 
             item(key = "gap") { Spacer(Modifier.height(40.dp)) }
 
-            if (configured) {
-                item(key = "input") {
-                    FocusLine(onAdd = { viewModel.add(it) })
-                    Spacer(Modifier.height(14.dp))
-                }
+            item(key = "input") {
+                FocusLine(onAdd = { viewModel.add(it) })
+                Spacer(Modifier.height(14.dp))
             }
 
             uiState.items.forEach { item ->
@@ -276,6 +271,7 @@ fun TodoPage(
     sheetTask?.let { task ->
         TaskActionsSheet(
             task = task,
+            connected = uiState.connected,
             onDismiss = { sheetTask = null },
             onAddStep = {
                 addingStepUnder = task.id
@@ -496,14 +492,14 @@ private fun InlineTaskField(
 }
 
 /**
- * Nothing is shown while everything works. The line only appears when the page is not connected,
- * offline with unsent edits, or Todoist refused the token.
+ * Nothing is shown while everything works, and nothing at all for a local-only list. The line
+ * only appears when a connected list is offline with unsent edits, or Todoist refused the token.
  */
 @Composable
 private fun statusText(status: TodoSyncStatus): String? {
     val pendingText = if (status.pendingCount > 0) stringResource(R.string.sync_pending, status.pendingCount) else null
     return when (status.state) {
-        TodoSyncStatus.State.NOT_CONFIGURED -> stringResource(R.string.connect_todoist_in_settings)
+        TodoSyncStatus.State.LOCAL -> null
         TodoSyncStatus.State.OFFLINE -> listOfNotNull(stringResource(R.string.sync_offline), pendingText).joinToString(" · ")
         TodoSyncStatus.State.AUTH_ERROR -> stringResource(R.string.sync_auth_error)
         TodoSyncStatus.State.ERROR -> listOfNotNull(stringResource(R.string.sync_error), pendingText).joinToString(" · ")
@@ -515,6 +511,7 @@ private fun statusText(status: TodoSyncStatus): String? {
 @Composable
 private fun TaskActionsSheet(
     task: TodoTask,
+    connected: Boolean,
     onDismiss: () -> Unit,
     onAddStep: () -> Unit,
     onRename: () -> Unit,
@@ -538,7 +535,7 @@ private fun TaskActionsSheet(
             }
             SheetAction(stringResource(R.string.rename), onRename)
             // Tasks created offline still carry a local UUID; Todoist can't open those yet.
-            if ('-' !in task.id) {
+            if (connected && '-' !in task.id) {
                 SheetAction(stringResource(R.string.open_in_todoist), onOpenInTodoist)
             }
         }

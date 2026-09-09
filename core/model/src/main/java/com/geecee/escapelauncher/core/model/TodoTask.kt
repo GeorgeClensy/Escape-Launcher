@@ -19,13 +19,15 @@ data class TodoProject(
 )
 
 /**
- * Where the to-do list stands with respect to its remote (Todoist).
+ * Where the to-do list stands with respect to its optional remote (Todoist).
+ *
+ * [State.LOCAL] is the default: tasks live on the phone only and nothing is synced.
  */
 data class TodoSyncStatus(
-    val state: State = State.NOT_CONFIGURED,
+    val state: State = State.LOCAL,
     val lastSyncedAt: Long? = null,
     val pendingCount: Int = 0,
     val message: String? = null
 ) {
-    enum class State { NOT_CONFIGURED, IDLE, SYNCING, OFFLINE, AUTH_ERROR, ERROR }
+    enum class State { LOCAL, IDLE, SYNCING, OFFLINE, AUTH_ERROR, ERROR }
 }

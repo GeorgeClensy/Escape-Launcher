@@ -13,7 +13,6 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -26,7 +25,7 @@ data class TodoistSettingsUiState(
 
 @HiltViewModel
 class TodoistSettingsViewModel @Inject constructor(
-    private val settings: TodoSettingsRepository,
+    settings: TodoSettingsRepository,
     private val repository: TodoRepository
 ) : ViewModel() {
 
@@ -46,13 +45,7 @@ class TodoistSettingsViewModel @Inject constructor(
     fun connect(token: String) {
         viewModelScope.launch {
             _connecting.value = true
-            val previous = settings.todoistToken.first()
-            val trimmed = token.trim()
-            if (trimmed != previous) {
-                settings.setTodoistToken(trimmed)
-                settings.setTodoistSyncToken("")
-            }
-            repository.syncNow()
+            repository.connect(token)
             _connecting.value = false
         }
     }

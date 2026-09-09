@@ -145,6 +145,7 @@
     <string name="show_tasks_page">Show tasks page</string>
     <string name="todoist">Todoist</string>
     <string name="todoist_api_token">API token</string>
+    <string name="todoist_local_help">Tasks are kept on this phone. Connect Todoist to sync them with a project; the tasks you already have are uploaded.</string>
     <string name="todoist_token_help">Paste the API token from Todoist → Settings → Integrations → Developer.</string>
     <string name="connect">Connect</string>
     <string name="disconnect">Disconnect</string>
@@ -156,11 +157,11 @@
     <string name="new_step">New step</string>
     <string name="rename">Rename</string>
     <string name="open_in_todoist">Open in Todoist</string>
-    <string name="connect_todoist_in_settings">Connect Todoist in settings</string>
     <string name="sync_syncing">Syncing…</string>
     <string name="sync_offline">Offline</string>
     <string name="sync_pending">%1$d unsent</string>
     <string name="sync_auth_error">Todoist rejected the token</string>
     <string name="sync_error">Sync failed</string>
     <string name="sync_connected">Connected</string>
+    <string name="sync_not_connected">Not connected</string>
 </resources>

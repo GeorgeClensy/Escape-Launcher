@@ -51,7 +51,8 @@ import com.geecee.escapelauncher.core.ui.composables.SettingsNavigationItem
 import com.geecee.escapelauncher.core.ui.composables.SettingsSpacer
 
 /**
- * Settings page for the Todoist connection: API token, first sync, project choice.
+ * Settings page for the optional Todoist sync: API token, first sync, project choice. Without a
+ * token the tasks page is a plain local list.
  */
 @Composable
 fun TodoistSettings(
@@ -89,6 +90,16 @@ fun TodoistSettings(
         ) {
             item { EscapeHeader(goBack, stringResource(R.string.todoist)) }
 
+            item {
+                Text(
+                    text = stringResource(R.string.todoist_local_help),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier
+                        .alpha(0.7f)
+                        .padding(bottom = 12.dp)
+                )
+            }
             item {
                 Text(
                     text = stringResource(R.string.todoist_token_help),
@@ -217,7 +228,7 @@ private fun TokenField(
 
 @Composable
 private fun statusText(status: TodoSyncStatus): String = when (status.state) {
-    TodoSyncStatus.State.NOT_CONFIGURED -> ""
+    TodoSyncStatus.State.LOCAL -> stringResource(R.string.sync_not_connected)
     TodoSyncStatus.State.SYNCING -> stringResource(R.string.sync_syncing)
     TodoSyncStatus.State.IDLE -> stringResource(R.string.sync_connected)
     TodoSyncStatus.State.OFFLINE -> stringResource(R.string.sync_offline)

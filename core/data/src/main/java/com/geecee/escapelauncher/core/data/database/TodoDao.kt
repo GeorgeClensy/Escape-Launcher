@@ -18,6 +18,9 @@ interface TodoDao {
     @Query("SELECT * FROM todoTasks WHERE id = :id LIMIT 1")
     suspend fun getTask(id: String): TodoTaskEntity?
 
+    @Query("SELECT * FROM todoTasks WHERE checked = 0 ORDER BY childOrder ASC, updatedAt ASC")
+    suspend fun getOpenTasks(): List<TodoTaskEntity>
+
     @Query("SELECT COALESCE(MAX(childOrder), 0) FROM todoTasks WHERE parentId IS :parentId")
     suspend fun maxChildOrder(parentId: String?): Int
 

@@ -7,10 +7,11 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 
 /**
- * Offline-first to-do list backed by Todoist.
+ * To-do list kept on the phone, optionally synced with Todoist.
  *
- * Every edit is applied to the local copy immediately and queued for the remote; [requestSync]
- * pushes the queue and pulls remote changes. The UI only ever reads [tasks].
+ * Without a token the list is purely local. Once [connect]ed, every edit is still applied to the
+ * local copy immediately and additionally queued for Todoist; [requestSync] pushes the queue and
+ * pulls remote changes. The UI only ever reads [tasks].
  */
 interface TodoRepository {
     val tasks: Flow<List<TodoTask>>
@@ -28,9 +29,15 @@ interface TodoRepository {
     suspend fun rename(id: String, content: String)
     suspend fun delete(id: String)
 
+    /**
+     * Saves the token, uploads the tasks that only exist on the phone and runs a first sync.
+     * Returns the resulting status so the caller can tell the user whether it worked.
+     */
+    suspend fun connect(token: String): TodoSyncStatus
+
     /** Switches the project shown on the page. Local tasks are dropped and re-fetched. */
     suspend fun selectProject(project: TodoProject)
 
-    /** Forgets the token, the local tasks and the pending queue. */
+    /** Forgets the token and the pending queue. The tasks stay on the phone as a local list. */
     suspend fun disconnect()
 }

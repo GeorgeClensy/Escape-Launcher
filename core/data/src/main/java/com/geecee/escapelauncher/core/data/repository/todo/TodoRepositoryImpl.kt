@@ -109,6 +109,37 @@ class TodoRepositoryImpl @Inject constructor(
         enqueue("item_delete", taskId = id)
     }
 
+    override suspend fun connect(token: String): TodoSyncStatus {
+        val trimmed = token.trim()
+        if (trimmed.isEmpty()) return _syncStatus.value
+        syncMutex.withLock {
+            if (trimmed != settings.todoistToken.first()) {
+                settings.setTodoistToken(trimmed)
+                settings.setTodoistSyncToken("")
+            }
+            // Whatever was queued before belongs to an older connection (or none); the current
+            // local list is the truth. Tasks with a local id have never been in Todoist, so they
+            // are uploaded; tasks that already carry a Todoist id are reconciled by the full sync.
+            dao.deleteAllPending()
+            val open = dao.getOpenTasks().filter { it.id.isLocal() }
+            val uploadable = open.filter { it.parentId == null } +
+                open.filter { it.parentId != null && open.any { p -> p.id == it.parentId } }
+            uploadable.forEach { task ->
+                dao.insertPending(
+                    TodoPendingCommandEntity(
+                        uuid = UUID.randomUUID().toString(),
+                        type = "item_add",
+                        taskId = task.id,
+                        parentId = task.parentId,
+                        content = task.content,
+                        projectId = null
+                    )
+                )
+            }
+        }
+        return runSync()
+    }
+
     override suspend fun selectProject(project: TodoProject) {
         settings.setTodoistProject(project.id, project.name)
         settings.setTodoistSyncToken("")
@@ -120,11 +151,14 @@ class TodoRepositoryImpl @Inject constructor(
         settings.setTodoistToken("")
         settings.setTodoistSyncToken("")
         settings.setTodoistProject("", "")
-        dao.clearAll()
+        dao.deleteAllPending()
         _projects.value = emptyList()
         _syncStatus.value = TodoSyncStatus()
     }
 
+    private suspend fun isConnected() = settings.todoistToken.first().isNotBlank()
+
+    /** Queues a command for Todoist. Nothing is queued while the list is local-only. */
     private suspend fun enqueue(
         type: String,
         taskId: String,
@@ -132,6 +166,7 @@ class TodoRepositoryImpl @Inject constructor(
         content: String? = null,
         projectId: String? = null
     ) {
+        if (!isConnected()) return
         dao.insertPending(
             TodoPendingCommandEntity(
                 uuid = UUID.randomUUID().toString(),
@@ -150,7 +185,9 @@ class TodoRepositoryImpl @Inject constructor(
     private suspend fun runSync(): TodoSyncStatus = syncMutex.withLock {
         val apiToken = settings.todoistToken.first().trim()
         if (apiToken.isEmpty()) {
-            return setStatus(TodoSyncStatus.State.NOT_CONFIGURED)
+            // Local list: the only housekeeping is dropping old completed tasks.
+            dao.purgeStaleCompleted(before = System.currentTimeMillis() - COMPLETED_RETENTION.inWholeMilliseconds)
+            return setStatus(TodoSyncStatus.State.LOCAL)
         }
         _syncStatus.update { it.copy(state = TodoSyncStatus.State.SYNCING, message = null) }
 
@@ -277,6 +314,9 @@ class TodoRepositoryImpl @Inject constructor(
         projectId = projectId,
         updatedAt = now
     )
+
+    /** Ids handed out locally are UUIDs; Todoist ids never contain a dash. */
+    private fun String.isLocal() = '-' in this
 
     private fun TodoTaskEntity.toModel() = TodoTask(
         id = id,
