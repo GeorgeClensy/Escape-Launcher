@@ -33,6 +33,7 @@ import com.geecee.escapelauncher.feature.appslist.AppsListViewModel
 import com.geecee.escapelauncher.feature.homescreen.HomeScreen
 import com.geecee.escapelauncher.feature.screentime.ScreenTimeDashboard
 import com.geecee.escapelauncher.feature.screentime.ScreenTimeViewModel
+import com.geecee.escapelauncher.feature.todo.TodoPage
 import com.geecee.escapelauncher.feature.securefolder.SecureFolderButton
 import com.geecee.escapelauncher.feature.securefolder.canUseSecureFolder
 import com.geecee.escapelauncher.feature.workapps.WorkApps
@@ -53,12 +54,12 @@ import kotlin.time.Duration.Companion.milliseconds
 @Composable
 fun MainPagerScreen(
     viewModel: MainPagerScreenViewModel = hiltViewModel(),
-    globalViewModel: GlobalViewModel = hiltViewModel(),
+    globalViewModel: GlobalViewModel = hiltViewModel(LocalActivity.current as ComponentActivity),
     appsListViewModel: AppsListViewModel = hiltViewModel(),
     screenTimeViewModel: ScreenTimeViewModel = hiltViewModel(LocalActivity.current as ComponentActivity),
     onOpenSettings: () -> Unit
 ) {
-    val hideScreenTimePage by viewModel.hideScreenTimePage.collectAsState()
+    val pages by viewModel.pages.collectAsState()
     val doubleTapToLock by viewModel.doubleTapToLock.collectAsState(initial = DefaultSettings.DOUBLE_TAP_TO_LOCK)
     val hapticFeedbackEnabled by viewModel.hapticFeedBackEnabled.collectAsState(initial = DefaultSettings.HAPTIC_FEEDBACK)
     val isHiddenPrivateSpace by viewModel.isHiddenPrivateSpace.collectAsState(initial = DefaultSettings.HIDE_PRIVATE_SPACE)
@@ -101,14 +102,12 @@ fun MainPagerScreen(
                 }
             )
     ) { page ->
-        val screenTimePageIndex = if (!hideScreenTimePage) 0 else -1
-        val homePageIndex = if (hideScreenTimePage) 0 else 1
-        val appsListPageIndex = if (hideScreenTimePage) 1 else 2
+        when (pages.getOrNull(page)) {
+            PagerPage.SCREEN_TIME -> ScreenTimeDashboard()
 
-        when (page) {
-            screenTimePageIndex -> ScreenTimeDashboard()
+            PagerPage.TODO -> TodoPage(isBeingShown = viewModel.pagerState.currentPage == page)
 
-            homePageIndex -> HomeScreen(
+            PagerPage.HOME -> HomeScreen(
                 onAppOpened = { app ->
                     viewModel.openApp(
                         app = app,
@@ -121,10 +120,10 @@ fun MainPagerScreen(
                 onGoHomeRequest = { globalViewModel.requestToGoHome() }
             )
 
-            appsListPageIndex -> AppsList(
+            PagerPage.APPS -> AppsList(
                 appsListViewModel = appsListViewModel,
                 scrollState = viewModel.appsListScrollState,
-                isBeingShown = viewModel.pagerState.currentPage == appsListPageIndex,
+                isBeingShown = viewModel.pagerState.currentPage == page,
                 onGoHomeRequest = {
                     globalViewModel.requestToGoHome()
                 },
@@ -183,6 +182,8 @@ fun MainPagerScreen(
                     }
                 }
             )
+
+            null -> {}
         }
     }
 

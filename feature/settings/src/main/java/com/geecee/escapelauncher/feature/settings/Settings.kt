@@ -42,6 +42,7 @@ import com.geecee.escapelauncher.feature.settings.hiddenapps.HiddenAppsViewModel
 import com.geecee.escapelauncher.feature.settings.mainpage.MainSettingsPage
 import com.geecee.escapelauncher.feature.settings.openchallenges.OpenChallengeViewModel
 import com.geecee.escapelauncher.feature.settings.theme.ThemeOptions
+import com.geecee.escapelauncher.feature.settings.todoist.TodoistSettings
 import com.geecee.escapelauncher.feature.settings.widget.WidgetOptions
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
@@ -79,6 +80,9 @@ sealed interface SettingsNavKey : NavKey {
 
     @Serializable
     data object FontLicences : SettingsNavKey
+
+    @Serializable
+    data object Todoist : SettingsNavKey
 }
 
 //
@@ -142,6 +146,9 @@ fun Settings(
                         showPolicyDialog = { showPolicyDialog.value = true },
                         onNavigate = { key -> backStack.add(key) }
                     )
+                }
+                entry<SettingsNavKey.Todoist> {
+                    TodoistSettings(goBack = { backStack.removeLastOrNull() })
                 }
                 entry<SettingsNavKey.HiddenApps> {
                     HiddenApps(

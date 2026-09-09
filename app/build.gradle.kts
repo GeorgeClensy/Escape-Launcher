@@ -66,8 +66,9 @@ dependencies {
     implementation(libs.bundles.navigation3)
     implementation(libs.bundles.hilt)
 
-    // WorkManager
+    // WorkManager (with Hilt-injected workers)
     implementation(libs.androidx.work.runtime.ktx)
+    implementation(libs.androidx.hilt.work)
 
     // JSON Parsing
     implementation(libs.gson)
@@ -97,4 +98,5 @@ dependencies {
     implementation(project(":feature:appslist"))
     implementation(project(":feature:newwidgets"))
     implementation(project(":feature:onboarding"))
+    implementation(project(":feature:todo"))
 }

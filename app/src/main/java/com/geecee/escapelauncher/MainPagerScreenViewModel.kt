@@ -8,11 +8,9 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.pager.PagerState
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.geecee.escapelauncher.core.domain.apps.GetFavoriteAppsUseCase
 import com.geecee.escapelauncher.core.domain.apps.LaunchAppUseCase
 import com.geecee.escapelauncher.core.domain.apps.TryOpenAppResult
 import com.geecee.escapelauncher.core.domain.apps.TryOpenAppUseCase
@@ -23,29 +21,32 @@ import com.geecee.escapelauncher.core.domain.managedprofiles.ManagedProfileType
 import com.geecee.escapelauncher.core.domain.repository.settings.OnboardingRepository
 import com.geecee.escapelauncher.core.domain.repository.settings.ScreenTimeSettingsRepository
 import com.geecee.escapelauncher.core.domain.repository.settings.LauncherBehaviorRepository
+import com.geecee.escapelauncher.core.domain.repository.settings.TodoSettingsRepository
 import com.geecee.escapelauncher.core.domain.system.LockScreenUseCase
 import com.geecee.escapelauncher.core.model.InstalledApp
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import jakarta.inject.Inject
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import kotlin.time.Duration.Companion.milliseconds
+
+/** The pages of the home pager. */
+enum class PagerPage { SCREEN_TIME, TODO, HOME, APPS }
 
 @HiltViewModel
 class MainPagerScreenViewModel @Inject constructor(
     @ApplicationContext context: Context,
     private val onboardingRepository: OnboardingRepository,
     screenTimeSettingsRepository: ScreenTimeSettingsRepository,
+    todoSettingsRepository: TodoSettingsRepository,
     launcherBehaviorRepository: LauncherBehaviorRepository,
-    private val getFavoriteAppsUseCase: GetFavoriteAppsUseCase,
     private val tryOpenAppUseCase: TryOpenAppUseCase,
     private val launchAppUseCase: LaunchAppUseCase,
     private val managedProfileExistsUseCase: ManagedProfileExistsUseCase,
@@ -61,10 +62,24 @@ class MainPagerScreenViewModel @Inject constructor(
         }
     }
 
-    val hideScreenTimePage = screenTimeSettingsRepository.hideScreenTimePage.stateIn(
+    /**
+     * The pages of the home pager, left to right. Which optional pages appear is driven by
+     * settings, so everything that needs an index looks it up here instead of hard-coding it.
+     */
+    val pages: StateFlow<List<PagerPage>> = combine(
+        screenTimeSettingsRepository.hideScreenTimePage,
+        todoSettingsRepository.showTodoPage
+    ) { hideScreenTime, showTodo ->
+        buildList {
+            if (!hideScreenTime) add(PagerPage.SCREEN_TIME)
+            if (showTodo) add(PagerPage.TODO)
+            add(PagerPage.HOME)
+            add(PagerPage.APPS)
+        }
+    }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.Eagerly,
-        initialValue = false
+        initialValue = listOf(PagerPage.SCREEN_TIME, PagerPage.TODO, PagerPage.HOME, PagerPage.APPS)
     )
     val doubleTapToLock = launcherBehaviorRepository.doubleTapToLock
     val hapticFeedBackEnabled = launcherBehaviorRepository.hapticFeedBackEnabled
@@ -88,20 +103,18 @@ class MainPagerScreenViewModel @Inject constructor(
 
     val interactionSource = MutableInteractionSource()
 
-    val favoriteApps = mutableStateListOf<InstalledApp>()
-
     val appsListScrollState = LazyListState()
 
     val pagerState = PagerState(
-        currentPage = if (hideScreenTimePage.value) 0 else 1,
+        currentPage = pages.value.indexOf(PagerPage.HOME),
         currentPageOffsetFraction = 0f
     ) {
-        if (hideScreenTimePage.value) 2 else 3
+        pages.value.size
     }
 
-    private fun getMainPageIndex(): Int {
-        return if (hideScreenTimePage.value) 0 else 1
-    }
+    private fun getMainPageIndex(): Int = pages.value.indexOf(PagerPage.HOME)
+
+    fun indexOf(page: PagerPage): Int = pages.value.indexOf(page)
 
     suspend fun goToMainPage() {
         pagerState.scrollToPage(getMainPageIndex())
@@ -122,13 +135,12 @@ class MainPagerScreenViewModel @Inject constructor(
 
     init {
         updateLauncherStatus()
+
+        // The pager is constructed before DataStore has emitted, so `pages` is still its
+        // placeholder value at that point. Re-anchor the pager on the main page once the real
+        // value is known, and again whenever a page is toggled (the page indices shift).
         viewModelScope.launch {
-            getFavoriteAppsUseCase().collect { newFavoriteApps ->
-                withContext(Dispatchers.Main) {
-                    favoriteApps.clear()
-                    favoriteApps.addAll(newFavoriteApps)
-                }
-            }
+            pages.collect { pagerState.scrollToPage(it.indexOf(PagerPage.HOME)) }
         }
     }
 

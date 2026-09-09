@@ -2,9 +2,7 @@ name: Unit Tests
 
 on:
   push:
-    branches: [ "master", "refactor" ]
   pull_request:
-    branches: [ "master", "refactor" ]
   workflow_dispatch: 
 
 jobs:

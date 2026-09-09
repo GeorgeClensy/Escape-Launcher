@@ -5,11 +5,13 @@ import com.geecee.escapelauncher.core.data.repository.android.ManagedProfileRepo
 import com.geecee.escapelauncher.core.data.repository.android.SystemActionsRepositoryImpl
 import com.geecee.escapelauncher.core.data.repository.db.ModifiedAppsRepositoryImpl
 import com.geecee.escapelauncher.core.data.repository.db.ScreenTimeRepositoryImpl
+import com.geecee.escapelauncher.core.data.repository.todo.TodoRepositoryImpl
 import com.geecee.escapelauncher.core.domain.repository.android.AppsRepository
 import com.geecee.escapelauncher.core.domain.repository.android.ManagedProfileRepository
 import com.geecee.escapelauncher.core.domain.repository.android.SystemActionsRepository
 import com.geecee.escapelauncher.core.domain.repository.db.ModifiedAppsRepository
 import com.geecee.escapelauncher.core.domain.repository.db.ScreenTimeRepository
+import com.geecee.escapelauncher.core.domain.repository.todo.TodoRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -49,4 +51,10 @@ abstract class RepositoryModule {
     abstract fun bindSystemActionsRepository(
         systemActionsRepositoryImpl: SystemActionsRepositoryImpl
     ): SystemActionsRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindTodoRepository(
+        todoRepositoryImpl: TodoRepositoryImpl
+    ): TodoRepository
 }

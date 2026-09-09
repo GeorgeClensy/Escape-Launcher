@@ -3,6 +3,7 @@ package com.geecee.escapelauncher
 import android.Manifest
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -84,8 +85,9 @@ class MainHomeScreenActivity : ComponentActivity() {
     lateinit var widgetHostManager: WidgetHostManager
     private lateinit var screenOffReceiver: ScreenOffReceiver
     private val permissionLauncher = registerForActivityResult(
-        ActivityResultContracts.RequestPermission()
+        ActivityResultContracts.RequestMultiplePermissions()
     ) { _ -> }
+    private var runtimePermissionsRequested = false
 
     override fun onStart() {
         super.onStart()
@@ -191,6 +193,9 @@ class MainHomeScreenActivity : ComponentActivity() {
     override fun onResume() {
         super.onResume()
 
+        // The user may have changed the default launcher while we were in the background
+        mainPagerViewModel.updateLauncherStatus()
+
         // Check if we need to update screen time when coming back from an app
         if (screenTimeViewModel.hasActiveSession()) {
             lifecycleScope.launch(Dispatchers.IO) {
@@ -222,6 +227,46 @@ class MainHomeScreenActivity : ComponentActivity() {
         }
     }
 
+
+    /**
+     * Requests the optional runtime permissions (notifications, location for weather) in a single
+     * system dialog. Only permissions that this build actually declares in its manifest are
+     * requested (the FOSS flavour declares neither), and the request is made at most once per
+     * process so the user isn't re-prompted every time they return to the home page.
+     */
+    private fun requestRuntimePermissionsOnce() {
+        if (runtimePermissionsRequested) return
+        runtimePermissionsRequested = true
+
+        val declaredPermissions = try {
+            val packageInfo = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                packageManager.getPackageInfo(
+                    packageName,
+                    PackageManager.PackageInfoFlags.of(PackageManager.GET_PERMISSIONS.toLong())
+                )
+            } else {
+                @Suppress("DEPRECATION") // Replaced by the PackageInfoFlags overload above on API 33+
+                packageManager.getPackageInfo(packageName, PackageManager.GET_PERMISSIONS)
+            }
+            packageInfo.requestedPermissions.orEmpty().toSet()
+        } catch (e: PackageManager.NameNotFoundException) {
+            Log.e("Permissions", "Could not read own package info", e)
+            emptySet()
+        }
+
+        val wanted = buildList {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                add(Manifest.permission.POST_NOTIFICATIONS)
+            }
+            // Android 12+ ignores a FINE request that doesn't also include COARSE
+            add(Manifest.permission.ACCESS_COARSE_LOCATION)
+            add(Manifest.permission.ACCESS_FINE_LOCATION)
+        }.filter { it in declaredPermissions && !hasPermission(it) }
+
+        if (wanted.isNotEmpty()) {
+            permissionLauncher.launch(wanted.toTypedArray())
+        }
+    }
 
     /**
      * Sets up main navigation display for the app
@@ -294,15 +339,7 @@ class MainHomeScreenActivity : ComponentActivity() {
                     entry<AppNavKey.Home> {
                         // Ask for permissions as soon as you get to the homepage. Bad.
                         LaunchedEffect(Unit) {
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                                if (!hasPermission(Manifest.permission.POST_NOTIFICATIONS)) {
-                                    permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
-                                }
-                            }
-
-                            if (!hasPermission(Manifest.permission.ACCESS_FINE_LOCATION)) {
-                                permissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
-                            }
+                            requestRuntimePermissionsOnce()
                         }
 
                         MainPagerScreen(

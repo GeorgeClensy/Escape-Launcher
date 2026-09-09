@@ -2,6 +2,7 @@ package com.geecee.escapelauncher.core.data.system
 
 import android.accessibilityservice.AccessibilityService
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.os.Build
 import android.view.accessibility.AccessibilityEvent
 
@@ -13,6 +14,16 @@ class EscapeAccessibilityService : AccessibilityService() {
 
     override fun onServiceConnected() {
         instance = this
+    }
+
+    override fun onUnbind(intent: Intent?): Boolean {
+        instance = null
+        return super.onUnbind(intent)
+    }
+
+    override fun onDestroy() {
+        instance = null
+        super.onDestroy()
     }
 
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {}

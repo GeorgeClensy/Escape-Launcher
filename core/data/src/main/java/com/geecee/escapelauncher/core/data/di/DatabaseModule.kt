@@ -6,6 +6,8 @@ import com.geecee.escapelauncher.core.data.database.AppDatabase
 import com.geecee.escapelauncher.core.data.database.AppUsageDao
 import com.geecee.escapelauncher.core.data.database.ModifiedAppsDao
 import com.geecee.escapelauncher.core.data.database.ModifiedAppsDatabase
+import com.geecee.escapelauncher.core.data.database.TodoDao
+import com.geecee.escapelauncher.core.data.database.TodoDatabase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -48,5 +50,22 @@ object DatabaseModule {
     @Provides
     fun provideModifiedAppsDao(database: ModifiedAppsDatabase): ModifiedAppsDao {
         return database.modifiedAppsDao()
+    }
+
+    @Provides
+    @Singleton
+    fun provideTodoDatabase(
+        @ApplicationContext context: Context
+    ): TodoDatabase {
+        return Room.databaseBuilder(
+            context = context,
+            klass = TodoDatabase::class.java,
+            "todo_database"
+        ).fallbackToDestructiveMigration(dropAllTables = true).build()
+    }
+
+    @Provides
+    fun provideTodoDao(database: TodoDatabase): TodoDao {
+        return database.todoDao()
     }
 }

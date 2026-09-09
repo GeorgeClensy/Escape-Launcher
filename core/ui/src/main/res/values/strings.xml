@@ -139,4 +139,29 @@
     <string name="back">Back</string>
     <string name="launch_secure_folder">Secure Folder</string>
     <string name="enable_secure_folder_on_settings">Enable the Secure Folder in settings</string>
+
+    <!-- Tasks / Todoist -->
+    <string name="tasks">Tasks</string>
+    <string name="show_tasks_page">Show tasks page</string>
+    <string name="todoist">Todoist</string>
+    <string name="todoist_api_token">API token</string>
+    <string name="todoist_local_help">Tasks are kept on this phone. Connect Todoist to sync them with a project; the tasks you already have are uploaded.</string>
+    <string name="todoist_token_help">Paste the API token from Todoist → Settings → Integrations → Developer.</string>
+    <string name="connect">Connect</string>
+    <string name="disconnect">Disconnect</string>
+    <string name="project">Project</string>
+    <string name="choose_project">Choose project</string>
+    <string name="main_focus_prompt">What is your main focus for today?</string>
+    <string name="clear_done">Clear done</string>
+    <string name="add_step">Add step</string>
+    <string name="new_step">New step</string>
+    <string name="rename">Rename</string>
+    <string name="open_in_todoist">Open in Todoist</string>
+    <string name="sync_syncing">Syncing…</string>
+    <string name="sync_offline">Offline</string>
+    <string name="sync_pending">%1$d unsent</string>
+    <string name="sync_auth_error">Todoist rejected the token</string>
+    <string name="sync_error">Sync failed</string>
+    <string name="sync_connected">Connected</string>
+    <string name="sync_not_connected">Not connected</string>
 </resources>
