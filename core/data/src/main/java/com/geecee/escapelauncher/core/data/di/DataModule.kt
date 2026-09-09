@@ -68,6 +68,12 @@ abstract class DataModule {
 
     @Binds
     @Singleton
+    abstract fun bindTodoSettingsRepository(
+        impl: TodoSettingsRepositoryImpl
+    ): TodoSettingsRepository
+
+    @Binds
+    @Singleton
     abstract fun bindSettingsManager(
         impl: SettingsManagerImpl
     ): SettingsManager

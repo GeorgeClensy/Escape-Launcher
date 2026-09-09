@@ -98,4 +98,5 @@ dependencies {
     implementation(project(":feature:appslist"))
     implementation(project(":feature:newwidgets"))
     implementation(project(":feature:onboarding"))
+    implementation(project(":feature:todo"))
 }

@@ -9,7 +9,7 @@ object DefaultSettings {
 
     // Home Screen
     const val TWELVE_HOUR_CLOCK = false
-    const val SHOW_CLOCK = true
+    const val SHOW_CLOCK = false
     const val BIG_CLOCK = false
     const val SHOW_DATE = true
     const val SHOW_STATUS_BAR = true
@@ -51,6 +51,13 @@ object DefaultSettings {
     const val SEARCH_AUTO_OPEN = false
     const val BOTTOM_SEARCH = false
     const val AUTOMATICALLY_OPEN_APPS_IN_SEARCH = false
+
+    // Tasks
+    const val SHOW_TODO_PAGE = true
+    const val TODOIST_TOKEN = ""
+    const val TODOIST_PROJECT_ID = ""
+    const val TODOIST_PROJECT_NAME = ""
+    const val TODOIST_SYNC_TOKEN = ""
 
     // Misc
     const val DOUBLE_TAP_TO_LOCK = true

@@ -48,6 +48,13 @@ object PreferencesKeys {
     val BOTTOM_SEARCH = booleanPreferencesKey(name = "bottom_search")
     val AUTOMATICALLY_OPEN_APPS_IN_SEARCH = booleanPreferencesKey(name = "automatically_open_apps_in_search")
 
+    //Tasks
+    val SHOW_TODO_PAGE = booleanPreferencesKey(name = "show_todo_page")
+    val TODOIST_TOKEN = stringPreferencesKey(name = "todoist_token")
+    val TODOIST_PROJECT_ID = stringPreferencesKey(name = "todoist_project_id")
+    val TODOIST_PROJECT_NAME = stringPreferencesKey(name = "todoist_project_name")
+    val TODOIST_SYNC_TOKEN = stringPreferencesKey(name = "todoist_sync_token")
+
     //Misc
     val DOUBLE_TAP_TO_LOCK = booleanPreferencesKey(name = "double_tap_to_lock")
     val HIDE_SCREEN_TIME_PAGE = booleanPreferencesKey(name = "hide_screen_time_page")

@@ -379,6 +379,27 @@ fun MainSettingsPage(
                     })
             }
 
+            //Tasks
+            item(key = "tasks_subhead") { EscapeSubhead(stringResource(R.string.tasks)) }
+
+            item(key = "show_tasks_page") {
+                SettingsSwitch(
+                    label = stringResource(id = R.string.show_tasks_page),
+                    checked = uiState.showTodoPage,
+                    isTopOfGroup = true,
+                    onCheckedChange = {
+                        mainSettingsPageViewModel.setShowTodoPage(it)
+                    })
+            }
+
+            item(key = "todoist") {
+                SettingsNavigationItem(
+                    label = stringResource(id = R.string.todoist),
+                    false,
+                    isBottomOfGroup = true,
+                    onClick = { onNavigate(SettingsNavKey.Todoist) })
+            }
+
             //Apps
             item(key = "apps_subhead") {
                 EscapeSubhead(

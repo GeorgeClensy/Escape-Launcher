@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.escapelauncher.android.hilt)
     alias(libs.plugins.escapelauncher.android.testing)
     alias(libs.plugins.escapelauncher.android.room)
+    alias(libs.plugins.kotlin.serialization)
 }
 
 android {
@@ -19,6 +20,7 @@ dependencies {
     implementation(project(":core:common"))
 
     implementation(libs.androidx.work.runtime.ktx)
+    implementation(libs.kotlinx.serialization.json)
     implementation(libs.hilt.android)
     implementation(libs.androidx.hilt.common)
     implementation(libs.androidx.hilt.work)
