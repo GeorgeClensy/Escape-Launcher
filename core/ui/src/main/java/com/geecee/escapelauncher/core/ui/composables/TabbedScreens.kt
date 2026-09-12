@@ -26,7 +26,6 @@ import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.navigationBars
@@ -75,6 +74,7 @@ import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.boundsInParent
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.SoftwareKeyboardController
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
@@ -349,7 +349,7 @@ fun TabBar(
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun TabScreen(
+fun TabDisplay(
     modifier: Modifier = Modifier,
     screens: List<TabbedScreen>,
     selectedTabIndex: MutableIntState,
@@ -363,6 +363,13 @@ fun TabScreen(
     onSearchTextChanged: (String) -> Unit = {},
     onSearchDone: (String, SoftwareKeyboardController?) -> Unit = { _, _ -> }
 ) {
+    val density = LocalDensity.current
+    val imeInsets = WindowInsets.ime
+    val navBarInsets = WindowInsets.navigationBars
+    val actualImeHeight = with(density) {
+        (imeInsets.getBottom(this) - navBarInsets.getBottom(this)).coerceAtLeast(0).toDp()
+    }
+
     val topOfTabBarHeight =
         56.dp + 30.dp + WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
 
@@ -375,32 +382,41 @@ fun TabScreen(
 
     Box(modifier = modifier) {
         HorizontalPager(
-            state = pagerState, modifier = Modifier.fillMaxSize(), userScrollEnabled = false
+            state = pagerState,
+            userScrollEnabled = false,
+            modifier = Modifier
+                .fillMaxSize()
+                .graphicsLayer {
+                    compositingStrategy = CompositingStrategy.Offscreen
+                }
+                .drawWithContent {
+                    drawContent()
+
+                    val totalFadeOffsetPx = with(density) { (topOfTabBarHeight + actualImeHeight).toPx() }
+                    val imeOffsetPx = with(density) { actualImeHeight.toPx() }
+
+                    val fadeStartPx = size.height - totalFadeOffsetPx
+                    val fadeEndPx = size.height - imeOffsetPx
+
+                    drawRect(
+                        brush = Brush.verticalGradient(
+                            colors = listOf(
+                                Color.Black,       // Fully visible content above mask
+                                Color.Transparent,  // Fades out completely toward bottom
+                                Color.Transparent, // Fades out completely toward bottom
+                                Color.Transparent  // Fades out completely toward bottom
+                            ),
+                            startY = fadeStartPx,
+                            endY = fadeEndPx
+                        ),
+                        blendMode = BlendMode.DstIn
+                    )
+                }
         ) { page ->
             Box(Modifier.fillMaxSize()) {
                 screens[page].content(this, PaddingValues(bottom = topOfTabBarHeight))
             }
         }
-
-        Box(
-            modifier = Modifier
-                .padding(
-                    bottom = WindowInsets.ime.asPaddingValues().calculateBottomPadding()
-                )
-                .fillMaxWidth()
-                .height(topOfTabBarHeight)
-                .background(
-                    Brush.verticalGradient(
-                        colors = listOf(
-                            Color.Transparent,
-                            MaterialTheme.colorScheme.surface,
-                            MaterialTheme.colorScheme.surface,
-                            MaterialTheme.colorScheme.surface
-                        )
-                    )
-                )
-                .align(Alignment.BottomCenter)
-        )
 
         TabBar(
             modifier = Modifier
@@ -475,14 +491,14 @@ fun PrevTabBar() {
 
 @Preview(device = "id:pixel_6a")
 @Composable
-fun PrevTabScreen() {
+fun PrevTabDisplay() {
     EscapeThemePreview {
         Box(
             Modifier
                 .fillMaxSize()
                 .background(MaterialTheme.colorScheme.surface)
         ) {
-            TabScreen(
+            TabDisplay(
                 screens = listOf(
                 TabbedScreen(
                     title = "All Apps", icon = Icons.Rounded.Apps, content = { padding ->

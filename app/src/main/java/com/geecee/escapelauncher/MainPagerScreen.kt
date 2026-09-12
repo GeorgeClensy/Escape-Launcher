@@ -33,7 +33,7 @@ import com.geecee.escapelauncher.core.domain.managedprofiles.ManagedProfileType
 import com.geecee.escapelauncher.core.model.InstalledApp
 import com.geecee.escapelauncher.core.ui.DefaultSettingsUi
 import com.geecee.escapelauncher.core.ui.composables.OpenChallenge
-import com.geecee.escapelauncher.core.ui.composables.TabScreen
+import com.geecee.escapelauncher.core.ui.composables.TabDisplay
 import com.geecee.escapelauncher.core.ui.composables.TabbedScreen
 import com.geecee.escapelauncher.core.ui.utils.doHapticFeedBack
 import com.geecee.escapelauncher.feature.appslist.AppsList
@@ -211,7 +211,7 @@ fun MainPagerScreen(
                         })
                 }
 
-                TabScreen(
+                TabDisplay(
                     screens = listOf(
                         TabbedScreen(
                             title = "All Apps",
