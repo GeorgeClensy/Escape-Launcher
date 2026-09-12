@@ -39,7 +39,6 @@ import com.geecee.escapelauncher.core.ui.R
 import com.geecee.escapelauncher.core.ui.composables.BouncyMorphingFab
 import com.geecee.escapelauncher.core.ui.composables.HomeScreenItem
 import com.geecee.escapelauncher.core.ui.composables.LockedAppFolderUI
-import com.geecee.escapelauncher.core.ui.vectors.getPrivateSpaceLockedImage
 
 /**
  * Android 15+ Private space UI with apps, settings button and lock button
@@ -128,7 +127,6 @@ fun PrivateSpace(
         ) {
             LockedAppFolderUI(
                 text = stringResource(R.string.private_space),
-                image = getPrivateSpaceLockedImage(),
                 iconContentDescription = stringResource(R.string.unlock_private_space),
                 subhead = stringResource(R.string.private_space_is_locked),
                 modifier = modifier
