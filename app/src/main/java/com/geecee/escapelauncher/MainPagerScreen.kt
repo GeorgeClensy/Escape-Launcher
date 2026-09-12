@@ -84,7 +84,9 @@ fun MainPagerScreen(
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P && canUseSecureFolder(context = context)) {
             TabbedScreen(
                 title = "Secure Folder", icon = Icons.Default.Lock, content = {
-                    SecureFolderButton()
+                    SecureFolderButton(
+                        modifier = Modifier.fillMaxSize()
+                    )
                 })
         } else {
             null
