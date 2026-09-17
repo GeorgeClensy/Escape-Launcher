@@ -4,31 +4,28 @@ import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.asPaddingValues
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.WorkOff
 import androidx.compose.material.icons.rounded.WorkOff
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonColors
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -40,36 +37,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.geecee.escapelauncher.core.model.InstalledApp
+import com.geecee.escapelauncher.core.ui.DefaultSettingsUi
 import com.geecee.escapelauncher.core.ui.R
+import com.geecee.escapelauncher.core.ui.composables.BouncyMorphingFab
+import com.geecee.escapelauncher.core.ui.composables.HomeScreenItem
 import com.geecee.escapelauncher.core.ui.composables.LockedAppFolderUI
-
-/**
- * UI component for displaying a single Work Profile app item. Just a `Text()` with `bodyMedium`
- *
- * @param appName The name of the app
- * @param onLongClick The action to perform when the app is long clicked
- * @param onClick The action to perform when the app is clicked
- *
- * @author George Clensy
- */
-@OptIn(ExperimentalFoundationApi::class)
-@Composable
-fun WorkAppItem(
-    appName: String,
-    onLongClick: () -> Unit,
-    onClick: () -> Unit
-) {
-    val modifier = Modifier
-        .padding(vertical = 15.dp)
-        .combinedClickable(onClick = onClick, onLongClick = onLongClick)
-
-    Text(
-        appName,
-        modifier = modifier,
-        color = MaterialTheme.colorScheme.onSurface,
-        style = MaterialTheme.typography.bodyMedium
-    )
-}
 
 /**
  * The main work apps UI
@@ -93,64 +65,65 @@ fun WorkApps(
     val resources = LocalResources.current
     val isUnlocked by viewModel.isUnlocked.collectAsState()
     val workApps by viewModel.workApps.collectAsState()
+    val appsListAlignment by viewModel.appsAlignment.collectAsState(initial = DefaultSettingsUi.APPS_ALIGNMENT)
+    val scrollState = rememberScrollState()
+    val heightToTopOfTabs = 30.dp + 56.dp
 
     Box (modifier) {
-        // Work apps unlocked
-        if (isUnlocked) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Row(
+        AnimatedVisibility(
+            visible = isUnlocked, enter = fadeIn(), exit = fadeOut()
+        ) {
+            Box(Modifier.fillMaxSize().padding(horizontal = 30.dp)) {
+                Column(
+                    horizontalAlignment = appsListAlignment,
+                    verticalArrangement = Arrangement.Bottom,
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(20.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
+                        .fillMaxSize()
+                        .verticalScroll(scrollState)
                 ) {
-                    Text(
-                        stringResource(R.string.work_profile),
-                        style = MaterialTheme.typography.bodyMedium
+                    val statusBarHeight =
+                        WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
+                    Spacer(
+                        modifier = Modifier.height(statusBarHeight + 10.dp)
                     )
 
-                    if (viewModel.canToggleProfile) {
-                        IconButton(
-                            onClick = {
-                                viewModel.toggleWorkProfile {
-                                    Toast.makeText(
-                                        context,
-                                        resources.getString(R.string.launcher_must_be_default_to_pause_or_unpause_work_apps),
-                                        Toast.LENGTH_SHORT
-                                    ).show()
-                                }
-                            },
-                            colors = IconButtonColors(
-                                containerColor = MaterialTheme.colorScheme.surfaceContainer,
-                                contentColor = MaterialTheme.colorScheme.onSurface,
-                                disabledContainerColor = MaterialTheme.colorScheme.surfaceContainer,
-                                disabledContentColor = MaterialTheme.colorScheme.onSurface
-                            )
-                        ) {
-                            Icon(
-                                Icons.Rounded.WorkOff,
-                                contentDescription = stringResource(R.string.lock_work_profile)
-                            )
-                        }
+                    workApps.forEach { app ->
+                        HomeScreenItem(appName = app.displayName, onAppLongClick = {
+                            onAppLongClick(app)
+                        }, onAppClick = {
+                            onAppClick(app)
+                        }, alignment = appsListAlignment)
                     }
+
+                    Spacer(modifier = Modifier.height(15.dp))
+
+                    Spacer(
+                        modifier = Modifier.height(
+                            WindowInsets.navigationBars.asPaddingValues()
+                                .calculateBottomPadding() + heightToTopOfTabs
+                        )
+                    )
                 }
 
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    //modifier = Modifier.verticalScroll(rememberScrollState())
-                ) {
-                    workApps.forEach { app ->
-                        WorkAppItem(app.displayName, {
-                            onAppLongClick(app)
-                        }) {
-                            onAppClick(app)
-                        }
-                    }
-
-                    Spacer(Modifier.height(20.dp))
+                if (viewModel.canToggleProfile) {
+                    BouncyMorphingFab(
+                        icon = Icons.Default.WorkOff,
+                        contentDescription = stringResource(R.string.pause_work_apps),
+                        onClick = {
+                            viewModel.toggleWorkProfile(onLauncherNotDefault = {
+                                //todo: do something here
+                            })
+                        },
+                        modifier = Modifier
+                            .align(if (appsListAlignment == Alignment.End) Alignment.BottomStart else Alignment.BottomEnd)
+                            .padding(
+                                bottom = WindowInsets.navigationBars.asPaddingValues()
+                                    .calculateBottomPadding() + heightToTopOfTabs + 15.dp
+                            ), // Pad the bottom now so it looks alright above the tabs
+                        containerColor = MaterialTheme.colorScheme.tertiary,
+                        contentColor = MaterialTheme.colorScheme.onTertiary,
+                        radius = 24.dp
+                    )
                 }
             }
         }
