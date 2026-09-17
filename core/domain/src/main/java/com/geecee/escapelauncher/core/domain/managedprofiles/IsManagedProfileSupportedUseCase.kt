@@ -23,8 +23,8 @@ class IsManagedProfileSupportedUseCase @Inject constructor() {
                 Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM
             }
             ManagedProfileType.WorkApps -> {
-                // Work apps are supported for viewing on all versions this launcher supports (API 26+)
-                true
+                // Work apps needs android R to check if profile is work apps or not
+                Build.VERSION.SDK_INT >= Build.VERSION_CODES.R
             }
         }
     }
