@@ -2,43 +2,18 @@ package com.geecee.escapelauncher.privatespace
 
 import android.os.Build
 import androidx.annotation.RequiresApi
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.WindowInsetsSides
-import androidx.compose.foundation.layout.asPaddingValues
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBars
-import androidx.compose.foundation.layout.only
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawing
-import androidx.compose.foundation.layout.statusBars
-import androidx.compose.foundation.layout.windowInsetsPadding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.geecee.escapelauncher.core.model.InstalledApp
 import com.geecee.escapelauncher.core.ui.DefaultSettingsUi
 import com.geecee.escapelauncher.core.ui.R
-import com.geecee.escapelauncher.core.ui.composables.BouncyMorphingFab
-import com.geecee.escapelauncher.core.ui.composables.HomeScreenItem
-import com.geecee.escapelauncher.core.ui.composables.LockedAppFolderUI
+import com.geecee.escapelauncher.core.ui.composables.ManagedProfileScreen
 
 /**
  * Android 15+ Private space UI with apps, settings button and lock button
@@ -61,89 +36,30 @@ fun PrivateSpace(
     val isUnlocked by viewModel.isUnlocked.collectAsState()
     val privateApps by viewModel.privateSpaceApps.collectAsState()
     val appsListAlignment by viewModel.appsAlignment.collectAsState(initial = DefaultSettingsUi.APPS_ALIGNMENT)
-    val scrollState = rememberScrollState()
 
-    val heightToTopOfTabs = 30.dp + 56.dp
-
-    Box(modifier) {
-        AnimatedVisibility(
-            visible = isUnlocked, enter = fadeIn(), exit = fadeOut()
-        ) {
-            Box(Modifier.fillMaxSize().padding(horizontal = 30.dp)) {
-                Column(
-                    horizontalAlignment = appsListAlignment,
-                    verticalArrangement = Arrangement.Bottom,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .verticalScroll(scrollState)
-                ) {
-                    val statusBarHeight =
-                        WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
-                    Spacer(
-                        modifier = Modifier.height(statusBarHeight + 10.dp)
-                    )
-
-                    privateApps.forEach { app ->
-                        HomeScreenItem(appName = app.displayName, onAppLongClick = {
-                            onAppLongClick(app)
-                        }, onAppClick = {
-                            onAppClick(app)
-                        }, alignment = appsListAlignment)
-                    }
-
-                    Spacer(modifier = Modifier.height(15.dp))
-
-                    Spacer(
-                        modifier = Modifier.height(
-                            WindowInsets.navigationBars.asPaddingValues()
-                                .calculateBottomPadding() + heightToTopOfTabs
-                        )
-                    )
-                }
-
-                if (viewModel.canToggleProfile) {
-                    BouncyMorphingFab(
-                        icon = Icons.Default.Lock,
-                        contentDescription = stringResource(R.string.lock_private_space),
-                        onClick = {
-                            viewModel.togglePrivateSpaceProfile(onLauncherNotDefault = {})
-                        },
-                        modifier = Modifier
-                            .align(if (appsListAlignment == Alignment.End) Alignment.BottomStart else Alignment.BottomEnd)
-                            .padding(
-                                bottom = WindowInsets.navigationBars.asPaddingValues()
-                                    .calculateBottomPadding() + heightToTopOfTabs + 15.dp
-                            ), // Pad the bottom now so it looks alright above the tabs
-                        containerColor = MaterialTheme.colorScheme.tertiary,
-                        contentColor = MaterialTheme.colorScheme.onTertiary,
-                        radius = 24.dp
-                    )
-                }
+    ManagedProfileScreen(
+        modifier = modifier,
+        isUnlocked = isUnlocked,
+        apps = privateApps,
+        appsListAlignment = appsListAlignment,
+        onAppClick = onAppClick,
+        onAppLongClick = onAppLongClick,
+        canToggleProfile = viewModel.canToggleProfile,
+        toggleIcon = Icons.Default.Lock,
+        toggleContentDescription = stringResource(R.string.lock_private_space),
+        onToggleClick = {
+            viewModel.togglePrivateSpaceProfile(onLauncherNotDefault = {})
+        },
+        lockedIcon = Icons.Default.Lock,
+        lockedText = stringResource(R.string.private_space),
+        lockedSubhead = stringResource(R.string.private_space_is_locked),
+        lockedButtonText = stringResource(R.string.unlock),
+        onUnlockClick = {
+            if (viewModel.canToggleProfile) {
+                viewModel.togglePrivateSpaceProfile(onLauncherNotDefault = {
+                    //todo: do something here
+                })
             }
         }
-
-        AnimatedVisibility(
-            visible = !isUnlocked, enter = fadeIn(), exit = fadeOut()
-        ) {
-            LockedAppFolderUI(
-                text = stringResource(R.string.private_space),
-                iconContentDescription = stringResource(R.string.unlock_private_space),
-                subhead = stringResource(R.string.private_space_is_locked),
-                modifier = modifier
-                    .padding(
-                        bottom = 86.dp,
-                        top = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
-                    ) // Pad the bottom now so it looks centered against the tabs
-                    .windowInsetsPadding(
-                        WindowInsets.safeDrawing.only(WindowInsetsSides.Bottom)
-                    ),
-                unlockClick = {
-                    if (viewModel.canToggleProfile) {
-                        viewModel.togglePrivateSpaceProfile(onLauncherNotDefault = {
-                            //todo: do something here
-                        })
-                    }
-                })
-        }
-    }
+    )
 }

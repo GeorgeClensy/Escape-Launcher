@@ -25,7 +25,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.geecee.escapelauncher.core.theme.colours.AppColourScheme
 import com.geecee.escapelauncher.core.theme.colours.resolveColorScheme
-import com.geecee.escapelauncher.core.ui.composables.nameRes
+import com.geecee.escapelauncher.core.ui.utils.nameRes
 
 
 /**
