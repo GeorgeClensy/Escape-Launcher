@@ -45,7 +45,6 @@ object PreferencesKeys {
     //Search
     val SHOW_SEARCH_BOX = booleanPreferencesKey(name = "show_search_box")
     val SEARCH_AUTO_OPEN = booleanPreferencesKey(name = "search_auto_open")
-    val BOTTOM_SEARCH = booleanPreferencesKey(name = "bottom_search")
     val AUTOMATICALLY_OPEN_APPS_IN_SEARCH = booleanPreferencesKey(name = "automatically_open_apps_in_search")
 
     //Misc

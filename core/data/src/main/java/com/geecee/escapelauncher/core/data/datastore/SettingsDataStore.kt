@@ -99,7 +99,6 @@ private class SharedPreferencesToDataStoreMigration(
         migrateBoolean("TwelveHourClock", PreferencesKeys.TWELVE_HOUR_CLOCK)
         migrateBoolean("HideScreenTimePage", PreferencesKeys.HIDE_SCREEN_TIME_PAGE)
         migrateBoolean("ShowHiddenAppsInSearch", PreferencesKeys.SHOW_HIDDEN_APPS_IN_SEARCH)
-        migrateBoolean("bottomSearch", PreferencesKeys.BOTTOM_SEARCH)
         migrateBoolean("AppsListAutoSearch", PreferencesKeys.AUTOMATICALLY_OPEN_APPS_IN_SEARCH)
         migrateString("weather_app_package", PreferencesKeys.WEATHER_APP_PACKAGE)
         migrateBoolean("DoubleTapToLock", PreferencesKeys.DOUBLE_TAP_TO_LOCK)

@@ -160,7 +160,6 @@ fun MainPagerScreen(
         if (!isAppsListVisible) {
             appsListViewModel.onSearchExpandedChanged(false)
             appsListViewModel.setBottomSheetVisible(visibility = false)
-            appsListViewModel.setShowWorkApps(show = false)
         } else if (autoOpenSearch) {
             appsListViewModel.onSearchExpandedChanged(true)
         }

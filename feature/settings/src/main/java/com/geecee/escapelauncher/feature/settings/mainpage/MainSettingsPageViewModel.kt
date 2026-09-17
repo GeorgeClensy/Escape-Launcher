@@ -35,7 +35,6 @@ data class MainSettingsUiState(
     val doubleTapToLock: Boolean = DefaultSettings.DOUBLE_TAP_TO_LOCK,
     val showSearchBox: Boolean = DefaultSettings.SHOW_SEARCH_BOX,
     val searchAutoOpen: Boolean = DefaultSettings.SEARCH_AUTO_OPEN,
-    val bottomSearch: Boolean = DefaultSettings.BOTTOM_SEARCH,
     val automaticallyOpenAppsInSearch: Boolean = DefaultSettings.AUTOMATICALLY_OPEN_APPS_IN_SEARCH,
     val hideScreenTimePage: Boolean = DefaultSettings.HIDE_SCREEN_TIME_PAGE,
     val allowAnalytics: Boolean = DefaultSettings.ALLOW_ANALYTICS,
@@ -77,7 +76,6 @@ class MainSettingsPageViewModel @Inject constructor(
         launcherBehaviorRepository.doubleTapToLock,
         searchSettingsRepository.showSearchBox,
         searchSettingsRepository.searchAutoOpen,
-        searchSettingsRepository.bottomSearch,
         searchSettingsRepository.automaticallyOpenAppsInSearch,
         screenTimeSettingsRepository.hideScreenTimePage,
         launcherBehaviorRepository.allowAnalyitics,
@@ -113,12 +111,11 @@ class MainSettingsPageViewModel @Inject constructor(
             doubleTapToLock = args[13] as Boolean,
             showSearchBox = args[14] as Boolean,
             searchAutoOpen = args[15] as Boolean,
-            bottomSearch = args[16] as Boolean,
-            automaticallyOpenAppsInSearch = args[17] as Boolean,
-            hideScreenTimePage = args[18] as Boolean,
-            allowAnalytics = args[19] as Boolean,
-            isDefaultLauncher = args[20] as Boolean,
-            isAccessibilityServiceEnabled = args[21] as Boolean
+            automaticallyOpenAppsInSearch = args[16] as Boolean,
+            hideScreenTimePage = args[17] as Boolean,
+            allowAnalytics = args[18] as Boolean,
+            isDefaultLauncher = args[19] as Boolean,
+            isAccessibilityServiceEnabled = args[20] as Boolean
         )
     }.stateIn(
         scope = viewModelScope,
@@ -252,12 +249,6 @@ class MainSettingsPageViewModel @Inject constructor(
     fun setSearchAutoOpen(value: Boolean) {
         viewModelScope.launch {
             searchSettingsRepository.setSearchAutoOpen(value)
-        }
-    }
-
-    fun setBottomSearch(value: Boolean) {
-        viewModelScope.launch {
-            searchSettingsRepository.setBottomSearch(value)
         }
     }
 

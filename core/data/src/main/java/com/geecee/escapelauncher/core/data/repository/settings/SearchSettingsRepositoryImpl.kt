@@ -21,10 +21,6 @@ class SearchSettingsRepositoryImpl @Inject constructor(
     override suspend fun setSearchAutoOpen(enabled: Boolean) {
         dataStore.edit { it[PreferencesKeys.SEARCH_AUTO_OPEN] = enabled }
     }
-    override val bottomSearch: Flow<Boolean> = dataStore.data.map { it[PreferencesKeys.BOTTOM_SEARCH] ?: DefaultSettings.BOTTOM_SEARCH }
-    override suspend fun setBottomSearch(enabled: Boolean) {
-        dataStore.edit { it[PreferencesKeys.BOTTOM_SEARCH] = enabled }
-    }
     override val automaticallyOpenAppsInSearch: Flow<Boolean> = dataStore.data.map { it[PreferencesKeys.AUTOMATICALLY_OPEN_APPS_IN_SEARCH] ?: DefaultSettings.AUTOMATICALLY_OPEN_APPS_IN_SEARCH }
     override suspend fun setAutomaticallyOpenAppsInSearch(enabled: Boolean) {
         dataStore.edit { it[PreferencesKeys.AUTOMATICALLY_OPEN_APPS_IN_SEARCH] = enabled }
