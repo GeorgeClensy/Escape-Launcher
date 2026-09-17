@@ -65,6 +65,7 @@ import kotlin.time.Duration.Companion.milliseconds
 fun LockedAppFolderUI(
     modifier: Modifier = Modifier,
     icon: ImageVector = Icons.Default.Lock,
+    buttonText: String = stringResource(R.string.unlock),
     text: String,
     subhead: String = "",
     iconContentDescription: String,
@@ -175,12 +176,11 @@ fun LockedAppFolderUI(
                         scope.launch {
                             delay(200.milliseconds)
                             isButtonMorphed = false
+                            unlockClick()
                         }
                     } else {
                         isButtonMorphed = false
                     }
-
-                    unlockClick()
                 },
                 interactionSource = buttonInteractionSource,
                 modifier = Modifier
@@ -188,7 +188,7 @@ fun LockedAppFolderUI(
                     .aspectRatio(2f)
             ) {
                 Text(
-                    text = stringResource(R.string.unlock),
+                    text = buttonText,
                     style = MaterialTheme.typography.bodyLarge
                 )
             }

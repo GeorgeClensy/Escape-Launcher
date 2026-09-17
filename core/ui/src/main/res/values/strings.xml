@@ -45,7 +45,7 @@
     <string name="unpause">Unpause</string>
     <string name="lock_work_profile">Pause Work Apps</string>
     <string name="work_apps_are_paused">Work apps are paused</string>
-    <string name="you_wont_receive_notifications_from_work_apps">You won\'t receive notifications from your work apps</string>
+    <string name="work_apps_are_paused_you_wont_recieve_notifications">Work apps are paused. You won\'t receive notifications from them.</string>
 
     <!-- Hidden Apps strings-->
     <string name="hidden_apps">Hidden Apps</string>

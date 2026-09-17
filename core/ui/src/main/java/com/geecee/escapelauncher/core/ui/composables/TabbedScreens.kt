@@ -72,8 +72,11 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.boundsInParent
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.layout.positionInParent
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.SoftwareKeyboardController
 import androidx.compose.ui.tooling.preview.Preview
@@ -229,6 +232,8 @@ fun TabBar(
     onSearchDone: (String, SoftwareKeyboardController?) -> Unit = { _, _ -> }
 ) {
     val scrollState = rememberScrollState()
+    var rowWidth by remember { mutableIntStateOf(0) }
+    val itemCoordinates = remember { mutableMapOf<Int, LayoutCoordinates>() }
 
     val showLeftFade by remember(reverse) {
         derivedStateOf { if (!reverse) scrollState.value > 0 else scrollState.value < scrollState.maxValue }
@@ -244,7 +249,17 @@ fun TabBar(
         targetValue = if (showRightFade) 1f else 0f, label = "RightFadeAlpha"
     )
 
-    // Go to all apps when search pressed (for now, we may implement searching within lists later)
+    LaunchedEffect(selectedTabIndex.intValue) {
+        itemCoordinates[selectedTabIndex.intValue]?.let { coordinates ->
+            if (coordinates.isAttached) {
+                val itemOffset = coordinates.positionInParent().x
+                val itemWidth = coordinates.size.width
+                val targetScroll = (itemOffset + itemWidth / 2f - rowWidth / 2f).toInt()
+                scrollState.animateScrollTo(targetScroll.coerceIn(0, scrollState.maxValue))
+            }
+        }
+    }
+
     LaunchedEffect(searchExpanded) {
         if (searchExpanded) {
             selectedTabIndex.intValue = 0
@@ -255,13 +270,13 @@ fun TabBar(
 
     Row(
         modifier = modifier
+            .onSizeChanged { rowWidth = it.width }
             .graphicsLayer { alpha = 0.99f }
             .drawWithContent {
                 drawContent()
 
                 val fadeWidth = 30.dp.toPx()
 
-                // Left edge fade
                 drawRect(
                     brush = Brush.horizontalGradient(
                         colors = listOf(Color.Black.copy(alpha = leftAlpha), Color.Transparent),
@@ -270,7 +285,6 @@ fun TabBar(
                     ), blendMode = BlendMode.DstOut
                 )
 
-                // Right edge fade
                 drawRect(
                     brush = Brush.horizontalGradient(
                         colors = listOf(Color.Transparent, Color.Black.copy(alpha = rightAlpha)),
@@ -286,10 +300,8 @@ fun TabBar(
                 if (!searchExpanded) return@pointerInput
 
                 awaitEachGesture {
-                    // Intercept down event before child views consume it
                     val downEvent = awaitFirstDown(pass = PointerEventPass.Initial)
 
-                    // Only proceed if the tap occurred outside the search bar bounds
                     if (!searchBarBounds.contains(downEvent.position)) {
                         val upEvent = waitForUpOrCancellation(pass = PointerEventPass.Initial)
                         if (upEvent != null) {
@@ -319,14 +331,18 @@ fun TabBar(
 
         val displayList = if (reverse) screens.reversed() else screens
         displayList.forEach { screen ->
+            val index = screens.indexOf(screen)
             Tab(
+                modifier = Modifier.onGloballyPositioned { coordinates ->
+                    itemCoordinates[index] = coordinates
+                },
                 text = screen.title,
                 icon = screen.icon,
-                selected = selectedTabIndex.intValue == screens.indexOf(screen),
-                showText = selectedTabIndex.intValue == screens.indexOf(screen),
+                selected = selectedTabIndex.intValue == index,
+                showText = selectedTabIndex.intValue == index,
                 disabled = searchExpanded,
                 onClick = {
-                    selectedTabIndex.intValue = screens.indexOf(screen)
+                    selectedTabIndex.intValue = index
                 })
         }
 

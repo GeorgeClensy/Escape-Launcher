@@ -124,19 +124,21 @@ fun MainPagerScreen(
         ) {
             TabbedScreen(
                 title = "Work", icon = Icons.Default.Work, content = {
-                    WorkApps(modifier = Modifier, onAppClick = { app ->
+                    WorkApps(modifier =
+                        Modifier.fillMaxSize(),
+                        onAppClick = { app ->
                         viewModel.openApp(
                             app = app, overrideChallenge = false, onAppOpened = {
                                 screenTimeViewModel.onAppOpened(it)
                                 appsListViewModel.onSearchExpandedChanged(false)
                                 doHapticFeedBack(haptics, hapticFeedbackEnabled)
                             })
-                    }, onAppLongClick = { app ->
+                    },
+                        onAppLongClick = { app ->
                         appsListViewModel.setBottomSheetVisible(true)
                         appsListViewModel.setBottomSheetApp(app)
                         doHapticFeedBack(haptics, hapticFeedbackEnabled)
                     })
-
                 })
         } else {
             null
@@ -150,6 +152,7 @@ fun MainPagerScreen(
     val isAppsListVisible = viewModel.pagerState.currentPage == appsListPageIndex
     val autoOpenSearch by appsListViewModel.searchAutoOpen.collectAsState(initial = DefaultSettings.SEARCH_AUTO_OPEN)
 
+    // Tidy up apps list when it closes or opens
     LaunchedEffect(isAppsListVisible) {
         if (!isAppsListVisible) {
             appsListViewModel.onSearchExpandedChanged(false)
