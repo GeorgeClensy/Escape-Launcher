@@ -2,7 +2,6 @@ package com.geecee.escapelauncher.feature.appslist
 
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.LocalActivity
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -35,7 +34,6 @@ import com.geecee.escapelauncher.core.common.DefaultSettings
 import com.geecee.escapelauncher.core.common.formatScreenTime
 import com.geecee.escapelauncher.core.model.InstalledApp
 import com.geecee.escapelauncher.core.ui.DefaultSettingsUi
-import com.geecee.escapelauncher.core.ui.composables.HomeScreenBottomSheet
 import com.geecee.escapelauncher.core.ui.composables.HomeScreenItem
 import com.geecee.escapelauncher.core.ui.utils.doHapticFeedBack
 import com.geecee.escapelauncher.feature.screentime.ScreenTimeViewModel
@@ -60,11 +58,6 @@ fun AppsList(
     val appsListAlignment by appsListViewModel.appsAlignment.collectAsState(initial = DefaultSettingsUi.APPS_ALIGNMENT)
     val hapticFeedbackEnabled by appsListViewModel.hapticFeedBackEnabled.collectAsState(initial = DefaultSettings.HAPTIC_FEEDBACK)
     val apps by appsListViewModel.apps.collectAsState()
-    val showBottomSheet by appsListViewModel.showBottomSheet.collectAsState()
-    val bottomSheetApp by appsListViewModel.bottomSheetApp.collectAsState()
-
-    val bottomSheetActions by appsListViewModel.bottomSheetActions.collectAsState()
-    val shortcutActions by appsListViewModel.shortcutActions.collectAsState()
 
     // Standard app interaction logic shared across slots
     val handleAppClick: (InstalledApp) -> Unit = { app ->
@@ -129,16 +122,6 @@ fun AppsList(
                 Spacer(modifier = Modifier.height(padding.calculateBottomPadding()))
             }
         }
-    }
-
-    // Bottom Sheet
-    AnimatedVisibility(showBottomSheet && bottomSheetApp != null) {
-        HomeScreenBottomSheet(
-            app = bottomSheetApp!!,
-            actions = bottomSheetActions,
-            onDismissRequest = { appsListViewModel.setBottomSheetVisible(false) },
-            shortcutActions = shortcutActions
-        )
     }
 }
 

@@ -37,6 +37,7 @@ fun BouncyMorphingFab(
     containerColor: Color,
     contentColor: Color,
     radius: Dp = 16.dp,
+    instantMode: Boolean = false,
     onClick: () -> Unit
 ) {
     val interactionSource = remember { MutableInteractionSource() }
@@ -62,12 +63,17 @@ fun BouncyMorphingFab(
                  scope.launch {
                      delay(200.milliseconds)
                      isMorphed = false
+                     if(!instantMode) {
+                         onClick()
+                     }
                  }
             } else {
                 isMorphed = false
             }
 
-            onClick()
+            if(instantMode) {
+                onClick()
+            }
         },
         modifier = modifier,
         shape = RoundedCornerShape(animatedRadius),

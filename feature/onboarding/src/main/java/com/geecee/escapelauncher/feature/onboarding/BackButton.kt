@@ -22,6 +22,7 @@ fun BackButton(
         contentDescription = stringResource(R.string.back),
         containerColor = MaterialTheme.colorScheme.primary,
         contentColor = MaterialTheme.colorScheme.surface,
+        instantMode = true,
         onClick = { onClick() }
     )
 }

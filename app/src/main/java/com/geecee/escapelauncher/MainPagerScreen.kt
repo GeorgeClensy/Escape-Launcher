@@ -15,6 +15,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Work
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.SheetValue
+import androidx.compose.material3.rememberBottomSheetState
 import androidx.compose.material.icons.rounded.Apps
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -32,6 +34,7 @@ import com.geecee.escapelauncher.core.common.DefaultSettings
 import com.geecee.escapelauncher.core.domain.managedprofiles.ManagedProfileType
 import com.geecee.escapelauncher.core.model.InstalledApp
 import com.geecee.escapelauncher.core.ui.DefaultSettingsUi
+import com.geecee.escapelauncher.core.ui.composables.HomeScreenBottomSheet
 import com.geecee.escapelauncher.core.ui.composables.OpenChallenge
 import com.geecee.escapelauncher.core.ui.composables.TabDisplay
 import com.geecee.escapelauncher.core.ui.composables.TabbedScreen
@@ -205,6 +208,11 @@ fun MainPagerScreen(
                 val apps by appsListViewModel.apps.collectAsState()
                 val autoOpenAppInSearch by appsListViewModel.automaticallyOpenAppsInSearch.collectAsState(initial = DefaultSettings.AUTOMATICALLY_OPEN_APPS_IN_SEARCH)
 
+                val showBottomSheet by appsListViewModel.showBottomSheet.collectAsState()
+                val bottomSheetApp by appsListViewModel.bottomSheetApp.collectAsState()
+                val bottomSheetActions by appsListViewModel.bottomSheetActions.collectAsState()
+                val shortcutActions by appsListViewModel.shortcutActions.collectAsState()
+
                 val handleAppClick: (InstalledApp) -> Unit = { app ->
                     viewModel.openApp(
                         app = app, overrideChallenge = false, onAppOpened = {
@@ -258,6 +266,17 @@ fun MainPagerScreen(
                         }
                     }
                 )
+
+                // Bottom Sheet
+                AnimatedVisibility(showBottomSheet && bottomSheetApp != null) {
+                    HomeScreenBottomSheet(
+                        app = bottomSheetApp!!,
+                        actions = bottomSheetActions,
+                        onDismissRequest = { appsListViewModel.setBottomSheetVisible(false) },
+                        shortcutActions = shortcutActions,
+                        sheetState = rememberBottomSheetState(initialValue = SheetValue.Hidden)
+                    )
+                }
             }
         }
     }
