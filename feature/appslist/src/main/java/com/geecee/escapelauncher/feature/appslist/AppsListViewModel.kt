@@ -54,7 +54,6 @@ class AppsListViewModel @Inject constructor(
     }
     val showSearchBox = searchSettingsRepository.showSearchBox
     val searchAutoOpen = searchSettingsRepository.searchAutoOpen
-    val bottomSearch = searchSettingsRepository.bottomSearch
     val automaticallyOpenAppsInSearch = searchSettingsRepository.automaticallyOpenAppsInSearch
     val hiddenAppsInSearch = searchSettingsRepository.showHiddenAppsInSearch
     val hapticFeedBackEnabled = launcherBehaviorRepository.hapticFeedBackEnabled
@@ -180,17 +179,6 @@ class AppsListViewModel @Inject constructor(
         started = SharingStarted.WhileSubscribed(5000),
         initialValue = emptyList()
     )
-
-    // Work Apps
-    private val _showWorkApps = MutableStateFlow(false)
-    val showWorkApps: StateFlow<Boolean> = _showWorkApps.asStateFlow()
-    fun setShowWorkApps(show: Boolean) {
-        _showWorkApps.value = show
-    }
-
-    fun launchApp(app: InstalledApp, onAppOpened: ((String) -> Unit)? = null): Boolean {
-        return launchAppUseCase(app, onAppOpened)
-    }
 }
 
 sealed class AppsListUiEvent {

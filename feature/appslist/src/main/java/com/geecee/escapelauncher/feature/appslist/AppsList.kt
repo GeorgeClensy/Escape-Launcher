@@ -2,23 +2,20 @@ package com.geecee.escapelauncher.feature.appslist
 
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.LocalActivity
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
-import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxScope
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyListScope
-import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -28,67 +25,39 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import com.geecee.escapelauncher.core.ui.R
 import com.geecee.escapelauncher.core.common.DefaultSettings
 import com.geecee.escapelauncher.core.common.formatScreenTime
 import com.geecee.escapelauncher.core.model.InstalledApp
-import com.geecee.escapelauncher.core.theme.colours.transparentHalf
 import com.geecee.escapelauncher.core.ui.DefaultSettingsUi
-import com.geecee.escapelauncher.core.ui.composables.AnimatedPillSearchBar
-import com.geecee.escapelauncher.core.ui.composables.AppsListHeader
-import com.geecee.escapelauncher.core.ui.composables.HomeScreenBottomSheet
 import com.geecee.escapelauncher.core.ui.composables.HomeScreenItem
-import com.geecee.escapelauncher.core.ui.composables.ListGradient
-import com.geecee.escapelauncher.core.ui.composables.SettingsSpacer
 import com.geecee.escapelauncher.core.ui.utils.doHapticFeedBack
 import com.geecee.escapelauncher.feature.screentime.ScreenTimeViewModel
 import kotlinx.coroutines.flow.collectLatest
 
 /**
- * Main App List composable
+ * Main App List composable - focuses purely on the list of apps
  */
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun AppsList(
     modifier: Modifier = Modifier,
-    scrollState: LazyListState,
-    isBeingShown: Boolean,
+    padding: PaddingValues = PaddingValues(),
     onAppOpened: (app: InstalledApp) -> Unit = {},
     onGoHomeRequest: () -> Unit = {},
     appsListViewModel: AppsListViewModel = hiltViewModel(),
     screenTimeViewModel: ScreenTimeViewModel = hiltViewModel(LocalActivity.current as ComponentActivity),
-    extraListItems: LazyListScope.(onAppClick: (InstalledApp) -> Unit, onAppLongClick: (InstalledApp) -> Unit) -> Unit = { _, _ -> },
-    floatingContent: @Composable BoxScope.(onShowWorkApps: () -> Unit) -> Unit = { _ -> },
-    workAppsContent: @Composable BoxScope.(onAppClick: (InstalledApp) -> Unit, onAppLongClick: (InstalledApp) -> Unit) -> Unit = { _, _ -> },
 ) {
     val haptics = LocalHapticFeedback.current
     val appUsageList by screenTimeViewModel.appUsageUiList.collectAsState()
     val showScreenTimeApp by appsListViewModel.showScreenTimeApp.collectAsState(initial = DefaultSettings.SHOW_SCREEN_TIME_APP)
     val appsListAlignment by appsListViewModel.appsAlignment.collectAsState(initial = DefaultSettingsUi.APPS_ALIGNMENT)
     val hapticFeedbackEnabled by appsListViewModel.hapticFeedBackEnabled.collectAsState(initial = DefaultSettings.HAPTIC_FEEDBACK)
-    val showSearchBox by appsListViewModel.showSearchBox.collectAsState(initial = DefaultSettings.SHOW_SEARCH_BOX)
-    val bottomSearchBox by appsListViewModel.bottomSearch.collectAsState(initial = DefaultSettings.BOTTOM_SEARCH)
-    val autoOpenSearch by appsListViewModel.searchAutoOpen.collectAsState(initial = DefaultSettings.SEARCH_AUTO_OPEN)
-    val autoOpenAppInSearch by appsListViewModel.automaticallyOpenAppsInSearch.collectAsState(
-        initial = DefaultSettings.AUTOMATICALLY_OPEN_APPS_IN_SEARCH
-    )
     val apps by appsListViewModel.apps.collectAsState()
-    val searchText by appsListViewModel.searchText.collectAsState()
-    val searchExpanded by appsListViewModel.searchExpanded.collectAsState()
-    val showBottomSheet by appsListViewModel.showBottomSheet.collectAsState()
-    val bottomSheetApp by appsListViewModel.bottomSheetApp.collectAsState()
-    val showWorkApps by appsListViewModel.showWorkApps.collectAsState()
-
-    val bottomSheetActions by appsListViewModel.bottomSheetActions.collectAsState()
-    val shortcutActions by appsListViewModel.shortcutActions.collectAsState()
 
     // Standard app interaction logic shared across slots
     val handleAppClick: (InstalledApp) -> Unit = { app ->
@@ -112,16 +81,7 @@ fun AppsList(
         }
     }
 
-    // This manages tidying everything when the visibility changes
-    LaunchedEffect(isBeingShown) {
-        if (!isBeingShown) {
-            appsListViewModel.onSearchExpandedChanged(false)
-            appsListViewModel.setBottomSheetVisible(visibility = false)
-            appsListViewModel.setShowWorkApps(show = false)
-        } else if (autoOpenSearch) {
-            appsListViewModel.onSearchExpandedChanged(true)
-        }
-    }
+    val scrollState = rememberLazyListState()
 
     Box(
         modifier
@@ -133,48 +93,15 @@ fun AppsList(
             state = scrollState,
             modifier = Modifier
                 .fillMaxSize()
-                .padding(30.dp, 0.dp),
+                .padding(horizontal = 30.dp),
             horizontalAlignment = appsListAlignment,
+            verticalArrangement = Arrangement.Bottom
         ) {
-            // Apps list title
             item {
-                AppsListHeader(stringResource(R.string.all_apps))
+                val statusBarHeight = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
+                Spacer(modifier = Modifier.height(statusBarHeight + 10.dp))
             }
 
-            // Search box
-            item {
-                if (showSearchBox && !bottomSearchBox) {
-                    Spacer(modifier = Modifier.height(15.dp))
-
-                    AnimatedPillSearchBar(
-                        closedText = stringResource(R.string.search),
-                        searchText = searchText,
-                        isExpanded = searchExpanded,
-                        autoFocus = autoOpenSearch,
-                        onExpandedChange = {
-                            appsListViewModel.onSearchExpandedChanged(it)
-                            doHapticFeedBack(haptics, hapticFeedbackEnabled)
-                        },
-                        onSearchTextChanged = { query ->
-                            appsListViewModel.onSearchTextChanged(query)
-                            if (autoOpenAppInSearch && query.length >= 2 && apps.size == 1) {
-                                handleAppClick(apps.first())
-                            }
-                        },
-                        onSearchDone = { _, keboardController ->
-                            if (apps.isNotEmpty()) {
-                                keboardController?.hide()
-                                handleAppClick(apps.first())
-                            } else {
-                                doHapticFeedBack(haptics, hapticFeedbackEnabled)
-                            }
-                        })
-
-                    Spacer(modifier = Modifier.height(15.dp))
-                }
-            }
-
-            // Apps
             items(apps, key = { app -> app.packageName }) { app ->
                 val screenTime = remember(appUsageList) {
                     screenTimeViewModel.getScreenTime(app.packageName)
@@ -191,110 +118,18 @@ fun AppsList(
                 )
             }
 
-            // Extra list items (Secure Folder, Private Space, etc)
-            extraListItems(handleAppClick, handleAppLongClick)
-
             item {
-                Spacer(modifier = Modifier.height(90.dp))
-            }
-
-            item {
-                SettingsSpacer()
+                Spacer(modifier = Modifier.height(padding.calculateBottomPadding()))
             }
         }
-
-        ListGradient() // Adds a gradient to the bottom of the screen just to make it a bit nicer
-
-        // Floating content (Work Apps FAB, etc)
-        floatingContent { appsListViewModel.setShowWorkApps(true) }
-
-        // Overlays (Work Apps full screen UI)
-        AnimatedVisibility(
-            visible = showWorkApps, enter = fadeIn(), exit = fadeOut()
-        ) {
-            Box(
-                Modifier
-                    .fillMaxSize()
-                    .combinedClickable(
-                        onClick = { appsListViewModel.setShowWorkApps(show = false) },
-                        onLongClick = {},
-                        indication = null,
-                        interactionSource = null
-                    )
-                    .background(transparentHalf)
-            ) {
-                workAppsContent(
-                    { app -> // onAppClick
-                        appsListViewModel.launchApp(app = app)
-                        onGoHomeRequest()
-                    },
-                    { app -> // onAppLongClick
-                        handleAppLongClick(app)
-                    }
-                )
-            }
-        }
-
-        // Bottom search box
-        Column(
-            modifier = Modifier
-                .align(alignment = Alignment.BottomCenter)
-                .padding(30.dp, 25.dp)
-                .fillMaxWidth(),
-            horizontalAlignment = appsListAlignment
-        ) {
-            if (showSearchBox && bottomSearchBox) {
-                Spacer(modifier = Modifier.height(15.dp))
-
-                AnimatedPillSearchBar(
-                    closedText = stringResource(R.string.search),
-                    searchText = searchText,
-                    isExpanded = searchExpanded,
-                    autoFocus = autoOpenSearch,
-                    onExpandedChange = {
-                        appsListViewModel.onSearchExpandedChanged(it)
-                        doHapticFeedBack(haptics, hapticFeedbackEnabled)
-                    },
-                    onSearchTextChanged = { query ->
-                        appsListViewModel.onSearchTextChanged(query)
-                        if (autoOpenAppInSearch && query.length >= 2 && apps.size == 1) {
-                            handleAppClick(apps.first())
-                        }
-                    },
-                    onSearchDone = { _, keboardController ->
-                        if (apps.isNotEmpty()) {
-                            keboardController?.hide()
-                            handleAppClick(apps.first())
-                        } else {
-                            doHapticFeedBack(haptics, hapticFeedbackEnabled)
-                        }
-                    })
-
-                SettingsSpacer()
-            }
-        }
-    }
-
-
-    // Bottom Sheet
-    AnimatedVisibility(showBottomSheet && bottomSheetApp != null) {
-        HomeScreenBottomSheet(
-            app = bottomSheetApp!!,
-            actions = bottomSheetActions,
-            onDismissRequest = { appsListViewModel.setBottomSheetVisible(false) },
-            shortcutActions = shortcutActions
-        )
     }
 }
 
 @Preview(showBackground = true)
 @Composable
 private fun AppsListPreview() {
-    val scrollState = rememberLazyListState()
     Box(modifier = Modifier.background(MaterialTheme.colorScheme.surface)) {
         AppsList(
-            scrollState = scrollState,
-            isBeingShown = true,
             onAppOpened = {},
             onGoHomeRequest = {})
     }

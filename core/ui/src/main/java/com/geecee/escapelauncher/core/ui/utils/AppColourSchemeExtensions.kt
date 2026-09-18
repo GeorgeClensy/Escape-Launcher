@@ -1,4 +1,4 @@
-package com.geecee.escapelauncher.core.ui.composables
+package com.geecee.escapelauncher.core.ui.utils
 
 import androidx.annotation.StringRes
 import com.geecee.escapelauncher.core.theme.colours.AppColourScheme

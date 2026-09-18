@@ -32,6 +32,9 @@
     <string name="app_info">App Info</string>
     <string name="search">Search</string>
     <string name="unlock_private_space">Unlock Private Space</string>
+    <string name="unlock">Unlock</string>
+    <string name="secure_folder_is_locked">Secure folder is locked, Unlock to use apps.</string>
+    <string name="private_space_is_locked">Private spaced is locked, Unlock to use apps.</string>
     <string name="lock_private_space">Lock Private Space</string>
     <string name="private_space">Private Space</string>
     <string name="private_space_settings">Private Space Settings</string>
@@ -42,7 +45,8 @@
     <string name="unpause">Unpause</string>
     <string name="lock_work_profile">Pause Work Apps</string>
     <string name="work_apps_are_paused">Work apps are paused</string>
-    <string name="you_wont_receive_notifications_from_work_apps">You won\'t receive notifications from your work apps</string>
+    <string name="pause_work_apps">Pause work apps</string>
+    <string name="work_apps_are_paused_you_wont_recieve_notifications">Work apps are paused. You won\'t receive notifications from them.</string>
 
     <!-- Hidden Apps strings-->
     <string name="hidden_apps">Hidden Apps</string>
@@ -94,7 +98,6 @@
     <string name="hide_screen_time_page">Hide screen time page</string>
     <string name="show_hidden_apps_in_search">Show hidden apps in search</string>
     <string name="manage_favourite_apps">Manage favourite apps</string>
-    <string name="search_at_bottom">Search at bottom</string>
     <string name="apps_list_auto_search">Automatically Open Search</string>
     <string name="sponsor">Sponsor</string>
     <string name="font_licences">Font Licences</string>

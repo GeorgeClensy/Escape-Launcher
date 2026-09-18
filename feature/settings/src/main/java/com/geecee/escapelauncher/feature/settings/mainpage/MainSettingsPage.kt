@@ -327,16 +327,6 @@ fun MainSettingsPage(
                     })
             }
 
-            item(key = "bottom_search") {
-                SettingsSwitch(
-                    label = stringResource(id = R.string.search_at_bottom),
-                    checked = uiState.bottomSearch,
-                    isBottomOfGroup = false,
-                    onCheckedChange = {
-                        mainSettingsPageViewModel.setBottomSearch(it)
-                    })
-            }
-
             item(key = "apps_list_auto_search") {
                 SettingsSwitch(
                     label = stringResource(id = R.string.apps_list_auto_search),

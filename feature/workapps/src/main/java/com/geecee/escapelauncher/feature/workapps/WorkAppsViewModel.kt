@@ -1,5 +1,6 @@
 package com.geecee.escapelauncher.feature.workapps
 
+import androidx.compose.ui.Alignment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.geecee.escapelauncher.core.domain.managedprofiles.CanToggleManagedProfileUseCase
@@ -9,11 +10,13 @@ import com.geecee.escapelauncher.core.domain.managedprofiles.ObserveManagedProfi
 import com.geecee.escapelauncher.core.domain.managedprofiles.ToggleManagedProfileUseCase
 import com.geecee.escapelauncher.core.domain.managedprofiles.ToggleManagedProfileUseCaseOutput
 import com.geecee.escapelauncher.core.domain.repository.android.AppsRepository
+import com.geecee.escapelauncher.core.domain.repository.settings.AppearanceRepository
 import com.geecee.escapelauncher.core.model.InstalledApp
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -24,7 +27,8 @@ class WorkAppsViewModel @Inject constructor(
     observeManagedProfileUnlockedUseCase: ObserveManagedProfileUnlockedUseCase,
     private val toggleManagedProfileUseCase: ToggleManagedProfileUseCase,
     canToggleManagedProfileUseCase: CanToggleManagedProfileUseCase,
-    appsRepository: AppsRepository
+    appsRepository: AppsRepository,
+    appearanceRepository: AppearanceRepository
 ) : ViewModel() {
 
     val canToggleProfile: Boolean = canToggleManagedProfileUseCase(ManagedProfileType.WorkApps)
@@ -52,6 +56,14 @@ class WorkAppsViewModel @Inject constructor(
                 ToggleManagedProfileUseCaseOutput.FailedNotDefaultLauncher -> onLauncherNotDefault()
                 else -> { /* Success cases are handled by the Flow observers */ }
             }
+        }
+    }
+
+    val appsAlignment = appearanceRepository.appsAlignment.map { alignment ->
+        when (alignment) {
+            "Left" -> Alignment.Start
+            "Center" -> Alignment.CenterHorizontally
+            else -> Alignment.End
         }
     }
 }

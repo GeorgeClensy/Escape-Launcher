@@ -24,6 +24,7 @@ fun NextButton(
         contentDescription = stringResource(R.string.continue_str),
         containerColor = MaterialTheme.colorScheme.primary,
         contentColor = MaterialTheme.colorScheme.surface,
+        instantMode = true,
         onClick = { onNext() }
     )
 }

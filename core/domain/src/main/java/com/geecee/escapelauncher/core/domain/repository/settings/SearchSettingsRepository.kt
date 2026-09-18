@@ -7,8 +7,6 @@ interface SearchSettingsRepository {
     suspend fun setShowSearchBox(enabled: Boolean)
     val searchAutoOpen: Flow<Boolean>
     suspend fun setSearchAutoOpen(enabled: Boolean)
-    val bottomSearch: Flow<Boolean>
-    suspend fun setBottomSearch(enabled: Boolean)
     val automaticallyOpenAppsInSearch: Flow<Boolean>
     suspend fun setAutomaticallyOpenAppsInSearch(enabled: Boolean)
     val showHiddenAppsInSearch: Flow<Boolean>

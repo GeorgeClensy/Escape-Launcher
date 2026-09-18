@@ -44,7 +44,8 @@ class ManagedProfileRepositoryImpl @Inject constructor(
     private val appsRepository: AppsRepository
 ) : ManagedProfileRepository {
 
-    private val launcherApps = context.getSystemService(Context.LAUNCHER_APPS_SERVICE) as LauncherApps
+    private val launcherApps =
+        context.getSystemService(Context.LAUNCHER_APPS_SERVICE) as LauncherApps
     private val userManager = context.getSystemService(Context.USER_SERVICE) as UserManager
 
     private val _profileUpdateTrigger = MutableSharedFlow<Unit>(replay = 1)
@@ -122,7 +123,8 @@ class ManagedProfileRepositoryImpl @Inject constructor(
             val intent = Intent(Intent.ACTION_MAIN).apply {
                 addCategory(Intent.CATEGORY_HOME)
             }
-            val resolveInfo = packageManager.resolveActivity(intent, PackageManager.MATCH_DEFAULT_ONLY)
+            val resolveInfo =
+                packageManager.resolveActivity(intent, PackageManager.MATCH_DEFAULT_ONLY)
             resolveInfo?.activityInfo?.packageName == context.packageName
         }
     }
@@ -142,10 +144,14 @@ class ManagedProfileRepositoryImpl @Inject constructor(
                     userManager.userProfiles.find {
                         launcherApps.getLauncherUserInfo(it)?.userType == UserManager.USER_TYPE_PROFILE_MANAGED
                     }
-                } else {
-                    // Fallback for API 26-34: Typically only one other profile exists for the current user.
-                    userManager.userProfiles.find { it != Process.myUserHandle() }
-                }
+                } else if (Build.VERSION.SDK_INT >= 30) {
+                    val myUser = Process.myUserHandle()
+                    userManager.userProfiles.find { handle ->
+                        if (handle == myUser) return@find false
+
+                        userManager.isManagedProfile
+                    }
+                } else null
             }
         }
     }

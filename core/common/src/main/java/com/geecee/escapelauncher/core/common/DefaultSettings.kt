@@ -49,7 +49,6 @@ object DefaultSettings {
     // Search
     const val SHOW_SEARCH_BOX = true
     const val SEARCH_AUTO_OPEN = false
-    const val BOTTOM_SEARCH = false
     const val AUTOMATICALLY_OPEN_APPS_IN_SEARCH = false
 
     // Misc

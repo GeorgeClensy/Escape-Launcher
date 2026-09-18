@@ -10,24 +10,35 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Work
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.SheetValue
+import androidx.compose.material3.rememberBottomSheetState
+import androidx.compose.material.icons.rounded.Apps
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
-import androidx.compose.ui.platform.LocalResources
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.platform.SoftwareKeyboardController
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.geecee.escapelauncher.core.common.DefaultSettings
 import com.geecee.escapelauncher.core.domain.managedprofiles.ManagedProfileType
-import com.geecee.escapelauncher.core.ui.R
+import com.geecee.escapelauncher.core.model.InstalledApp
+import com.geecee.escapelauncher.core.ui.DefaultSettingsUi
+import com.geecee.escapelauncher.core.ui.composables.HomeScreenBottomSheet
 import com.geecee.escapelauncher.core.ui.composables.OpenChallenge
+import com.geecee.escapelauncher.core.ui.composables.TabDisplay
+import com.geecee.escapelauncher.core.ui.composables.TabbedScreen
+import com.geecee.escapelauncher.core.ui.utils.doHapticFeedBack
 import com.geecee.escapelauncher.feature.appslist.AppsList
 import com.geecee.escapelauncher.feature.appslist.AppsListViewModel
 import com.geecee.escapelauncher.feature.homescreen.HomeScreen
@@ -36,7 +47,6 @@ import com.geecee.escapelauncher.feature.screentime.ScreenTimeViewModel
 import com.geecee.escapelauncher.feature.securefolder.SecureFolderButton
 import com.geecee.escapelauncher.feature.securefolder.canUseSecureFolder
 import com.geecee.escapelauncher.feature.workapps.WorkApps
-import com.geecee.escapelauncher.feature.workapps.WorkAppsFab
 import com.geecee.escapelauncher.privatespace.PrivateSpace
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -47,8 +57,7 @@ import kotlin.time.Duration.Companion.milliseconds
  *  contains a pager with all the pages inside of it, contains bottom sheet, contains open challenge UI
  */
 @OptIn(
-    ExperimentalMaterial3Api::class,
-    ExperimentalFoundationApi::class
+    ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class
 )
 @Composable
 fun MainPagerScreen(
@@ -58,14 +67,12 @@ fun MainPagerScreen(
     screenTimeViewModel: ScreenTimeViewModel = hiltViewModel(LocalActivity.current as ComponentActivity),
     onOpenSettings: () -> Unit
 ) {
+    val haptics = LocalHapticFeedback.current
     val hideScreenTimePage by viewModel.hideScreenTimePage.collectAsState()
     val doubleTapToLock by viewModel.doubleTapToLock.collectAsState(initial = DefaultSettings.DOUBLE_TAP_TO_LOCK)
     val hapticFeedbackEnabled by viewModel.hapticFeedBackEnabled.collectAsState(initial = DefaultSettings.HAPTIC_FEEDBACK)
-    val isHiddenPrivateSpace by viewModel.isHiddenPrivateSpace.collectAsState(initial = DefaultSettings.HIDE_PRIVATE_SPACE)
-    val appsListSearchText by appsListViewModel.searchText.collectAsState() // The apps list is defined here and passed into the apps list so I can get the search text here so I can hide the private spaced based on the search text.
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
-    val resources = LocalResources.current
 
     // Make it that if you go back you go back to main page
     BackHandler(enabled = true) {
@@ -76,12 +83,93 @@ fun MainPagerScreen(
 
     val isDefaultLauncher by viewModel.isDefaultLauncher.collectAsState()
 
+    val appsListTabs = listOf(
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P && canUseSecureFolder(context = context)) {
+            TabbedScreen(
+                title = "Secure Folder", icon = Icons.Default.Lock, content = {
+                    SecureFolderButton(
+                        modifier = Modifier.fillMaxSize()
+                    )
+                })
+        } else {
+            null
+        },
+        if (isDefaultLauncher && Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM && viewModel.managedProfileExists(
+                ManagedProfileType.PrivateSpace
+            )
+        ) {
+            TabbedScreen(
+                title = "Private", icon = Icons.Default.Lock, content = {
+                    PrivateSpace(
+                        modifier = Modifier
+                            .fillMaxSize(),
+                        onAppClick = { app ->
+                            viewModel.openApp(
+                                app = app, overrideChallenge = false, onAppOpened = {
+                                    screenTimeViewModel.onAppOpened(it)
+                                    appsListViewModel.onSearchExpandedChanged(false)
+                                    doHapticFeedBack(haptics, hapticFeedbackEnabled)
+                                })
+                        },
+                        onAppLongClick = { app ->
+                            appsListViewModel.setBottomSheetVisible(true)
+                            appsListViewModel.setBottomSheetApp(app)
+                            doHapticFeedBack(haptics, hapticFeedbackEnabled)
+                        })
+
+                })
+        } else {
+            null
+        },
+        if (viewModel.isManagedProfileSupported(type = ManagedProfileType.WorkApps) && viewModel.managedProfileExists(
+                type = ManagedProfileType.WorkApps
+            )
+        ) {
+            TabbedScreen(
+                title = "Work", icon = Icons.Default.Work, content = {
+                    WorkApps(modifier =
+                        Modifier.fillMaxSize(),
+                        onAppClick = { app ->
+                        viewModel.openApp(
+                            app = app, overrideChallenge = false, onAppOpened = {
+                                screenTimeViewModel.onAppOpened(it)
+                                appsListViewModel.onSearchExpandedChanged(false)
+                                doHapticFeedBack(haptics, hapticFeedbackEnabled)
+                            })
+                    },
+                        onAppLongClick = { app ->
+                        appsListViewModel.setBottomSheetVisible(true)
+                        appsListViewModel.setBottomSheetApp(app)
+                        doHapticFeedBack(haptics, hapticFeedbackEnabled)
+                    })
+                })
+        } else {
+            null
+        }
+    )
+
+    val screenTimePageIndex = if (!hideScreenTimePage) 0 else -1
+    val homePageIndex = if (hideScreenTimePage) 0 else 1
+    val appsListPageIndex = if (hideScreenTimePage) 1 else 2
+
+    val isAppsListVisible = viewModel.pagerState.currentPage == appsListPageIndex
+    val autoOpenSearch by appsListViewModel.searchAutoOpen.collectAsState(initial = DefaultSettings.SEARCH_AUTO_OPEN)
+
+    // Tidy up apps list when it closes or opens
+    LaunchedEffect(isAppsListVisible) {
+        if (!isAppsListVisible) {
+            appsListViewModel.onSearchExpandedChanged(false)
+            appsListViewModel.setBottomSheetVisible(visibility = false)
+        } else if (autoOpenSearch) {
+            appsListViewModel.onSearchExpandedChanged(true)
+        }
+    }
+
     // Home Screen Pages
     HorizontalPager(
         state = viewModel.pagerState,
         modifier = Modifier
             .fillMaxSize()
-            //.background(color = MaterialTheme.colorScheme.surface)
             .combinedClickable(
                 onClick = {},
                 onLongClickLabel = "",
@@ -98,99 +186,103 @@ fun MainPagerScreen(
                             viewModel.lockScreen()
                         }
                     }
-                }
-            )
+                })
     ) { page ->
-        val screenTimePageIndex = if (!hideScreenTimePage) 0 else -1
-        val homePageIndex = if (hideScreenTimePage) 0 else 1
-        val appsListPageIndex = if (hideScreenTimePage) 1 else 2
-
         when (page) {
             screenTimePageIndex -> ScreenTimeDashboard()
 
-            homePageIndex -> HomeScreen(
-                onAppOpened = { app ->
-                    viewModel.openApp(
-                        app = app,
-                        overrideChallenge = false,
-                        onAppOpened = {
-                            screenTimeViewModel.onAppOpened(it)
-                        }
-                    )
-                },
-                onGoHomeRequest = { globalViewModel.requestToGoHome() }
-            )
+            homePageIndex -> HomeScreen(onAppOpened = { app ->
+                viewModel.openApp(
+                    app = app, overrideChallenge = false, onAppOpened = {
+                        screenTimeViewModel.onAppOpened(it)
+                    })
+            }, onGoHomeRequest = { globalViewModel.requestToGoHome() })
 
-            appsListPageIndex -> AppsList(
-                appsListViewModel = appsListViewModel,
-                scrollState = viewModel.appsListScrollState,
-                isBeingShown = viewModel.pagerState.currentPage == appsListPageIndex,
-                onGoHomeRequest = {
-                    globalViewModel.requestToGoHome()
-                },
-                onAppOpened = { app ->
+            appsListPageIndex -> {
+                val searchText by appsListViewModel.searchText.collectAsState()
+                val searchExpanded by appsListViewModel.searchExpanded.collectAsState()
+                val showSearchBox by appsListViewModel.showSearchBox.collectAsState(initial = DefaultSettings.SHOW_SEARCH_BOX)
+                val appsListAlignment by appsListViewModel.appsAlignment.collectAsState(initial = DefaultSettingsUi.APPS_ALIGNMENT)
+                val selectedTabIndex = remember { mutableIntStateOf(0) }
+                val apps by appsListViewModel.apps.collectAsState()
+                val autoOpenAppInSearch by appsListViewModel.automaticallyOpenAppsInSearch.collectAsState(initial = DefaultSettings.AUTOMATICALLY_OPEN_APPS_IN_SEARCH)
+
+                val showBottomSheet by appsListViewModel.showBottomSheet.collectAsState()
+                val bottomSheetApp by appsListViewModel.bottomSheetApp.collectAsState()
+                val bottomSheetActions by appsListViewModel.bottomSheetActions.collectAsState()
+                val shortcutActions by appsListViewModel.shortcutActions.collectAsState()
+
+                val handleAppClick: (InstalledApp) -> Unit = { app ->
                     viewModel.openApp(
-                        app = app,
-                        overrideChallenge = false,
-                        onAppOpened = {
+                        app = app, overrideChallenge = false, onAppOpened = {
                             screenTimeViewModel.onAppOpened(it)
-                        }
-                    )
-                },
-                extraListItems = { onClick, onLongClick ->
-                    //Secure Folder
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P && canUseSecureFolder(context = context)) {
-                        item {
-                            SecureFolderButton()
-                        }
-                    }
-                    //Private Space
-                    else if (isDefaultLauncher && Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM && viewModel.managedProfileExists(
-                            ManagedProfileType.PrivateSpace
-                        )
-                    ) {
-                        if ((isHiddenPrivateSpace && appsListSearchText == resources.getString(R.string.private_space_search_term)) || !isHiddenPrivateSpace) {
-                            item {
-                                PrivateSpace(
-                                    modifier = Modifier,
-                                    onAppClick = onClick,
-                                    onAppLongClick = onLongClick
+                            appsListViewModel.onSearchExpandedChanged(false)
+                            doHapticFeedBack(haptics, hapticFeedbackEnabled)
+                        })
+                }
+
+                TabDisplay(
+                    screens = listOf(
+                        TabbedScreen(
+                            title = "All Apps",
+                            icon = Icons.Rounded.Apps,
+                            content = { padding ->
+                                AppsList(
+                                    padding = padding,
+                                    onAppOpened = { app ->
+                                        handleAppClick(app)
+                                    },
+                                    onGoHomeRequest = {
+                                        globalViewModel.requestToGoHome()
+                                    },
+                                    appsListViewModel = appsListViewModel,
+                                    screenTimeViewModel = screenTimeViewModel
                                 )
                             }
-                        }
-                    }
-                },
-                floatingContent = { onShowWorkApps ->
-                    if (viewModel.managedProfileExists(ManagedProfileType.WorkApps) &&
-                        viewModel.isManagedProfileSupported(ManagedProfileType.WorkApps)
-                    ) {
-                        WorkAppsFab(
-                            Modifier
-                                .align(Alignment.BottomEnd)
-                                .padding(vertical = 55.dp, horizontal = 30.dp)
-                        ) {
-                            onShowWorkApps()
-                        }
-                    }
-                },
-                workAppsContent = { onClick, onLongClick ->
-                    if (viewModel.isManagedProfileSupported(ManagedProfileType.WorkApps)) {
-                        WorkApps(
-                            modifier = Modifier.align(Alignment.Center),
-                            onAppClick = onClick,
-                            onAppLongClick = onLongClick
                         )
+                    ) + appsListTabs.filterNotNull(),
+                    selectedTabIndex = selectedTabIndex,
+                    alignment = appsListAlignment,
+                    showSearch = showSearchBox,
+                    searchText = searchText,
+                    searchExpanded = searchExpanded,
+                    onSearchExpandedChange = {
+                        appsListViewModel.onSearchExpandedChanged(it)
+                        doHapticFeedBack(haptics, hapticFeedbackEnabled)
+                    },
+                    onSearchTextChanged = { query: String ->
+                        appsListViewModel.onSearchTextChanged(query)
+                        if (autoOpenAppInSearch && query.length >= 2 && apps.size == 1) {
+                            handleAppClick(apps.first())
+                        }
+                    },
+                    onSearchDone = { _: String, keyboardController: SoftwareKeyboardController? ->
+                        if (apps.isNotEmpty()) {
+                            keyboardController?.hide()
+                            handleAppClick(apps.first())
+                        } else {
+                            doHapticFeedBack(haptics, hapticFeedbackEnabled)
+                        }
                     }
+                )
+
+                // Bottom Sheet
+                AnimatedVisibility(showBottomSheet && bottomSheetApp != null) {
+                    HomeScreenBottomSheet(
+                        app = bottomSheetApp!!,
+                        actions = bottomSheetActions,
+                        onDismissRequest = { appsListViewModel.setBottomSheetVisible(false) },
+                        shortcutActions = shortcutActions,
+                        sheetState = rememberBottomSheetState(initialValue = SheetValue.Hidden)
+                    )
                 }
-            )
+            }
         }
     }
 
     //Open Challenge
     AnimatedVisibility(
-        visible = viewModel.showOpenChallenge.value,
-        enter = fadeIn(),
-        exit = fadeOut()
+        visible = viewModel.showOpenChallenge.value, enter = fadeIn(), exit = fadeOut()
     ) {
         OpenChallenge(
             haptics = LocalHapticFeedback.current,
@@ -201,8 +293,7 @@ fun MainPagerScreen(
                     overrideChallenge = true,
                     onAppOpened = {
                         screenTimeViewModel.onAppOpened(it)
-                    }
-                )
+                    })
                 coroutineScope.launch {
                     delay(1000.milliseconds)
                     viewModel.showOpenChallenge.value = false
