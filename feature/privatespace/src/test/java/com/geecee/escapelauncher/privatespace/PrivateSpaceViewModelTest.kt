@@ -2,10 +2,12 @@ package com.geecee.escapelauncher.privatespace
 
 import com.geecee.escapelauncher.core.domain.managedprofiles.CanToggleManagedProfileUseCase
 import com.geecee.escapelauncher.core.domain.managedprofiles.GetManagedProfileAppsUseCase
+import com.geecee.escapelauncher.core.domain.managedprofiles.IsManagedProfileUnlockedUseCase
 import com.geecee.escapelauncher.core.domain.managedprofiles.ManagedProfileType
 import com.geecee.escapelauncher.core.domain.managedprofiles.ObserveManagedProfileUnlockedUseCase
 import com.geecee.escapelauncher.core.domain.managedprofiles.ToggleManagedProfileUseCase
 import com.geecee.escapelauncher.core.domain.managedprofiles.ToggleManagedProfileUseCaseOutput
+import com.geecee.escapelauncher.core.domain.repository.settings.AppearanceRepository
 import com.geecee.escapelauncher.core.domain.repository.settings.LauncherBehaviorRepository
 import com.geecee.escapelauncher.core.model.InstalledApp
 import io.mockk.coEvery
@@ -38,6 +40,8 @@ class PrivateSpaceViewModelTest {
     private val toggleManagedProfileUseCase: ToggleManagedProfileUseCase = mockk()
     private val canToggleManagedProfileUseCase: CanToggleManagedProfileUseCase = mockk()
     private val launcherBehaviorRepository: LauncherBehaviorRepository = mockk()
+    private val appearanceRepository: AppearanceRepository = mockk()
+    private val isManagedProfileUnlockedUseCase: IsManagedProfileUnlockedUseCase = mockk()
 
     private lateinit var viewModel: PrivateSpaceViewModel
 
@@ -50,13 +54,17 @@ class PrivateSpaceViewModelTest {
         every { observeManagedProfileUnlockedUseCase(ManagedProfileType.PrivateSpace) } returns flowOf(true)
         every { getManagedProfileAppsUseCase(ManagedProfileType.PrivateSpace) } returns flowOf(emptyList())
         every { launcherBehaviorRepository.hidePrivateSpace } returns flowOf(false)
+        every { isManagedProfileUnlockedUseCase(ManagedProfileType.PrivateSpace) } returns true
+        every { appearanceRepository.appsAlignment } returns flowOf("Center")
 
         viewModel = PrivateSpaceViewModel(
-            getManagedProfileAppsUseCase,
-            observeManagedProfileUnlockedUseCase,
-            toggleManagedProfileUseCase,
-            canToggleManagedProfileUseCase,
-            launcherBehaviorRepository
+            getManagedProfileAppsUseCase = getManagedProfileAppsUseCase,
+            observeManagedProfileUnlockedUseCase = observeManagedProfileUnlockedUseCase,
+            toggleManagedProfileUseCase = toggleManagedProfileUseCase,
+            canToggleManagedProfileUseCase = canToggleManagedProfileUseCase,
+            launcherBehaviorRepository = launcherBehaviorRepository,
+            appearanceRepository = appearanceRepository,
+            isManagedProfileUnlockedUseCase = isManagedProfileUnlockedUseCase
         )
     }
 
@@ -79,13 +87,14 @@ class PrivateSpaceViewModelTest {
 
         // Re-init to pick up the new flow
         viewModel = PrivateSpaceViewModel(
-            getManagedProfileAppsUseCase,
-            observeManagedProfileUnlockedUseCase,
-            toggleManagedProfileUseCase,
-            canToggleManagedProfileUseCase,
-            launcherBehaviorRepository
+            getManagedProfileAppsUseCase = getManagedProfileAppsUseCase,
+            observeManagedProfileUnlockedUseCase = observeManagedProfileUnlockedUseCase,
+            toggleManagedProfileUseCase = toggleManagedProfileUseCase,
+            canToggleManagedProfileUseCase = canToggleManagedProfileUseCase,
+            launcherBehaviorRepository = launcherBehaviorRepository,
+            appearanceRepository = appearanceRepository,
+            isManagedProfileUnlockedUseCase = isManagedProfileUnlockedUseCase
         )
-
         backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { viewModel.isUnlocked.collect {} }
 
         // When
@@ -104,11 +113,13 @@ class PrivateSpaceViewModelTest {
 
         // Re-init to pick up the new flow
         viewModel = PrivateSpaceViewModel(
-            getManagedProfileAppsUseCase,
-            observeManagedProfileUnlockedUseCase,
-            toggleManagedProfileUseCase,
-            canToggleManagedProfileUseCase,
-            launcherBehaviorRepository
+            getManagedProfileAppsUseCase = getManagedProfileAppsUseCase,
+            observeManagedProfileUnlockedUseCase = observeManagedProfileUnlockedUseCase,
+            toggleManagedProfileUseCase = toggleManagedProfileUseCase,
+            canToggleManagedProfileUseCase = canToggleManagedProfileUseCase,
+            launcherBehaviorRepository = launcherBehaviorRepository,
+            appearanceRepository = appearanceRepository,
+            isManagedProfileUnlockedUseCase = isManagedProfileUnlockedUseCase
         )
 
         backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { viewModel.privateSpaceApps.collect {} }

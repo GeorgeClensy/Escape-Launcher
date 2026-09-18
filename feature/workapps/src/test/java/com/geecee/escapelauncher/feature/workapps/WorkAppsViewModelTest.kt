@@ -7,6 +7,7 @@ import com.geecee.escapelauncher.core.domain.managedprofiles.ObserveManagedProfi
 import com.geecee.escapelauncher.core.domain.managedprofiles.ToggleManagedProfileUseCase
 import com.geecee.escapelauncher.core.domain.managedprofiles.ToggleManagedProfileUseCaseOutput
 import com.geecee.escapelauncher.core.domain.repository.android.AppsRepository
+import com.geecee.escapelauncher.core.domain.repository.settings.AppearanceRepository
 import com.geecee.escapelauncher.core.model.InstalledApp
 import io.mockk.coEvery
 import io.mockk.every
@@ -37,6 +38,7 @@ class WorkAppsViewModelTest {
     private val toggleManagedProfileUseCase: ToggleManagedProfileUseCase = mockk()
     private val canToggleManagedProfileUseCase: CanToggleManagedProfileUseCase = mockk()
     private val appsRepository: AppsRepository = mockk()
+    private val appearanceRepository: AppearanceRepository = mockk()
 
     private lateinit var viewModel: WorkAppsViewModel
 
@@ -49,13 +51,15 @@ class WorkAppsViewModelTest {
         every { observeManagedProfileUnlockedUseCase(ManagedProfileType.WorkApps) } returns flowOf(true)
         every { getManagedProfileAppsUseCase(ManagedProfileType.WorkApps) } returns flowOf(emptyList())
         every { appsRepository.installedApps } returns MutableStateFlow(emptyList())
+        every { appearanceRepository.appsAlignment } returns flowOf("Center")
         
         viewModel = WorkAppsViewModel(
             getManagedProfileAppsUseCase,
             observeManagedProfileUnlockedUseCase,
             toggleManagedProfileUseCase,
             canToggleManagedProfileUseCase,
-            appsRepository
+            appsRepository,
+            appearanceRepository
         )
     }
 
@@ -82,7 +86,8 @@ class WorkAppsViewModelTest {
             observeManagedProfileUnlockedUseCase,
             toggleManagedProfileUseCase,
             canToggleManagedProfileUseCase,
-            appsRepository
+            appsRepository,
+            appearanceRepository
         )
 
         backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { viewModel.isUnlocked.collect {} }
@@ -107,7 +112,8 @@ class WorkAppsViewModelTest {
             observeManagedProfileUnlockedUseCase,
             toggleManagedProfileUseCase,
             canToggleManagedProfileUseCase,
-            appsRepository
+            appsRepository,
+            appearanceRepository
         )
 
         backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { viewModel.workApps.collect {} }
