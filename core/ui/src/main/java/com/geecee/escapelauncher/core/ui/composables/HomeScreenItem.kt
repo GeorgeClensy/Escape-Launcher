@@ -12,6 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 
 
@@ -29,7 +30,8 @@ fun HomeScreenItem(
     onAppClick: () -> Unit,
     onAppLongClick: () -> Unit,
     showScreenTime: Boolean = false,
-    alignment: Alignment.Horizontal = Alignment.CenterHorizontally
+    alignment: Alignment.Horizontal = Alignment.CenterHorizontally,
+    color: Color = MaterialTheme.colorScheme.primary
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -50,7 +52,7 @@ fun HomeScreenItem(
         Text(
             appName,
             modifier = Modifier.padding(vertical = 15.dp),
-            color = MaterialTheme.colorScheme.primary,
+            color = color,
             style = MaterialTheme.typography.bodyMedium
         )
 
@@ -61,7 +63,7 @@ fun HomeScreenItem(
                 modifier = Modifier
                     .padding(vertical = 15.dp, horizontal = 5.dp)
                     .alpha(0.5f),
-                color = MaterialTheme.colorScheme.primary,
+                color = color,
                 style = MaterialTheme.typography.bodyMedium
             )
         }

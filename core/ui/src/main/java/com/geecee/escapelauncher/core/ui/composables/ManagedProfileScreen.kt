@@ -1,32 +1,41 @@
 package com.geecee.escapelauncher.core.ui.composables
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardColors
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonColors
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.geecee.escapelauncher.core.model.InstalledApp
+import com.geecee.escapelauncher.core.ui.R
 
 /**
  * A common screen for managed profiles (Work Profile, Private Space)
@@ -65,22 +74,33 @@ fun ManagedProfileScreen(
     lockedButtonText: String,
     onUnlockClick: () -> Unit
 ) {
-    Box(modifier) {
-        UnlockedManagedProfileUI(
-            isVisible = isUnlocked,
-            apps = apps,
-            appsListAlignment = appsListAlignment,
-            onAppClick = onAppClick,
-            onAppLongClick = onAppLongClick,
-            canToggleProfile = canToggleProfile,
-            toggleIcon = toggleIcon,
-            toggleContentDescription = toggleContentDescription,
-            onToggleClick = onToggleClick
-        )
+    val heightToTopOfTabs = 30.dp + 56.dp
 
-        AnimatedVisibility(
-            visible = !isUnlocked, enter = fadeIn(), exit = fadeOut()
-        ) {
+    Box(modifier = modifier) {
+        if (isUnlocked) {
+            UnlockedManagedProfileUI(
+                title = lockedText,
+                apps = apps,
+                appsListAlignment = appsListAlignment,
+                onAppClick = onAppClick,
+                onAppLongClick = onAppLongClick,
+                canToggleProfile = canToggleProfile,
+                toggleIcon = toggleIcon,
+                toggleContentDescription = toggleContentDescription,
+                onToggleClick = onToggleClick,
+                modifier = Modifier
+                    .widthIn(max = 500.dp)
+                    .align(if (appsListAlignment == Alignment.End) Alignment.BottomEnd else if (appsListAlignment == Alignment.CenterHorizontally) Alignment.BottomCenter else Alignment.BottomStart)
+                    .padding(horizontal = 30.dp)
+                    .padding(
+                        bottom = WindowInsets.navigationBars.asPaddingValues()
+                            .calculateBottomPadding() + heightToTopOfTabs + 20.dp,
+                        top = WindowInsets.statusBars.asPaddingValues().calculateTopPadding() + 5.dp
+                    )
+            )
+        }
+
+        if (!isUnlocked) {
             LockedAppFolderUI(
                 text = lockedText,
                 icon = lockedIcon,
@@ -106,7 +126,6 @@ fun ManagedProfileScreen(
  * UI for an unlocked managed profile (Work Profile, Private Space)
  *
  * @param modifier The modifier to apply to the UI
- * @param isVisible Whether the UI is visible
  * @param apps The list of apps in the profile
  * @param appsListAlignment The alignment of the apps list
  * @param onAppClick The action to perform when an app is clicked
@@ -119,7 +138,7 @@ fun ManagedProfileScreen(
 @Composable
 fun UnlockedManagedProfileUI(
     modifier: Modifier = Modifier,
-    isVisible: Boolean,
+    title: String = stringResource(R.string.private_space),
     apps: List<InstalledApp>,
     appsListAlignment: Alignment.Horizontal,
     onAppClick: (InstalledApp) -> Unit,
@@ -130,59 +149,88 @@ fun UnlockedManagedProfileUI(
     onToggleClick: () -> Unit
 ) {
     val scrollState = rememberScrollState()
-    val heightToTopOfTabs = 30.dp + 56.dp
 
-    AnimatedVisibility(
-        visible = isVisible, enter = fadeIn(), exit = fadeOut(), modifier = modifier
+    Card(
+        modifier = modifier, shape = MaterialTheme.shapes.extraLarge, colors = CardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+            contentColor = MaterialTheme.colorScheme.onSurface,
+            disabledContentColor = MaterialTheme.colorScheme.surfaceContainerLow,
+            disabledContainerColor = MaterialTheme.colorScheme.onSurface,
+        )
     ) {
-        Box(Modifier.fillMaxSize().padding(horizontal = 30.dp)) {
-            Column(
-                horizontalAlignment = appsListAlignment,
-                verticalArrangement = Arrangement.Bottom,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .verticalScroll(scrollState)
-            ) {
-                val statusBarHeight =
-                    WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
-                Spacer(
-                    modifier = Modifier.height(statusBarHeight + 10.dp)
+        Box(
+            Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp)
+                .padding(top = 20.dp, bottom = 5.dp)
+        ) {
+            if (appsListAlignment != Alignment.End) {
+                Text(
+                    title,
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.align(Alignment.CenterStart),
+                    color = MaterialTheme.colorScheme.primary
                 )
+            }
 
-                apps.forEach { app ->
-                    HomeScreenItem(appName = app.displayName, onAppLongClick = {
-                        onAppLongClick(app)
-                    }, onAppClick = {
-                        onAppClick(app)
-                    }, alignment = appsListAlignment)
+            Row(
+                modifier = Modifier.align(Alignment.CenterEnd),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                if (appsListAlignment == Alignment.End) {
+                    Text(
+                        title,
+                        style = MaterialTheme.typography.bodyMedium,
+                        textAlign = TextAlign.End,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+
+                    Spacer(
+                        modifier = Modifier.width(10.dp)
+                    )
                 }
 
-                Spacer(modifier = Modifier.height(15.dp))
-
-                Spacer(
-                    modifier = Modifier.height(
-                        WindowInsets.navigationBars.asPaddingValues()
-                            .calculateBottomPadding() + heightToTopOfTabs
+                IconButton(
+                    onClick = {
+                        onToggleClick()
+                    }, modifier = Modifier, colors = IconButtonColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceContainer,
+                        contentColor = MaterialTheme.colorScheme.onSurface,
+                        disabledContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+                        disabledContentColor = MaterialTheme.colorScheme.onSurface
                     )
+                ) {
+                    Icon(
+                        toggleIcon, toggleContentDescription
+                    )
+                }
+            }
+
+        }
+
+
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier
+                .fillMaxWidth()
+                .verticalScroll(scrollState)
+        ) {
+            apps.forEach { app ->
+                HomeScreenItem(
+                    appName = app.displayName,
+                    onAppLongClick = {
+                        onAppLongClick(app)
+                    },
+                    onAppClick = {
+                        onAppClick(app)
+                    },
+                    alignment = appsListAlignment,
+                    modifier = Modifier.padding(horizontal = 20.dp),
+                    color = MaterialTheme.colorScheme.onSurface
                 )
             }
 
-            if (canToggleProfile) {
-                BouncyMorphingFab(
-                    icon = toggleIcon,
-                    contentDescription = toggleContentDescription,
-                    onClick = onToggleClick,
-                    modifier = Modifier
-                        .align(if (appsListAlignment == Alignment.End) Alignment.BottomStart else Alignment.BottomEnd)
-                        .padding(
-                            bottom = WindowInsets.navigationBars.asPaddingValues()
-                                .calculateBottomPadding() + heightToTopOfTabs + 15.dp
-                        ),
-                    containerColor = MaterialTheme.colorScheme.tertiary,
-                    contentColor = MaterialTheme.colorScheme.onTertiary,
-                    radius = 24.dp
-                )
-            }
+            Spacer(Modifier.height(20.dp))
         }
     }
 }
