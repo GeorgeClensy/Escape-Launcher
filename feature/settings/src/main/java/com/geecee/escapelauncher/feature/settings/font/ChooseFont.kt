@@ -49,6 +49,7 @@ fun ChooseFont(
         "Jost",
         "Inter",
         "Lexend",
+        "Google Sans Flex",
         "Work Sans",
         "Poppins",
         "Roboto",
