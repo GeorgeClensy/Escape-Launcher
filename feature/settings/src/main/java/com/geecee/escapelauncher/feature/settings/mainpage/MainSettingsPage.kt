@@ -37,9 +37,9 @@ import com.geecee.escapelauncher.core.ui.R
 import com.geecee.escapelauncher.core.ui.composables.EscapeHeader
 import com.geecee.escapelauncher.core.ui.composables.EscapeSubhead
 import com.geecee.escapelauncher.core.ui.composables.FooterBox
-import com.geecee.escapelauncher.core.ui.composables.SettingsButton
 import com.geecee.escapelauncher.core.ui.composables.SettingsNavigationItem
 import com.geecee.escapelauncher.core.ui.composables.SettingsSingleChoiceSegmentedButtons
+import com.geecee.escapelauncher.core.ui.composables.SettingsSmallSpacer
 import com.geecee.escapelauncher.core.ui.composables.SettingsSpacer
 import com.geecee.escapelauncher.core.ui.composables.SettingsSwitch
 import com.geecee.escapelauncher.feature.settings.weather.WeatherAppPicker
@@ -112,6 +112,16 @@ fun MainSettingsPage(
                     onClick = { onNavigate(SettingsNavKey.ChooseFont) })
             }
 
+            item(key = "show_status_bar") {
+                SettingsSwitch(
+                    label = stringResource(id = R.string.show_status_bar),
+                    checked = uiState.showStatusBar,
+                    onCheckedChange = {
+                        mainSettingsPageViewModel.setShowStatusBar(it)
+                        activity?.window?.configureStatusBar(hide = !it)
+                    })
+            }
+
             item(key = "haptic") {
                 SettingsSwitch(
                     label = stringResource(id = R.string.haptic_feedback),
@@ -150,28 +160,38 @@ fun MainSettingsPage(
                 SettingsSwitch(
                     label = stringResource(id = R.string.big_clock),
                     checked = uiState.bigClock,
+                    isBottomOfGroup = true,
                     onCheckedChange = {
                         mainSettingsPageViewModel.setBigClock(it)
                     })
+            }
+
+            item(key = "clock_group_spacer") {
+                SettingsSmallSpacer()
             }
 
             item(key = "show_date") {
                 SettingsSwitch(
                     label = stringResource(id = R.string.date),
                     checked = uiState.showDate,
+                    isTopOfGroup = true,
                     onCheckedChange = {
                         mainSettingsPageViewModel.setShowDate(it)
                     })
             }
 
-            item(key = "show_status_bar") {
+            item(key = "screen_time_home") {
                 SettingsSwitch(
-                    label = stringResource(id = R.string.show_status_bar),
-                    checked = uiState.showStatusBar,
+                    label = stringResource(id = R.string.screen_time_on_home_screen),
+                    checked = uiState.showScreenTimeHome,
+                    isBottomOfGroup = true,
                     onCheckedChange = {
-                        mainSettingsPageViewModel.setShowStatusBar(it)
-                        activity?.window?.configureStatusBar(hide = !it)
+                        mainSettingsPageViewModel.setShowScreenTimeHome(it)
                     })
+            }
+
+            item(key = "date_group_spacer") {
+                SettingsSmallSpacer()
             }
 
             if (!mainSettingsPageViewModel.appConfiguration.isFoss) {
@@ -179,6 +199,7 @@ fun MainSettingsPage(
                     SettingsSwitch(
                         label = stringResource(id = R.string.show_weather),
                         checked = uiState.showWeather,
+                        isTopOfGroup = true,
                         onCheckedChange = {
                             mainSettingsPageViewModel.setShowWeather(it)
                             if (it) {
@@ -201,7 +222,12 @@ fun MainSettingsPage(
                     SettingsNavigationItem(
                         label = stringResource(id = R.string.choose_weather_app),
                         false,
+                        isBottomOfGroup = true,
                         onClick = { showWeatherAppPicker = true })
+                }
+
+                item(key = "weather_group_spacer") {
+                    SettingsSmallSpacer()
                 }
             }
 
@@ -209,20 +235,16 @@ fun MainSettingsPage(
                 SettingsNavigationItem(
                     label = stringResource(id = R.string.widget),
                     false,
+                    isTopOfGroup = true,
+                    isBottomOfGroup = true,
                     onClick = { onNavigate(SettingsNavKey.Widget) })
             }
 
-            item(key = "manage_fav_apps") {
-                SettingsNavigationItem(
-                    stringResource(R.string.manage_favourite_apps),
-                    diagonalArrow = false,
-                    isBottomOfGroup = Build.VERSION.SDK_INT < Build.VERSION_CODES.P,
-                    onClick = {
-                        onNavigate(SettingsNavKey.BulkFavouriteApps)
-                    })
-            }
-
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                item(key = "double_tap_to_lock_top_spacer") {
+                    SettingsSmallSpacer()
+                }
+
                 item(key = "double_tap_to_lock") {
                     SettingsSwitch(
                         label = stringResource(id = R.string.double_tap_to_lock),
@@ -230,15 +252,17 @@ fun MainSettingsPage(
                         onCheckedChange = {
                             mainSettingsPageViewModel.setDoubleTapToLock(it)
                         },
+                        isTopOfGroup = true,
                         isBottomOfGroup = uiState.isAccessibilityServiceEnabled
                     )
                 }
 
                 if (!uiState.isAccessibilityServiceEnabled) {
                     item(key = "enable_accessibility") {
-                        SettingsButton(
+                        SettingsNavigationItem(
                             label = stringResource(R.string.enable_accessibility),
                             isBottomOfGroup = true,
+                            diagonalArrow = true,
                             onClick = {
                                 val intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
                                 intent.addFlags(FLAG_ACTIVITY_NEW_TASK)
@@ -354,18 +378,9 @@ fun MainSettingsPage(
                 SettingsSwitch(
                     label = stringResource(id = R.string.hide_screen_time_page),
                     checked = uiState.hideScreenTimePage,
-                    onCheckedChange = {
-                        mainSettingsPageViewModel.setHideScreenTimePage(it)
-                    })
-            }
-
-            item(key = "screen_time_home") {
-                SettingsSwitch(
-                    label = stringResource(id = R.string.screen_time_on_home_screen),
-                    checked = uiState.showScreenTimeHome,
                     isBottomOfGroup = true,
                     onCheckedChange = {
-                        mainSettingsPageViewModel.setShowScreenTimeHome(it)
+                        mainSettingsPageViewModel.setHideScreenTimePage(it)
                     })
             }
 
@@ -376,11 +391,20 @@ fun MainSettingsPage(
                 )
             }
 
+            item(key = "manage_fav_apps") {
+                SettingsNavigationItem(
+                    stringResource(R.string.manage_favourite_apps),
+                    diagonalArrow = false,
+                    isTopOfGroup = true,
+                    onClick = {
+                        onNavigate(SettingsNavKey.BulkFavouriteApps)
+                    })
+            }
+
             item(key = "manage_hidden_apps") {
                 SettingsNavigationItem(
                     label = stringResource(id = R.string.manage_hidden_apps),
                     false,
-                    isTopOfGroup = true,
                     onClick = { onNavigate(SettingsNavKey.HiddenApps) })
             }
 
@@ -444,7 +468,7 @@ fun MainSettingsPage(
                     onSponsorClick = {
                         val url = "https://github.com/sponsors/GeorgeClensy"
                         val i = Intent(Intent.ACTION_VIEW)
-                        i.setData(url.toUri())
+                        i.data = url.toUri()
                         i.addFlags(FLAG_ACTIVITY_NEW_TASK)
                         context.startActivity(i)
                     },

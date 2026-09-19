@@ -104,7 +104,7 @@ fun SettingsSwitch(
  *
  * @param label The text to be shown
  * @param diagonalArrow Whether the arrow should be pointed upwards to signal that pressing this will take you out of Escape Launcher
- * @param repalceIconWichCheck Will replace the icon with a tick
+ * @param replaceIconWhichCheck Will replace the icon with a tick
  * @param onClick When composable is clicked
  * @param isTopOfGroup Whether this item is at the top of a group of items, for corner rounding
  * @param isBottomOfGroup Whether this item is at the bottom of a group of items, for corner rounding
@@ -114,7 +114,7 @@ fun SettingsSwitch(
 fun SettingsNavigationItem(
     label: String,
     diagonalArrow: Boolean?,
-    repalceIconWichCheck: Boolean = false,
+    replaceIconWhichCheck: Boolean = false,
     onClick: () -> Unit,
     isTopOfGroup: Boolean = false,
     isBottomOfGroup: Boolean = false
@@ -157,7 +157,7 @@ fun SettingsNavigationItem(
                 style = MaterialTheme.typography.bodyMedium,
             )
             val iconModifier = Modifier.size(24.dp) // Standardized icon size slightly
-            if (repalceIconWichCheck) {
+            if (replaceIconWhichCheck) {
                 Icon(
                     Icons.Rounded.Check,
                     contentDescription = null,
@@ -400,4 +400,12 @@ fun SettingsSwipeableButton(
 @Composable
 fun SettingsSpacer() {
     Spacer(modifier = Modifier.height(30.dp))
+}
+
+/**
+ * Spacer 10.dp height
+ */
+@Composable
+fun SettingsSmallSpacer() {
+    Spacer(modifier = Modifier.height(10.dp))
 }

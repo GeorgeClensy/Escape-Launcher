@@ -84,7 +84,7 @@ fun DefaultLauncherPage(
                         roleLauncher.launch(intent)
                     },
                     diagonalArrow = true,
-                    repalceIconWichCheck = true,
+                    replaceIconWhichCheck = true,
                     isTopOfGroup = true,
                     isBottomOfGroup = true
                 )

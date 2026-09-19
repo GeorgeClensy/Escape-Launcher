@@ -80,7 +80,7 @@
     <string name="font">Font</string>
     <string name="theme">Theme</string>
     <string name="screen_time_on_app">Screen Time On Apps</string>
-    <string name="screen_time_on_home_screen">Home Screen Time</string>
+    <string name="screen_time_on_home_screen">Screen time on home</string>
     <string name="hide_private_space_in_search">Hidden private space</string>
     <string name="haptic_feedback">Haptic feedback</string>
     <string name="done">Done</string>
