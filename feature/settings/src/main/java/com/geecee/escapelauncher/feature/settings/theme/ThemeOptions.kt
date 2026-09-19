@@ -65,6 +65,17 @@ fun ThemeOptions(
                     checked = showWallpaper,
                     onCheckedChange = { themeViewModel.setShowWallpaper(it) },
                     isTopOfGroup = true,
+                    isBottomOfGroup = false
+                )
+            }
+
+            item {
+                val blackBackground by themeViewModel.blackBackground.collectAsState(initial = false)
+                SettingsSwitch(
+                    label = stringResource(R.string.black_background),
+                    checked = blackBackground,
+                    onCheckedChange = { themeViewModel.setBlackBackground(it) },
+                    isTopOfGroup = false,
                     isBottomOfGroup = true
                 )
             }

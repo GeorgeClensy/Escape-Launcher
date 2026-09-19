@@ -52,4 +52,12 @@ class ThemeViewModel @Inject constructor(
             appearanceRepository.setFont(value)
         }
     }
+
+    val blackBackground = appearanceRepository.blackBackground
+
+    fun setBlackBackground(enabled: Boolean) {
+        viewModelScope.launch {
+            appearanceRepository.setBlackBackground(enabled)
+        }
+    }
 }

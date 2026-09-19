@@ -126,6 +126,7 @@
     <string name="green">Verde claro</string>
     <string name="orange">Laranxa</string>
     <string name="system">Sistema</string>
+    <string name="black_background">Fondo negro</string>
     <string name="accessibility_service_description">Permite que a app apague a pantalla.</string>
     <string name="back">Volver</string>
     <string name="launch_secure_folder">Cartafol Seguro</string>

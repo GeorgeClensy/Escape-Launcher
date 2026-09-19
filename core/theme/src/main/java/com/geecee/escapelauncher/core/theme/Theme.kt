@@ -8,6 +8,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.remember
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
@@ -43,10 +44,22 @@ fun EscapeTheme(
         FontFamily.Default
     }
 
+    val blackBackground by themeViewModel.blackBackground.collectAsState(initial = false)
+
     // Generating a scheme from a seed walks ~50 HCT colours; only redo it when the input changes
     val selectedScheme = theme ?: colorScheme
     val isDark = isSystemInDarkTheme()
-    val resolvedColorScheme = remember(selectedScheme, isDark) { selectedScheme.resolveColorScheme(context, isDark) }
+    val resolvedColorScheme = remember(selectedScheme, isDark, blackBackground) {
+        val scheme = selectedScheme.resolveColorScheme(context, isDark)
+        if (blackBackground && isDark) {
+            scheme.copy(
+                background = Color.Black,
+                surface = Color.Black,
+            )
+        } else {
+            scheme
+        }
+    }
     val typography = remember(fontFamily) { escapeType(fontFamily) }
 
     // Keep status bar icons readable against the themed background (dark icons on a light surface)

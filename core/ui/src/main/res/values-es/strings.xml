@@ -12,6 +12,7 @@
     <string name="pitch_black">Oscuro total</string>
     <string name="light">Claro</string>
     <string name="dark">Oscuro</string>
+    <string name="black_background">Fondo negro</string>
     <string name="search">Buscar</string>
     <string name="unlock_private_space">Desbloquear Espacio Privado</string>
     <string name="lock_private_space">Bloquear Espacio Privado</string>

@@ -13,6 +13,7 @@
     <string name="pitch_black">Pitch black</string>
     <string name="light">Light</string>
     <string name="dark">Dark</string>
+    <string name="black_background">Black background</string>
 
     <!-- Privacy and Analytics stuff -->
     <string name="Analytics" translatable="false">Analytics</string>

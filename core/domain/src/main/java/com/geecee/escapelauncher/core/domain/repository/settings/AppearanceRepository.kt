@@ -17,4 +17,6 @@ interface AppearanceRepository {
     suspend fun setShowStatusBar(enabled: Boolean)
     val showWallpaper: Flow<Boolean>
     suspend fun setShowWallpaper(enabled: Boolean)
+    val blackBackground: Flow<Boolean>
+    suspend fun setBlackBackground(enabled: Boolean)
 }

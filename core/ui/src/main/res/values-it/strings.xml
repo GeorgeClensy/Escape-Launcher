@@ -13,6 +13,7 @@
     <string name="pitch_black">Nero profondo</string>
     <string name="light">Chiaro</string>
     <string name="dark">Scuro</string>
+    <string name="black_background">Sfondo nero</string>
 
     <!-- Privacy and Analytics stuff -->
     <string name="analytics_and_data_collection">Analisi e raccolta dati</string>
