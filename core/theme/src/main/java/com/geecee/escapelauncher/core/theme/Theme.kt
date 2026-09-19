@@ -31,11 +31,16 @@ fun EscapeTheme(
     val colorScheme by themeViewModel.theme.collectAsState(AppColourScheme.ESCAPE_THEME)
     val font by themeViewModel.font.collectAsState("Outfit") // Must match DefaultSettings.FONT
 
-    val fontFamily = remember(fontName, font) {
-        getFontFamily(
-            context = context,
-            fontName = fontName ?: font
-        )
+    val fontFamily = if(font != "System") {
+        remember(fontName, font) {
+            getFontFamily(
+                context = context,
+                fontName = fontName ?: font
+            )
+        }
+    }
+    else {
+        FontFamily.Default
     }
 
     // Generating a scheme from a seed walks ~50 HCT colours; only redo it when the input changes
