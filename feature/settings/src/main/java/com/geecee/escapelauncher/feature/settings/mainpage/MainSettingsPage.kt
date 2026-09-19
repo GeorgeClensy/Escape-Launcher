@@ -8,6 +8,9 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.LocalActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -17,6 +20,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -31,12 +35,16 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.geecee.escapelauncher.feature.settings.SettingsNavKey
 import com.geecee.escapelauncher.core.common.configureStatusBar
 import com.geecee.escapelauncher.core.ui.R
 import com.geecee.escapelauncher.core.ui.composables.EscapeHeader
 import com.geecee.escapelauncher.core.ui.composables.EscapeSubhead
 import com.geecee.escapelauncher.core.ui.composables.FooterBox
+import com.geecee.escapelauncher.core.ui.composables.NotDefaultLauncher
 import com.geecee.escapelauncher.core.ui.composables.SettingsNavigationItem
 import com.geecee.escapelauncher.core.ui.composables.SettingsSingleChoiceSegmentedButtons
 import com.geecee.escapelauncher.core.ui.composables.SettingsSmallSpacer
@@ -71,10 +79,27 @@ fun MainSettingsPage(
     val uiState by mainSettingsPageViewModel.uiState.collectAsState()
     var showWeatherAppPicker by remember { mutableStateOf(false) }
 
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                mainSettingsPageViewModel.updateLauncherStatus()
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
+
     // To show the default launcher prompt, the activity must be started for a result so this is required instead of Context.startActivity
     val roleLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
-    ) { _ -> }
+    ) { _ ->
+        mainSettingsPageViewModel.updateLauncherStatus()
+    }
+
+    val isDefaultLauncher by mainSettingsPageViewModel.isDefaultLauncher.collectAsState()
 
     Box(
         Modifier
@@ -92,6 +117,15 @@ fun MainSettingsPage(
                 EscapeHeader(
                     goBack, stringResource(R.string.settings)
                 )
+            }
+
+            item(key = "not_default_launcher") {
+                AnimatedVisibility(!isDefaultLauncher, enter = fadeIn(), exit = fadeOut()) {
+                    NotDefaultLauncher {
+                        val intent = mainSettingsPageViewModel.getPromptDefaultLauncherIntent()
+                        roleLauncher.launch(intent)
+                    }
+                }
             }
 
             //General

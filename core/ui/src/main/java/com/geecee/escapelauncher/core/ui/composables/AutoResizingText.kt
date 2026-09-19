@@ -29,6 +29,7 @@ import androidx.compose.ui.unit.sp
  * @param color Color of the text
  * @param fontFamily Font family of the text
  * @param textAlign Text alignment
+ * @param singleLine Whether the text should be restricted to a single line with ellipsis or allowed to wrap
  */
 @Composable
 fun AutoResizingText(
@@ -39,13 +40,15 @@ fun AutoResizingText(
     maxLines: Int = 1,
     color: Color = MaterialTheme.colorScheme.onSurface,
     fontFamily: FontFamily? = MaterialTheme.typography.bodyMedium.fontFamily,
-    textAlign: TextAlign? = null
+    textAlign: TextAlign? = null,
+    singleLine: Boolean = true
 ) {
     BoxWithConstraints(modifier = modifier) {
         val textMeasurer = rememberTextMeasurer()
         val maxWidthPx = constraints.maxWidth
+        val actualMaxLines = if (singleLine) 1 else maxLines
 
-        val fontSize = remember(text, style, maxWidthPx) {
+        val fontSize = remember(text, style, maxWidthPx, actualMaxLines) {
             var currentSize = if (style.fontSize.isUnspecified) 16.sp else style.fontSize
             
             // Fast path: check if it fits with default size
@@ -53,7 +56,7 @@ fun AutoResizingText(
                 text = text,
                 style = style.copy(fontSize = currentSize, fontFamily = fontFamily),
                 constraints = Constraints(maxWidth = maxWidthPx),
-                maxLines = maxLines,
+                maxLines = actualMaxLines,
                 overflow = TextOverflow.Clip
             )
 
@@ -66,7 +69,7 @@ fun AutoResizingText(
                         text = text,
                         style = style.copy(fontSize = currentSize, fontFamily = fontFamily),
                         constraints = Constraints(maxWidth = maxWidthPx),
-                        maxLines = maxLines,
+                        maxLines = actualMaxLines,
                         overflow = TextOverflow.Clip
                     )
                     if (!stepResult.hasVisualOverflow) break
@@ -79,10 +82,10 @@ fun AutoResizingText(
         Text(
             text = text,
             style = style.copy(fontSize = fontSize, color = color, fontFamily = fontFamily),
-            maxLines = maxLines,
+            maxLines = actualMaxLines,
             overflow = TextOverflow.Ellipsis,
             textAlign = textAlign,
-            softWrap = false
+            softWrap = !singleLine
         )
     }
 }

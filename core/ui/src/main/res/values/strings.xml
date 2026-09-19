@@ -123,6 +123,8 @@
     <string name="already_default">Already Default</string>
     <string name="set_escape">Set Escape as default launcher</string>
     <string name="stop_going_back">This will stop you going back to your default home screen</string>
+    <string name="escape_not_default">Escape isn\'t default launcher</string>
+    <string name="exiting_apps_will_take_you_home">Exiting apps will take you to the default launcher</string>
     <string name="swipe_for_all_apps">Swipe for all apps</string>
     <string name="hold_for_settings">Hold for settings</string>
     <string name="accessibility_title">Screen Lock Permission</string>

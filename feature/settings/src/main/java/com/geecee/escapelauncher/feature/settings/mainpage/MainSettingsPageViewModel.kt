@@ -14,6 +14,7 @@ import jakarta.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -58,6 +59,7 @@ class MainSettingsPageViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val _isDefaultLauncher = MutableStateFlow(false)
+    val isDefaultLauncher: StateFlow<Boolean> = _isDefaultLauncher.asStateFlow()
 
     val uiState: StateFlow<MainSettingsUiState> = combine(
         launcherBehaviorRepository.hapticFeedBackEnabled,
