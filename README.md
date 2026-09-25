@@ -16,9 +16,6 @@ Escape launcher is a minimalist app launcher that replaces the default homes scr
 
 </div>
 
-> [!Important]
-> I am currently working on refactoring the code in the [refactor branch](https://github.com/GeorgeClensy/Escape-Launcher/tree/refactor) so I am not currently accepting PRs, sorry.
-
 <div align="center">
   
 <br>
@@ -179,4 +176,5 @@ Here are all the previous sponsors who have not set the sponsorship as private:
 @ZenMeadows
 @trigatsunshine
 @MarmiteonToasts
+@GenericUsernameIsNotAvailable
 </div>
