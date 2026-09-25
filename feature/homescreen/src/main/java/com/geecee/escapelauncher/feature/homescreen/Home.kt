@@ -29,6 +29,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material.icons.filled.WbSunny
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.rememberBottomSheetState
 import androidx.compose.runtime.Composable
@@ -41,6 +42,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -107,6 +109,7 @@ fun HomeScreen(
     val bottomSheetApp by homeScreenViewModel.bottomSheetApp.collectAsState()
     val bottomSheetActions by homeScreenViewModel.bottomSheetActions.collectAsState()
     val shortcutActions by homeScreenViewModel.shortcutActions.collectAsState()
+    val showWallpaper by homeScreenViewModel.showWallpaper.collectAsState(initial = false)
 
     val (hour, minute, _) = timeParts
 
@@ -194,7 +197,9 @@ fun HomeScreen(
                             } catch (e: Exception) {
                                 Log.e("Error", e.message.orEmpty())
                             }
-                        }
+                        },
+                        color = if (showWallpaper) MaterialTheme.colorScheme.primaryFixed else MaterialTheme.colorScheme.primary,
+                        shadow = showWallpaper
                     )
                 }
             }
@@ -240,7 +245,9 @@ fun HomeScreen(
                                 } catch (e: Exception) {
                                     homeScreenViewModel.logException(e)
                                 }
-                            }
+                            },
+                            shadow = showWallpaper,
+                            color = if (showWallpaper) MaterialTheme.colorScheme.primaryFixed else MaterialTheme.colorScheme.primary
                         )
 
                     }
@@ -254,7 +261,9 @@ fun HomeScreen(
                             iconContentDescription = "Screen Time",
                             homeAlignment = homeAlignment,
                             small = true,
-                            onClick = {}
+                            onClick = {},
+                            shadow = showWallpaper,
+                            color = if (showWallpaper) MaterialTheme.colorScheme.primaryFixed else MaterialTheme.colorScheme.primary
                         )
 
                     }
@@ -262,7 +271,11 @@ fun HomeScreen(
                     if (showWeather) {
                         @Suppress("KotlinConstantConditions", "RedundantSuppression") // This is to stop the IS_FOSS is always true cuz it's a FOSS sync in Android Studio
                         if (!homeScreenViewModel.isFoss) {
-                            HomeWeatherImpl(alignment = homeAlignment)
+                            HomeWeatherImpl(
+                                alignment = homeAlignment,
+                                shadow = showWallpaper,
+                                color = if (showWallpaper) MaterialTheme.colorScheme.primaryFixed else MaterialTheme.colorScheme.primary
+                            )
                         }
                     }
                 }
@@ -320,7 +333,11 @@ fun HomeScreen(
                     },
                     showScreenTime = showScreenTimeApp,
                     modifier = Modifier,
-                    alignment = homeAlignment
+                    alignment = homeAlignment,
+                    shadow = showWallpaper,
+                    color = if (showWallpaper) MaterialTheme.colorScheme.primaryFixed else MaterialTheme.colorScheme.primary,
+                    screenTimeColor = if (showWallpaper) MaterialTheme.colorScheme.secondaryFixed else MaterialTheme.colorScheme.primary,
+                    screenTimeAlpha = if (showWallpaper) 1f else 0.5f
                 )
             }
 
@@ -363,6 +380,8 @@ fun HomeScreen(
 @Composable
 fun HomeWeatherImpl(
     alignment: Alignment.Horizontal,
+    color: Color = MaterialTheme.colorScheme.primary,
+    shadow: Boolean = false,
     weatherViewModel: WeatherViewModel = hiltViewModel(LocalActivity.current as ComponentActivity)
 ) {
     val context = LocalContext.current
@@ -378,8 +397,10 @@ fun HomeWeatherImpl(
             text = weatherViewModel.weatherText.value,
             icon = Icons.Default.WbSunny,
             iconContentDescription = "Weather",
+            shadow = shadow,
             homeAlignment = alignment,
             small = true,
+            color = color,
             onClick = {
                 if (weatherAppPackage.isNotEmpty()) {
                     //todo: use OpenApp() here so it's tracked

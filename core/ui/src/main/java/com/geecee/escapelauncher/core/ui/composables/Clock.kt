@@ -17,6 +17,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.graphics.toArgb
@@ -30,6 +31,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.geecee.escapelauncher.core.theme.EscapeThemePreview
+import com.geecee.escapelauncher.core.ui.utils.escapeShadow
 
 private const val SMALL_TIME_FORMAT = "%02d:%02d"
 
@@ -44,16 +46,21 @@ fun Clock(
     minute: Int,
     bigClock: Boolean,
     onClockClick: () -> Unit,
-    homeAlignment: Alignment.Horizontal
+    homeAlignment: Alignment.Horizontal,
+    color: Color = MaterialTheme.colorScheme.primary,
+    shadow: Boolean = false
 ) {
-    val color = MaterialTheme.colorScheme.primary
-
     if (bigClock) {
         BigClock(
             hour = hour,
             minute = minute,
             color = color,
-            baseStyle = MaterialTheme.typography.headlineLarge,
+            baseStyle = MaterialTheme.typography.headlineLarge.copy(
+                shadow = escapeShadow(
+                    MaterialTheme.colorScheme.scrim,
+                    shadow
+                )
+            ),
             homeAlignment = homeAlignment,
             onClockClick = onClockClick
         )
@@ -68,7 +75,12 @@ fun Clock(
                 ),
             color = color,
             fontWeight = FontWeight.W600,
-            style = MaterialTheme.typography.titleLarge,
+            style = MaterialTheme.typography.titleLarge.copy(
+                shadow = escapeShadow(
+                    MaterialTheme.colorScheme.scrim,
+                    shadow
+                )
+            ),
             textAlign = when (homeAlignment) {
                 Alignment.Start -> TextAlign.Start
                 Alignment.End -> TextAlign.End
@@ -141,6 +153,7 @@ private fun BigClock(
     val fontSizePx = with(density) { baseStyle.fontSize.toPx() }
     val typeface = rememberDigitTypeface(baseStyle.fontFamily, FontWeight.W600)
     val metrics = remember(typeface, fontSizePx) { computeDigitMetrics(typeface, fontSizePx) }
+    val shadow = baseStyle.shadow
 
     val hourDigits = remember(hour) { "%02d".format(hour).map { it - '0' } }
     val minuteDigits = remember(minute) { "%02d".format(minute).map { it - '0' } }
@@ -159,9 +172,9 @@ private fun BigClock(
         horizontalAlignment = homeAlignment,
         modifier = Modifier.clickable { onClockClick() }
     ) {
-        TightDigitRow(hourDigits, typeface, fontSizePx, metrics, leadTrim, color, density)
+        TightDigitRow(hourDigits, typeface, fontSizePx, metrics, leadTrim, color, shadow)
         Spacer(Modifier.height(7.dp))
-        TightDigitRow(minuteDigits, typeface, fontSizePx, metrics, leadTrim, color, density)
+        TightDigitRow(minuteDigits, typeface, fontSizePx, metrics, leadTrim, color, shadow)
         Spacer(Modifier.height(8.dp))
     }
 }
@@ -174,20 +187,31 @@ private fun TightDigitRow(
     metrics: DigitMetrics,
     leadTrim: Float,
     color: Color,
-    density: androidx.compose.ui.unit.Density,
+    shadow: Shadow?,
     spacingPx: Float = 5f
 ) {
+    val density = LocalDensity.current
+
     // Account for the spacing added ONLY between adjacent digits
     val totalSpacingPx = if (digits.size > 1) (digits.size - 1) * spacingPx else 0f
     val widthPx = (metrics.slotWidth * digits.size - leadTrim) + totalSpacingPx
     val widthDp: Dp = with(density) { widthPx.toDp() }
     val heightDp: Dp = with(density) { metrics.boxHeight.toDp() }
 
-    val paint = remember(typeface, fontSizePx, color) {
+    val paint = remember(typeface, fontSizePx, color, shadow) {
         Paint(Paint.ANTI_ALIAS_FLAG).apply {
             this.typeface = typeface
             this.textSize = fontSizePx
             this.color = color.toArgb()
+
+            if (shadow != null && shadow != Shadow.None && shadow.blurRadius > 0f) {
+                setShadowLayer(
+                    shadow.blurRadius,
+                    shadow.offset.x,
+                    shadow.offset.y,
+                    shadow.color.toArgb()
+                )
+            }
         }
     }
 

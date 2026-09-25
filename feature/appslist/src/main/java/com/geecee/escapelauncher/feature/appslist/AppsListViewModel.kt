@@ -5,7 +5,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.geecee.escapelauncher.core.common.isMainUserApp
 import com.geecee.escapelauncher.core.domain.apps.AppActionType
-import com.geecee.escapelauncher.core.domain.apps.LaunchAppUseCase
 import com.geecee.escapelauncher.core.domain.apps.GetAppActionsUseCase
 import com.geecee.escapelauncher.core.domain.apps.GetAppShortcutsUseCase
 import com.geecee.escapelauncher.core.domain.apps.OpenAppDetailsUseCase
@@ -34,7 +33,6 @@ class AppsListViewModel @Inject constructor(
     private val getAppActionsUseCase: GetAppActionsUseCase,
     private val getAppShortcutsUseCase: GetAppShortcutsUseCase,
     private val startShortcutUseCase: StartShortcutUseCase,
-    private val launchAppUseCase: LaunchAppUseCase,
     private val uninstallAppUseCase: UninstallAppUseCase,
     private val openAppDetailsUseCase: OpenAppDetailsUseCase,
     searchAppsUseCase: SearchAppsUseCase
@@ -57,6 +55,7 @@ class AppsListViewModel @Inject constructor(
     val automaticallyOpenAppsInSearch = searchSettingsRepository.automaticallyOpenAppsInSearch
     val hiddenAppsInSearch = searchSettingsRepository.showHiddenAppsInSearch
     val hapticFeedBackEnabled = launcherBehaviorRepository.hapticFeedBackEnabled
+    val showWallpaper = appearanceRepository.showWallpaper
 
     // Search
     private val _searchText = MutableStateFlow("")

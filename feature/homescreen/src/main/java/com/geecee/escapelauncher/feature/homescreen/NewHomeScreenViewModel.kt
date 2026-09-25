@@ -60,6 +60,7 @@ class NewHomeScreenViewModel @Inject constructor(
     val showScreenTimeApp = screenTimeSettingsRepository.showScreenTimeApp
     val firstTimeHelp = onboardingRepository.firstTimeHelp
     val hapticFeedBackEnabled = launcherBehaviorRepository.hapticFeedBackEnabled
+    val showWallpaper = appearanceRepository.showWallpaper
 
     val homeAlignment = appearanceRepository.homeAlignment.map { alignment ->
         when (alignment) {

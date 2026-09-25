@@ -2,7 +2,6 @@ package com.geecee.escapelauncher.feature.appslist
 
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.LocalActivity
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -27,7 +26,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalHapticFeedback
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.geecee.escapelauncher.core.common.DefaultSettings
@@ -57,6 +55,7 @@ fun AppsList(
     val showScreenTimeApp by appsListViewModel.showScreenTimeApp.collectAsState(initial = DefaultSettings.SHOW_SCREEN_TIME_APP)
     val appsListAlignment by appsListViewModel.appsAlignment.collectAsState(initial = DefaultSettingsUi.APPS_ALIGNMENT)
     val hapticFeedbackEnabled by appsListViewModel.hapticFeedBackEnabled.collectAsState(initial = DefaultSettings.HAPTIC_FEEDBACK)
+    val showWallpaper by appsListViewModel.showWallpaper.collectAsState(initial = false)
     val apps by appsListViewModel.apps.collectAsState()
 
     // Standard app interaction logic shared across slots
@@ -114,7 +113,11 @@ fun AppsList(
                     onAppLongClick = { handleAppLongClick(app) },
                     showScreenTime = showScreenTimeApp,
                     modifier = Modifier,
-                    alignment = appsListAlignment
+                    alignment = appsListAlignment,
+                    shadow = showWallpaper,
+                    color = if (showWallpaper) MaterialTheme.colorScheme.primaryFixed else MaterialTheme.colorScheme.primary,
+                    screenTimeColor = if (showWallpaper) MaterialTheme.colorScheme.secondaryFixed else MaterialTheme.colorScheme.primary,
+                    screenTimeAlpha = if (showWallpaper) 1f else 0.5f
                 )
             }
 
@@ -122,15 +125,5 @@ fun AppsList(
                 Spacer(modifier = Modifier.height(padding.calculateBottomPadding()))
             }
         }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun AppsListPreview() {
-    Box(modifier = Modifier.background(MaterialTheme.colorScheme.surface)) {
-        AppsList(
-            onAppOpened = {},
-            onGoHomeRequest = {})
     }
 }
