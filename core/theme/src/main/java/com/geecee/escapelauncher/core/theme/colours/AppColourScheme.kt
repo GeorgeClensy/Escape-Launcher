@@ -1,7 +1,9 @@
 package com.geecee.escapelauncher.core.theme.colours
 
+import android.app.WallpaperManager
 import android.content.Context
 import android.os.Build
+import android.util.Log
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.darkColorScheme
@@ -10,6 +12,7 @@ import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toColorLong
 import androidx.compose.ui.platform.LocalContext
 
 /**
@@ -27,6 +30,7 @@ enum class AppColourScheme(val id: Int, val seedColor: Color? = null) {
     PURPLE(15, Color(0xFF6750A4)),
     PINK(16, Color(0xFF984061)),
     SYSTEM(12),
+    WALLPAPER(17),
     ESCAPE_THEME(13);
 
     companion object {
@@ -43,6 +47,7 @@ enum class AppColourScheme(val id: Int, val seedColor: Color? = null) {
         val selectableThemes = listOf(
             ESCAPE_THEME,
             SYSTEM,
+            WALLPAPER,
             RED,
             ORANGE,
             YELLOW,
@@ -80,6 +85,12 @@ fun AppColourScheme.resolveColorScheme(context: Context, isDark: Boolean): Color
             }
         }
 
+        AppColourScheme.WALLPAPER -> {
+            val seed = getWallpaperColorCompat(context) ?: Color(0xFFFF5722)
+            Log.d("resolveColorScheme", "Using wallpaper color: ${seed.toColorLong()}")
+            DynamicColourSchemeUtils.generateColorSchemeFromSeed(seed, isDark)
+        }
+
         else -> {
             // Dynamic generation from seed if available
             seedColor?.let {
@@ -91,4 +102,17 @@ fun AppColourScheme.resolveColorScheme(context: Context, isDark: Boolean): Color
             } ?: darkSchemeEscapeTheme
         }
     }
+}
+
+private fun getWallpaperColorCompat(context: Context): Color? {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
+        try {
+            val wallpaperManager = WallpaperManager.getInstance(context)
+            val colors = wallpaperManager.getWallpaperColors(WallpaperManager.FLAG_SYSTEM)
+            colors?.primaryColor?.toArgb()?.let { return Color(it) }
+        } catch (e: Exception) {
+            Log.e("getWallpaperColorCompat", "Error getting wallpaper color", e)
+        }
+    }
+    return null
 }

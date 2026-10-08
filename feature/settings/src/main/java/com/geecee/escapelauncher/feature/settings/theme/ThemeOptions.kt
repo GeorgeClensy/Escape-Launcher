@@ -1,6 +1,7 @@
 package com.geecee.escapelauncher.feature.settings.theme
 
 import android.annotation.SuppressLint
+import android.os.Build
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -13,6 +14,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -40,7 +42,16 @@ fun ThemeOptions(
 ) {
     val scheme by themeViewModel.theme.collectAsState()
     val showWallpaper by themeViewModel.showWallpaper.collectAsState(initial = false)
-    val selectableThemes = AppColourScheme.selectableThemes
+    val selectableThemes = remember(showWallpaper) {
+        AppColourScheme.selectableThemes.filter { themeOption ->
+            when (themeOption) {
+                AppColourScheme.MONOCHROME -> !showWallpaper
+                AppColourScheme.WALLPAPER -> showWallpaper && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1
+                AppColourScheme.SYSTEM -> Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && !showWallpaper
+                else -> true
+            }
+        }
+    }
 
     Box(
         Modifier
@@ -110,7 +121,8 @@ fun ThemeOptions(
                     isBottomOfGroup = index == selectableThemes.size - 1,
                     onClick = {
                         themeViewModel.setTheme(themeOption)
-                    })
+                    }
+                )
             }
 
             item { SettingsSpacer() }
