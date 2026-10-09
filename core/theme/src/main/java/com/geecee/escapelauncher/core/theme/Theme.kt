@@ -30,6 +30,7 @@ fun EscapeTheme(
 ) {
     val context = LocalContext.current
     val colorScheme by themeViewModel.theme.collectAsState(AppColourScheme.ESCAPE_THEME)
+    val blackBackground by themeViewModel.blackBackground.collectAsState(initial = false)
     val font by themeViewModel.font.collectAsState("Outfit") // Must match DefaultSettings.FONT
 
     val fontFamily = if(font != "System") {
@@ -43,14 +44,13 @@ fun EscapeTheme(
     else {
         FontFamily.Default
     }
-
-    val blackBackground by themeViewModel.blackBackground.collectAsState(initial = false)
+    val typography = remember(fontFamily) { escapeType(fontFamily) }
 
     // Generating a scheme from a seed walks ~50 HCT colours; only redo it when the input changes
     val selectedScheme = theme ?: colorScheme
     val isDark = isSystemInDarkTheme()
     val resolvedColorScheme = remember(selectedScheme, isDark, blackBackground) {
-        val scheme = selectedScheme.resolveColorScheme(context, isDark)
+        val scheme = selectedScheme.resolveColorScheme(context, isDark || blackBackground)
         if (blackBackground) {
             scheme.copy(
                 background = Color.Black,
@@ -61,7 +61,6 @@ fun EscapeTheme(
         }
     }
 
-    val typography = remember(fontFamily) { escapeType(fontFamily) }
 
     // Keep status bar icons readable against the themed background (dark icons on a light surface)
     val view = LocalView.current
