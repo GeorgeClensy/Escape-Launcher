@@ -3,7 +3,6 @@ package com.geecee.escapelauncher.core.theme.colours
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.ui.graphics.Color
 
-val transparentHalf = Color(0, 0, 0, 150)
 val escapeRed = Color(172, 43, 43)
 val escapeGreen = Color(43, 172, 61)
 
@@ -30,7 +29,7 @@ val darkSchemeEscapeTheme = darkColorScheme(
     onSurface = Color(0xFFE5E2E1),
     surfaceVariant = Color(0xFF444748),
     onSurfaceVariant = Color(0xFFC4C7C7),
-    outline = Color(0xFFB2D8D8),
+    outline = Color(0xFF879292),
     outlineVariant = Color(0xFF444748),
     scrim = Color(0xFF000000),
     inverseSurface = Color(0xFFE5E2E1),

@@ -1,4 +1,5 @@
 package com.geecee.escapelauncher.core.ui.composables
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
@@ -46,19 +47,19 @@ fun SettingsSingleChoiceSegmentedButtons(
     val groupEdgeCornerRadius = 24.dp
     val defaultCornerRadius = 8.dp
 
-    val topStartRadius = if (isTopOfGroup) groupEdgeCornerRadius else defaultCornerRadius
-    val topEndRadius = if (isTopOfGroup) groupEdgeCornerRadius else defaultCornerRadius
-    val bottomStartRadius = if (isBottomOfGroup) groupEdgeCornerRadius else defaultCornerRadius
-    val bottomEndRadius = if (isBottomOfGroup) groupEdgeCornerRadius else defaultCornerRadius
+    val topStartRadius = animateDpAsState(if (isTopOfGroup) groupEdgeCornerRadius else defaultCornerRadius)
+    val topEndRadius = animateDpAsState(if (isTopOfGroup) groupEdgeCornerRadius else defaultCornerRadius)
+    val bottomStartRadius = animateDpAsState(if (isBottomOfGroup) groupEdgeCornerRadius else defaultCornerRadius)
+    val bottomEndRadius = animateDpAsState(if (isBottomOfGroup) groupEdgeCornerRadius else defaultCornerRadius)
 
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 1.dp), shape = RoundedCornerShape(
-            topStart = topStartRadius,
-            topEnd = topEndRadius,
-            bottomStart = bottomStartRadius,
-            bottomEnd = bottomEndRadius
+            topStart = topStartRadius.value,
+            topEnd = topEndRadius.value,
+            bottomStart = bottomStartRadius.value,
+            bottomEnd = bottomEndRadius.value
         ), colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
             contentColor = MaterialTheme.colorScheme.onSurface

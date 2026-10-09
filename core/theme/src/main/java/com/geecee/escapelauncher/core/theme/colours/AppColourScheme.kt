@@ -31,7 +31,7 @@ enum class AppColourScheme(val id: Int, val seedColor: Color? = null) {
     PINK(16, Color(0xFF984061)),
     SYSTEM(12),
     WALLPAPER(17),
-    ESCAPE_THEME(13);
+    ESCAPE_THEME(13, Color(0xFFB2D8D8));
 
     companion object {
         /**
@@ -75,7 +75,7 @@ fun AppColourScheme.resolveColorScheme(): ColorScheme {
  */
 fun AppColourScheme.resolveColorScheme(context: Context, isDark: Boolean): ColorScheme {
     return when (this) {
-        AppColourScheme.ESCAPE_THEME -> darkSchemeEscapeTheme
+        //AppColourScheme.ESCAPE_THEME -> darkSchemeEscapeTheme
 
         AppColourScheme.SYSTEM -> {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {

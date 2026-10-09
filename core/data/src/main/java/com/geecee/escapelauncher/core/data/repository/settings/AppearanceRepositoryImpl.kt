@@ -45,4 +45,10 @@ class AppearanceRepositoryImpl @Inject constructor(
     override suspend fun setBlackBackground(enabled: Boolean) {
         dataStore.edit { it[PreferencesKeys.BLACK_BACKGROUND] = enabled }
     }
+    override suspend fun setBackgroundMode(showWallpaper: Boolean, blackBackground: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[PreferencesKeys.SHOW_WALLPAPER] = showWallpaper
+            preferences[PreferencesKeys.BLACK_BACKGROUND] = blackBackground
+        }
+    }
 }
