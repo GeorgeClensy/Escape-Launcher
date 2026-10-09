@@ -51,7 +51,7 @@ fun EscapeTheme(
     val isDark = isSystemInDarkTheme()
     val resolvedColorScheme = remember(selectedScheme, isDark, blackBackground) {
         val scheme = selectedScheme.resolveColorScheme(context, isDark)
-        if (blackBackground && isDark) {
+        if (blackBackground) {
             scheme.copy(
                 background = Color.Black,
                 surface = Color.Black,
@@ -60,6 +60,7 @@ fun EscapeTheme(
             scheme
         }
     }
+
     val typography = remember(fontFamily) { escapeType(fontFamily) }
 
     // Keep status bar icons readable against the themed background (dark icons on a light surface)

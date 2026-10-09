@@ -12,6 +12,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -26,8 +27,8 @@ import com.geecee.escapelauncher.core.theme.colours.resolveColorScheme
 import com.geecee.escapelauncher.core.ui.R
 import com.geecee.escapelauncher.core.ui.composables.EscapeHeader
 import com.geecee.escapelauncher.core.ui.composables.SettingsButton
+import com.geecee.escapelauncher.core.ui.composables.SettingsSingleChoiceSegmentedButtons
 import com.geecee.escapelauncher.core.ui.composables.SettingsSpacer
-import com.geecee.escapelauncher.core.ui.composables.SettingsSwitch
 import com.geecee.escapelauncher.core.ui.utils.toAndroidColor
 
 /**
@@ -42,6 +43,7 @@ fun ThemeOptions(
 ) {
     val scheme by themeViewModel.theme.collectAsState()
     val showWallpaper by themeViewModel.showWallpaper.collectAsState(initial = false)
+    val blackBackground by themeViewModel.blackBackground.collectAsState(initial = false)
     val selectableThemes = remember(showWallpaper) {
         AppColourScheme.selectableThemes.filter { themeOption ->
             when (themeOption) {
@@ -51,6 +53,18 @@ fun ThemeOptions(
                 else -> true
             }
         }
+    }
+
+    LaunchedEffect(showWallpaper, scheme, selectableThemes) {
+        if (!selectableThemes.contains(scheme)) {
+            themeViewModel.setTheme(AppColourScheme.ESCAPE_THEME)
+        }
+    }
+
+    val backgroundSelectedIndex = when {
+        showWallpaper -> 2
+        blackBackground -> 1
+        else -> 0
     }
 
     Box(
@@ -71,41 +85,52 @@ fun ThemeOptions(
             }
 
             item {
-                SettingsSwitch(
-                    label = stringResource(R.string.show_wallpaper),
-                    checked = showWallpaper,
-                    onCheckedChange = { themeViewModel.setShowWallpaper(it) },
+                val backgroundOptions = listOf(
+                    stringResource(R.string.colorful),
+                    stringResource(R.string.pitch_black),
+                    stringResource(R.string.wallpaper)
+                )
+
+                SettingsSingleChoiceSegmentedButtons(
+                    label = "",
+                    options = backgroundOptions,
+                    selectedIndex = backgroundSelectedIndex,
+                    onSelectedIndexChange = { index ->
+                        when (index) {
+                            0 -> { // Colorful
+                                themeViewModel.setShowWallpaper(false)
+                                themeViewModel.setBlackBackground(false)
+                            }
+
+                            1 -> { // Pitch Black
+                                themeViewModel.setShowWallpaper(false)
+                                themeViewModel.setBlackBackground(true)
+                            }
+
+                            2 -> { // Wallpaper
+                                themeViewModel.setShowWallpaper(true)
+                                themeViewModel.setBlackBackground(false)
+                            }
+                        }
+                    },
                     isTopOfGroup = true,
-                    isBottomOfGroup = false
+                    isBottomOfGroup = showWallpaper
                 )
             }
 
-            item {
-                val blackBackground by themeViewModel.blackBackground.collectAsState(initial = false)
-                SettingsSwitch(
-                    label = stringResource(R.string.black_background),
-                    checked = blackBackground,
-                    onCheckedChange = { themeViewModel.setBlackBackground(it) },
-                    isTopOfGroup = false,
-                    isBottomOfGroup = true
-                )
-            }
+            if (!showWallpaper) {
+                item {
+                    val activeTheme = scheme
+                    val colour = activeTheme.resolveColorScheme().background
 
-            item {
-                SettingsSpacer()
-            }
-
-            item {
-                val activeTheme = scheme
-                val colour = activeTheme.resolveColorScheme().background
-
-                SettingsButton(
-                    label = stringResource(R.string.match_system_wallpaper),
-                    isTopOfGroup = true,
-                    isBottomOfGroup = true,
-                    onClick = {
-                        themeViewModel.setWallpaper(colour.toAndroidColor())
-                    })
+                    SettingsButton(
+                        label = stringResource(R.string.match_system_wallpaper),
+                        isTopOfGroup = false,
+                        isBottomOfGroup = true,
+                        onClick = {
+                            themeViewModel.setWallpaper(colour.toAndroidColor())
+                        })
+                }
             }
 
             item { SettingsSpacer() }
@@ -121,8 +146,7 @@ fun ThemeOptions(
                     isBottomOfGroup = index == selectableThemes.size - 1,
                     onClick = {
                         themeViewModel.setTheme(themeOption)
-                    }
-                )
+                    })
             }
 
             item { SettingsSpacer() }

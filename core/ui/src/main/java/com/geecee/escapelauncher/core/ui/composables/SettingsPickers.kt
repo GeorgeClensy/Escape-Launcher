@@ -1,6 +1,4 @@
 package com.geecee.escapelauncher.core.ui.composables
-
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
@@ -12,7 +10,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SegmentedButton
@@ -37,7 +34,6 @@ import androidx.compose.ui.unit.dp
  * @param isTopOfGroup Whether this item is the first in a group of settings.
  * @param isBottomOfGroup Whether this item is the last in a group of settings.
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsSingleChoiceSegmentedButtons(
     label: String,
@@ -75,14 +71,16 @@ fun SettingsSingleChoiceSegmentedButtons(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            AutoResizingText(
-                text = label,
-                modifier = Modifier.weight(1f)
-            )
+            if(label != "") {
+                AutoResizingText(
+                    text = label,
+                    modifier = Modifier.weight(1f)
+                )
+            }
 
             SingleChoiceSegmentedButtonRow(
                 modifier = Modifier
-                    .padding(start = 16.dp)
+                    .padding(start = if(label != "") 16.dp else 0.dp)
                     .weight(4f)
             ) {
                 options.forEachIndexed { index, optionLabel ->
@@ -115,7 +113,6 @@ fun SettingsSingleChoiceSegmentedButtons(
  * @param isTopOfGroup Whether this item is the first in a group of settings, for corner rounding.
  * @param isBottomOfGroup Whether this item is the last in a group of settings, for corner rounding.
  */
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun SettingsSlider(
     label: String,
