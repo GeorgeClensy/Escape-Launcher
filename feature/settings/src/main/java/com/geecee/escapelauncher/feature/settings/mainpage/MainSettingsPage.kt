@@ -11,25 +11,13 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SegmentedButtonDefaults.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
@@ -49,10 +37,8 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
-import com.geecee.escapelauncher.feature.settings.SettingsNavKey
 import com.geecee.escapelauncher.core.common.configureStatusBar
 import com.geecee.escapelauncher.core.ui.R
-import com.geecee.escapelauncher.core.ui.composables.AutoResizingText
 import com.geecee.escapelauncher.core.ui.composables.EscapeHeader
 import com.geecee.escapelauncher.core.ui.composables.EscapeSubhead
 import com.geecee.escapelauncher.core.ui.composables.FooterBox
@@ -62,6 +48,7 @@ import com.geecee.escapelauncher.core.ui.composables.SettingsSingleChoiceSegment
 import com.geecee.escapelauncher.core.ui.composables.SettingsSmallSpacer
 import com.geecee.escapelauncher.core.ui.composables.SettingsSpacer
 import com.geecee.escapelauncher.core.ui.composables.SettingsSwitch
+import com.geecee.escapelauncher.feature.settings.SettingsNavKey
 import com.geecee.escapelauncher.feature.settings.weather.WeatherAppPicker
 import com.geecee.escapelauncher.feature.weather.WeatherViewModel
 
@@ -74,7 +61,6 @@ import com.geecee.escapelauncher.feature.weather.WeatherViewModel
  *
  * @see Settings
  */
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun MainSettingsPage(
     goBack: () -> Unit,
