@@ -141,7 +141,7 @@ fun WelcomePage(
                             y = 200.dp.roundToPx() + rightYOffset.dp.roundToPx()
                         )
                     },
-                circleColor = MaterialTheme.colorScheme.tertiary.toAndroidColor()
+                circleColor = MaterialTheme.colorScheme.inversePrimary.toAndroidColor()
             )
 
             BlurryCircle(

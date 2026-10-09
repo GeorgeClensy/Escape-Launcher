@@ -59,12 +59,12 @@ fun FinishedPage(
         ),
         rememberLottieDynamicProperty(
             property = LottieProperty.COLOR,
-            value = MaterialTheme.colorScheme.secondary.toAndroidColor(),
+            value = MaterialTheme.colorScheme.secondaryContainer.toAndroidColor(),
             keyPath = arrayOf("Behind 1", "**")
         ),
         rememberLottieDynamicProperty(
             property = LottieProperty.COLOR,
-            value = MaterialTheme.colorScheme.tertiary.toAndroidColor(),
+            value = MaterialTheme.colorScheme.tertiaryContainer.toAndroidColor(),
             keyPath = arrayOf("Behind 3", "**")
         )
     )
@@ -156,7 +156,7 @@ fun FinishedPage(
                             y = 200.dp.roundToPx() + rightYOffset.dp.roundToPx()
                         )
                     },
-                circleColor = MaterialTheme.colorScheme.tertiary.toAndroidColor()
+                circleColor = MaterialTheme.colorScheme.inversePrimary.toAndroidColor()
             )
 
             BlurryCircle(

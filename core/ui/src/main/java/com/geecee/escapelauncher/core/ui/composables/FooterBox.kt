@@ -1,6 +1,7 @@
 package com.geecee.escapelauncher.core.ui.composables
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -40,9 +41,7 @@ fun FooterBox(
             .fillMaxWidth()
             .clickable(onClick = {
                 onBackgroundClick()
-            }),
-        shape = RoundedCornerShape(24.dp),
-        colors = CardDefaults.cardColors(
+            }), shape = RoundedCornerShape(24.dp), colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
             contentColor = MaterialTheme.colorScheme.onSurface
         )
@@ -56,9 +55,8 @@ fun FooterBox(
             Icon(
                 icon,
                 "Escape Launcher Icon",
-                Modifier
-                    .padding(3.dp),
-                tint = MaterialTheme.colorScheme.onSurface
+                Modifier.padding(3.dp),
+                tint = MaterialTheme.colorScheme.primary
             )
 
             Spacer(
@@ -86,19 +84,23 @@ fun FooterBox(
                     onSponsorClick()
                 }, colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.surfaceContainerHigh
-                )
+                    contentColor = MaterialTheme.colorScheme.onPrimary
+                ), modifier = Modifier.padding(horizontal = 20.dp)
             ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Filled.Favorite, "", tint = MaterialTheme.colorScheme.surfaceContainerHigh)
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(50.dp),
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Icon(Icons.Filled.Favorite, "", tint = MaterialTheme.colorScheme.onPrimary)
                     Spacer(Modifier.width(5.dp))
                     AutoResizingText(
-                        text = sponsorButtonText,
-                        color = MaterialTheme.colorScheme.surfaceContainerHigh
+                        text = sponsorButtonText, color = MaterialTheme.colorScheme.onPrimary
                     )
                 }
             }
-
         }
     }
 }
