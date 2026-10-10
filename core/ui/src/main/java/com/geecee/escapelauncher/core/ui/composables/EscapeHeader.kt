@@ -26,6 +26,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.geecee.escapelauncher.core.theme.EscapeThemePreview
+import com.geecee.escapelauncher.core.ui.utils.bouncyClickable
 
 /**
  * Title header with back button
@@ -86,7 +87,7 @@ fun EscapeSubhead(title: String) {
             shape = CircleShape, colors = CardDefaults.cardColors(
                 containerColor = MaterialTheme.colorScheme.primaryContainer,
                 contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-            )
+            ), modifier = Modifier.bouncyClickable{}
         ) {
             Box(
                 modifier = Modifier.padding(16.dp, 10.dp, 16.dp, 10.dp)

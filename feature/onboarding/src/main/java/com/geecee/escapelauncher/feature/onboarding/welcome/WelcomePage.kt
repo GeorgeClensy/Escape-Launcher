@@ -35,6 +35,7 @@ import androidx.compose.ui.unit.dp
 import com.geecee.escapelauncher.core.theme.EscapeThemePreview
 import com.geecee.escapelauncher.core.ui.R
 import com.geecee.escapelauncher.core.ui.composables.BlurryCircle
+import com.geecee.escapelauncher.core.ui.utils.bouncyClickable
 import com.geecee.escapelauncher.core.ui.utils.doHapticFeedBack
 import com.geecee.escapelauncher.core.ui.utils.toAndroidColor
 import kotlinx.coroutines.launch
@@ -47,7 +48,6 @@ fun WelcomePage(
 
     // Tapping the logo stuff
     val haptics = LocalHapticFeedback.current
-    val iconScale = remember { Animatable(initialValue = 1f) }
 
     // Stuff to make the cirlces move
     val infiniteTransition = rememberInfiniteTransition(label = "FloatingCircles")
@@ -100,30 +100,12 @@ fun WelcomePage(
                 Modifier
                     .padding(3.dp)
                     .align(Alignment.CenterHorizontally)
-                    .graphicsLayer {
-                        scaleX = iconScale.value
-                        scaleY = iconScale.value
-                    }
-                    .clickable(
-                        interactionSource = remember { MutableInteractionSource() },
-                        indication = null
-                    ) {
-                        doHapticFeedBack(
-                            hapticFeedback = haptics,
-                            enabled = true
-                        )
-
-                        coroutineScope.launch {
-                            iconScale.animateTo(0.9f, animationSpec = tween(durationMillis = 50))
-                            iconScale.animateTo(
-                                targetValue = 1f,
-                                animationSpec = spring(
-                                    dampingRatio = Spring.DampingRatioMediumBouncy,
-                                    stiffness = Spring.StiffnessMedium
-                                )
-                            )
+                    .bouncyClickable(
+                        scaleDown = 0.9f,
+                        onClick = {
+                            doHapticFeedBack(hapticFeedback = haptics, enabled = true)
                         }
-                    },
+                    ),
                 tint = MaterialTheme.colorScheme.primary
             )
         }
