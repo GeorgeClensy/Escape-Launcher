@@ -7,7 +7,6 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
@@ -40,10 +39,10 @@ fun ThemeCard(
     label: String = stringResource(scheme.nameRes()),
     onClick: (AppColourScheme) -> Unit,
     isTopOfGroup: Boolean = false,
-    isBottomOfGroup: Boolean = false
+    isBottomOfGroup: Boolean = false,
+    isDark: Boolean = true
 ) {
     val context = LocalContext.current
-    val isDark = isSystemInDarkTheme()
 
     val colors = remember(scheme, isDark) {
         scheme.resolveColorScheme(context, isDark)

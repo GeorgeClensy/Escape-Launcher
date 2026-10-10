@@ -166,7 +166,7 @@ fun MainSettingsPage(
             }
 
             // Home options
-            item(key = "home_options_subhead") { EscapeSubhead(stringResource(R.string.home_screen_options)) }
+            item(key = "home_options_subhead") { EscapeSubhead(stringResource(R.string.home)) }
 
             item(key = "show_clock") {
                 SettingsSwitch(
@@ -334,12 +334,18 @@ fun MainSettingsPage(
                 )
 
                 SettingsSingleChoiceSegmentedButtons(
-                    label = "",
+                    label = " ",
                     options = homeVerticalOptions,
                     selectedIndex = uiState.homeVAlignment,
                     onSelectedIndexChange = { newIndex ->
                         mainSettingsPageViewModel.setHomeVAlignment(newIndex)
-                    })
+                    },
+                    isBottomOfGroup = true
+                )
+            }
+
+            item(key = "alignements_spacer") {
+                SettingsSmallSpacer()
             }
 
             item(key = "apps_alignment") {
@@ -356,6 +362,7 @@ fun MainSettingsPage(
                     onSelectedIndexChange = { newIndex ->
                         mainSettingsPageViewModel.setAppsAlignment(newIndex)
                     },
+                    isTopOfGroup = true,
                     isBottomOfGroup = true
                 )
             }

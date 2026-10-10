@@ -42,6 +42,7 @@ object PreferencesKeys {
     val SHOW_WALLPAPER = booleanPreferencesKey(name = "show_wallpaper")
     val BLACK_BACKGROUND = booleanPreferencesKey(name = "black_background")
     val FONT = stringPreferencesKey(name = "font")
+    val NIGHTMODE = intPreferencesKey(name = "night_mode")
 
     //Search
     val SHOW_SEARCH_BOX = booleanPreferencesKey(name = "show_search_box")

@@ -54,4 +54,12 @@ class ThemeViewModel @Inject constructor(
             appearanceRepository.setBackgroundMode(showWallpaper, blackBackground)
         }
     }
+
+    val nightMode = appearanceRepository.nightMode
+
+    fun setNightMode(nightMode: Int) {
+        viewModelScope.launch {
+            appearanceRepository.setNightMode(nightMode = nightMode)
+        }
+    }
 }

@@ -51,4 +51,10 @@ class AppearanceRepositoryImpl @Inject constructor(
             preferences[PreferencesKeys.BLACK_BACKGROUND] = blackBackground
         }
     }
+    override val nightMode: Flow<Int> = dataStore.data.map { it[PreferencesKeys.NIGHTMODE] ?: DefaultSettings.NIGHT_MODE }
+    override suspend fun setNightMode(nightMode: Int) {
+        dataStore.edit { preferences ->
+            preferences[PreferencesKeys.NIGHTMODE] = nightMode
+        }
+    }
 }

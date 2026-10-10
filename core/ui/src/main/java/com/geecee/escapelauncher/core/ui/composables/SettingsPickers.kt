@@ -42,7 +42,8 @@ fun SettingsSingleChoiceSegmentedButtons(
     selectedIndex: Int,
     onSelectedIndexChange: (Int) -> Unit,
     isTopOfGroup: Boolean = false,
-    isBottomOfGroup: Boolean = false
+    isBottomOfGroup: Boolean = false,
+    enabled: Boolean = true
 ) {
     val groupEdgeCornerRadius = 24.dp
     val defaultCornerRadius = 8.dp
@@ -90,7 +91,7 @@ fun SettingsSingleChoiceSegmentedButtons(
                             index = index, count = options.size
                         ), onClick = {
                             onSelectedIndexChange(index)
-                        }, selected = index == selectedIndex
+                        }, selected = index == selectedIndex, enabled = enabled
                     ) {
                         Text(text = optionLabel, overflow = TextOverflow.Ellipsis, maxLines = 1)
                     }

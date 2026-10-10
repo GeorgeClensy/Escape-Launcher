@@ -9,6 +9,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -28,13 +29,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.geecee.escapelauncher.core.common.DefaultSettings.NIGHT_MODE_DARK
+import com.geecee.escapelauncher.core.common.DefaultSettings.NIGHT_MODE_SYNC
 import com.geecee.escapelauncher.core.theme.colours.AppColourScheme
 import com.geecee.escapelauncher.core.theme.ThemeViewModel
 import com.geecee.escapelauncher.core.theme.colours.resolveColorScheme
 import com.geecee.escapelauncher.core.ui.R
 import com.geecee.escapelauncher.core.ui.composables.EscapeHeader
+import com.geecee.escapelauncher.core.ui.composables.EscapeSubhead
 import com.geecee.escapelauncher.core.ui.composables.SettingsButton
 import com.geecee.escapelauncher.core.ui.composables.SettingsSingleChoiceSegmentedButtons
+import com.geecee.escapelauncher.core.ui.composables.SettingsSmallSpacer
 import com.geecee.escapelauncher.core.ui.composables.SettingsSpacer
 import com.geecee.escapelauncher.core.ui.utils.toAndroidColor
 import kotlinx.coroutines.coroutineScope
@@ -55,6 +60,7 @@ fun ThemeOptions(
     val scheme by themeViewModel.theme.collectAsState()
     val showWallpaper by themeViewModel.showWallpaper.collectAsState(initial = false)
     val blackBackground by themeViewModel.blackBackground.collectAsState(initial = false)
+    val nightMode by themeViewModel.nightMode.collectAsState(initial = NIGHT_MODE_SYNC)
 
     val selectableThemes = remember(showWallpaper) {
         AppColourScheme.selectableThemes.filter { themeOption ->
@@ -106,6 +112,10 @@ fun ThemeOptions(
 
             item(key = "header") {
                 EscapeHeader(goBack, stringResource(R.string.theme))
+            }
+
+            item(key = "background_header") {
+                EscapeSubhead(stringResource(R.string.background))
             }
 
             item(key = "background_segmented_button") {
@@ -167,8 +177,32 @@ fun ThemeOptions(
                 }
             }
 
-            item(key = "spacer_top") {
-                SettingsSpacer()
+            item(key = "colours_header") {
+                EscapeSubhead(stringResource(R.string.colours))
+            }
+
+            item(key = "nightmode_segmented_button") {
+                val nightModeOptions = listOf(
+                    stringResource(R.string.system),
+                    stringResource(R.string.dark),
+                    stringResource(R.string.light)
+                )
+
+                SettingsSingleChoiceSegmentedButtons(
+                    label = "",
+                    options = nightModeOptions,
+                    selectedIndex = if(blackBackground) NIGHT_MODE_DARK else nightMode,
+                    onSelectedIndexChange = { index ->
+                        themeViewModel.setNightMode(index)
+                    },
+                    isTopOfGroup = true,
+                    isBottomOfGroup = true,
+                    enabled = !blackBackground
+                )
+            }
+
+            item {
+                SettingsSmallSpacer()
             }
 
             itemsIndexed(selectableThemes, key = { _, theme -> theme.id }) { index, themeOption ->
@@ -184,6 +218,11 @@ fun ThemeOptions(
                     isBottomOfGroup = index == selectableThemes.size - 1,
                     onClick = {
                         themeViewModel.setTheme(themeOption)
+                    },
+                    isDark = when (nightMode) {
+                        0 -> isSystemInDarkTheme()
+                        1 -> true
+                        else -> false
                     }
                 )
             }

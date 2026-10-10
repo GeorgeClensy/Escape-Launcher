@@ -17,6 +17,7 @@
     <string name="black_background">Black background</string>
     <string name="background">Background</string>
     <string name="colorful">Colorful</string>
+    <string name="colours">Colours</string>
 
     <!-- Privacy and Analytics stuff -->
     <string name="Analytics" translatable="false">Analytics</string>

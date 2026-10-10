@@ -31,6 +31,7 @@ fun EscapeTheme(
     val context = LocalContext.current
     val colorScheme by themeViewModel.theme.collectAsState(AppColourScheme.ESCAPE_THEME)
     val blackBackground by themeViewModel.blackBackground.collectAsState(initial = false)
+    val nightMode by themeViewModel.nightMode.collectAsState(initial = 0)
     val font by themeViewModel.font.collectAsState("Outfit") // Must match DefaultSettings.FONT
 
     val fontFamily = if(font != "System") {
@@ -49,8 +50,15 @@ fun EscapeTheme(
     // Generating a scheme from a seed walks ~50 HCT colours; only redo it when the input changes
     val selectedScheme = theme ?: colorScheme
     val isDark = isSystemInDarkTheme()
-    val resolvedColorScheme = remember(selectedScheme, isDark, blackBackground) {
-        val scheme = selectedScheme.resolveColorScheme(context, isDark || blackBackground)
+    val resolvedColorScheme = remember(selectedScheme, isDark, blackBackground, nightMode) {
+        val shouldBeDark = when(nightMode) {
+            0 -> isDark
+            1 -> true
+            2 -> false
+            else -> isDark
+        }
+
+        val scheme = selectedScheme.resolveColorScheme(context, shouldBeDark || blackBackground)
         if (blackBackground) {
             scheme.copy(
                 background = Color.Black,

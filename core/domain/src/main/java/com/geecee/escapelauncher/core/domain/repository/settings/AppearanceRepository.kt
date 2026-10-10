@@ -20,4 +20,6 @@ interface AppearanceRepository {
     val blackBackground: Flow<Boolean>
     suspend fun setBlackBackground(enabled: Boolean)
     suspend fun setBackgroundMode(showWallpaper: Boolean, blackBackground: Boolean)
+    val nightMode: Flow<Int>
+    suspend fun setNightMode(nightMode: Int)
 }
