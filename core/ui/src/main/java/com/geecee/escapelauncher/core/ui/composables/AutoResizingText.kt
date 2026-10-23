@@ -1,18 +1,18 @@
 package com.geecee.escapelauncher.core.ui.composables
 
-import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.text.BasicText
+import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.Constraints
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.isUnspecified
 import androidx.compose.ui.unit.sp
@@ -26,7 +26,7 @@ import androidx.compose.ui.unit.sp
  * @param style Style of the text
  * @param minFontSize Minimum font size
  * @param maxLines Maximum lines
- * @param color Color of the text
+ * @param color Colour of the text
  * @param fontFamily Font family of the text
  * @param textAlign Text alignment
  * @param singleLine Whether the text should be restricted to a single line with ellipsis or allowed to wrap
@@ -43,49 +43,36 @@ fun AutoResizingText(
     textAlign: TextAlign? = null,
     singleLine: Boolean = true
 ) {
-    BoxWithConstraints(modifier = modifier) {
-        val textMeasurer = rememberTextMeasurer()
-        val maxWidthPx = constraints.maxWidth
-        val actualMaxLines = if (singleLine) 1 else maxLines
+    BasicText(
+        text = text,
+        style = style.copy(color = color, fontFamily = fontFamily),
+        autoSize = TextAutoSize.StepBased(
+            minFontSize = minFontSize,
+            maxFontSize = if (style.fontSize.isUnspecified) 16.sp else style.fontSize
+        ),
+        maxLines = maxLines,
+        overflow = TextOverflow.Ellipsis,
+        softWrap = !singleLine,
+        modifier = modifier
+    )
+}
 
-        val fontSize = remember(text, style, maxWidthPx, actualMaxLines) {
-            var currentSize = if (style.fontSize.isUnspecified) 16.sp else style.fontSize
-            
-            // Fast path: check if it fits with default size
-            val result = textMeasurer.measure(
-                text = text,
-                style = style.copy(fontSize = currentSize, fontFamily = fontFamily),
-                constraints = Constraints(maxWidth = maxWidthPx),
-                maxLines = actualMaxLines,
-                overflow = TextOverflow.Clip
-            )
+@Preview
+@Composable
+fun PrevAutoResizingText() {
+    AutoResizingText(
+        text = "Test Text",
+        style = MaterialTheme.typography.bodyMedium
+    )
+}
 
-            if (result.hasVisualOverflow) {
-                // Iterative shrink (could use binary search for even more speed, 
-                // but usually 1-3 steps is enough)
-                while (currentSize > minFontSize) {
-                    currentSize = (currentSize.value * 0.9f).sp
-                    val stepResult = textMeasurer.measure(
-                        text = text,
-                        style = style.copy(fontSize = currentSize, fontFamily = fontFamily),
-                        constraints = Constraints(maxWidth = maxWidthPx),
-                        maxLines = actualMaxLines,
-                        overflow = TextOverflow.Clip
-                    )
-                    if (!stepResult.hasVisualOverflow) break
-                }
-                if (currentSize < minFontSize) currentSize = minFontSize
-            }
-            currentSize
-        }
-
-        Text(
-            text = text,
-            style = style.copy(fontSize = fontSize, color = color, fontFamily = fontFamily),
-            maxLines = actualMaxLines,
-            overflow = TextOverflow.Ellipsis,
-            textAlign = textAlign,
-            softWrap = !singleLine
+@Preview(device = "id:Galaxy Nexus")
+@Composable
+fun PrevAutoResizingTextSmallBox() {
+    Box(modifier = Modifier.fillMaxSize()) {
+        AutoResizingText(
+            text = "A very long piece of text to test what happens when there is not enough space on the screen.",
+            style = MaterialTheme.typography.displayLarge
         )
     }
 }
