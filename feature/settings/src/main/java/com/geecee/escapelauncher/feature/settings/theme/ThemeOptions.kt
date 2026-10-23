@@ -26,18 +26,20 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.geecee.escapelauncher.core.common.DefaultSettings.NIGHT_MODE_DARK
 import com.geecee.escapelauncher.core.common.DefaultSettings.NIGHT_MODE_SYNC
-import com.geecee.escapelauncher.core.theme.colours.AppColourScheme
 import com.geecee.escapelauncher.core.theme.ThemeViewModel
+import com.geecee.escapelauncher.core.theme.colours.AppColourScheme
 import com.geecee.escapelauncher.core.theme.colours.resolveColorScheme
 import com.geecee.escapelauncher.core.ui.R
 import com.geecee.escapelauncher.core.ui.composables.EscapeHeader
 import com.geecee.escapelauncher.core.ui.composables.EscapeSubhead
-import com.geecee.escapelauncher.core.ui.composables.SettingsButton
+import com.geecee.escapelauncher.core.ui.composables.SettingsNavigationItem
 import com.geecee.escapelauncher.core.ui.composables.SettingsSingleChoiceSegmentedButtons
 import com.geecee.escapelauncher.core.ui.composables.SettingsSmallSpacer
 import com.geecee.escapelauncher.core.ui.composables.SettingsSpacer
@@ -56,11 +58,28 @@ import kotlin.time.Duration.Companion.milliseconds
 fun ThemeOptions(
     goBack: () -> Unit, themeViewModel: ThemeViewModel = hiltViewModel()
 ) {
+    val context = LocalContext.current
     val modeChanged = remember { mutableStateOf(false) }
     val scheme by themeViewModel.theme.collectAsState()
     val showWallpaper by themeViewModel.showWallpaper.collectAsState(initial = false)
     val blackBackground by themeViewModel.blackBackground.collectAsState(initial = false)
     val nightMode by themeViewModel.nightMode.collectAsState(initial = NIGHT_MODE_SYNC)
+
+    val isSystemDark = isSystemInDarkTheme()
+    val isDark = when (nightMode) {
+        0 -> isSystemDark
+        1 -> true
+        2 -> false
+        else -> isSystemDark
+    }
+
+    val currentBackground = remember(scheme, isDark, blackBackground) {
+        if (blackBackground) {
+            Color.Black
+        } else {
+            scheme.resolveColorScheme(context, isDark).background
+        }
+    }
 
     val selectableThemes = remember(showWallpaper) {
         AppColourScheme.selectableThemes.filter { themeOption ->
@@ -163,16 +182,15 @@ fun ThemeOptions(
                     enter = fadeIn(tween(300)) + expandVertically(tween(300)),
                     exit = fadeOut(tween(300)) + shrinkVertically(tween(300))
                 ) {
-                    val activeTheme = scheme
-                    val colour = activeTheme.resolveColorScheme().background
 
-                    SettingsButton(
+                    SettingsNavigationItem(
                         label = stringResource(R.string.match_system_wallpaper),
                         isTopOfGroup = false,
                         isBottomOfGroup = true,
                         onClick = {
-                            themeViewModel.setWallpaper(colour.toAndroidColor())
-                        }
+                            themeViewModel.setWallpaper(currentBackground.toAndroidColor())
+                        },
+                        diagonalArrow = true
                     )
                 }
             }
@@ -219,11 +237,7 @@ fun ThemeOptions(
                     onClick = {
                         themeViewModel.setTheme(themeOption)
                     },
-                    isDark = when (nightMode) {
-                        0 -> isSystemInDarkTheme()
-                        1 -> true
-                        else -> false
-                    }
+                    isDark = isDark
                 )
             }
 
