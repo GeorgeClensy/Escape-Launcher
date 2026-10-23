@@ -1,10 +1,7 @@
 package com.geecee.escapelauncher.feature.appslist
 
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
@@ -17,19 +14,16 @@ import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.geecee.escapelauncher.core.common.DefaultSettings
-import com.geecee.escapelauncher.core.common.formatScreenTime
 import com.geecee.escapelauncher.core.model.InstalledApp
 import com.geecee.escapelauncher.core.ui.DefaultSettingsUi
 import com.geecee.escapelauncher.core.ui.composables.HomeScreenItem
@@ -40,7 +34,6 @@ import kotlinx.coroutines.flow.collectLatest
 /**
  * Main App List composable - focuses purely on the list of apps
  */
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun AppsList(
     modifier: Modifier = Modifier,
@@ -48,15 +41,14 @@ fun AppsList(
     onAppOpened: (app: InstalledApp) -> Unit = {},
     onGoHomeRequest: () -> Unit = {},
     appsListViewModel: AppsListViewModel = hiltViewModel(),
-    screenTimeViewModel: ScreenTimeViewModel = hiltViewModel(LocalActivity.current as ComponentActivity),
+    @Suppress("unused") screenTimeViewModel: ScreenTimeViewModel? = null
 ) {
     val haptics = LocalHapticFeedback.current
-    val appUsageList by screenTimeViewModel.appUsageUiList.collectAsState()
     val showScreenTimeApp by appsListViewModel.showScreenTimeApp.collectAsState(initial = DefaultSettings.SHOW_SCREEN_TIME_APP)
     val appsListAlignment by appsListViewModel.appsAlignment.collectAsState(initial = DefaultSettingsUi.APPS_ALIGNMENT)
     val hapticFeedbackEnabled by appsListViewModel.hapticFeedBackEnabled.collectAsState(initial = DefaultSettings.HAPTIC_FEEDBACK)
     val showWallpaper by appsListViewModel.showWallpaper.collectAsState(initial = false)
-    val apps by appsListViewModel.apps.collectAsState()
+    val appListItems by appsListViewModel.appListItems.collectAsState()
 
     // Standard app interaction logic shared across slots
     val handleAppClick: (InstalledApp) -> Unit = { app ->
@@ -101,16 +93,12 @@ fun AppsList(
                 Spacer(modifier = Modifier.height(statusBarHeight + 10.dp))
             }
 
-            items(apps, key = { app -> app.packageName }) { app ->
-                val screenTime = remember(appUsageList) {
-                    screenTimeViewModel.getScreenTime(app.packageName)
-                }
-
+            items(appListItems, key = { item -> item.app.packageName }) { item ->
                 HomeScreenItem(
-                    appName = app.displayName,
-                    screenTime = formatScreenTime(screenTime),
-                    onAppClick = { handleAppClick(app) },
-                    onAppLongClick = { handleAppLongClick(app) },
+                    appName = item.app.displayName,
+                    screenTime = item.formattedTime,
+                    onAppClick = { handleAppClick(item.app) },
+                    onAppLongClick = { handleAppLongClick(item.app) },
                     showScreenTime = showScreenTimeApp,
                     modifier = Modifier,
                     alignment = appsListAlignment,

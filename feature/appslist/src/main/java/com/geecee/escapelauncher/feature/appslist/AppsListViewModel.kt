@@ -3,6 +3,7 @@ package com.geecee.escapelauncher.feature.appslist
 import androidx.compose.ui.Alignment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.geecee.escapelauncher.core.common.formatScreenTime
 import com.geecee.escapelauncher.core.common.isMainUserApp
 import com.geecee.escapelauncher.core.domain.apps.AppActionType
 import com.geecee.escapelauncher.core.domain.apps.GetAppActionsUseCase
@@ -10,17 +11,29 @@ import com.geecee.escapelauncher.core.domain.apps.GetAppShortcutsUseCase
 import com.geecee.escapelauncher.core.domain.apps.OpenAppDetailsUseCase
 import com.geecee.escapelauncher.core.domain.apps.StartShortcutUseCase
 import com.geecee.escapelauncher.core.domain.apps.UninstallAppUseCase
-import com.geecee.escapelauncher.core.domain.search.SearchAppsUseCase
 import com.geecee.escapelauncher.core.domain.repository.db.ModifiedAppsRepository
+import com.geecee.escapelauncher.core.domain.repository.db.ScreenTimeRepository
 import com.geecee.escapelauncher.core.domain.repository.settings.*
+import com.geecee.escapelauncher.core.domain.search.SearchAppsUseCase
 import com.geecee.escapelauncher.core.model.AppAction
 import com.geecee.escapelauncher.core.model.InstalledApp
 import com.geecee.escapelauncher.core.ui.R
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Date
+import java.util.Locale
+import kotlin.time.Duration.Companion.milliseconds
+
+data class AppListItem(
+    val app: InstalledApp,
+    val formattedTime: String? = null
+)
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
@@ -35,7 +48,8 @@ class AppsListViewModel @Inject constructor(
     private val startShortcutUseCase: StartShortcutUseCase,
     private val uninstallAppUseCase: UninstallAppUseCase,
     private val openAppDetailsUseCase: OpenAppDetailsUseCase,
-    searchAppsUseCase: SearchAppsUseCase
+    searchAppsUseCase: SearchAppsUseCase,
+    screenTimeRepository: ScreenTimeRepository
 ) : ViewModel() {
     // UI Events
     private val _uiEvent = MutableSharedFlow<AppsListUiEvent>()
@@ -81,7 +95,56 @@ class AppsListViewModel @Inject constructor(
             started = SharingStarted.WhileSubscribed(5000),
             initialValue = emptyList()
         )
-    
+
+    private val todayFlow: Flow<String> = flow {
+        while (true) {
+            val now = Date()
+            val today = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(now)
+            emit(today)
+
+            val calendar = Calendar.getInstance().apply {
+                time = now
+                add(Calendar.DAY_OF_YEAR, 1)
+                set(Calendar.HOUR_OF_DAY, 0)
+                set(Calendar.MINUTE, 0)
+                set(Calendar.SECOND, 0)
+                set(Calendar.MILLISECOND, 0)
+            }
+            val delayMs = calendar.timeInMillis - System.currentTimeMillis()
+            delay((delayMs + 1000).milliseconds)
+        }
+    }.distinctUntilChanged()
+
+    private val todayUsageMap: Flow<Map<String, Long>> = todayFlow.flatMapLatest { today ->
+        screenTimeRepository.getScreenTimeListSortedFlow(today).map { list ->
+            list.associate { it.packageName to it.totalTime }
+        }
+    }
+
+    // Combined UI Model list to avoid LazyColumn recomposition explosion
+    val appListItems: StateFlow<List<AppListItem>> = combine(
+        apps,
+        showScreenTimeApp,
+        todayUsageMap
+    ) { appsList, showScreenTime, usageMap ->
+        appsList.map { app ->
+            val formattedTime = if (showScreenTime) {
+                val time = usageMap[app.packageName] ?: 0L
+                formatScreenTime(time)
+            } else {
+                null
+            }
+            AppListItem(
+                app = app,
+                formattedTime = formattedTime
+            )
+        }
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = emptyList()
+    )
+
     // Bottom sheet
     private val _showBottomSheet = MutableStateFlow(false)
     val showBottomSheet: StateFlow<Boolean> = _showBottomSheet.asStateFlow()
@@ -160,7 +223,7 @@ class AppsListViewModel @Inject constructor(
 
     val shortcutActions: StateFlow<List<AppAction>> = _bottomSheetApp.map { app ->
         if (app == null || !app.isMainUserApp()) return@map emptyList()
-        
+
         getAppShortcutsUseCase(app.packageName).map { shortcut ->
             AppAction(
                 label = shortcut.label,
