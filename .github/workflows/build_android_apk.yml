@@ -30,7 +30,7 @@ jobs:
 
       # 4. Build the app using Gradle (targeting the FOSS variant to avoid Google API requirements)
       - name: Build with Gradle
-        run: ./gradlew assembleFossDebug
+        run: ./gradlew assembleFossDebug --stacktrace
 
       # 5. Upload the compiled APK so you can download it
       - name: Upload APK
