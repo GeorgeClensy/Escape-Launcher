@@ -24,7 +24,7 @@ class ScreenTimeRepositoryImpl @Inject constructor(
     override val allUsageFlow: Flow<List<AppUsage>> = appUsageDao.getAllUsageFlow().map { entities ->
         entities.map { usage ->
             AppUsage(
-                packageName = usage.packageName.substringBeforeLast("-"),
+                packageName = usage.packageName,
                 totalTime = usage.totalTime
             )
         }
@@ -47,15 +47,15 @@ class ScreenTimeRepositoryImpl @Inject constructor(
         val openTime = appSessions.remove(packageName) ?: return 0
         val usageTime = System.currentTimeMillis() - openTime
         val currentDate = getCurrentDate()
-        val appKey = "$packageName-$currentDate"
 
         return try {
-            val existingUsage = appUsageDao.getAppUsage(appKey)
+            val existingUsage = appUsageDao.getAppUsage(packageName, currentDate)
             val updatedTime = (existingUsage?.totalTime ?: 0L) + usageTime
 
             appUsageDao.insertOrUpdate(
                 AppUsageEntity(
-                    packageName = appKey,
+                    packageName = packageName,
+                    date = currentDate,
                     totalTime = updatedTime
                 )
             )
@@ -73,39 +73,39 @@ class ScreenTimeRepositoryImpl @Inject constructor(
         val yesterday = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(calendar.time)
 
         try {
-            appUsageDao.deleteOldDataExcept("%-$today", "%-$yesterday")
+            appUsageDao.deleteOldDataExcept(today, yesterday)
         } catch (e: Exception) {
             Log.e("ScreenTimeRepository", "Error clearing old data: ${e.message}")
         }
     }
 
     override suspend fun getTotalUsageForDate(date: String): Long {
-        return appUsageDao.getTotalUsageForDate("%-$date") ?: 0L
+        return appUsageDao.getTotalUsageForDate(date) ?: 0L
     }
 
     override fun getTotalUsageForDateFlow(date: String): Flow<Long> {
-        return appUsageDao.getTotalUsageForDateFlow("%-$date").map { it ?: 0L }
+        return appUsageDao.getTotalUsageForDateFlow(date).map { it ?: 0L }
     }
 
     override suspend fun getUsageForApp(packageName: String, date: String): Long {
-        return appUsageDao.getAppUsage("$packageName-$date")?.totalTime ?: 0L
+        return appUsageDao.getAppUsage(packageName, date)?.totalTime ?: 0L
     }
 
     override suspend fun getScreenTimeListSorted(date: String): List<AppUsage> {
-        val usageList = appUsageDao.getUsageListForDate("%-$date")
+        val usageList = appUsageDao.getUsageListForDate(date)
         return usageList.map { usage ->
             AppUsage(
-                packageName = usage.packageName.substringBeforeLast("-$date"),
+                packageName = usage.packageName,
                 totalTime = usage.totalTime
             )
         }.sortedByDescending { it.totalTime }
     }
 
     override fun getScreenTimeListSortedFlow(date: String): Flow<List<AppUsage>> {
-        return appUsageDao.getUsageListForDateFlow("%-$date").map { usageList ->
+        return appUsageDao.getUsageListForDateFlow(date).map { usageList ->
             usageList.map { usage ->
                 AppUsage(
-                    packageName = usage.packageName.substringBeforeLast("-$date"),
+                    packageName = usage.packageName,
                     totalTime = usage.totalTime
                 )
             }.sortedByDescending { it.totalTime }
