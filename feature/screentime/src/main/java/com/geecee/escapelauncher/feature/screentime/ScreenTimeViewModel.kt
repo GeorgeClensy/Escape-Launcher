@@ -86,11 +86,11 @@ class ScreenTimeViewModel @Inject constructor(
         screenTimeRepository.onAppClosed(packageName)
     }
 
-    fun hasActiveSession(): Boolean {
+    suspend fun hasActiveSession(): Boolean {
         return screenTimeRepository.hasActiveSession()
     }
 
-    fun getActiveSessionPackageName(): String? {
+    suspend fun getActiveSessionPackageName(): String? {
         return screenTimeRepository.getActiveSessionPackageName()
     }
 

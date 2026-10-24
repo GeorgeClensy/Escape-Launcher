@@ -3,6 +3,7 @@ package com.geecee.escapelauncher.core.data.datastore
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.floatPreferencesKey
 import androidx.datastore.preferences.core.intPreferencesKey
+import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 
 object PreferencesKeys {
@@ -42,7 +43,7 @@ object PreferencesKeys {
     val SHOW_WALLPAPER = booleanPreferencesKey(name = "show_wallpaper")
     val BLACK_BACKGROUND = booleanPreferencesKey(name = "black_background")
     val FONT = stringPreferencesKey(name = "font")
-    val NIGHTMODE = intPreferencesKey(name = "night_mode")
+    val NIGHT_MODE = intPreferencesKey(name = "night_mode")
 
     //Search
     val SHOW_SEARCH_BOX = booleanPreferencesKey(name = "show_search_box")
@@ -54,4 +55,8 @@ object PreferencesKeys {
     val HIDE_SCREEN_TIME_PAGE = booleanPreferencesKey(name = "hide_screen_time_page")
     val SHOW_HIDDEN_APPS_IN_SEARCH = booleanPreferencesKey(name = "show_hidden_apps_in_search")
     val FIRST_TIME = booleanPreferencesKey(name = "first_time")
+
+    //Screen Time
+    val ACTIVE_SESSION_PACKAGE = stringPreferencesKey("active_session_package")
+    val ACTIVE_SESSION_START_TIME = longPreferencesKey("active_session_start_time")
 }

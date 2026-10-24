@@ -1,25 +1,34 @@
 package com.geecee.escapelauncher.core.data.repository.db
 
 import android.util.Log
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.edit
 import com.geecee.escapelauncher.core.data.database.AppUsageDao
+import com.geecee.escapelauncher.core.data.datastore.PreferencesKeys
 import com.geecee.escapelauncher.core.data.entity.AppUsageEntity
+import com.geecee.escapelauncher.core.di.ApplicationScope
 import com.geecee.escapelauncher.core.domain.repository.db.ScreenTimeRepository
 import com.geecee.escapelauncher.core.model.AppUsage
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
-import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 class ScreenTimeRepositoryImpl @Inject constructor(
-    private val appUsageDao: AppUsageDao
+    private val appUsageDao: AppUsageDao,
+    private val dataStore: DataStore<Preferences>,
+    @ApplicationScope private val scope: CoroutineScope
 ) : ScreenTimeRepository {
-    private val appSessions = ConcurrentHashMap<String, Long>()
 
     override val allUsageFlow: Flow<List<AppUsage>> = appUsageDao.getAllUsageFlow().map { entities ->
         entities.map { usage ->
@@ -31,30 +40,69 @@ class ScreenTimeRepositoryImpl @Inject constructor(
     }
 
     override fun onAppOpened(packageName: String) {
-        appSessions[packageName] = System.currentTimeMillis()
+        val now = System.currentTimeMillis()
+        // Save immediately using application scope so it outlives the caller
+        scope.launch(Dispatchers.IO) {
+            try {
+                dataStore.edit { prefs ->
+                    prefs[PreferencesKeys.ACTIVE_SESSION_PACKAGE] = packageName
+                    prefs[PreferencesKeys.ACTIVE_SESSION_START_TIME] = now
+                }
+            } catch (e: Exception) {
+                Log.e("ScreenTimeRepository", "Error saving active session start: ${e.message}")
+            }
+        }
     }
 
-    override fun hasActiveSession(): Boolean {
-        return appSessions.isNotEmpty()
+    override suspend fun hasActiveSession(): Boolean {
+        return try {
+            val prefs = dataStore.data.first()
+            prefs[PreferencesKeys.ACTIVE_SESSION_PACKAGE] != null
+        } catch (_: Exception) {
+            false
+        }
     }
 
-    override fun getActiveSessionPackageName(): String? {
-        return appSessions.keys().asSequence().firstOrNull()
+    override suspend fun getActiveSessionPackageName(): String? {
+        return try {
+            val prefs = dataStore.data.first()
+            prefs[PreferencesKeys.ACTIVE_SESSION_PACKAGE]
+        } catch (_: Exception) {
+            null
+        }
     }
 
     override suspend fun onAppClosed(packageName: String): Int {
-        // Remove first so a concurrent close (screen-off receiver + onResume) can't double count
-        val openTime = appSessions.remove(packageName) ?: return 0
-        val usageTime = System.currentTimeMillis() - openTime
+        var openTime: Long? = null
+        var activePackage: String? = null
+
+        // Atomically read and remove the session to prevent concurrent double-counting
+        try {
+            dataStore.edit { prefs ->
+                activePackage = prefs[PreferencesKeys.ACTIVE_SESSION_PACKAGE]
+                openTime = prefs[PreferencesKeys.ACTIVE_SESSION_START_TIME]
+                prefs.remove(PreferencesKeys.ACTIVE_SESSION_PACKAGE)
+                prefs.remove(PreferencesKeys.ACTIVE_SESSION_START_TIME)
+            }
+        } catch (e: Exception) {
+            Log.e("ScreenTimeRepository", "Error clearing active session: ${e.message}")
+            return 0
+        }
+
+        val startTime = openTime ?: return 0
+        val targetPackage = activePackage ?: packageName
+        val usageTime = System.currentTimeMillis() - startTime
+        if (usageTime <= 0) return 0
+
         val currentDate = getCurrentDate()
 
         return try {
-            val existingUsage = appUsageDao.getAppUsage(packageName, currentDate)
+            val existingUsage = appUsageDao.getAppUsage(targetPackage, currentDate)
             val updatedTime = (existingUsage?.totalTime ?: 0L) + usageTime
 
             appUsageDao.insertOrUpdate(
                 AppUsageEntity(
-                    packageName = packageName,
+                    packageName = targetPackage,
                     date = currentDate,
                     totalTime = updatedTime
                 )

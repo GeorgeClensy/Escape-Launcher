@@ -6,8 +6,8 @@ import kotlinx.coroutines.flow.Flow
 interface ScreenTimeRepository {
     fun onAppOpened(packageName: String)
     suspend fun onAppClosed(packageName: String): Int
-    fun hasActiveSession(): Boolean
-    fun getActiveSessionPackageName(): String?
+    suspend fun hasActiveSession(): Boolean
+    suspend fun getActiveSessionPackageName(): String?
     suspend fun clearOldData()
     suspend fun getTotalUsageForDate(date: String): Long
     suspend fun getUsageForApp(packageName: String, date: String): Long

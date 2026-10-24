@@ -122,7 +122,7 @@ class MainHomeScreenActivity : ComponentActivity() {
             }
         }
 
-        // Set up the screen time tracking cleanup
+        // Set up the screen time tracking clean-up
         ClearOldDataWorker.scheduleDailyCleanup(this)
 
         // Determine start destination before hiding splash screen
@@ -140,8 +140,8 @@ class MainHomeScreenActivity : ComponentActivity() {
         // Register screen off receiver
         screenOffReceiver = ScreenOffReceiver {
             // Screen turned off
-            if (screenTimeViewModel.hasActiveSession()) {
-                lifecycleScope.launch(Dispatchers.IO) {
+            lifecycleScope.launch(Dispatchers.IO) {
+                if (screenTimeViewModel.hasActiveSession()) {
                     val packageName = screenTimeViewModel.getActiveSessionPackageName() ?: ""
                     if (packageName.isNotEmpty()) {
                         screenTimeViewModel.onAppClosed(packageName)
@@ -156,10 +156,11 @@ class MainHomeScreenActivity : ComponentActivity() {
                 }
             }
         }
+
         val filter = IntentFilter(Intent.ACTION_SCREEN_OFF)
         registerReceiver(screenOffReceiver, filter)
 
-        // Subscribe to notifications via flavor-specific initializer
+        // Subscribe to notifications via flavour-specific initialiser
         messagingInitializer.initialize(this)
 
 
@@ -197,8 +198,8 @@ class MainHomeScreenActivity : ComponentActivity() {
         mainPagerViewModel.updateLauncherStatus()
 
         // Check if we need to update screen time when coming back from an app
-        if (screenTimeViewModel.hasActiveSession()) {
-            lifecycleScope.launch(Dispatchers.IO) {
+        lifecycleScope.launch(Dispatchers.IO) {
+            if (screenTimeViewModel.hasActiveSession()) {
                 val packageName = screenTimeViewModel.getActiveSessionPackageName() ?: ""
                 if (packageName.isNotEmpty()) {
                     screenTimeViewModel.onAppClosed(packageName)
@@ -230,7 +231,7 @@ class MainHomeScreenActivity : ComponentActivity() {
 
     /**
      * Requests the optional runtime permissions (notifications, location for weather) in a single
-     * system dialog. Only permissions that this build actually declares in its manifest are
+     * system dialogue. Only permissions that this build actually declares in its manifest are
      * requested (the FOSS flavour declares neither), and the request is made at most once per
      * process so the user isn't re-prompted every time they return to the home page.
      */
@@ -288,10 +289,10 @@ class MainHomeScreenActivity : ComponentActivity() {
                         backStack.add(AppNavKey.Home)
                     }
                 }
-                launch {
+                this@LaunchedEffect.launch {
                     mainPagerViewModel.animatedGoToMainPage()
                 }
-                launch {
+                this@LaunchedEffect.launch {
                     delay(300.milliseconds)
                     mainPagerViewModel.appsListScrollState.scrollToItem(0)
                 }
@@ -309,10 +310,10 @@ class MainHomeScreenActivity : ComponentActivity() {
                     }
                 }
                 // Make sure the home is clean for when we get back there
-                launch {
+                this@LaunchedEffect.launch {
                     mainPagerViewModel.animatedGoToMainPage()
                 }
-                launch {
+                this@LaunchedEffect.launch {
                     delay(300.milliseconds)
                     mainPagerViewModel.appsListScrollState.scrollToItem(0)
                 }
