@@ -18,30 +18,22 @@ import androidx.annotation.RequiresPermission
 import androidx.core.content.FileProvider
 import androidx.core.graphics.createBitmap
 import androidx.core.net.toUri
-import com.geecee.escapelauncher.core.data.system.EscapeAccessibilityService
+import com.geecee.escapelauncher.core.data.system.AccessibilityEventManager
 import com.geecee.escapelauncher.core.domain.repository.android.SystemActionsRepository
 import com.geecee.escapelauncher.core.model.InstalledApp
 import dagger.hilt.android.qualifiers.ApplicationContext
-import javax.inject.Inject
-import javax.inject.Singleton
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
 import java.io.File
 import java.io.FileOutputStream
-import kotlin.time.Duration.Companion.milliseconds
+import javax.inject.Inject
+import javax.inject.Singleton
 
 @Singleton
 class SystemActionsRepositoryImpl @Inject constructor(
     @ApplicationContext private val context: Context
 ) : SystemActionsRepository {
-
-    override val isAccessibilityServiceEnabled: Flow<Boolean> = flow {
-        while (true) {
-            emit(EscapeAccessibilityService.instance != null)
-            delay(1000.milliseconds)
-        }
-    }
+    override val isAccessibilityServiceEnabled: Flow<Boolean> =
+        AccessibilityEventManager.isServiceConnected
 
     override fun uninstallApp(app: InstalledApp) {
         val intent = Intent(Intent.ACTION_DELETE).apply {
@@ -160,6 +152,6 @@ class SystemActionsRepositoryImpl @Inject constructor(
     }
 
     override fun lockScreen() {
-        EscapeAccessibilityService.instance?.lockScreen()
+        AccessibilityEventManager.triggerLockScreen()
     }
 }

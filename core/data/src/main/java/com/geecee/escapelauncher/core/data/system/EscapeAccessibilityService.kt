@@ -5,32 +5,42 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Build
 import android.view.accessibility.AccessibilityEvent
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 
 @SuppressLint("AccessibilityPolicy")
 class EscapeAccessibilityService : AccessibilityService() {
-    companion object {
-        var instance: EscapeAccessibilityService? = null
-    }
+
+    private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
 
     override fun onServiceConnected() {
-        instance = this
+        super.onServiceConnected()
+        AccessibilityEventManager.setConnected(true)
+
+        // Listen for lock screen requests safely
+        serviceScope.launch {
+            AccessibilityEventManager.lockScreenEvents.collect {
+                performLockScreen()
+            }
+        }
     }
 
     override fun onUnbind(intent: Intent?): Boolean {
-        instance = null
+        AccessibilityEventManager.setConnected(false)
         return super.onUnbind(intent)
     }
 
     override fun onDestroy() {
-        instance = null
+        AccessibilityEventManager.setConnected(false)
         super.onDestroy()
     }
 
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {}
-
     override fun onInterrupt() {}
 
-    fun lockScreen() {
+    private fun performLockScreen() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             performGlobalAction(GLOBAL_ACTION_LOCK_SCREEN)
         }
