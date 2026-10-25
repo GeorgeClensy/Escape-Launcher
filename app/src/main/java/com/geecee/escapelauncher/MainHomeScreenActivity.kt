@@ -2,7 +2,6 @@ package com.geecee.escapelauncher
 
 import android.Manifest
 import android.content.Intent
-import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
@@ -36,13 +35,11 @@ import com.geecee.escapelauncher.core.analytics.AnalyticsProxy
 import com.geecee.escapelauncher.core.cloudmessaging.MessagingInitializer
 import com.geecee.escapelauncher.core.common.configureNavBar
 import com.geecee.escapelauncher.core.common.configureStatusBar
-import com.geecee.escapelauncher.core.common.formatScreenTime
 import com.geecee.escapelauncher.core.common.hasPermission
 import com.geecee.escapelauncher.core.data.worker.ClearOldDataWorker
 import com.geecee.escapelauncher.core.theme.EscapeTheme
 import com.geecee.escapelauncher.core.theme.motion.enterTransition
 import com.geecee.escapelauncher.core.theme.motion.exitTransition
-import com.geecee.escapelauncher.core.ui.recievers.ScreenOffReceiver
 import com.geecee.escapelauncher.feature.newwidgets.WidgetHostManager
 import com.geecee.escapelauncher.feature.onboarding.Onboarding
 import com.geecee.escapelauncher.feature.screentime.ScreenTimeViewModel
@@ -83,7 +80,6 @@ class MainHomeScreenActivity : ComponentActivity() {
 
     @Inject
     lateinit var widgetHostManager: WidgetHostManager
-    private lateinit var screenOffReceiver: ScreenOffReceiver
     private val permissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { _ -> }
@@ -137,32 +133,8 @@ class MainHomeScreenActivity : ComponentActivity() {
             startDestination == null || !globalViewModel.initializationState.value.isAllLoaded
         }
 
-        // Register screen off receiver
-        screenOffReceiver = ScreenOffReceiver {
-            // Screen turned off
-            lifecycleScope.launch(Dispatchers.IO) {
-                if (screenTimeViewModel.hasActiveSession()) {
-                    val packageName = screenTimeViewModel.getActiveSessionPackageName() ?: ""
-                    if (packageName.isNotEmpty()) {
-                        screenTimeViewModel.onAppClosed(packageName)
-
-                        Log.i(
-                            "INFO",
-                            "Screen turned off with app $packageName open, stopping screen time counting at " + formatScreenTime(
-                                screenTimeViewModel.getScreenTime(packageName)
-                            )
-                        )
-                    }
-                }
-            }
-        }
-
-        val filter = IntentFilter(Intent.ACTION_SCREEN_OFF)
-        registerReceiver(screenOffReceiver, filter)
-
         // Subscribe to notifications via flavour-specific initialiser
         messagingInitializer.initialize(this)
-
 
         // Set up the application content
         setContent {
@@ -221,11 +193,6 @@ class MainHomeScreenActivity : ComponentActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-
-        // Stop the screen off receivers
-        if (::screenOffReceiver.isInitialized) {
-            unregisterReceiver(screenOffReceiver)
-        }
     }
 
 

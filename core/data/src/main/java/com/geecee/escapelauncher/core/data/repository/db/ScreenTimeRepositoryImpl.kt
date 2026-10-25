@@ -1,5 +1,10 @@
 package com.geecee.escapelauncher.core.data.repository.db
 
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
+import android.os.Build
 import android.util.Log
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
@@ -10,6 +15,7 @@ import com.geecee.escapelauncher.core.data.entity.AppUsageEntity
 import com.geecee.escapelauncher.core.di.ApplicationScope
 import com.geecee.escapelauncher.core.domain.repository.db.ScreenTimeRepository
 import com.geecee.escapelauncher.core.model.AppUsage
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -27,8 +33,32 @@ import javax.inject.Singleton
 class ScreenTimeRepositoryImpl @Inject constructor(
     private val appUsageDao: AppUsageDao,
     private val dataStore: DataStore<Preferences>,
-    @ApplicationScope private val scope: CoroutineScope
+    @ApplicationScope private val scope: CoroutineScope,
+    @ApplicationContext private val context: Context
 ) : ScreenTimeRepository {
+    init {
+        // Register the screen-off receiver globally using application context
+        val filter = IntentFilter(Intent.ACTION_SCREEN_OFF)
+        val receiver = object : BroadcastReceiver() {
+            override fun onReceive(context: Context?, intent: Intent?) {
+                if (intent?.action == Intent.ACTION_SCREEN_OFF) {
+                    scope.launch(Dispatchers.IO) {
+                        val activePackage = getActiveSessionPackageName()
+                        if (activePackage != null) {
+                            onAppClosed(activePackage)
+                        }
+                    }
+                }
+            }
+        }
+
+        // Safe registration across Android versions
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            context.registerReceiver(receiver, filter, Context.RECEIVER_NOT_EXPORTED)
+        } else {
+            context.registerReceiver(receiver, filter)
+        }
+    }
 
     override val allUsageFlow: Flow<List<AppUsage>> = appUsageDao.getAllUsageFlow().map { entities ->
         entities.map { usage ->
