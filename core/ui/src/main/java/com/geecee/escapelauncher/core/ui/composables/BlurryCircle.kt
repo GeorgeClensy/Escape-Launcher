@@ -8,6 +8,7 @@ import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.toShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Outline
@@ -30,16 +31,20 @@ fun BlurryCircle(
 ) {
     val shape = MaterialShapes.Cookie12Sided.toShape()
 
+    // Remember the paint and filter outside the draw phase to prevent GC churn
+    val paint = remember(circleColor) {
+        Paint().nativePaint.apply {
+            isAntiAlias = true
+            // Increase this value to make it more blurry
+            maskFilter = BlurMaskFilter(150f, BlurMaskFilter.Blur.NORMAL)
+            color = circleColor
+        }
+    }
+
     Box(
         modifier = modifier
             .size(300.dp)
             .drawBehind {
-                val paint = Paint().nativePaint.apply {
-                    isAntiAlias = true
-                    maskFilter = BlurMaskFilter(400f, BlurMaskFilter.Blur.NORMAL)
-                    color = circleColor
-                }
-
                 val outline = shape.createOutline(size, layoutDirection, this)
 
                 val nativePath = when (outline) {
