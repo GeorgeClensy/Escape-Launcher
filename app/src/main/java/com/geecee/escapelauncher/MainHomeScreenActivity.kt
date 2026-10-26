@@ -26,7 +26,6 @@ import androidx.compose.ui.Modifier
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
-import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
@@ -37,6 +36,9 @@ import com.geecee.escapelauncher.core.common.configureNavBar
 import com.geecee.escapelauncher.core.common.configureStatusBar
 import com.geecee.escapelauncher.core.common.hasPermission
 import com.geecee.escapelauncher.core.data.worker.ClearOldDataWorker
+import com.geecee.escapelauncher.core.navigation.AppNavKey
+import com.geecee.escapelauncher.core.navigation.NavEvent
+import com.geecee.escapelauncher.core.navigation.NavRouter
 import com.geecee.escapelauncher.core.theme.EscapeTheme
 import com.geecee.escapelauncher.core.theme.motion.enterTransition
 import com.geecee.escapelauncher.core.theme.motion.exitTransition
@@ -46,26 +48,9 @@ import com.geecee.escapelauncher.feature.screentime.ScreenTimeViewModel
 import com.geecee.escapelauncher.feature.settings.Settings
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import kotlinx.serialization.Serializable
 import javax.inject.Inject
-import kotlin.time.Duration.Companion.milliseconds
-
-/**
- * Type-safe navigation keys for the top-level app destinations.
- */
-sealed interface AppNavKey : NavKey {
-    @Serializable
-    data object Home : AppNavKey
-
-    @Serializable
-    data object Settings : AppNavKey
-
-    @Serializable
-    data object Onboarding : AppNavKey
-}
 
 @AndroidEntryPoint
 class MainHomeScreenActivity : ComponentActivity() {
@@ -77,9 +62,10 @@ class MainHomeScreenActivity : ComponentActivity() {
     lateinit var analyticsProxy: AnalyticsProxy
     @Inject
     lateinit var messagingInitializer: MessagingInitializer
-
     @Inject
     lateinit var widgetHostManager: WidgetHostManager
+    @Inject
+    lateinit var navRouter: NavRouter
     private val permissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { _ -> }
@@ -157,7 +143,7 @@ class MainHomeScreenActivity : ComponentActivity() {
             lifecycleScope.launch {
                 val isFirstTime = globalViewModel.firstTime.first()
                 if (!isFirstTime) {
-                    globalViewModel.requestToGoHome()
+                    navRouter.navigateHome()
                 }
             }
         }
@@ -246,43 +232,58 @@ class MainHomeScreenActivity : ComponentActivity() {
         val backStack = rememberNavBackStack(startDestination)
         val showWallpaper by globalViewModel.showWallpaper.collectAsState(initial = false)
 
-        // Responsible for going home when navigateHomeEvent happens
-        LaunchedEffect(globalViewModel.navigateHomeEvent) {
-            globalViewModel.navigateHomeEvent.collect {
-                // Clear the back stack and set Home as the only entry
-                if (backStack.lastOrNull() !is AppNavKey.Home) {
-                    backStack.removeAll { it !is AppNavKey.Home }
-                    if (backStack.isEmpty()) {
-                        backStack.add(AppNavKey.Home)
+        // Listener for all nav events
+        LaunchedEffect(Unit) {
+            navRouter.navigationEvents.collect { event ->
+                when (event) {
+                    is NavEvent.NavigateTo -> {
+                        if (event.key is AppNavKey) {
+                            // Ensure we don't push a duplicate if it's already the top entry
+                            if (backStack.lastOrNull() != event.key) {
+                                backStack.add(event.key)
+                            }
+                        }
                     }
-                }
-                this@LaunchedEffect.launch {
-                    mainPagerViewModel.animatedGoToMainPage()
-                }
-                this@LaunchedEffect.launch {
-                    delay(300.milliseconds)
-                    mainPagerViewModel.appsListScrollState.scrollToItem(0)
-                }
-            }
-        }
 
-        // Go back to onboarding
-        LaunchedEffect(globalViewModel.replayOnBoardingEvent) {
-            globalViewModel.replayOnBoardingEvent.collect {
-                // Clear the back stack and set Onboarding as the only entry
-                if (backStack.lastOrNull() !is AppNavKey.Onboarding) {
-                    backStack.removeAll { it !is AppNavKey.Onboarding }
-                    if (backStack.isEmpty()) {
-                        backStack.add(AppNavKey.Onboarding)
+                    NavEvent.PopBackStack -> {
+                        if (backStack.size > 1) {
+                            backStack.removeLastOrNull()
+                        }
                     }
-                }
-                // Make sure the home is clean for when we get back there
-                this@LaunchedEffect.launch {
-                    mainPagerViewModel.animatedGoToMainPage()
-                }
-                this@LaunchedEffect.launch {
-                    delay(300.milliseconds)
-                    mainPagerViewModel.appsListScrollState.scrollToItem(0)
+
+                    NavEvent.NavigateHome -> {
+                        if (backStack.lastOrNull() !is AppNavKey.Home) {
+                            backStack.removeAll { it !is AppNavKey.Home }
+                            if (backStack.isEmpty()) {
+                                backStack.add(AppNavKey.Home)
+                            }
+                        }
+                        // Fire the animation in a child coroutine so the collector isn't blocked
+                        this@LaunchedEffect.launch {
+                            try {
+                                mainPagerViewModel.animatedGoToMainPage()
+                            } catch (_: Exception) {
+                                // Pager might not be attached to layout yet; safe to ignore
+                            }
+                        }
+                    }
+
+                    NavEvent.NavigateOnboarding -> {
+                        if (backStack.lastOrNull() !is AppNavKey.Onboarding) {
+                            backStack.removeAll { it !is AppNavKey.Onboarding }
+                            if (backStack.isEmpty()) {
+                                backStack.add(AppNavKey.Onboarding)
+                            }
+                        }
+                        // Fire the animation in a child coroutine so the collector isn't blocked
+                        this@LaunchedEffect.launch {
+                            try {
+                                mainPagerViewModel.animatedGoToMainPage()
+                            } catch (_: Exception) {
+                                // Pager might not be attached to layout yet; safe to ignore
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -305,29 +306,27 @@ class MainHomeScreenActivity : ComponentActivity() {
                 ),
                 entryProvider = entryProvider {
                     entry<AppNavKey.Home> {
-                        // Ask for permissions as soon as you get to the homepage. Bad.
                         LaunchedEffect(Unit) {
                             requestRuntimePermissionsOnce()
                         }
 
                         MainPagerScreen(
                             viewModel = mainPagerViewModel,
-                            onOpenSettings = { backStack.add(AppNavKey.Settings) }
+                            onOpenSettings = {
+                                navRouter.navigateTo(AppNavKey.Settings)
+                            }
                         )
                     }
                     entry<AppNavKey.Settings> {
                         Settings(
-                            goBack = {
-                                backStack.removeLastOrNull()
-                            },
+                            goBack = { navRouter.popBackStack() },
                             activity = this@MainHomeScreenActivity,
                         )
                     }
                     entry<AppNavKey.Onboarding> {
                         Onboarding(
                             onFinished = {
-                                backStack.clear()
-                                backStack.add(AppNavKey.Home)
+                                navRouter.navigateHome()
                             }
                         )
                     }
@@ -339,7 +338,7 @@ class MainHomeScreenActivity : ComponentActivity() {
                     exitTransition()
                 },
                 predictivePopTransitionSpec = {
-                   exitTransition()
+                    exitTransition()
                 }
             )
         }

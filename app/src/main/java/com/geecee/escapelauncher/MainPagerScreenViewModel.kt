@@ -6,7 +6,6 @@ import android.content.Context
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
@@ -23,6 +22,7 @@ import com.geecee.escapelauncher.core.domain.repository.settings.ScreenTimeSetti
 import com.geecee.escapelauncher.core.domain.repository.settings.LauncherBehaviorRepository
 import com.geecee.escapelauncher.core.domain.system.LockScreenUseCase
 import com.geecee.escapelauncher.core.model.InstalledApp
+import com.geecee.escapelauncher.core.navigation.NavRouter
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import jakarta.inject.Inject
@@ -47,7 +47,8 @@ class MainPagerScreenViewModel @Inject constructor(
     private val managedProfileExistsUseCase: ManagedProfileExistsUseCase,
     private val isManagedProfileSupportedUseCase: IsManagedProfileSupportedUseCase,
     private val getIsDefaultLauncherUseCase: GetIsDefaultLauncherUseCase,
-    private val lockScreenUseCase: LockScreenUseCase
+    private val lockScreenUseCase: LockScreenUseCase,
+    private val navRouter: NavRouter
 ) : AndroidViewModel(context as Application) {
     fun managedProfileExists(type: ManagedProfileType): Boolean = managedProfileExistsUseCase(type)
     fun isManagedProfileSupported(type: ManagedProfileType): Boolean = isManagedProfileSupportedUseCase(type)
@@ -65,8 +66,6 @@ class MainPagerScreenViewModel @Inject constructor(
     val doubleTapToLock = launcherBehaviorRepository.doubleTapToLock
     val hapticFeedBackEnabled = launcherBehaviorRepository.hapticFeedBackEnabled
 
-    val isHiddenPrivateSpace = launcherBehaviorRepository.hidePrivateSpace
-
     private val _isDefaultLauncher = MutableStateFlow(false)
     val isDefaultLauncher: StateFlow<Boolean> = _isDefaultLauncher.asStateFlow()
 
@@ -83,8 +82,6 @@ class MainPagerScreenViewModel @Inject constructor(
     var showOpenChallenge = mutableStateOf(false)
 
     val interactionSource = MutableInteractionSource()
-
-    val appsListScrollState = LazyListState()
 
     val pagerState = PagerState(
         currentPage = if (hideScreenTimePage.value) 0 else 1,
@@ -168,5 +165,9 @@ class MainPagerScreenViewModel @Inject constructor(
                 }
             }
         }
+    }
+
+    fun navigateHome() {
+        navRouter.navigateHome()
     }
 }

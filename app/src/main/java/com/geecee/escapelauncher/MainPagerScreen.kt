@@ -7,7 +7,6 @@ import androidx.activity.compose.LocalActivity
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.pager.HorizontalPager
@@ -57,12 +56,11 @@ import kotlin.time.Duration.Companion.milliseconds
  *  contains a pager with all the pages inside of it, contains bottom sheet, contains open challenge UI
  */
 @OptIn(
-    ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class
+    ExperimentalMaterial3Api::class
 )
 @Composable
 fun MainPagerScreen(
     viewModel: MainPagerScreenViewModel = hiltViewModel(),
-    globalViewModel: GlobalViewModel = hiltViewModel(LocalActivity.current as ComponentActivity),
     appsListViewModel: AppsListViewModel = hiltViewModel(),
     screenTimeViewModel: ScreenTimeViewModel = hiltViewModel(LocalActivity.current as ComponentActivity),
     onOpenSettings: () -> Unit
@@ -100,22 +98,18 @@ fun MainPagerScreen(
         ) {
             TabbedScreen(
                 title = "Private", icon = Icons.Default.Lock, content = {
-                    PrivateSpace(
-                        modifier = Modifier
-                            .fillMaxSize(),
-                        onAppClick = { app ->
-                            viewModel.openApp(
-                                app = app, overrideChallenge = false, onAppOpened = {
-                                    screenTimeViewModel.onAppOpened(it)
-                                    appsListViewModel.onSearchExpandedChanged(false)
-                                    doHapticFeedBack(haptics, hapticFeedbackEnabled)
-                                })
-                        },
-                        onAppLongClick = { app ->
-                            appsListViewModel.setBottomSheetVisible(true)
-                            appsListViewModel.setBottomSheetApp(app)
-                            doHapticFeedBack(haptics, hapticFeedbackEnabled)
-                        })
+                    PrivateSpace(modifier = Modifier.fillMaxSize(), onAppClick = { app ->
+                        viewModel.openApp(
+                            app = app, overrideChallenge = false, onAppOpened = {
+                                screenTimeViewModel.onAppOpened(it)
+                                appsListViewModel.onSearchExpandedChanged(false)
+                                doHapticFeedBack(haptics, hapticFeedbackEnabled)
+                            })
+                    }, onAppLongClick = { app ->
+                        appsListViewModel.setBottomSheetVisible(true)
+                        appsListViewModel.setBottomSheetApp(app)
+                        doHapticFeedBack(haptics, hapticFeedbackEnabled)
+                    })
 
                 })
         } else {
@@ -127,17 +121,14 @@ fun MainPagerScreen(
         ) {
             TabbedScreen(
                 title = "Work", icon = Icons.Default.Work, content = {
-                    WorkApps(modifier =
-                        Modifier.fillMaxSize(),
-                        onAppClick = { app ->
+                    WorkApps(modifier = Modifier.fillMaxSize(), onAppClick = { app ->
                         viewModel.openApp(
                             app = app, overrideChallenge = false, onAppOpened = {
                                 screenTimeViewModel.onAppOpened(it)
                                 appsListViewModel.onSearchExpandedChanged(false)
                                 doHapticFeedBack(haptics, hapticFeedbackEnabled)
                             })
-                    },
-                        onAppLongClick = { app ->
+                    }, onAppLongClick = { app ->
                         appsListViewModel.setBottomSheetVisible(true)
                         appsListViewModel.setBottomSheetApp(app)
                         doHapticFeedBack(haptics, hapticFeedbackEnabled)
@@ -196,7 +187,7 @@ fun MainPagerScreen(
                     app = app, overrideChallenge = false, onAppOpened = {
                         screenTimeViewModel.onAppOpened(it)
                     })
-            }, onGoHomeRequest = { globalViewModel.requestToGoHome() })
+            }, onGoHomeRequest = { viewModel.navigateHome() })
 
             appsListPageIndex -> {
                 val searchText by appsListViewModel.searchText.collectAsState()
@@ -205,7 +196,9 @@ fun MainPagerScreen(
                 val appsListAlignment by appsListViewModel.appsAlignment.collectAsState(initial = DefaultSettingsUi.APPS_ALIGNMENT)
                 val selectedTabIndex = remember { mutableIntStateOf(0) }
                 val apps by appsListViewModel.apps.collectAsState()
-                val autoOpenAppInSearch by appsListViewModel.automaticallyOpenAppsInSearch.collectAsState(initial = DefaultSettings.AUTOMATICALLY_OPEN_APPS_IN_SEARCH)
+                val autoOpenAppInSearch by appsListViewModel.automaticallyOpenAppsInSearch.collectAsState(
+                    initial = DefaultSettings.AUTOMATICALLY_OPEN_APPS_IN_SEARCH
+                )
 
                 val showBottomSheet by appsListViewModel.showBottomSheet.collectAsState()
                 val bottomSheetApp by appsListViewModel.bottomSheetApp.collectAsState()
@@ -224,22 +217,19 @@ fun MainPagerScreen(
                 TabDisplay(
                     screens = listOf(
                         TabbedScreen(
-                            title = "All Apps",
-                            icon = Icons.Rounded.Apps,
-                            content = { padding ->
+                            title = "All Apps", icon = Icons.Rounded.Apps, content = { padding ->
                                 AppsList(
                                     padding = padding,
                                     onAppOpened = { app ->
                                         handleAppClick(app)
                                     },
                                     onGoHomeRequest = {
-                                        globalViewModel.requestToGoHome()
+                                        viewModel.navigateHome()
                                     },
                                     appsListViewModel = appsListViewModel,
                                     screenTimeViewModel = screenTimeViewModel
                                 )
-                            }
-                        )
+                            })
                     ) + appsListTabs.filterNotNull(),
                     selectedTabIndex = selectedTabIndex,
                     alignment = appsListAlignment,
@@ -263,8 +253,7 @@ fun MainPagerScreen(
                         } else {
                             doHapticFeedBack(haptics, hapticFeedbackEnabled)
                         }
-                    }
-                )
+                    })
 
                 // Bottom Sheet
                 AnimatedVisibility(showBottomSheet && bottomSheetApp != null) {
