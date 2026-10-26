@@ -22,7 +22,6 @@ import com.geecee.escapelauncher.core.domain.repository.settings.ScreenTimeSetti
 import com.geecee.escapelauncher.core.domain.repository.settings.LauncherBehaviorRepository
 import com.geecee.escapelauncher.core.domain.system.LockScreenUseCase
 import com.geecee.escapelauncher.core.model.InstalledApp
-import com.geecee.escapelauncher.core.navigation.NavRouter
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import jakarta.inject.Inject
@@ -48,7 +47,6 @@ class MainPagerScreenViewModel @Inject constructor(
     private val isManagedProfileSupportedUseCase: IsManagedProfileSupportedUseCase,
     private val getIsDefaultLauncherUseCase: GetIsDefaultLauncherUseCase,
     private val lockScreenUseCase: LockScreenUseCase,
-    private val navRouter: NavRouter
 ) : AndroidViewModel(context as Application) {
     fun managedProfileExists(type: ManagedProfileType): Boolean = managedProfileExistsUseCase(type)
     fun isManagedProfileSupported(type: ManagedProfileType): Boolean = isManagedProfileSupportedUseCase(type)
@@ -165,9 +163,5 @@ class MainPagerScreenViewModel @Inject constructor(
                 }
             }
         }
-    }
-
-    fun navigateHome() {
-        navRouter.navigateHome()
     }
 }

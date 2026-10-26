@@ -6,6 +6,7 @@ import com.geecee.escapelauncher.core.domain.repository.settings.OnboardingRepos
 import com.geecee.escapelauncher.core.domain.repository.settings.WeatherSettingsRepository
 import com.geecee.escapelauncher.core.domain.repository.settings.LauncherBehaviorRepository
 import com.geecee.escapelauncher.core.domain.system.LockScreenUseCase
+import com.geecee.escapelauncher.core.navigation.AppNavKey
 import com.geecee.escapelauncher.core.navigation.NavRouter
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
@@ -46,6 +47,6 @@ class DevOptionsPageViewModel @Inject constructor(
     }
 
     fun requestReplayOnboarding() {
-        navRouter.navigateOnboarding()
+        navRouter.navigateTo(AppNavKey.Onboarding, true)
     }
 }

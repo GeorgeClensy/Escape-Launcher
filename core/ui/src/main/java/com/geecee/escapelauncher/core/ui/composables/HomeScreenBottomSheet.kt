@@ -1,7 +1,6 @@
 package com.geecee.escapelauncher.core.ui.composables
 
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -33,7 +32,7 @@ import com.geecee.escapelauncher.core.model.AppAction
 /**
  * Bottom Sheet home screen
  */
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreenBottomSheet(
     modifier: Modifier = Modifier,
@@ -93,7 +92,6 @@ fun HomeScreenBottomSheet(
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun AppActionItem(action: AppAction, app: InstalledApp) {
     val label = action.label ?: action.labelRes?.let { stringResource(it) } ?: ""
@@ -101,7 +99,7 @@ private fun AppActionItem(action: AppAction, app: InstalledApp) {
         text = label,
         modifier = Modifier
             .padding(vertical = 10.dp)
-            .combinedClickable(onClick = { action.onClick(app) }),
+            .clickable(onClick = { action.onClick(app) }),
         color = MaterialTheme.colorScheme.onSurface,
         style = MaterialTheme.typography.bodyMedium
     )

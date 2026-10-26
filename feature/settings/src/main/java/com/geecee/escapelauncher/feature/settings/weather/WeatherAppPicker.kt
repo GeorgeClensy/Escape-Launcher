@@ -1,6 +1,6 @@
 package com.geecee.escapelauncher.feature.settings.weather
 
-import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -49,7 +49,7 @@ fun WeatherAppPicker(
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .combinedClickable(onClick = { onAppSelected(app) })
+                            .clickable(onClick = { onAppSelected(app) })
                             .padding(vertical = 12.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {

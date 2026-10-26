@@ -17,6 +17,7 @@ import com.geecee.escapelauncher.core.domain.repository.settings.*
 import com.geecee.escapelauncher.core.domain.search.SearchAppsUseCase
 import com.geecee.escapelauncher.core.model.AppAction
 import com.geecee.escapelauncher.core.model.InstalledApp
+import com.geecee.escapelauncher.core.navigation.AppNavKey
 import com.geecee.escapelauncher.core.navigation.NavRouter
 import com.geecee.escapelauncher.core.ui.R
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -177,7 +178,7 @@ class AppsListViewModel @Inject constructor(
                                     modifiedAppsRepository.removeFavourite(clickedApp.packageName)
                                 } else {
                                     modifiedAppsRepository.addFavourite(clickedApp.packageName)
-                                    navRouter.navigateHome()
+                                    navRouter.navigateTo(AppNavKey.Home, true)
                                 }
                                 _showBottomSheet.value = false
                             }
@@ -229,7 +230,7 @@ class AppsListViewModel @Inject constructor(
                     startShortcutUseCase(clickedApp.packageName, shortcut.id)
                     _showBottomSheet.value = false
                     viewModelScope.launch {
-                        navRouter.navigateHome()
+                        navRouter.navigateTo(AppNavKey.Home, true)
                     }
                 }
             )

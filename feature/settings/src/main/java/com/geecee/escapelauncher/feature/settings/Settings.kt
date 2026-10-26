@@ -140,7 +140,11 @@ fun Settings(
                     MainSettingsPage(
                         goBack = { goBack() },
                         showPolicyDialog = { showPolicyDialog.value = true },
-                        onNavigate = { key -> backStack.add(key) }
+                        onNavigate = { key ->
+                            if (backStack.lastOrNull() != key) {
+                                backStack.add(key)
+                            }
+                        }
                     )
                 }
                 entry<SettingsNavKey.HiddenApps> {

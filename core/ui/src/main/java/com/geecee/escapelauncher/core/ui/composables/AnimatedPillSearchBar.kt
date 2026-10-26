@@ -7,7 +7,8 @@ import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Box
@@ -109,21 +110,23 @@ fun AnimatedPillSearchBar(
         modifier = modifier
             .width(width)
             .height(56.dp)
-            .combinedClickable(
-                interactionSource = interactionSource
-            ) {
-                if (!isMorphed) {
-                    isMorphed = true
-                    scope.launch {
-                        delay(200.milliseconds)
+            .clickable(
+                interactionSource = interactionSource,
+                indication = LocalIndication.current,
+                onClick = {
+                    if (!isMorphed) {
+                        isMorphed = true
+                        scope.launch {
+                            delay(200.milliseconds)
+                            isMorphed = false
+                        }
+                    } else {
                         isMorphed = false
                     }
-                } else {
-                    isMorphed = false
-                }
 
-                onExpandedChange(!isExpanded)
-            },
+                    onExpandedChange(!isExpanded)
+                }
+            ),
         color = MaterialTheme.colorScheme.secondary
     ) {
         Box(

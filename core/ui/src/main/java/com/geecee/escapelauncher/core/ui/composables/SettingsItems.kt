@@ -3,9 +3,7 @@ package com.geecee.escapelauncher.core.ui.composables
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -24,7 +22,6 @@ import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.Home
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SwipeToDismissBox
@@ -118,7 +115,6 @@ fun SettingsSwitch(
  * @param isTopOfGroup Whether this item is at the top of a group of items, for corner rounding
  * @param isBottomOfGroup Whether this item is at the bottom of a group of items, for corner rounding
  */
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun SettingsNavigationItem(
     label: String,
@@ -140,7 +136,7 @@ fun SettingsNavigationItem(
     Card(
         modifier = Modifier
             .padding(vertical = 1.dp)
-            .combinedClickable(onClick = onClick),
+            .clickable(onClick = onClick),
         shape = RoundedCornerShape(
             topStart = topStartRadius,
             topEnd = topEndRadius,
@@ -203,7 +199,6 @@ fun SettingsNavigationItem(
  * @param isBottomOfGroup Whether this item is at the bottom of a group of items, for corner rounding
  * @param useAutoResize Whether to use the expensive AutoResizingText or a standard Text with ellipsis
  */
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun SettingsButton(
     modifier: Modifier = Modifier,
@@ -252,7 +247,7 @@ fun SettingsButton(
     Card(
         modifier = modifier
             .padding(vertical = 1.dp)
-            .combinedClickable(onClick = onClick),
+            .clickable(onClick = onClick, enabled = !isDisabled),
         shape = RoundedCornerShape(
             topStart = topStartRadius,
             topEnd = topEndRadius,
@@ -305,7 +300,6 @@ fun SettingsButton(
  * @param isTopOfGroup Whether this item is at the top of a group of items, for corner rounding
  * @param isBottomOfGroup Whether this item is at the bottom of a group of items, for corner rounding
  */
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun SettingsSwipeableButton(
     label: String,
@@ -372,7 +366,7 @@ fun SettingsSwipeableButton(
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .combinedClickable(onClick = onClick),
+                .clickable(onClick = onClick),
             shape = RoundedCornerShape(
                 topStart = topStartRadius,
                 topEnd = topEndRadius,

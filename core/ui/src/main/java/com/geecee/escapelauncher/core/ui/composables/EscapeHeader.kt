@@ -1,7 +1,6 @@
 package com.geecee.escapelauncher.core.ui.composables
 
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -43,7 +42,7 @@ fun EscapeHeader(
 ) {
     Row(
         modifier = Modifier
-            .combinedClickable(onClick = { goBack() })
+            .clickable(onClick = { goBack() })
             .padding(
                 0.dp, if (padding) {
                     120.dp

@@ -22,6 +22,7 @@ import kotlinx.coroutines.launch
 import kotlin.collections.map
 import com.geecee.escapelauncher.core.domain.apps.UninstallAppUseCase
 import com.geecee.escapelauncher.core.domain.apps.OpenAppDetailsUseCase
+import com.geecee.escapelauncher.core.navigation.AppNavKey
 import com.geecee.escapelauncher.core.navigation.NavRouter
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -128,7 +129,7 @@ class NewHomeScreenViewModel @Inject constructor(
                                     modifiedAppsRepository.removeFavourite(clickedApp.packageName)
                                 } else {
                                     modifiedAppsRepository.addFavourite(clickedApp.packageName)
-                                    navRouter.navigateHome()
+                                    navRouter.navigateTo(AppNavKey.Home, true)
                                 }
                                 _showBottomSheet.value = false
                             }
@@ -180,7 +181,7 @@ class NewHomeScreenViewModel @Inject constructor(
                     startShortcutUseCase(clickedApp.packageName, shortcut.id)
                     _showBottomSheet.value = false
                     viewModelScope.launch {
-                        navRouter.navigateHome()
+                        navRouter.navigateTo(AppNavKey.Home, true)
                     }
                 }
             )

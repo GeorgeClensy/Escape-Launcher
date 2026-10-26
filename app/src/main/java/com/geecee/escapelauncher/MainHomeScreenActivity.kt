@@ -143,7 +143,7 @@ class MainHomeScreenActivity : ComponentActivity() {
             lifecycleScope.launch {
                 val isFirstTime = globalViewModel.firstTime.first()
                 if (!isFirstTime) {
-                    navRouter.navigateHome()
+                    navRouter.navigateTo(AppNavKey.Home, true)
                 }
             }
         }
@@ -237,51 +237,19 @@ class MainHomeScreenActivity : ComponentActivity() {
             navRouter.navigationEvents.collect { event ->
                 when (event) {
                     is NavEvent.NavigateTo -> {
-                        if (event.key is AppNavKey) {
-                            // Ensure we don't push a duplicate if it's already the top entry
-                            if (backStack.lastOrNull() != event.key) {
+                        if (event.clearBackStack) {
+                            backStack.removeAll { it != event.key }
+                            if (backStack.isEmpty() || backStack.last() != event.key) {
                                 backStack.add(event.key)
                             }
+                        } else if (backStack.lastOrNull() != event.key) {
+                            backStack.add(event.key)
                         }
                     }
 
                     NavEvent.PopBackStack -> {
                         if (backStack.size > 1) {
                             backStack.removeLastOrNull()
-                        }
-                    }
-
-                    NavEvent.NavigateHome -> {
-                        if (backStack.lastOrNull() !is AppNavKey.Home) {
-                            backStack.removeAll { it !is AppNavKey.Home }
-                            if (backStack.isEmpty()) {
-                                backStack.add(AppNavKey.Home)
-                            }
-                        }
-                        // Fire the animation in a child coroutine so the collector isn't blocked
-                        this@LaunchedEffect.launch {
-                            try {
-                                mainPagerViewModel.animatedGoToMainPage()
-                            } catch (_: Exception) {
-                                // Pager might not be attached to layout yet; safe to ignore
-                            }
-                        }
-                    }
-
-                    NavEvent.NavigateOnboarding -> {
-                        if (backStack.lastOrNull() !is AppNavKey.Onboarding) {
-                            backStack.removeAll { it !is AppNavKey.Onboarding }
-                            if (backStack.isEmpty()) {
-                                backStack.add(AppNavKey.Onboarding)
-                            }
-                        }
-                        // Fire the animation in a child coroutine so the collector isn't blocked
-                        this@LaunchedEffect.launch {
-                            try {
-                                mainPagerViewModel.animatedGoToMainPage()
-                            } catch (_: Exception) {
-                                // Pager might not be attached to layout yet; safe to ignore
-                            }
                         }
                     }
                 }
@@ -326,7 +294,7 @@ class MainHomeScreenActivity : ComponentActivity() {
                     entry<AppNavKey.Onboarding> {
                         Onboarding(
                             onFinished = {
-                                navRouter.navigateHome()
+                                navRouter.navigateTo(AppNavKey.Home, true)
                             }
                         )
                     }
