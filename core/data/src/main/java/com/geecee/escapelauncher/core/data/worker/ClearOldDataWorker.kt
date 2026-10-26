@@ -8,6 +8,7 @@ import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
+import com.geecee.escapelauncher.core.domain.repository.db.ModifiedAppsRepository
 import com.geecee.escapelauncher.core.domain.repository.db.ScreenTimeRepository
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
@@ -18,12 +19,14 @@ import java.util.concurrent.TimeUnit
 class ClearOldDataWorker @AssistedInject constructor(
     @Assisted appContext: Context,
     @Assisted workerParams: WorkerParameters,
-    private val screenTimeRepository: ScreenTimeRepository
+    private val screenTimeRepository: ScreenTimeRepository,
+    private val modifiedAppsRepository: ModifiedAppsRepository
 ) : CoroutineWorker(appContext, workerParams) {
 
     override suspend fun doWork(): Result {
         return try {
             screenTimeRepository.clearOldData()
+            modifiedAppsRepository.purgeAppsWithNoData()
             Log.d("ClearOldDataWorker", "Ran ClearDatWorker")
             Result.success()
         } catch (e: Exception) {
