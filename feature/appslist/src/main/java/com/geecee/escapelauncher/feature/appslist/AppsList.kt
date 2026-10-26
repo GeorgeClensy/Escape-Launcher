@@ -16,7 +16,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -29,7 +28,6 @@ import com.geecee.escapelauncher.core.ui.DefaultSettingsUi
 import com.geecee.escapelauncher.core.ui.composables.HomeScreenItem
 import com.geecee.escapelauncher.core.ui.utils.doHapticFeedBack
 import com.geecee.escapelauncher.feature.screentime.ScreenTimeViewModel
-import kotlinx.coroutines.flow.collectLatest
 
 /**
  * Main App List composable - focuses purely on the list of apps
@@ -39,7 +37,6 @@ fun AppsList(
     modifier: Modifier = Modifier,
     padding: PaddingValues = PaddingValues(),
     onAppOpened: (app: InstalledApp) -> Unit = {},
-    onGoHomeRequest: () -> Unit = {},
     appsListViewModel: AppsListViewModel = hiltViewModel(),
     @Suppress("unused") screenTimeViewModel: ScreenTimeViewModel? = null
 ) {
@@ -61,15 +58,6 @@ fun AppsList(
         appsListViewModel.setBottomSheetVisible(true)
         appsListViewModel.setBottomSheetApp(app)
         doHapticFeedBack(haptics, hapticFeedbackEnabled)
-    }
-
-    // Handle UI Events from ViewModel
-    LaunchedEffect(Unit) {
-        appsListViewModel.uiEvent.collectLatest { event ->
-            when (event) {
-                is AppsListUiEvent.NavigateHome -> onGoHomeRequest()
-            }
-        }
     }
 
     val scrollState = rememberLazyListState()

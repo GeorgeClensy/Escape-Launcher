@@ -17,6 +17,7 @@ import com.geecee.escapelauncher.core.domain.repository.settings.*
 import com.geecee.escapelauncher.core.domain.search.SearchAppsUseCase
 import com.geecee.escapelauncher.core.model.AppAction
 import com.geecee.escapelauncher.core.model.InstalledApp
+import com.geecee.escapelauncher.core.navigation.NavRouter
 import com.geecee.escapelauncher.core.ui.R
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
@@ -49,12 +50,9 @@ class AppsListViewModel @Inject constructor(
     private val uninstallAppUseCase: UninstallAppUseCase,
     private val openAppDetailsUseCase: OpenAppDetailsUseCase,
     searchAppsUseCase: SearchAppsUseCase,
-    screenTimeRepository: ScreenTimeRepository
+    screenTimeRepository: ScreenTimeRepository,
+    val navRouter: NavRouter
 ) : ViewModel() {
-    // UI Events
-    private val _uiEvent = MutableSharedFlow<AppsListUiEvent>()
-    val uiEvent = _uiEvent.asSharedFlow()
-
     // Settings
     val showScreenTimeApp = screenTimeSettingsRepository.showScreenTimeApp
     val appsAlignment = appearanceRepository.appsAlignment.map { alignment ->
@@ -179,7 +177,7 @@ class AppsListViewModel @Inject constructor(
                                     modifiedAppsRepository.removeFavourite(clickedApp.packageName)
                                 } else {
                                     modifiedAppsRepository.addFavourite(clickedApp.packageName)
-                                    _uiEvent.emit(AppsListUiEvent.NavigateHome)
+                                    navRouter.navigateHome()
                                 }
                                 _showBottomSheet.value = false
                             }
@@ -231,7 +229,7 @@ class AppsListViewModel @Inject constructor(
                     startShortcutUseCase(clickedApp.packageName, shortcut.id)
                     _showBottomSheet.value = false
                     viewModelScope.launch {
-                        _uiEvent.emit(AppsListUiEvent.NavigateHome)
+                        navRouter.navigateHome()
                     }
                 }
             )
@@ -241,8 +239,4 @@ class AppsListViewModel @Inject constructor(
         started = SharingStarted.WhileSubscribed(5000),
         initialValue = emptyList()
     )
-}
-
-sealed class AppsListUiEvent {
-    data object NavigateHome : AppsListUiEvent()
 }

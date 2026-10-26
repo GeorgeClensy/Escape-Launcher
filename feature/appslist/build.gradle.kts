@@ -10,6 +10,7 @@ dependencies {
     implementation(project(":core:ui"))
     implementation(project(":core:common"))
     implementation(project(":core:model"))
+    implementation(project(":core:navigation"))
     implementation(project(":core:theme"))
     implementation(project(":core:domain"))
     implementation(project(":feature:screentime"))

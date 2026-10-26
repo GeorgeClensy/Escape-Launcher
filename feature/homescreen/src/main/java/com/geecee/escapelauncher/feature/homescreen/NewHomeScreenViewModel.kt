@@ -22,6 +22,7 @@ import kotlinx.coroutines.launch
 import kotlin.collections.map
 import com.geecee.escapelauncher.core.domain.apps.UninstallAppUseCase
 import com.geecee.escapelauncher.core.domain.apps.OpenAppDetailsUseCase
+import com.geecee.escapelauncher.core.navigation.NavRouter
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
@@ -42,13 +43,10 @@ class NewHomeScreenViewModel @Inject constructor(
     private val startShortcutUseCase: StartShortcutUseCase,
     private val uninstallAppUseCase: UninstallAppUseCase,
     private val openAppDetailsUseCase: OpenAppDetailsUseCase,
-    private val analyticsProxy: AnalyticsProxy
+    private val analyticsProxy: AnalyticsProxy,
+    val navRouter: NavRouter
 ) : ViewModel() {
     val isFoss = appConfiguration.isFoss
-
-    // UI Events
-    private val _uiEvent = MutableSharedFlow<HomeUiEvent>()
-    val uiEvent = _uiEvent.asSharedFlow()
 
     // Settings
     val twelveHourClock = clockRepository.twelveHourClock
@@ -130,7 +128,7 @@ class NewHomeScreenViewModel @Inject constructor(
                                     modifiedAppsRepository.removeFavourite(clickedApp.packageName)
                                 } else {
                                     modifiedAppsRepository.addFavourite(clickedApp.packageName)
-                                    _uiEvent.emit(HomeUiEvent.NavigateHome)
+                                    navRouter.navigateHome()
                                 }
                                 _showBottomSheet.value = false
                             }
@@ -182,7 +180,7 @@ class NewHomeScreenViewModel @Inject constructor(
                     startShortcutUseCase(clickedApp.packageName, shortcut.id)
                     _showBottomSheet.value = false
                     viewModelScope.launch {
-                        _uiEvent.emit(HomeUiEvent.NavigateHome)
+                        navRouter.navigateHome()
                     }
                 }
             )
@@ -192,8 +190,4 @@ class NewHomeScreenViewModel @Inject constructor(
         started = SharingStarted.WhileSubscribed(5000),
         initialValue = emptyList()
     )
-}
-
-sealed class HomeUiEvent {
-    data object NavigateHome : HomeUiEvent()
 }

@@ -67,7 +67,6 @@ import com.geecee.escapelauncher.feature.newwidgets.WidgetRenderer
 import com.geecee.escapelauncher.feature.screentime.ScreenTimeViewModel
 import com.geecee.escapelauncher.feature.weather.WeatherViewModel
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.collectLatest
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -80,7 +79,6 @@ import kotlin.time.Duration.Companion.milliseconds
 fun HomeScreen(
     modifier: Modifier = Modifier,
     onAppOpened: (app: InstalledApp) -> Unit = {},
-    onGoHomeRequest: () -> Unit = {},
     clockViewModel: ClockViewModel = hiltViewModel(),
     homeScreenViewModel: NewHomeScreenViewModel = hiltViewModel(),
     screenTimeViewModel: ScreenTimeViewModel = hiltViewModel(LocalActivity.current as ComponentActivity)
@@ -119,14 +117,6 @@ fun HomeScreen(
 
     val haptics = LocalHapticFeedback.current
 
-    // Handle UI Events from ViewModel
-    LaunchedEffect(Unit) {
-        homeScreenViewModel.uiEvent.collectLatest { event ->
-            when (event) {
-                is HomeUiEvent.NavigateHome -> onGoHomeRequest()
-            }
-        }
-    }
 
     val scrollState = rememberLazyListState()
 

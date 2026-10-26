@@ -187,7 +187,7 @@ fun MainPagerScreen(
                     app = app, overrideChallenge = false, onAppOpened = {
                         screenTimeViewModel.onAppOpened(it)
                     })
-            }, onGoHomeRequest = { viewModel.navigateHome() })
+            })
 
             appsListPageIndex -> {
                 val searchText by appsListViewModel.searchText.collectAsState()
@@ -222,9 +222,6 @@ fun MainPagerScreen(
                                     padding = padding,
                                     onAppOpened = { app ->
                                         handleAppClick(app)
-                                    },
-                                    onGoHomeRequest = {
-                                        viewModel.navigateHome()
                                     },
                                     appsListViewModel = appsListViewModel,
                                     screenTimeViewModel = screenTimeViewModel

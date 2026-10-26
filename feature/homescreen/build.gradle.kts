@@ -12,6 +12,7 @@ dependencies {
     implementation(project(":core:common"))
     implementation(project(":core:domain"))
     implementation(project(":core:ui"))
+    implementation(project(":core:navigation"))
     implementation(project(":core:model"))
     implementation(project(":core:analytics"))
     implementation(project(":feature:newwidgets"))
