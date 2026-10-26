@@ -8,6 +8,8 @@ import com.geecee.escapelauncher.core.domain.launcher.SetDefaultLauncherUseCase
 import com.geecee.escapelauncher.core.domain.onboarding.GetOnboardingScreenUseCase
 import com.geecee.escapelauncher.core.domain.repository.settings.OnboardingRepository
 import com.geecee.escapelauncher.core.domain.repository.settings.LauncherBehaviorRepository
+import com.geecee.escapelauncher.core.navigation.AppNavKey
+import com.geecee.escapelauncher.core.navigation.NavRouter
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -24,7 +26,8 @@ class OnboardingViewModel @Inject constructor(
     getOnboardingScreensUseCase: GetOnboardingScreenUseCase,
     private val getIsDefaultLauncherUseCase: GetIsDefaultLauncherUseCase,
     private val setDefaultLauncherUseCase: SetDefaultLauncherUseCase,
-    private val savedStateHandle: SavedStateHandle
+    private val savedStateHandle: SavedStateHandle,
+    val navRouter: NavRouter
 ) : ViewModel() {
     val screens = getOnboardingScreensUseCase()
 
@@ -51,6 +54,7 @@ class OnboardingViewModel @Inject constructor(
             withContext(NonCancellable) {
                 onboardingRepository.setFirstTime(false)
             }
+            navRouter.navigateTo(AppNavKey.Home, true)
         }
     }
 

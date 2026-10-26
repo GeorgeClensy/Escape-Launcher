@@ -6,6 +6,7 @@ import com.geecee.escapelauncher.core.domain.apps.GetFavoriteAppsUseCase
 import com.geecee.escapelauncher.core.domain.repository.android.AppsRepository
 import com.geecee.escapelauncher.core.domain.repository.db.ModifiedAppsRepository
 import com.geecee.escapelauncher.core.model.InstalledApp
+import com.geecee.escapelauncher.core.navigation.NavRouter
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.SharingStarted
@@ -16,7 +17,8 @@ import kotlinx.coroutines.flow.stateIn
 class SettingsViewModel @Inject constructor(
     appsRepository: AppsRepository,
     val modifiedAppsRepository: ModifiedAppsRepository,
-    getFavoriteAppsUseCase: GetFavoriteAppsUseCase
+    getFavoriteAppsUseCase: GetFavoriteAppsUseCase,
+    val navRouter: NavRouter
 ) : ViewModel() {
     val installedApps = appsRepository.mainUserApps
 
@@ -26,4 +28,8 @@ class SettingsViewModel @Inject constructor(
             started = SharingStarted.WhileSubscribed(5000),
             initialValue = emptyList()
         )
+
+    fun popBackStack() {
+        navRouter.popBackStack()
+    }
 }

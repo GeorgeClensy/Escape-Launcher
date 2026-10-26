@@ -88,12 +88,10 @@ sealed interface SettingsNavKey : NavKey {
 /**
  * Main Settings window you see when settings is first opened
  *
- * @param goBack When back button is pressed
  * @param activity This is needed for some settings
  */
 @Composable
 fun Settings(
-    goBack: () -> Unit,
     activity: Activity,
     settingsViewModel: SettingsViewModel = hiltViewModel(),
     hiddenAppsViewModel: HiddenAppsViewModel = hiltViewModel(),
@@ -119,7 +117,7 @@ fun Settings(
                 if (backStack.size > 1) {
                     backStack.removeLastOrNull()
                 } else {
-                    goBack()
+                    settingsViewModel.popBackStack()
                 }
             },
             transitionSpec = {
@@ -138,7 +136,7 @@ fun Settings(
             entryProvider = entryProvider {
                 entry<SettingsNavKey.MainSettingsPage> {
                     MainSettingsPage(
-                        goBack = { goBack() },
+                        goBack = { settingsViewModel.popBackStack() },
                         showPolicyDialog = { showPolicyDialog.value = true },
                         onNavigate = { key ->
                             if (backStack.lastOrNull() != key) {

@@ -280,23 +280,15 @@ class MainHomeScreenActivity : ComponentActivity() {
 
                         MainPagerScreen(
                             viewModel = mainPagerViewModel,
-                            onOpenSettings = {
-                                navRouter.navigateTo(AppNavKey.Settings)
-                            }
                         )
                     }
                     entry<AppNavKey.Settings> {
                         Settings(
-                            goBack = { navRouter.popBackStack() },
                             activity = this@MainHomeScreenActivity,
                         )
                     }
                     entry<AppNavKey.Onboarding> {
-                        Onboarding(
-                            onFinished = {
-                                navRouter.navigateTo(AppNavKey.Home, true)
-                            }
-                        )
+                        Onboarding()
                     }
                 },
                 transitionSpec = {

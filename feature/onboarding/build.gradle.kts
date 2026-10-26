@@ -12,6 +12,7 @@ dependencies {
     implementation(project(":core:theme"))
     implementation(project(":core:model"))
     implementation(project(":core:analytics"))
+    implementation(project(":core:navigation"))
 
     implementation(libs.androidx.compose.material.icons.extended)
     implementation(libs.lottie.compose)

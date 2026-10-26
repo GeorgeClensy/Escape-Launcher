@@ -36,7 +36,6 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun Onboarding(
-    onFinished: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: OnboardingViewModel = hiltViewModel()
 ) {
@@ -71,7 +70,6 @@ fun Onboarding(
             }
         } else {
             viewModel.completeOnboarding()
-            onFinished()
         }
     }
 

@@ -63,7 +63,6 @@ fun MainPagerScreen(
     viewModel: MainPagerScreenViewModel = hiltViewModel(),
     appsListViewModel: AppsListViewModel = hiltViewModel(),
     screenTimeViewModel: ScreenTimeViewModel = hiltViewModel(LocalActivity.current as ComponentActivity),
-    onOpenSettings: () -> Unit
 ) {
     val haptics = LocalHapticFeedback.current
     val hideScreenTimePage by viewModel.hideScreenTimePage.collectAsState()
@@ -165,7 +164,7 @@ fun MainPagerScreen(
                 onClick = {},
                 onLongClickLabel = "",
                 onLongClick = {
-                    onOpenSettings()
+                    viewModel.openSettings()
                     viewModel.setFirstTimeHelp(false)
                 },
                 indication = null,
