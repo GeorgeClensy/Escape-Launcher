@@ -61,7 +61,6 @@ import com.geecee.escapelauncher.core.ui.composables.GlanceWidget
 import com.geecee.escapelauncher.core.ui.composables.HomeScreenBottomSheet
 import com.geecee.escapelauncher.core.ui.composables.HomeScreenItem
 import com.geecee.escapelauncher.core.ui.utils.doHapticFeedBack
-import com.geecee.escapelauncher.feature.screentime.ScreenTimeViewModel
 import com.geecee.escapelauncher.feature.weather.WeatherViewModel
 import kotlinx.coroutines.delay
 import java.text.SimpleDateFormat
@@ -78,7 +77,6 @@ fun HomeScreen(
     onAppOpened: (app: InstalledApp) -> Unit = {},
     clockViewModel: ClockViewModel = hiltViewModel(),
     homeScreenViewModel: NewHomeScreenViewModel = hiltViewModel(),
-    screenTimeViewModel: ScreenTimeViewModel = hiltViewModel(LocalActivity.current as ComponentActivity)
 ) {
     val context = LocalContext.current
     val timeParts by clockViewModel.timeParts.collectAsState()
@@ -93,7 +91,7 @@ fun HomeScreen(
     val homeAlignment by homeScreenViewModel.homeAlignment.collectAsState(initial = DefaultSettingsUi.HOME_ALIGNMENT)
     val homeVAlignment by homeScreenViewModel.homeVAlignment.collectAsState(initial = DefaultSettingsUi.HOME_V_ALIGNMENT)
     val hapticFeedbackEnabled by homeScreenViewModel.hapticFeedBackEnabled.collectAsState(initial = DefaultSettings.HAPTIC_FEEDBACK)
-    val appUsageList by screenTimeViewModel.appUsageUiList.collectAsState()
+    val appUsageList by homeScreenViewModel.appUsageUiList.collectAsState()
     val favoriteApps by homeScreenViewModel.favoriteApps.collectAsState()
     val showBottomSheet by homeScreenViewModel.showBottomSheet.collectAsState()
     val bottomSheetApp by homeScreenViewModel.bottomSheetApp.collectAsState()
@@ -235,7 +233,7 @@ fun HomeScreen(
                     }
 
                     if (showScreenTimeHome) {
-                        val todayUsage by screenTimeViewModel.totalUsage.collectAsState()
+                        val todayUsage by homeScreenViewModel.totalUsage.collectAsState()
 
                         GlanceWidget(
                             text = formatScreenTime(todayUsage),
@@ -275,7 +273,7 @@ fun HomeScreen(
             //Apps
             items(favoriteApps, key = { app -> app.packageName }) { app ->
                 val screenTime = remember(appUsageList) {
-                    screenTimeViewModel.getScreenTime(app.packageName)
+                    homeScreenViewModel.getScreenTime(app.packageName)
                 }
 
                 HomeScreenItem(

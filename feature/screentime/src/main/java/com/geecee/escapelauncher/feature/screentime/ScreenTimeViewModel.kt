@@ -107,8 +107,4 @@ class ScreenTimeViewModel @Inject constructor(
     suspend fun getActiveSessionPackageName(): String? {
         return screenTimeRepository.getActiveSessionPackageName()
     }
-
-    fun getScreenTime(packageName: String): Long {
-        return appUsageUiList.value.find { it.packageName == packageName }?.totalTime ?: 0L
-    }
 }

@@ -24,7 +24,7 @@ class GetAppUsageUiListUseCase @Inject constructor(
             todayUsage.map { appScreenTime ->
                 val yesterdayAppUsage = yesterdayUsage.find { it.packageName == appScreenTime.packageName }
                 val usageIncreased = appScreenTime.totalTime > (yesterdayAppUsage?.totalTime ?: 0L)
-                
+
                 // Get display name from current installed apps
                 val appName = apps.find { it.packageName == appScreenTime.packageName }?.displayName ?: "null"
 

@@ -1,7 +1,12 @@
 package com.geecee.escapelauncher.feature.homescreen
 
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.ui.Alignment
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.geecee.escapelauncher.core.analytics.AnalyticsProxy
@@ -21,8 +26,17 @@ import kotlinx.coroutines.launch
 import kotlin.collections.map
 import com.geecee.escapelauncher.core.domain.apps.UninstallAppUseCase
 import com.geecee.escapelauncher.core.domain.apps.OpenAppDetailsUseCase
+import com.geecee.escapelauncher.core.domain.repository.db.ScreenTimeRepository
+import com.geecee.escapelauncher.core.domain.screentime.GetAppUsageUiListUseCase
+import com.geecee.escapelauncher.core.model.AppUsageUiModel
 import com.geecee.escapelauncher.core.navigation.AppNavKey
 import com.geecee.escapelauncher.core.navigation.NavRouter
+import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.channels.awaitClose
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Date
+import java.util.Locale
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
@@ -33,6 +47,7 @@ class NewHomeScreenViewModel @Inject constructor(
     onboardingRepository: OnboardingRepository,
     screenTimeSettingsRepository: ScreenTimeSettingsRepository,
     weatherSettingsRepository: WeatherSettingsRepository,
+    getAppUsageUiListUseCase: GetAppUsageUiListUseCase,
     private val modifiedAppsRepository: ModifiedAppsRepository,
     getFavoriteAppsUseCase: GetFavoriteAppsUseCase,
     appConfiguration: AppConfiguration,
@@ -42,7 +57,9 @@ class NewHomeScreenViewModel @Inject constructor(
     private val uninstallAppUseCase: UninstallAppUseCase,
     private val openAppDetailsUseCase: OpenAppDetailsUseCase,
     private val analyticsProxy: AnalyticsProxy,
-    val navRouter: NavRouter
+    val navRouter: NavRouter,
+    @ApplicationContext private val context: Context,
+    screenTimeRepository: ScreenTimeRepository
 ) : ViewModel() {
     val isFoss = appConfiguration.isFoss
 
@@ -183,4 +200,57 @@ class NewHomeScreenViewModel @Inject constructor(
         started = SharingStarted.WhileSubscribed(5000),
         initialValue = emptyList()
     )
+
+    private fun getDatesPair(): Pair<String, String> {
+        val now = Date()
+        val today = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(now)
+        val calendar = Calendar.getInstance().apply {
+            time = now
+            add(Calendar.DAY_OF_YEAR, -1)
+        }
+        val yesterday = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(calendar.time)
+        return today to yesterday
+    }
+
+    private val datesFlow: Flow<Pair<String, String>> = callbackFlow {
+        trySend(getDatesPair())
+
+        val receiver = object : BroadcastReceiver() {
+            override fun onReceive(context: Context?, intent: Intent?) {
+                trySend(getDatesPair())
+            }
+        }
+
+        val filter = IntentFilter().apply {
+            addAction(Intent.ACTION_TIME_TICK)
+            addAction(Intent.ACTION_TIME_CHANGED)
+            addAction(Intent.ACTION_TIMEZONE_CHANGED)
+        }
+
+        ContextCompat.registerReceiver(context, receiver, filter, ContextCompat.RECEIVER_NOT_EXPORTED)
+
+        awaitClose {
+            context.unregisterReceiver(receiver)
+        }
+    }.distinctUntilChanged()
+
+    val appUsageUiList: StateFlow<List<AppUsageUiModel>> = datesFlow.flatMapLatest { (today, yesterday) ->
+        getAppUsageUiListUseCase(today, yesterday)
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = emptyList()
+    )
+
+    val totalUsage: StateFlow<Long> = datesFlow.flatMapLatest { (today, _) ->
+        screenTimeRepository.getTotalUsageForDateFlow(today)
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = 0L
+    )
+
+    fun getScreenTime(packageName: String): Long {
+        return appUsageUiList.value.find { it.packageName == packageName }?.totalTime ?: 0L
+    }
 }
