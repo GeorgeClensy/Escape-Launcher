@@ -38,6 +38,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.geecee.escapelauncher.core.common.configureStatusBar
+import com.geecee.escapelauncher.core.navigation.AppNavKey
 import com.geecee.escapelauncher.core.ui.R
 import com.geecee.escapelauncher.core.ui.composables.EscapeHeader
 import com.geecee.escapelauncher.core.ui.composables.EscapeSubhead
@@ -48,7 +49,6 @@ import com.geecee.escapelauncher.core.ui.composables.SettingsSingleChoiceSegment
 import com.geecee.escapelauncher.core.ui.composables.SettingsSmallSpacer
 import com.geecee.escapelauncher.core.ui.composables.SettingsSpacer
 import com.geecee.escapelauncher.core.ui.composables.SettingsSwitch
-import com.geecee.escapelauncher.feature.settings.SettingsNavKey
 import com.geecee.escapelauncher.feature.settings.weather.WeatherAppPicker
 import com.geecee.escapelauncher.feature.weather.WeatherViewModel
 
@@ -56,7 +56,6 @@ import com.geecee.escapelauncher.feature.weather.WeatherViewModel
  * Fist page of settings, contains navigation to all the other pages
  *
  * @param goBack When back button is pressed
- * @param showPolicyDialog When the show privacy policy button is pressed
  * @param onNavigate Callback to navigate to a settings sub-page
  *
  * @see Settings
@@ -64,8 +63,7 @@ import com.geecee.escapelauncher.feature.weather.WeatherViewModel
 @Composable
 fun MainSettingsPage(
     goBack: () -> Unit,
-    showPolicyDialog: () -> Unit,
-    onNavigate: (SettingsNavKey) -> Unit,
+    onNavigate: (AppNavKey) -> Unit,
     mainSettingsPageViewModel: MainSettingsPageViewModel = hiltViewModel(),
     weatherViewModel: WeatherViewModel = hiltViewModel(LocalActivity.current as ComponentActivity)
 ) {
@@ -134,14 +132,14 @@ fun MainSettingsPage(
                     label = stringResource(id = R.string.theme),
                     false,
                     isTopOfGroup = true,
-                    onClick = { onNavigate(SettingsNavKey.Theme) })
+                    onClick = { onNavigate(AppNavKey.Settings.Theme) })
             }
 
             item(key = "font") {
                 SettingsNavigationItem(
                     label = stringResource(id = R.string.choose_font),
                     false,
-                    onClick = { onNavigate(SettingsNavKey.ChooseFont) })
+                    onClick = { onNavigate(AppNavKey.Settings.ChooseFont) })
             }
 
             item(key = "show_status_bar") {
@@ -269,7 +267,7 @@ fun MainSettingsPage(
                     false,
                     isTopOfGroup = true,
                     isBottomOfGroup = true,
-                    onClick = { onNavigate(SettingsNavKey.Widget) })
+                    onClick = { onNavigate(AppNavKey.Settings.Widget) })
             }
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
@@ -436,7 +434,7 @@ fun MainSettingsPage(
                     diagonalArrow = false,
                     isTopOfGroup = true,
                     onClick = {
-                        onNavigate(SettingsNavKey.BulkFavouriteApps)
+                        onNavigate(AppNavKey.Settings.BulkFavouriteApps)
                     })
             }
 
@@ -444,7 +442,7 @@ fun MainSettingsPage(
                 SettingsNavigationItem(
                     label = stringResource(id = R.string.manage_hidden_apps),
                     false,
-                    onClick = { onNavigate(SettingsNavKey.HiddenApps) })
+                    onClick = { onNavigate(AppNavKey.Settings.HiddenApps) })
             }
 
             item(key = "manage_open_challenges") {
@@ -452,7 +450,7 @@ fun MainSettingsPage(
                     label = stringResource(id = R.string.manage_open_challenges),
                     false,
                     isBottomOfGroup = true,
-                    onClick = { onNavigate(SettingsNavKey.OpenChallenges) })
+                    onClick = { onNavigate(AppNavKey.Settings.OpenChallenges) })
             }
 
             //Other
@@ -485,7 +483,7 @@ fun MainSettingsPage(
                     label = stringResource(R.string.font_licences),
                     diagonalArrow = false,
                     isBottomOfGroup = mainSettingsPageViewModel.appConfiguration.isFoss,
-                    onClick = { onNavigate(SettingsNavKey.FontLicences) })
+                    onClick = { onNavigate(AppNavKey.Settings.FontLicences) })
             }
 
             if (!mainSettingsPageViewModel.appConfiguration.isFoss) {
@@ -494,7 +492,7 @@ fun MainSettingsPage(
                         label = stringResource(id = R.string.read_privacy_policy),
                         false,
                         isBottomOfGroup = true,
-                        onClick = { showPolicyDialog() })
+                        onClick = { onNavigate(AppNavKey.Settings.PrivacyPolicy) })
                 }
             }
 
@@ -514,7 +512,7 @@ fun MainSettingsPage(
                     icon = painterResource(R.drawable.outlineicon),
                     sponsorButtonText = stringResource(R.string.sponsor),
                     onBackgroundClick = {
-                        onNavigate(SettingsNavKey.DevOptions)
+                        onNavigate(AppNavKey.Settings.DevOptions)
                     })
             }
 

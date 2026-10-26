@@ -8,6 +8,7 @@ import com.geecee.escapelauncher.core.domain.repository.db.ModifiedAppsRepositor
 import com.geecee.escapelauncher.core.domain.repository.settings.SearchSettingsRepository
 import com.geecee.escapelauncher.core.domain.repository.settings.LauncherBehaviorRepository
 import com.geecee.escapelauncher.core.model.InstalledApp
+import com.geecee.escapelauncher.core.navigation.NavRouter
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.SharingStarted
@@ -22,7 +23,8 @@ class HiddenAppsViewModel @Inject constructor(
     val appsRepository: AppsRepository,
     private val searchSettingsRepository: SearchSettingsRepository,
     launcherBehaviorRepository: LauncherBehaviorRepository,
-    private val launchAppUseCase: LaunchAppUseCase
+    private val launchAppUseCase: LaunchAppUseCase,
+    val navRouter: NavRouter
 ) : ViewModel() {
     val hiddenPackageIds: StateFlow<Set<String>> = modifiedAppsRepository.getHiddenPackageIdsFlow()
         .map { it.toSet() }

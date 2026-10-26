@@ -3,8 +3,10 @@ package com.geecee.escapelauncher.feature.settings.openchallenges
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.geecee.escapelauncher.core.domain.challenges.GetOpenChallengeAppsUseCase
+import com.geecee.escapelauncher.core.domain.repository.android.AppsRepository
 import com.geecee.escapelauncher.core.domain.repository.db.ModifiedAppsRepository
 import com.geecee.escapelauncher.core.model.InstalledApp
+import com.geecee.escapelauncher.core.navigation.NavRouter
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.SharingStarted
@@ -15,8 +17,12 @@ import kotlinx.coroutines.launch
 @HiltViewModel
 class OpenChallengeViewModel @Inject constructor(
     private val modifiedAppsRepository: ModifiedAppsRepository,
-    getOpenChallengeAppsUseCase: GetOpenChallengeAppsUseCase
+    getOpenChallengeAppsUseCase: GetOpenChallengeAppsUseCase,
+    appsRepository: AppsRepository,
+    val navRouter: NavRouter
 ) : ViewModel() {
+    val installedApps = appsRepository.mainUserApps
+
     val challengeAppIds: StateFlow<List<InstalledApp>> = getOpenChallengeAppsUseCase()
         .stateIn(
             scope = viewModelScope,

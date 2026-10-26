@@ -1,8 +1,6 @@
 package com.geecee.escapelauncher.feature.settings.font
 
-import android.content.Context
 import android.provider.Settings
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -16,6 +14,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import com.geecee.escapelauncher.core.ui.R
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -35,13 +34,12 @@ import com.geecee.escapelauncher.core.ui.composables.SettingsSpacer
  *
  * @see Settings
  */
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ChooseFont(
-    context: Context,
     themeViewModel: ThemeViewModel = hiltViewModel(),
     goBack: () -> Unit
 ) {
+    val context = LocalContext.current
     val selectedFont by themeViewModel.font.collectAsState(initial = DefaultSettings.FONT)
 
     val fontNames = listOf(

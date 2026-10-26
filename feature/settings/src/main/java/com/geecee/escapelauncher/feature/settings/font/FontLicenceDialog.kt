@@ -1,6 +1,5 @@
 package com.geecee.escapelauncher.feature.settings.font
 
-import android.content.Context
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -17,6 +16,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -24,13 +24,9 @@ import androidx.compose.ui.unit.dp
 import com.geecee.escapelauncher.core.common.loadTextFromAssets
 import com.geecee.escapelauncher.core.ui.composables.SettingsSpacer
 
-/**
- * Font licence dialog
- *
- * @param context Context
- */
 @Composable
-fun FontLicenceDialog(context: Context, onOKClick: () -> Unit) {
+fun FontLicenceDialog(onOKClick: () -> Unit) {
+    val context = LocalContext.current
     val scrollState = rememberScrollState()
 
     Column(

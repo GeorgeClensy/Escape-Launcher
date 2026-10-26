@@ -52,7 +52,7 @@ class MainPagerScreenViewModel @Inject constructor(
     val navRouter: NavRouter
 ) : AndroidViewModel(context as Application) {
     fun openSettings() {
-        navRouter.navigateTo(AppNavKey.Settings)
+        navRouter.navigateTo(AppNavKey.Settings.MainSettingsPage)
     }
 
     fun managedProfileExists(type: ManagedProfileType): Boolean = managedProfileExistsUseCase(type)

@@ -1,4 +1,4 @@
-package com.geecee.escapelauncher.feature.settings
+package com.geecee.escapelauncher.feature.settings.favourites
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -14,12 +14,12 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 
 @HiltViewModel
-class SettingsViewModel @Inject constructor(
+class FavouritesViewModel @Inject constructor(
     appsRepository: AppsRepository,
-    val modifiedAppsRepository: ModifiedAppsRepository,
     getFavoriteAppsUseCase: GetFavoriteAppsUseCase,
-    val navRouter: NavRouter
-) : ViewModel() {
+    val navRouter: NavRouter,
+    val modifiedAppsRepository: ModifiedAppsRepository
+): ViewModel() {
     val installedApps = appsRepository.mainUserApps
 
     val favoriteApps: StateFlow<List<InstalledApp>> = getFavoriteAppsUseCase()
@@ -28,8 +28,4 @@ class SettingsViewModel @Inject constructor(
             started = SharingStarted.WhileSubscribed(5000),
             initialValue = emptyList()
         )
-
-    fun popBackStack() {
-        navRouter.popBackStack()
-    }
 }

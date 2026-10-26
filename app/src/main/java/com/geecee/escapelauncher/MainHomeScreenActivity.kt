@@ -45,7 +45,17 @@ import com.geecee.escapelauncher.core.theme.motion.exitTransition
 import com.geecee.escapelauncher.feature.newwidgets.WidgetHostManager
 import com.geecee.escapelauncher.feature.onboarding.Onboarding
 import com.geecee.escapelauncher.feature.screentime.ScreenTimeViewModel
-import com.geecee.escapelauncher.feature.settings.Settings
+import com.geecee.escapelauncher.feature.settings.devoptions.DevOptions
+import com.geecee.escapelauncher.feature.settings.favourites.BulkFavouritesManager
+import com.geecee.escapelauncher.feature.settings.font.ChooseFont
+import com.geecee.escapelauncher.feature.settings.font.FontLicenceDialog
+import com.geecee.escapelauncher.feature.settings.hiddenapps.BulkManageHiddenApps
+import com.geecee.escapelauncher.feature.settings.hiddenapps.HiddenApps
+import com.geecee.escapelauncher.feature.settings.mainpage.MainSettingsPage
+import com.geecee.escapelauncher.feature.settings.openchallenges.OpenChallengeSettings
+import com.geecee.escapelauncher.feature.settings.privacypolicy.PrivacyPolicyDialog
+import com.geecee.escapelauncher.feature.settings.theme.ThemeOptions
+import com.geecee.escapelauncher.feature.settings.widget.WidgetOptions
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
@@ -282,13 +292,57 @@ class MainHomeScreenActivity : ComponentActivity() {
                             viewModel = mainPagerViewModel,
                         )
                     }
-                    entry<AppNavKey.Settings> {
-                        Settings(
-                            activity = this@MainHomeScreenActivity,
-                        )
-                    }
                     entry<AppNavKey.Onboarding> {
                         Onboarding()
+                    }
+                    entry<AppNavKey.Settings.MainSettingsPage> {
+                        MainSettingsPage(
+                            goBack = {
+                                backStack.removeLastOrNull()
+                            },
+                            onNavigate = { key ->
+                                if (backStack.lastOrNull() != key) {
+                                    backStack.add(key)
+                                }
+                            }
+                        )
+                    }
+                    entry<AppNavKey.Settings.HiddenApps> {
+                        HiddenApps(
+                            goToManageHiddenApps = {
+                                backStack.add(AppNavKey.Settings.BulkHiddenApps)
+                            }) { backStack.removeLastOrNull() }
+                    }
+                    entry<AppNavKey.Settings.OpenChallenges> {
+                        OpenChallengeSettings()
+                    }
+                    entry<AppNavKey.Settings.ChooseFont> {
+                        ChooseFont { backStack.removeLastOrNull() }
+                    }
+                    entry<AppNavKey.Settings.DevOptions> {
+                        DevOptions { backStack.removeLastOrNull() }
+                    }
+                    entry<AppNavKey.Settings.Theme> {
+                        ThemeOptions(goBack = { backStack.removeLastOrNull() })
+                    }
+                    entry<AppNavKey.Settings.Widget> {
+                        WidgetOptions(onBackClick = { backStack.removeLastOrNull() })
+                    }
+                    entry<AppNavKey.Settings.BulkHiddenApps> {
+                        BulkManageHiddenApps()
+                    }
+                    entry<AppNavKey.Settings.BulkFavouriteApps> {
+                        BulkFavouritesManager()
+                    }
+                    entry<AppNavKey.Settings.FontLicences> {
+                        FontLicenceDialog {
+                            backStack.removeLastOrNull()
+                        }
+                    }
+                    entry<AppNavKey.Settings.PrivacyPolicy> {
+                        PrivacyPolicyDialog {
+                            backStack.removeLastOrNull()
+                        }
                     }
                 },
                 transitionSpec = {
