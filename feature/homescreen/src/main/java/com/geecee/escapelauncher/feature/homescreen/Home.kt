@@ -19,9 +19,7 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -48,22 +46,21 @@ import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.geecee.escapelauncher.core.common.DefaultSettings
 import com.geecee.escapelauncher.core.common.formatScreenTime
 import com.geecee.escapelauncher.core.model.InstalledApp
 import com.geecee.escapelauncher.core.ui.DefaultSettingsUi
+import com.geecee.escapelauncher.core.ui.R
 import com.geecee.escapelauncher.core.ui.composables.Clock
 import com.geecee.escapelauncher.core.ui.composables.FirstTimeHelp
 import com.geecee.escapelauncher.core.ui.composables.GlanceWidget
 import com.geecee.escapelauncher.core.ui.composables.HomeScreenBottomSheet
 import com.geecee.escapelauncher.core.ui.composables.HomeScreenItem
 import com.geecee.escapelauncher.core.ui.utils.doHapticFeedBack
-import com.geecee.escapelauncher.core.ui.R
-import com.geecee.escapelauncher.feature.newwidgets.WidgetRenderer
 import com.geecee.escapelauncher.feature.screentime.ScreenTimeViewModel
 import com.geecee.escapelauncher.feature.weather.WeatherViewModel
 import kotlinx.coroutines.delay
@@ -71,13 +68,13 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
-import androidx.compose.ui.platform.LocalResources
 import kotlin.time.Duration.Companion.milliseconds
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     modifier: Modifier = Modifier,
+    widget: @Composable () -> Unit = {},
     onAppOpened: (app: InstalledApp) -> Unit = {},
     clockViewModel: ClockViewModel = hiltViewModel(),
     homeScreenViewModel: NewHomeScreenViewModel = hiltViewModel(),
@@ -95,12 +92,7 @@ fun HomeScreen(
     val firstTimeHelp by homeScreenViewModel.firstTimeHelp.collectAsState(initial = false)
     val homeAlignment by homeScreenViewModel.homeAlignment.collectAsState(initial = DefaultSettingsUi.HOME_ALIGNMENT)
     val homeVAlignment by homeScreenViewModel.homeVAlignment.collectAsState(initial = DefaultSettingsUi.HOME_V_ALIGNMENT)
-    val widgetOffsetPref by homeScreenViewModel.widgetOffset.collectAsState(initial = DefaultSettings.WIDGET_OFFSET)
     val hapticFeedbackEnabled by homeScreenViewModel.hapticFeedBackEnabled.collectAsState(initial = DefaultSettings.HAPTIC_FEEDBACK)
-    val widgetHeight by homeScreenViewModel.widgetHeight.collectAsState(initial = DefaultSettings.WIDGET_HEIGHT)
-    val widgetWidth by homeScreenViewModel.widgetWidth.collectAsState(initial = DefaultSettings.WIDGET_WIDTH)
-    val widgetId by homeScreenViewModel.widgetId.collectAsState(initial = DefaultSettings.WIDGET_ID)
-    val widgetHostManager = homeScreenViewModel.widgetHostManager
     val appUsageList by screenTimeViewModel.appUsageUiList.collectAsState()
     val favoriteApps by homeScreenViewModel.favoriteApps.collectAsState()
     val showBottomSheet by homeScreenViewModel.showBottomSheet.collectAsState()
@@ -277,30 +269,7 @@ fun HomeScreen(
 
             //Widgets
             item {
-                // Find out offset of widget
-                val widgetOffset = remember(homeAlignment, widgetOffsetPref) {
-                    val alignmentOffset = when (homeAlignment) {
-                        Alignment.Start -> -8
-                        Alignment.End -> 8
-                        else -> 0
-                    }
-                    alignmentOffset + widgetOffsetPref.toInt()
-                }
-
-                WidgetRenderer(
-                    appWidgetId = widgetId,
-                    widgetHostManager = widgetHostManager,
-                    modifier = Modifier
-                        .offset {
-                            IntOffset(
-                                (widgetOffset.dp).toPx().toInt(), 0
-                            )
-                        }
-                        .size(
-                            widgetWidth.dp,
-                            widgetHeight.dp
-                        )
-                        .padding(0.dp, 0.dp))
+                widget()
             }
 
             //Apps

@@ -9,6 +9,9 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Lock
@@ -24,10 +27,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.SoftwareKeyboardController
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.geecee.escapelauncher.core.common.DefaultSettings
 import com.geecee.escapelauncher.core.domain.managedprofiles.ManagedProfileType
@@ -41,6 +47,7 @@ import com.geecee.escapelauncher.core.ui.utils.doHapticFeedBack
 import com.geecee.escapelauncher.feature.appslist.AppsList
 import com.geecee.escapelauncher.feature.appslist.AppsListViewModel
 import com.geecee.escapelauncher.feature.homescreen.HomeScreen
+import com.geecee.escapelauncher.feature.newwidgets.WidgetRenderer
 import com.geecee.escapelauncher.feature.screentime.ScreenTimeDashboard
 import com.geecee.escapelauncher.feature.screentime.ScreenTimeViewModel
 import com.geecee.escapelauncher.feature.securefolder.SecureFolderButton
@@ -70,6 +77,12 @@ fun MainPagerScreen(
     val hapticFeedbackEnabled by viewModel.hapticFeedBackEnabled.collectAsState(initial = DefaultSettings.HAPTIC_FEEDBACK)
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
+    val homeAlignment by viewModel.homeAlignment.collectAsState(initial = DefaultSettingsUi.HOME_ALIGNMENT)
+    val widgetHeight by viewModel.widgetHeight.collectAsState(initial = DefaultSettings.WIDGET_HEIGHT)
+    val widgetWidth by viewModel.widgetWidth.collectAsState(initial = DefaultSettings.WIDGET_WIDTH)
+    val widgetId by viewModel.widgetId.collectAsState(initial = DefaultSettings.WIDGET_ID)
+    val widgetHostManager = viewModel.widgetHostManager
+    val widgetOffsetPref by viewModel.widgetOffset.collectAsState(initial = DefaultSettings.WIDGET_OFFSET)
 
     // Make it that if you go back you go back to main page
     BackHandler(enabled = true) {
@@ -181,7 +194,31 @@ fun MainPagerScreen(
         when (page) {
             screenTimePageIndex -> ScreenTimeDashboard()
 
-            homePageIndex -> HomeScreen(onAppOpened = { app ->
+            homePageIndex -> HomeScreen(widget = {
+                // Find out offset of widget
+                val widgetOffset = remember(homeAlignment, widgetOffsetPref) {
+                    val alignmentOffset = when (homeAlignment) {
+                        Alignment.Start -> -8
+                        Alignment.End -> 8
+                        else -> 0
+                    }
+                    alignmentOffset + widgetOffsetPref.toInt()
+                }
+
+                WidgetRenderer(
+                    appWidgetId = widgetId,
+                    widgetHostManager = widgetHostManager,
+                    modifier = Modifier
+                        .offset {
+                            IntOffset(
+                                (widgetOffset.dp).toPx().toInt(), 0
+                            )
+                        }
+                        .size(
+                            widgetWidth.dp, widgetHeight.dp
+                        )
+                        .padding(0.dp, 0.dp))
+            }, onAppOpened = { app ->
                 viewModel.openApp(
                     app = app, overrideChallenge = false, onAppOpened = {
                         screenTimeViewModel.onAppOpened(it)

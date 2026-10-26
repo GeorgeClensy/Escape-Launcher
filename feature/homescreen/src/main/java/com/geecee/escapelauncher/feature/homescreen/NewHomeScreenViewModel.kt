@@ -13,7 +13,6 @@ import com.geecee.escapelauncher.core.domain.repository.settings.*
 import com.geecee.escapelauncher.core.model.AppAction
 import com.geecee.escapelauncher.core.model.InstalledApp
 import com.geecee.escapelauncher.core.ui.R
-import com.geecee.escapelauncher.feature.newwidgets.WidgetHostManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -34,10 +33,8 @@ class NewHomeScreenViewModel @Inject constructor(
     onboardingRepository: OnboardingRepository,
     screenTimeSettingsRepository: ScreenTimeSettingsRepository,
     weatherSettingsRepository: WeatherSettingsRepository,
-    widgetSettingsRepository: WidgetSettingsRepository,
     private val modifiedAppsRepository: ModifiedAppsRepository,
     getFavoriteAppsUseCase: GetFavoriteAppsUseCase,
-    val widgetHostManager: WidgetHostManager,
     appConfiguration: AppConfiguration,
     private val getAppActionsUseCase: GetAppActionsUseCase,
     private val getAppShortcutsUseCase: GetAppShortcutsUseCase,
@@ -76,11 +73,6 @@ class NewHomeScreenViewModel @Inject constructor(
             else -> Arrangement.Bottom
         }
     }
-
-    val widgetOffset = widgetSettingsRepository.widgetOffset
-    val widgetHeight = widgetSettingsRepository.widgetHeight
-    val widgetWidth = widgetSettingsRepository.widgetWidth
-    val widgetId = widgetSettingsRepository.widgetId
 
     // Favorite Apps
     val favoriteApps: StateFlow<List<InstalledApp>> = getFavoriteAppsUseCase()

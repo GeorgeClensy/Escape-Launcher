@@ -8,6 +8,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.Alignment
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.geecee.escapelauncher.core.domain.apps.LaunchAppUseCase
@@ -17,13 +18,16 @@ import com.geecee.escapelauncher.core.domain.launcher.GetIsDefaultLauncherUseCas
 import com.geecee.escapelauncher.core.domain.managedprofiles.IsManagedProfileSupportedUseCase
 import com.geecee.escapelauncher.core.domain.managedprofiles.ManagedProfileExistsUseCase
 import com.geecee.escapelauncher.core.domain.managedprofiles.ManagedProfileType
+import com.geecee.escapelauncher.core.domain.repository.settings.AppearanceRepository
 import com.geecee.escapelauncher.core.domain.repository.settings.OnboardingRepository
 import com.geecee.escapelauncher.core.domain.repository.settings.ScreenTimeSettingsRepository
 import com.geecee.escapelauncher.core.domain.repository.settings.LauncherBehaviorRepository
+import com.geecee.escapelauncher.core.domain.repository.settings.WidgetSettingsRepository
 import com.geecee.escapelauncher.core.domain.system.LockScreenUseCase
 import com.geecee.escapelauncher.core.model.InstalledApp
 import com.geecee.escapelauncher.core.navigation.AppNavKey
 import com.geecee.escapelauncher.core.navigation.NavRouter
+import com.geecee.escapelauncher.feature.newwidgets.WidgetHostManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import jakarta.inject.Inject
@@ -33,6 +37,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.milliseconds
@@ -43,6 +48,9 @@ class MainPagerScreenViewModel @Inject constructor(
     private val onboardingRepository: OnboardingRepository,
     private val screenTimeSettingsRepository: ScreenTimeSettingsRepository,
     launcherBehaviorRepository: LauncherBehaviorRepository,
+    widgetSettingsRepository: WidgetSettingsRepository,
+    appearanceRepository: AppearanceRepository,
+    val widgetHostManager: WidgetHostManager,
     private val tryOpenAppUseCase: TryOpenAppUseCase,
     private val launchAppUseCase: LaunchAppUseCase,
     private val managedProfileExistsUseCase: ManagedProfileExistsUseCase,
@@ -169,6 +177,20 @@ class MainPagerScreenViewModel @Inject constructor(
                     }
                 }
             }
+        }
+    }
+
+
+    val widgetOffset = widgetSettingsRepository.widgetOffset
+    val widgetHeight = widgetSettingsRepository.widgetHeight
+    val widgetWidth = widgetSettingsRepository.widgetWidth
+    val widgetId = widgetSettingsRepository.widgetId
+
+    val homeAlignment = appearanceRepository.homeAlignment.map { alignment ->
+        when (alignment) {
+            "Left" -> Alignment.Start
+            "Center" -> Alignment.CenterHorizontally
+            else -> Alignment.End
         }
     }
 }
