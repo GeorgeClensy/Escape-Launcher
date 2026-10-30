@@ -55,7 +55,7 @@ import com.geecee.escapelauncher.feature.settings.mainpage.MainSettingsPage
 import com.geecee.escapelauncher.feature.settings.openchallenges.OpenChallengeSettings
 import com.geecee.escapelauncher.feature.settings.privacypolicy.PrivacyPolicyDialog
 import com.geecee.escapelauncher.feature.settings.theme.ThemeOptions
-import com.geecee.escapelauncher.feature.settings.widget.WidgetOptions
+import com.geecee.escapelauncher.feature.newwidgets.options.WidgetOptions
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first

@@ -1,4 +1,4 @@
-package com.geecee.escapelauncher.feature.settings.widget
+package com.geecee.escapelauncher.feature.newwidgets.options
 
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProviderInfo

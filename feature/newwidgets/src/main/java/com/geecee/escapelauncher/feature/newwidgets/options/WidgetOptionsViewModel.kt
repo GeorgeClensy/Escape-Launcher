@@ -1,18 +1,15 @@
-package com.geecee.escapelauncher.feature.settings.widget
+package com.geecee.escapelauncher.feature.newwidgets.options
 
-import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.geecee.escapelauncher.core.domain.repository.settings.WidgetSettingsRepository
 import com.geecee.escapelauncher.feature.newwidgets.WidgetHostManager
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
 import jakarta.inject.Inject
 import kotlinx.coroutines.launch
 
 @HiltViewModel
 class WidgetOptionsViewModel @Inject constructor(
-    @ApplicationContext context: Context,
     private val widgetSettingsRepository: WidgetSettingsRepository,
     val widgetHostManager: WidgetHostManager
 ) : ViewModel() {
