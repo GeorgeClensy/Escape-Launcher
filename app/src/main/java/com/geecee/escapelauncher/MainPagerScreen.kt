@@ -10,6 +10,7 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Work
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -37,6 +38,7 @@ import com.geecee.escapelauncher.privatespace.PrivateSpace
 import com.geecee.escapelauncher.screens.AppsListTabScreen
 import com.geecee.escapelauncher.screens.HomeWidgetSlot
 import com.geecee.escapelauncher.screens.OpenChallengeOverlay
+import com.geecee.escapelauncher.screens.HomeWeatherImpl
 import kotlinx.coroutines.launch
 
 /**
@@ -55,13 +57,14 @@ fun MainPagerScreen(
     val hapticFeedbackEnabled by viewModel.hapticFeedBackEnabled.collectAsState(initial = DefaultSettings.HAPTIC_FEEDBACK)
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
-
     val homeAlignment by viewModel.homeAlignment.collectAsState(initial = DefaultSettingsUi.HOME_ALIGNMENT)
+    val showWeather by viewModel.showWeather.collectAsState(initial = DefaultSettings.SHOW_WEATHER)
     val widgetHeight by viewModel.widgetHeight.collectAsState(initial = DefaultSettings.WIDGET_HEIGHT)
     val widgetWidth by viewModel.widgetWidth.collectAsState(initial = DefaultSettings.WIDGET_WIDTH)
     val widgetId by viewModel.widgetId.collectAsState(initial = DefaultSettings.WIDGET_ID)
     val widgetHostManager = viewModel.widgetHostManager
     val widgetOffsetPref by viewModel.widgetOffset.collectAsState(initial = DefaultSettings.WIDGET_OFFSET)
+    val showWallpaper by viewModel.showWallpaper.collectAsState(initial = false)
 
     // Global action callbacks
     val handleAppClick: (InstalledApp) -> Unit = { app ->
@@ -190,6 +193,17 @@ fun MainPagerScreen(
                         widgetWidth = widgetWidth,
                         widgetHeight = widgetHeight
                     )
+                },
+                glanceWidgets = {
+                    if (showWeather) {
+                        if (!viewModel.isFoss) {
+                            HomeWeatherImpl(
+                                alignment = homeAlignment,
+                                shadow = showWallpaper,
+                                color = if (showWallpaper) MaterialTheme.colorScheme.primaryFixed else MaterialTheme.colorScheme.primary
+                            )
+                        }
+                    }
                 }
             )
 

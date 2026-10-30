@@ -11,14 +11,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.geecee.escapelauncher.core.analytics.AnalyticsProxy
 import com.geecee.escapelauncher.core.domain.apps.GetFavoriteAppsUseCase
-import com.geecee.escapelauncher.core.domain.repository.AppConfiguration
 import com.geecee.escapelauncher.core.domain.repository.db.ScreenTimeRepository
 import com.geecee.escapelauncher.core.domain.repository.settings.AppearanceRepository
 import com.geecee.escapelauncher.core.domain.repository.settings.ClockRepository
 import com.geecee.escapelauncher.core.domain.repository.settings.LauncherBehaviorRepository
 import com.geecee.escapelauncher.core.domain.repository.settings.OnboardingRepository
 import com.geecee.escapelauncher.core.domain.repository.settings.ScreenTimeSettingsRepository
-import com.geecee.escapelauncher.core.domain.repository.settings.WeatherSettingsRepository
 import com.geecee.escapelauncher.core.domain.screentime.GetAppUsageUiListUseCase
 import com.geecee.escapelauncher.core.domain.time.GetCurrentTimePartsUseCase
 import com.geecee.escapelauncher.core.model.AppUsageUiModel
@@ -54,16 +52,13 @@ class NewHomeScreenViewModel @Inject constructor(
     launcherBehaviorRepository: LauncherBehaviorRepository,
     onboardingRepository: OnboardingRepository,
     screenTimeSettingsRepository: ScreenTimeSettingsRepository,
-    weatherSettingsRepository: WeatherSettingsRepository,
     getAppUsageUiListUseCase: GetAppUsageUiListUseCase,
     getFavoriteAppsUseCase: GetFavoriteAppsUseCase,
-    appConfiguration: AppConfiguration,
     private val getCurrentTimeParts: GetCurrentTimePartsUseCase,
     private val analyticsProxy: AnalyticsProxy,
     @ApplicationContext private val context: Context,
     screenTimeRepository: ScreenTimeRepository
 ) : ViewModel() {
-    val isFoss = appConfiguration.isFoss
 
     // Settings
     val twelveHourClock = clockRepository.twelveHourClock
@@ -71,7 +66,6 @@ class NewHomeScreenViewModel @Inject constructor(
     val bigClock = clockRepository.bigClock
     val showDate = clockRepository.showDate
     val showScreenTimeHome = screenTimeSettingsRepository.showScreenTimeHome
-    val showWeather = weatherSettingsRepository.showWeather
     val showScreenTimeApp = screenTimeSettingsRepository.showScreenTimeApp
     val firstTimeHelp = onboardingRepository.firstTimeHelp
     val hapticFeedBackEnabled = launcherBehaviorRepository.hapticFeedBackEnabled

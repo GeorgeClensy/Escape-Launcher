@@ -13,5 +13,4 @@ dependencies {
     implementation(project(":core:navigation"))
     implementation(project(":core:theme"))
     implementation(project(":core:domain"))
-    implementation(project(":feature:screentime"))
 }

@@ -4,9 +4,6 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.provider.AlarmClock
 import android.util.Log
-import android.widget.Toast
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.LocalActivity
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -26,8 +23,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Timer
-import androidx.compose.material.icons.filled.WbSunny
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -36,16 +31,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
-import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -59,7 +51,6 @@ import com.geecee.escapelauncher.core.ui.composables.FirstTimeHelp
 import com.geecee.escapelauncher.core.ui.composables.GlanceWidget
 import com.geecee.escapelauncher.core.ui.composables.HomeScreenItem
 import com.geecee.escapelauncher.core.ui.utils.doHapticFeedBack
-import com.geecee.escapelauncher.feature.weather.WeatherViewModel
 import kotlinx.coroutines.delay
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -67,7 +58,6 @@ import java.util.Date
 import java.util.Locale
 import kotlin.time.Duration.Companion.milliseconds
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     modifier: Modifier = Modifier,
@@ -86,7 +76,6 @@ fun HomeScreen(
     val timeParts by homeViewModel.timeParts.collectAsState()
     val showDate by homeViewModel.showDate.collectAsState(initial = DefaultSettings.SHOW_DATE)
     val showScreenTimeHome by homeViewModel.showScreenTimeHome.collectAsState(initial = DefaultSettings.SHOW_SCREEN_TIME_HOME)
-    val showWeather by homeViewModel.showWeather.collectAsState(initial = DefaultSettings.SHOW_WEATHER)
     val showScreenTimeApp by homeViewModel.showScreenTimeApp.collectAsState(initial = DefaultSettings.SHOW_SCREEN_TIME_APP)
     val firstTimeHelp by homeViewModel.firstTimeHelp.collectAsState(initial = false)
     val homeAlignment by homeViewModel.homeAlignment.collectAsState(initial = DefaultSettingsUi.HOME_ALIGNMENT)
@@ -184,8 +173,6 @@ fun HomeScreen(
                 FlowRow(
                     horizontalArrangement = Arrangement.spacedBy(10.dp),
                 ) {
-                    glanceWidgets()
-
                     if (showDate) {
                         val dateFormat =
                             remember { SimpleDateFormat("EEE d MMM", Locale.getDefault()) }
@@ -241,15 +228,7 @@ fun HomeScreen(
                         )
                     }
 
-                    if (showWeather) {
-                        if (!homeViewModel.isFoss) {
-                            HomeWeatherImpl(
-                                alignment = homeAlignment,
-                                shadow = showWallpaper,
-                                color = if (showWallpaper) MaterialTheme.colorScheme.primaryFixed else MaterialTheme.colorScheme.primary
-                            )
-                        }
-                    }
+                    glanceWidgets()
                 }
             }
 
@@ -310,54 +289,5 @@ fun HomeScreen(
                 Spacer(Modifier.height(90.dp))
             }
         }
-    }
-}
-
-
-@Composable
-fun HomeWeatherImpl(
-    alignment: Alignment.Horizontal,
-    color: Color = MaterialTheme.colorScheme.primary,
-    shadow: Boolean = false,
-    weatherViewModel: WeatherViewModel = hiltViewModel(LocalActivity.current as ComponentActivity)
-) {
-    val context = LocalContext.current
-    val resources = LocalResources.current
-    val weatherAppPackage by weatherViewModel.weatherAppPackage.collectAsState(initial = DefaultSettings.WEATHER_APP_PACKAGE)
-
-    AnimatedVisibility(
-        weatherViewModel.weatherText.value != "",
-        enter = fadeIn(),
-        exit = fadeOut()
-    ) {
-        GlanceWidget(
-            text = weatherViewModel.weatherText.value,
-            icon = Icons.Default.WbSunny,
-            iconContentDescription = "Weather",
-            shadow = shadow,
-            homeAlignment = alignment,
-            small = true,
-            color = color,
-            onClick = {
-                if (weatherAppPackage.isNotEmpty()) {
-                    //todo: use OpenApp() here so it's tracked
-
-                    val launchIntent =
-                        context.packageManager.getLaunchIntentForPackage(
-                            weatherAppPackage
-                        )
-                    launchIntent?.let {
-                        it.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                        context.startActivity(it)
-                    }
-                } else {
-                    Toast.makeText(
-                        context,
-                        resources.getString(R.string.set_weather_app_in_settings),
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
-            }
-        )
     }
 }

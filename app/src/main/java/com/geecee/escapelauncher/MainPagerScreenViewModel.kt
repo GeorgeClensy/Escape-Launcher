@@ -24,11 +24,13 @@ import com.geecee.escapelauncher.core.domain.launcher.GetIsDefaultLauncherUseCas
 import com.geecee.escapelauncher.core.domain.managedprofiles.IsManagedProfileSupportedUseCase
 import com.geecee.escapelauncher.core.domain.managedprofiles.ManagedProfileExistsUseCase
 import com.geecee.escapelauncher.core.domain.managedprofiles.ManagedProfileType
+import com.geecee.escapelauncher.core.domain.repository.AppConfiguration
 import com.geecee.escapelauncher.core.domain.repository.db.ModifiedAppsRepository
 import com.geecee.escapelauncher.core.domain.repository.settings.AppearanceRepository
 import com.geecee.escapelauncher.core.domain.repository.settings.LauncherBehaviorRepository
 import com.geecee.escapelauncher.core.domain.repository.settings.OnboardingRepository
 import com.geecee.escapelauncher.core.domain.repository.settings.ScreenTimeSettingsRepository
+import com.geecee.escapelauncher.core.domain.repository.settings.WeatherSettingsRepository
 import com.geecee.escapelauncher.core.domain.repository.settings.WidgetSettingsRepository
 import com.geecee.escapelauncher.core.domain.system.LockScreenUseCase
 import com.geecee.escapelauncher.core.model.AppAction
@@ -74,8 +76,15 @@ class MainPagerScreenViewModel @Inject constructor(
     private val startShortcutUseCase: StartShortcutUseCase,
     private val uninstallAppUseCase: UninstallAppUseCase,
     private val openAppDetailsUseCase: OpenAppDetailsUseCase,
-    val navRouter: NavRouter
+    val navRouter: NavRouter,
+    appConfiguration: AppConfiguration,
+    weatherSettingsRepository: WeatherSettingsRepository
 ) : AndroidViewModel(context as Application) {
+    val isFoss = appConfiguration.isFoss
+    val showWeather = weatherSettingsRepository.showWeather
+
+    val showWallpaper = appearanceRepository.showWallpaper
+
     fun openSettings() {
         navRouter.navigateTo(AppNavKey.Settings.MainSettingsPage)
     }

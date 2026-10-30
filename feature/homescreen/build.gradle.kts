@@ -15,7 +15,6 @@ dependencies {
     implementation(project(":core:navigation"))
     implementation(project(":core:model"))
     implementation(project(":core:analytics"))
-    implementation(project(":feature:weather"))
 
     implementation(libs.androidx.appcompat)
 }

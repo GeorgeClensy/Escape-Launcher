@@ -19,14 +19,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.geecee.escapelauncher.core.common.DefaultSettings
 import com.geecee.escapelauncher.core.model.InstalledApp
 import com.geecee.escapelauncher.core.ui.DefaultSettingsUi
 import com.geecee.escapelauncher.core.ui.composables.HomeScreenItem
-import com.geecee.escapelauncher.core.ui.utils.doHapticFeedBack
 
 /**
  * Main App List composable - focuses purely on the list of apps
@@ -39,24 +37,10 @@ fun AppsList(
     onAppLongClick: (app: InstalledApp) -> Unit = {},
     appsListViewModel: AppsListViewModel = hiltViewModel(),
 ) {
-    val haptics = LocalHapticFeedback.current
     val showScreenTimeApp by appsListViewModel.showScreenTimeApp.collectAsState(initial = DefaultSettings.SHOW_SCREEN_TIME_APP)
     val appsListAlignment by appsListViewModel.appsAlignment.collectAsState(initial = DefaultSettingsUi.APPS_ALIGNMENT)
-    val hapticFeedbackEnabled by appsListViewModel.hapticFeedBackEnabled.collectAsState(initial = DefaultSettings.HAPTIC_FEEDBACK)
     val showWallpaper by appsListViewModel.showWallpaper.collectAsState(initial = false)
     val appListItems by appsListViewModel.appListItems.collectAsState()
-
-    // Standard app interaction logic shared across slots
-    val handleAppClick: (InstalledApp) -> Unit = { app ->
-        onAppOpened(app)
-        appsListViewModel.onSearchExpandedChanged(false)
-        doHapticFeedBack(haptics, hapticFeedbackEnabled)
-    }
-
-    val handleAppLongClickInternal: (InstalledApp) -> Unit = { app ->
-        onAppLongClick(app)
-        doHapticFeedBack(haptics, hapticFeedbackEnabled)
-    }
 
     val scrollState = rememberLazyListState()
 
@@ -83,8 +67,8 @@ fun AppsList(
                 HomeScreenItem(
                     appName = item.app.displayName,
                     screenTime = item.formattedTime,
-                    onAppClick = { handleAppClick(item.app) },
-                    onAppLongClick = { handleAppLongClickInternal(item.app) },
+                    onAppClick = { onAppOpened(item.app) },
+                    onAppLongClick = { onAppLongClick(item.app) },
                     showScreenTime = showScreenTimeApp,
                     modifier = Modifier,
                     alignment = appsListAlignment,

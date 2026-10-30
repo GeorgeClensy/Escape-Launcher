@@ -29,7 +29,6 @@ data class AppListItem(
 class AppsListViewModel @Inject constructor(
     appearanceRepository: AppearanceRepository,
     searchSettingsRepository: SearchSettingsRepository,
-    launcherBehaviorRepository: LauncherBehaviorRepository,
     screenTimeSettingsRepository: ScreenTimeSettingsRepository,
     searchAppsUseCase: SearchAppsUseCase,
     screenTimeRepository: ScreenTimeRepository
@@ -47,7 +46,6 @@ class AppsListViewModel @Inject constructor(
     val searchAutoOpen = searchSettingsRepository.searchAutoOpen
     val automaticallyOpenAppsInSearch = searchSettingsRepository.automaticallyOpenAppsInSearch
     val hiddenAppsInSearch = searchSettingsRepository.showHiddenAppsInSearch
-    val hapticFeedBackEnabled = launcherBehaviorRepository.hapticFeedBackEnabled
     val showWallpaper = appearanceRepository.showWallpaper
 
     // Search
