@@ -4,7 +4,6 @@ import android.content.Intent
 import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
 import android.os.Build
 import android.provider.Settings
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.LocalActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -50,7 +49,6 @@ import com.geecee.escapelauncher.core.ui.composables.SettingsSmallSpacer
 import com.geecee.escapelauncher.core.ui.composables.SettingsSpacer
 import com.geecee.escapelauncher.core.ui.composables.SettingsSwitch
 import com.geecee.escapelauncher.feature.settings.weather.WeatherAppPicker
-import com.geecee.escapelauncher.feature.weather.WeatherViewModel
 
 /**
  * Fist page of settings, contains navigation to all the other pages
@@ -64,8 +62,7 @@ import com.geecee.escapelauncher.feature.weather.WeatherViewModel
 fun MainSettingsPage(
     goBack: () -> Unit,
     onNavigate: (AppNavKey) -> Unit,
-    mainSettingsPageViewModel: MainSettingsPageViewModel = hiltViewModel(),
-    weatherViewModel: WeatherViewModel = hiltViewModel(LocalActivity.current as ComponentActivity)
+    mainSettingsPageViewModel: MainSettingsPageViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
     val activity = LocalActivity.current
@@ -232,9 +229,6 @@ fun MainSettingsPage(
                         isTopOfGroup = true,
                         onCheckedChange = {
                             mainSettingsPageViewModel.setShowWeather(it)
-                            if (it) {
-                                weatherViewModel.forceUpdate()
-                            }
                         })
                 }
 
@@ -244,7 +238,6 @@ fun MainSettingsPage(
                         checked = uiState.useFahrenheit,
                         onCheckedChange = {
                             mainSettingsPageViewModel.setUseFahrenheit(it)
-                            weatherViewModel.forceUpdate()
                         })
                 }
 
@@ -342,7 +335,7 @@ fun MainSettingsPage(
                 )
             }
 
-            item(key = "alignements_spacer") {
+            item(key = "alignments_spacer") {
                 SettingsSmallSpacer()
             }
 

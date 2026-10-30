@@ -10,6 +10,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import jakarta.inject.Inject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
@@ -30,17 +31,26 @@ class WeatherViewModel @Inject constructor(
 
     private fun startWeatherRefreshLoop() {
         viewModelScope.launch(Dispatchers.IO) {
-            weatherSettingsRepository.useFahrenheit.collect { useFahrenheit ->
-                // Restart the fetch loop whenever the setting changes
-                fetchWeather(useFahrenheit)
+            combine(
+                weatherSettingsRepository.showWeather,
+                weatherSettingsRepository.useFahrenheit
+            ) { showWeather, useFahrenheit ->
+                showWeather to useFahrenheit
+            }.collect { (showWeather, useFahrenheit) ->
+                if (showWeather) {
+                    fetchWeather(useFahrenheit)
+                }
             }
         }
 
         viewModelScope.launch(Dispatchers.IO) {
             while (true) {
                 delay(timeMillis = delayTime)
+                val show = weatherSettingsRepository.showWeather.first()
                 val useFahrenheit = weatherSettingsRepository.useFahrenheit.first()
-                fetchWeather(useFahrenheit)
+                if (show) {
+                    fetchWeather(useFahrenheit)
+                }
             }
         }
     }
@@ -56,13 +66,6 @@ class WeatherViewModel @Inject constructor(
                     weatherText.value = result
                 }
             }
-        }
-    }
-
-    fun forceUpdate() {
-        viewModelScope.launch(Dispatchers.IO) {
-            val useFahrenheit = weatherSettingsRepository.useFahrenheit.first()
-            fetchWeather(useFahrenheit)
         }
     }
 }
