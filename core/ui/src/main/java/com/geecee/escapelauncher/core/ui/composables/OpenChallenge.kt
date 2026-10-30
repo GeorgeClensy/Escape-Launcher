@@ -12,7 +12,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonColors
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -27,21 +27,22 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.hapticfeedback.HapticFeedback
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
+import kotlin.time.Duration.Companion.milliseconds
 
 @Composable
 fun OpenChallenge(
-    haptics: HapticFeedback,
     enabled: Boolean,
     openApp: () -> Unit,
     goBack: () -> Unit
 ) {
+    val haptics = LocalHapticFeedback.current
+
     val steps = listOf("5", "4", "3", "2", "1")
     var stepIndex by rememberSaveable { mutableIntStateOf(0) }
     var showText by rememberSaveable { mutableStateOf(true) }
@@ -52,11 +53,11 @@ fun OpenChallenge(
 
         while (stepIndex < steps.size) {
             if (showText) {
-                delay(3000)
+                delay(3000.milliseconds)
                 showText = false
             }
 
-            delay(1000)
+            delay(1000.milliseconds)
             stepIndex++
 
             if (stepIndex < steps.size) {
@@ -69,7 +70,7 @@ fun OpenChallenge(
                 if (enabled) {
                     haptics.performHapticFeedback(HapticFeedbackType.LongPress)
                 }
-                delay(500)
+                delay(500.milliseconds)
                 openApp()
             }
         }
@@ -77,37 +78,38 @@ fun OpenChallenge(
 
     val currentText = if (stepIndex < steps.size) steps[stepIndex] else ""
 
-    if (!nextScreen) {
-        Box(
-            Modifier
-                .fillMaxSize()
-                .background(
-                    brush = Brush.linearGradient(
-                        colors = listOf(
-                            Color(0xFFB2D8D8),
-                            Color(0xFF004C4C)
-                        ),
-                        start = Offset(0f, 0f),
-                        end = Offset(0f, Float.POSITIVE_INFINITY)
-                    )
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(
+                brush = Brush.linearGradient(
+                    colors = listOf(
+                        MaterialTheme.colorScheme.primaryFixed,
+                        MaterialTheme.colorScheme.secondaryFixed
+                    ),
+                    start = Offset(0f, 0f),
+                    end = Offset(0f, Float.POSITIVE_INFINITY)
                 )
-                .pointerInput(Unit) {},
-            contentAlignment = Alignment.Center
-        ) {
-            Column {
+            )
+            .pointerInput(Unit) {},
+        contentAlignment = Alignment.Center
+    ) {
+        if (!nextScreen) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
                 AnimatedVisibility(
                     visible = showText,
                     enter = fadeIn(animationSpec = tween(durationMillis = 1000)),
                     exit = fadeOut(animationSpec = tween(durationMillis = 1000))
                 ) {
                     Text(
-                        currentText,
-                        Modifier.padding(32.dp),
-                        Color.White,
+                        text = currentText,
+                        modifier = Modifier.padding(32.dp),
+                        color = MaterialTheme.colorScheme.onPrimaryFixed,
                         style = MaterialTheme.typography.titleSmall,
-                        textAlign = TextAlign.Center,
-
-                        )
+                        textAlign = TextAlign.Center
+                    )
                 }
 
                 Button(
@@ -117,69 +119,16 @@ fun OpenChallenge(
                         }
                         goBack()
                     },
-                    Modifier.align(Alignment.CenterHorizontally),
-                    colors = ButtonColors(
-                        MaterialTheme.colorScheme.onSurface,
-                        MaterialTheme.colorScheme.surfaceContainerHigh,
-                        MaterialTheme.colorScheme.onSurface,
-                        MaterialTheme.colorScheme.surfaceContainerHigh
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.onPrimaryFixed,
+                        contentColor = MaterialTheme.colorScheme.primaryFixed
                     )
                 ) {
                     Icon(
-                        Icons.AutoMirrored.Default.ArrowBack,
-                        "Go back",
-                        tint = MaterialTheme.colorScheme.surfaceContainerHigh
+                        imageVector = Icons.AutoMirrored.Default.ArrowBack,
+                        contentDescription = "Go back"
                     )
                 }
-            }
-        }
-    } else {
-        Box(
-            Modifier
-                .fillMaxSize()
-                .background(
-                    brush = Brush.linearGradient(
-                        colors = listOf(
-                            Color(0xFFB2D8D8),
-                            Color(0xFF004C4C)
-                        ),
-                        start = Offset(0f, 0f),  // Starting point (top-left corner)
-                        end = Offset(0f, Float.POSITIVE_INFINITY) // Ending point (bottom-center)
-                    )
-                )
-                .pointerInput(Unit) {},
-            contentAlignment = Alignment.Center
-        ) {
-
-
-            // Second Box with custom animation
-            AnimatedVisibility(
-                visible = true,
-                enter = fadeIn(
-                    animationSpec = tween(durationMillis = 1000)
-                ),
-                exit = fadeOut(
-                    animationSpec = tween(durationMillis = 1000)
-                )
-            ) {
-                Box(
-                    Modifier
-                        .fillMaxSize()
-                        .background(
-                            brush = Brush.linearGradient(
-                                colors = listOf(
-                                    Color(0xFFB2D8D8), // Peachy-pink color
-                                    Color(0xFF004C4C)  // Soft lavender color
-                                ),
-                                start = Offset(0f, 0f),  // Starting point (top-left corner)
-                                end = Offset(
-                                    0f,
-                                    Float.POSITIVE_INFINITY
-                                ) // Ending point (bottom-center)
-                            )
-                        ),
-                    contentAlignment = Alignment.Center
-                ) {}
             }
         }
     }

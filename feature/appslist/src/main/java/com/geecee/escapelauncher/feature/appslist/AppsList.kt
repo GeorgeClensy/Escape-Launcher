@@ -27,7 +27,6 @@ import com.geecee.escapelauncher.core.model.InstalledApp
 import com.geecee.escapelauncher.core.ui.DefaultSettingsUi
 import com.geecee.escapelauncher.core.ui.composables.HomeScreenItem
 import com.geecee.escapelauncher.core.ui.utils.doHapticFeedBack
-import com.geecee.escapelauncher.feature.screentime.ScreenTimeViewModel
 
 /**
  * Main App List composable - focuses purely on the list of apps
@@ -37,8 +36,8 @@ fun AppsList(
     modifier: Modifier = Modifier,
     padding: PaddingValues = PaddingValues(),
     onAppOpened: (app: InstalledApp) -> Unit = {},
+    onAppLongClick: (app: InstalledApp) -> Unit = {},
     appsListViewModel: AppsListViewModel = hiltViewModel(),
-    @Suppress("unused") screenTimeViewModel: ScreenTimeViewModel? = null
 ) {
     val haptics = LocalHapticFeedback.current
     val showScreenTimeApp by appsListViewModel.showScreenTimeApp.collectAsState(initial = DefaultSettings.SHOW_SCREEN_TIME_APP)
@@ -54,9 +53,8 @@ fun AppsList(
         doHapticFeedBack(haptics, hapticFeedbackEnabled)
     }
 
-    val handleAppLongClick: (InstalledApp) -> Unit = { app ->
-        appsListViewModel.setBottomSheetVisible(true)
-        appsListViewModel.setBottomSheetApp(app)
+    val handleAppLongClickInternal: (InstalledApp) -> Unit = { app ->
+        onAppLongClick(app)
         doHapticFeedBack(haptics, hapticFeedbackEnabled)
     }
 
@@ -86,7 +84,7 @@ fun AppsList(
                     appName = item.app.displayName,
                     screenTime = item.formattedTime,
                     onAppClick = { handleAppClick(item.app) },
-                    onAppLongClick = { handleAppLongClick(item.app) },
+                    onAppLongClick = { handleAppLongClickInternal(item.app) },
                     showScreenTime = showScreenTimeApp,
                     modifier = Modifier,
                     alignment = appsListAlignment,

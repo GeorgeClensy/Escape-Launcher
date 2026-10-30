@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.FlowRowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
@@ -28,8 +29,6 @@ import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material.icons.filled.WbSunny
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SheetValue
-import androidx.compose.material3.rememberBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -58,7 +57,6 @@ import com.geecee.escapelauncher.core.ui.R
 import com.geecee.escapelauncher.core.ui.composables.Clock
 import com.geecee.escapelauncher.core.ui.composables.FirstTimeHelp
 import com.geecee.escapelauncher.core.ui.composables.GlanceWidget
-import com.geecee.escapelauncher.core.ui.composables.HomeScreenBottomSheet
 import com.geecee.escapelauncher.core.ui.composables.HomeScreenItem
 import com.geecee.escapelauncher.core.ui.utils.doHapticFeedBack
 import com.geecee.escapelauncher.feature.weather.WeatherViewModel
@@ -73,40 +71,37 @@ import kotlin.time.Duration.Companion.milliseconds
 @Composable
 fun HomeScreen(
     modifier: Modifier = Modifier,
+    glanceWidgets: @Composable (FlowRowScope.() -> Unit) = {},
     widget: @Composable () -> Unit = {},
-    onAppOpened: (app: InstalledApp) -> Unit = {},
-    clockViewModel: ClockViewModel = hiltViewModel(),
-    homeScreenViewModel: NewHomeScreenViewModel = hiltViewModel(),
+    onAppClick: (app: InstalledApp) -> Unit = {},
+    onAppLongClick: (app: InstalledApp) -> Unit = {},
+    homeViewModel: NewHomeScreenViewModel = hiltViewModel(),
 ) {
     val context = LocalContext.current
-    val timeParts by clockViewModel.timeParts.collectAsState()
-    val twelveHourClock by homeScreenViewModel.twelveHourClock.collectAsState(initial = DefaultSettings.TWELVE_HOUR_CLOCK)
-    val showClock by homeScreenViewModel.showClock.collectAsState(initial = DefaultSettings.SHOW_CLOCK)
-    val bigClock by homeScreenViewModel.bigClock.collectAsState(initial = DefaultSettings.BIG_CLOCK)
-    val showDate by homeScreenViewModel.showDate.collectAsState(initial = DefaultSettings.SHOW_DATE)
-    val showScreenTimeHome by homeScreenViewModel.showScreenTimeHome.collectAsState(initial = DefaultSettings.SHOW_SCREEN_TIME_HOME)
-    val showWeather by homeScreenViewModel.showWeather.collectAsState(initial = DefaultSettings.SHOW_WEATHER)
-    val showScreenTimeApp by homeScreenViewModel.showScreenTimeApp.collectAsState(initial = DefaultSettings.SHOW_SCREEN_TIME_APP)
-    val firstTimeHelp by homeScreenViewModel.firstTimeHelp.collectAsState(initial = false)
-    val homeAlignment by homeScreenViewModel.homeAlignment.collectAsState(initial = DefaultSettingsUi.HOME_ALIGNMENT)
-    val homeVAlignment by homeScreenViewModel.homeVAlignment.collectAsState(initial = DefaultSettingsUi.HOME_V_ALIGNMENT)
-    val hapticFeedbackEnabled by homeScreenViewModel.hapticFeedBackEnabled.collectAsState(initial = DefaultSettings.HAPTIC_FEEDBACK)
-    val appUsageList by homeScreenViewModel.appUsageUiList.collectAsState()
-    val favoriteApps by homeScreenViewModel.favoriteApps.collectAsState()
-    val showBottomSheet by homeScreenViewModel.showBottomSheet.collectAsState()
-    val bottomSheetApp by homeScreenViewModel.bottomSheetApp.collectAsState()
-    val bottomSheetActions by homeScreenViewModel.bottomSheetActions.collectAsState()
-    val shortcutActions by homeScreenViewModel.shortcutActions.collectAsState()
-    val showWallpaper by homeScreenViewModel.showWallpaper.collectAsState(initial = false)
+    val haptics = LocalHapticFeedback.current
+
+    val twelveHourClock by homeViewModel.twelveHourClock.collectAsState(initial = DefaultSettings.TWELVE_HOUR_CLOCK)
+    val showClock by homeViewModel.showClock.collectAsState(initial = DefaultSettings.SHOW_CLOCK)
+    val bigClock by homeViewModel.bigClock.collectAsState(initial = DefaultSettings.BIG_CLOCK)
+    val timeParts by homeViewModel.timeParts.collectAsState()
+    val showDate by homeViewModel.showDate.collectAsState(initial = DefaultSettings.SHOW_DATE)
+    val showScreenTimeHome by homeViewModel.showScreenTimeHome.collectAsState(initial = DefaultSettings.SHOW_SCREEN_TIME_HOME)
+    val showWeather by homeViewModel.showWeather.collectAsState(initial = DefaultSettings.SHOW_WEATHER)
+    val showScreenTimeApp by homeViewModel.showScreenTimeApp.collectAsState(initial = DefaultSettings.SHOW_SCREEN_TIME_APP)
+    val firstTimeHelp by homeViewModel.firstTimeHelp.collectAsState(initial = false)
+    val homeAlignment by homeViewModel.homeAlignment.collectAsState(initial = DefaultSettingsUi.HOME_ALIGNMENT)
+    val homeVAlignment by homeViewModel.homeVAlignment.collectAsState(initial = DefaultSettingsUi.HOME_V_ALIGNMENT)
+    val hapticFeedbackEnabled by homeViewModel.hapticFeedBackEnabled.collectAsState(initial = DefaultSettings.HAPTIC_FEEDBACK)
+    val appUsageList by homeViewModel.appUsageUiList.collectAsState()
+    val favoriteApps by homeViewModel.favoriteApps.collectAsState()
+    val showWallpaper by homeViewModel.showWallpaper.collectAsState(initial = false)
+    val totalUsage by homeViewModel.totalUsage.collectAsState()
 
     val (hour, minute, _) = timeParts
 
     LaunchedEffect(twelveHourClock) {
-        clockViewModel.startTicker(twelveHourClock)
+        homeViewModel.startClockTicker(twelveHourClock)
     }
-
-    val haptics = LocalHapticFeedback.current
-
 
     val scrollState = rememberLazyListState()
 
@@ -126,7 +121,7 @@ fun HomeScreen(
                     if (totalDrag > 150f) {
                         try {
                             @SuppressLint("WrongConstant") val service =
-                                context.getSystemService("statusbar") // Use literal string "statusbar"
+                                context.getSystemService("statusbar")
 
                             val statusBarManager = Class.forName("android.app.StatusBarManager")
                             val expand = statusBarManager.getMethod("expandNotificationsPanel")
@@ -189,6 +184,8 @@ fun HomeScreen(
                 FlowRow(
                     horizontalArrangement = Arrangement.spacedBy(10.dp),
                 ) {
+                    glanceWidgets()
+
                     if (showDate) {
                         val dateFormat =
                             remember { SimpleDateFormat("EEE d MMM", Locale.getDefault()) }
@@ -223,20 +220,17 @@ fun HomeScreen(
                                     }
                                     context.startActivity(intent)
                                 } catch (e: Exception) {
-                                    homeScreenViewModel.logException(e)
+                                    homeViewModel.logException(e)
                                 }
                             },
                             shadow = showWallpaper,
                             color = if (showWallpaper) MaterialTheme.colorScheme.primaryFixed else MaterialTheme.colorScheme.primary
                         )
-
                     }
 
                     if (showScreenTimeHome) {
-                        val todayUsage by homeScreenViewModel.totalUsage.collectAsState()
-
                         GlanceWidget(
-                            text = formatScreenTime(todayUsage),
+                            text = formatScreenTime(totalUsage),
                             icon = Icons.Default.Timer,
                             iconContentDescription = "Screen Time",
                             homeAlignment = homeAlignment,
@@ -245,12 +239,10 @@ fun HomeScreen(
                             shadow = showWallpaper,
                             color = if (showWallpaper) MaterialTheme.colorScheme.primaryFixed else MaterialTheme.colorScheme.primary
                         )
-
                     }
 
                     if (showWeather) {
-                        @Suppress("KotlinConstantConditions", "RedundantSuppression") // This is to stop the IS_FOSS is always true cuz it's a FOSS sync in Android Studio
-                        if (!homeScreenViewModel.isFoss) {
+                        if (!homeViewModel.isFoss) {
                             HomeWeatherImpl(
                                 alignment = homeAlignment,
                                 shadow = showWallpaper,
@@ -273,19 +265,18 @@ fun HomeScreen(
             //Apps
             items(favoriteApps, key = { app -> app.packageName }) { app ->
                 val screenTime = remember(appUsageList) {
-                    homeScreenViewModel.getScreenTime(app.packageName)
+                    homeViewModel.getScreenTime(app.packageName)
                 }
 
                 HomeScreenItem(
                     appName = app.displayName,
                     screenTime = formatScreenTime(screenTime),
                     onAppClick = {
-                        onAppOpened(app)
+                        onAppClick(app)
                         doHapticFeedBack(haptics, hapticFeedbackEnabled)
                     },
                     onAppLongClick = {
-                        homeScreenViewModel.setBottomSheetVisible(true)
-                        homeScreenViewModel.setBottomSheetApp(app)
+                        onAppLongClick(app)
                         doHapticFeedBack(hapticFeedback = haptics, enabled = hapticFeedbackEnabled)
                     },
                     showScreenTime = showScreenTimeApp,
@@ -318,17 +309,6 @@ fun HomeScreen(
             item {
                 Spacer(Modifier.height(90.dp))
             }
-        }
-
-        // Bottom Sheet
-        if (showBottomSheet && bottomSheetApp != null) {
-            HomeScreenBottomSheet(
-                app = bottomSheetApp!!,
-                actions = bottomSheetActions,
-                onDismissRequest = { homeScreenViewModel.setBottomSheetVisible(false) },
-                shortcutActions = shortcutActions,
-                sheetState = rememberBottomSheetState(initialValue = SheetValue.Hidden)
-            )
         }
     }
 }

@@ -10,30 +10,38 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.geecee.escapelauncher.core.analytics.AnalyticsProxy
+import com.geecee.escapelauncher.core.domain.apps.GetFavoriteAppsUseCase
 import com.geecee.escapelauncher.core.domain.repository.AppConfiguration
-import com.geecee.escapelauncher.core.common.isMainUserApp
-import com.geecee.escapelauncher.core.domain.apps.*
-import com.geecee.escapelauncher.core.domain.repository.db.ModifiedAppsRepository
-import com.geecee.escapelauncher.core.domain.repository.settings.*
-import com.geecee.escapelauncher.core.model.AppAction
+import com.geecee.escapelauncher.core.domain.repository.db.ScreenTimeRepository
+import com.geecee.escapelauncher.core.domain.repository.settings.AppearanceRepository
+import com.geecee.escapelauncher.core.domain.repository.settings.ClockRepository
+import com.geecee.escapelauncher.core.domain.repository.settings.LauncherBehaviorRepository
+import com.geecee.escapelauncher.core.domain.repository.settings.OnboardingRepository
+import com.geecee.escapelauncher.core.domain.repository.settings.ScreenTimeSettingsRepository
+import com.geecee.escapelauncher.core.domain.repository.settings.WeatherSettingsRepository
+import com.geecee.escapelauncher.core.domain.screentime.GetAppUsageUiListUseCase
+import com.geecee.escapelauncher.core.domain.time.GetCurrentTimePartsUseCase
+import com.geecee.escapelauncher.core.model.AppUsageUiModel
 import com.geecee.escapelauncher.core.model.InstalledApp
-import com.geecee.escapelauncher.core.ui.R
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import jakarta.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
-import kotlin.collections.map
-import com.geecee.escapelauncher.core.domain.apps.UninstallAppUseCase
-import com.geecee.escapelauncher.core.domain.apps.OpenAppDetailsUseCase
-import com.geecee.escapelauncher.core.domain.repository.db.ScreenTimeRepository
-import com.geecee.escapelauncher.core.domain.screentime.GetAppUsageUiListUseCase
-import com.geecee.escapelauncher.core.model.AppUsageUiModel
-import com.geecee.escapelauncher.core.navigation.AppNavKey
-import com.geecee.escapelauncher.core.navigation.NavRouter
-import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
+import java.time.LocalTime
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
@@ -48,16 +56,10 @@ class NewHomeScreenViewModel @Inject constructor(
     screenTimeSettingsRepository: ScreenTimeSettingsRepository,
     weatherSettingsRepository: WeatherSettingsRepository,
     getAppUsageUiListUseCase: GetAppUsageUiListUseCase,
-    private val modifiedAppsRepository: ModifiedAppsRepository,
     getFavoriteAppsUseCase: GetFavoriteAppsUseCase,
     appConfiguration: AppConfiguration,
-    private val getAppActionsUseCase: GetAppActionsUseCase,
-    private val getAppShortcutsUseCase: GetAppShortcutsUseCase,
-    private val startShortcutUseCase: StartShortcutUseCase,
-    private val uninstallAppUseCase: UninstallAppUseCase,
-    private val openAppDetailsUseCase: OpenAppDetailsUseCase,
+    private val getCurrentTimeParts: GetCurrentTimePartsUseCase,
     private val analyticsProxy: AnalyticsProxy,
-    val navRouter: NavRouter,
     @ApplicationContext private val context: Context,
     screenTimeRepository: ScreenTimeRepository
 ) : ViewModel() {
@@ -91,6 +93,38 @@ class NewHomeScreenViewModel @Inject constructor(
         }
     }
 
+    // Clock
+    private val _timeParts = MutableStateFlow(getCurrentTimeParts.invoke(LocalTime.now(), false))
+    val timeParts: StateFlow<Triple<Int, Int, Boolean>> = _timeParts.asStateFlow()
+    private var clockTickerJob: Job? = null
+
+    private fun timeTicksFlow(): Flow<Unit> = callbackFlow {
+        trySend(Unit)
+        val receiver = object : BroadcastReceiver() {
+            override fun onReceive(receiverContext: Context?, intent: Intent?) {
+                trySend(Unit)
+            }
+        }
+        val filter = IntentFilter().apply {
+            addAction(Intent.ACTION_TIME_TICK)
+            addAction(Intent.ACTION_TIME_CHANGED)
+            addAction(Intent.ACTION_TIMEZONE_CHANGED)
+        }
+        ContextCompat.registerReceiver(context, receiver, filter, ContextCompat.RECEIVER_NOT_EXPORTED)
+        awaitClose {
+            context.unregisterReceiver(receiver)
+        }
+    }
+
+    fun startClockTicker(twelveHourDisplay: Boolean) {
+        clockTickerJob?.cancel()
+        clockTickerJob = viewModelScope.launch {
+            timeTicksFlow().collect {
+                _timeParts.value = getCurrentTimeParts.invoke(LocalTime.now(), twelveHourDisplay)
+            }
+        }
+    }
+
     // Favorite Apps
     val favoriteApps: StateFlow<List<InstalledApp>> = getFavoriteAppsUseCase()
         .stateIn(
@@ -99,107 +133,9 @@ class NewHomeScreenViewModel @Inject constructor(
             initialValue = emptyList()
         )
 
-    // Bottom Sheet State
-    private val _showBottomSheet = MutableStateFlow(false)
-    val showBottomSheet: StateFlow<Boolean> = _showBottomSheet.asStateFlow()
-    fun setBottomSheetVisible(visibility: Boolean) {
-        _showBottomSheet.value = visibility
-    }
-
-    private val _bottomSheetApp = MutableStateFlow<InstalledApp?>(null)
-    val bottomSheetApp: StateFlow<InstalledApp?> = _bottomSheetApp.asStateFlow()
-    fun setBottomSheetApp(app: InstalledApp?) {
-        _bottomSheetApp.value = app
-    }
-
     fun logException(e: Exception) {
         analyticsProxy.recordException(e)
     }
-
-    // Actions
-    val bottomSheetActions: StateFlow<List<AppAction>> = _bottomSheetApp.flatMapLatest { app ->
-        if (app == null) flowOf(emptyList())
-        else getAppActionsUseCase(app.packageName).map { actionTypes ->
-            actionTypes.map { type ->
-                when (type) {
-                    AppActionType.Uninstall -> AppAction(
-                        labelRes = R.string.uninstall,
-                        onClick = { clickedApp ->
-                            uninstallAppUseCase(clickedApp)
-                            _showBottomSheet.value = false
-                        }
-                    )
-                    is AppActionType.ToggleFavorite -> AppAction(
-                        labelRes = if (type.isFavorite) R.string.rem_from_fav else R.string.add_to_fav,
-                        isVisible = { it.isMainUserApp() },
-                        onClick = { clickedApp ->
-                            viewModelScope.launch {
-                                if (type.isFavorite) {
-                                    modifiedAppsRepository.removeFavourite(clickedApp.packageName)
-                                } else {
-                                    modifiedAppsRepository.addFavourite(clickedApp.packageName)
-                                    navRouter.navigateTo(AppNavKey.Home, true)
-                                }
-                                _showBottomSheet.value = false
-                            }
-                        }
-                    )
-                    AppActionType.Hide -> AppAction(
-                        labelRes = R.string.hide,
-                        isVisible = { it.isMainUserApp() },
-                        onClick = { clickedApp ->
-                            viewModelScope.launch {
-                                modifiedAppsRepository.setHidden(clickedApp.packageName, true)
-                                _showBottomSheet.value = false
-                            }
-                        }
-                    )
-                    AppActionType.AppInfo -> AppAction(
-                        labelRes = R.string.app_info,
-                        onClick = { clickedApp ->
-                            openAppDetailsUseCase(clickedApp)
-                            _showBottomSheet.value = false
-                        }
-                    )
-                    AppActionType.AddChallenge -> AppAction(
-                        labelRes = R.string.add_open_challenge,
-                        isVisible = { it.isMainUserApp() },
-                        onClick = { clickedApp ->
-                            viewModelScope.launch {
-                                modifiedAppsRepository.setChallenge(clickedApp.packageName, true)
-                                _showBottomSheet.value = false
-                            }
-                        }
-                    )
-                }
-            }
-        }
-    }.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5000),
-        initialValue = emptyList()
-    )
-
-    val shortcutActions: StateFlow<List<AppAction>> = _bottomSheetApp.map { app ->
-        if (app == null || !app.isMainUserApp()) return@map emptyList()
-        
-        getAppShortcutsUseCase(app.packageName).map { shortcut ->
-            AppAction(
-                label = shortcut.label,
-                onClick = { clickedApp ->
-                    startShortcutUseCase(clickedApp.packageName, shortcut.id)
-                    _showBottomSheet.value = false
-                    viewModelScope.launch {
-                        navRouter.navigateTo(AppNavKey.Home, true)
-                    }
-                }
-            )
-        }
-    }.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5000),
-        initialValue = emptyList()
-    )
 
     private fun getDatesPair(): Pair<String, String> {
         val now = Date()
@@ -216,7 +152,7 @@ class NewHomeScreenViewModel @Inject constructor(
         trySend(getDatesPair())
 
         val receiver = object : BroadcastReceiver() {
-            override fun onReceive(context: Context?, intent: Intent?) {
+            override fun onReceive(receiverContext: Context?, intent: Intent?) {
                 trySend(getDatesPair())
             }
         }
