@@ -1,8 +1,6 @@
 package com.geecee.escapelauncher.feature.settings.hiddenapps
 
 import android.provider.Settings
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.LocalActivity
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeOut
@@ -36,7 +34,6 @@ import com.geecee.escapelauncher.core.ui.composables.SettingsSpacer
 import com.geecee.escapelauncher.core.ui.composables.SettingsSwipeableButton
 import com.geecee.escapelauncher.core.ui.composables.SettingsSwitch
 import com.geecee.escapelauncher.core.ui.utils.doHapticFeedBack
-import com.geecee.escapelauncher.feature.screentime.ScreenTimeViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.milliseconds
@@ -52,7 +49,6 @@ import kotlin.time.Duration.Companion.milliseconds
 @Composable
 fun HiddenApps(
     hiddenAppsViewModel: HiddenAppsViewModel = hiltViewModel(),
-    screenTimeViewModel: ScreenTimeViewModel = hiltViewModel(LocalActivity.current as ComponentActivity),
     goToManageHiddenApps: () -> Unit,
     goBack: () -> Unit
 ) {
@@ -128,7 +124,7 @@ fun HiddenApps(
 
                             app?.let {
                                 hiddenAppsViewModel.launchApp(app)
-                                screenTimeViewModel.onAppOpened(app.packageName)
+                                hiddenAppsViewModel.onAppOpened(app.packageName)
                             }
                         },
                         onDeleteClick = {

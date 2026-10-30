@@ -8,7 +8,6 @@ android {
 }
 
 dependencies {
-    implementation(project(":feature:screentime"))
     implementation(project(":feature:weather"))
     implementation(project(":core:ui"))
     implementation(project(":core:common"))

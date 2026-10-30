@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.geecee.escapelauncher.core.domain.apps.LaunchAppUseCase
 import com.geecee.escapelauncher.core.domain.repository.android.AppsRepository
 import com.geecee.escapelauncher.core.domain.repository.db.ModifiedAppsRepository
+import com.geecee.escapelauncher.core.domain.repository.db.ScreenTimeRepository
 import com.geecee.escapelauncher.core.domain.repository.settings.SearchSettingsRepository
 import com.geecee.escapelauncher.core.domain.repository.settings.LauncherBehaviorRepository
 import com.geecee.escapelauncher.core.model.InstalledApp
@@ -24,7 +25,8 @@ class HiddenAppsViewModel @Inject constructor(
     private val searchSettingsRepository: SearchSettingsRepository,
     launcherBehaviorRepository: LauncherBehaviorRepository,
     private val launchAppUseCase: LaunchAppUseCase,
-    val navRouter: NavRouter
+    val navRouter: NavRouter,
+    private val screenTimeRepository: ScreenTimeRepository,
 ) : ViewModel() {
     val hiddenPackageIds: StateFlow<Set<String>> = modifiedAppsRepository.getHiddenPackageIdsFlow()
         .map { it.toSet() }
@@ -60,4 +62,8 @@ class HiddenAppsViewModel @Inject constructor(
     }
 
     val installedApps = appsRepository.mainUserApps
+
+    fun onAppOpened(packageName: String) {
+        screenTimeRepository.onAppOpened(packageName)
+    }
 }
