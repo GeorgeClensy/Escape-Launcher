@@ -5,4 +5,5 @@ interface AppConfiguration {
     val appVersion: String
     val appName: String
     val appFlavour: String
+    val sdkInt: Int
 }

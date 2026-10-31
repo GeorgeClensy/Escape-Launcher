@@ -1,6 +1,6 @@
 package com.geecee.escapelauncher.core.domain.managedprofiles
 
-import android.os.Build
+import com.geecee.escapelauncher.core.domain.repository.AppConfiguration
 import javax.inject.Inject
 
 /**
@@ -9,7 +9,9 @@ import javax.inject.Inject
  *
  * This is primarily used to decide whether to show profile-specific UI elements.
  */
-class IsManagedProfileSupportedUseCase @Inject constructor() {
+class IsManagedProfileSupportedUseCase @Inject constructor(
+    private val appConfiguration: AppConfiguration
+) {
     /**
      * Checks if the given [ManagedProfileType] is supported on this device's OS version.
      *
@@ -20,12 +22,17 @@ class IsManagedProfileSupportedUseCase @Inject constructor() {
         return when (type) {
             ManagedProfileType.PrivateSpace -> {
                 // Private Space is only available on Android 15+
-                Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM
+                appConfiguration.sdkInt >= MIN_SDK_PRIVATE_SPACE
             }
             ManagedProfileType.WorkApps -> {
                 // Work apps needs android R to check if profile is work apps or not
-                Build.VERSION.SDK_INT >= Build.VERSION_CODES.R
+                appConfiguration.sdkInt >= MIN_SDK_WORK_APPS
             }
         }
+    }
+
+    private companion object {
+        const val MIN_SDK_PRIVATE_SPACE = 35 // Android 15 (Vanilla Ice Cream)
+        const val MIN_SDK_WORK_APPS = 30     // Android 11 (R)
     }
 }

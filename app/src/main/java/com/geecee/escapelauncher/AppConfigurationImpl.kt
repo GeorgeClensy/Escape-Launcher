@@ -2,6 +2,7 @@
 
 package com.geecee.escapelauncher
 
+import android.os.Build
 import com.geecee.escapelauncher.core.domain.repository.AppConfiguration
 import dagger.Binds
 import dagger.Module
@@ -15,6 +16,7 @@ class AppConfigurationImpl @Inject constructor() : AppConfiguration {
     override val appVersion: String = BuildConfig.APP_VERSION
     override val appName: String = BuildConfig.APP_NAME
     override val appFlavour: String = BuildConfig.APP_FLAVOUR
+    override val sdkInt: Int = Build.VERSION.SDK_INT
 }
 
 @Suppress("unused") // It is used by hilt

@@ -1,6 +1,5 @@
 package com.geecee.escapelauncher.core.domain.onboarding
 
-import android.os.Build
 import com.geecee.escapelauncher.core.domain.repository.AppConfiguration
 import io.mockk.every
 import io.mockk.mockk
@@ -18,11 +17,12 @@ class GetOnboardingScreenUseCaseTest {
     fun setup() {
         // Default setup
         every { appConfiguration.isFoss } returns false
+        every { appConfiguration.sdkInt } returns 28
     }
 
     @Test
     fun `should show all screens when not FOSS and SDK is P or higher`() {
-        useCase = GetOnboardingScreenUseCase(appConfiguration, Build.VERSION_CODES.P)
+        useCase = GetOnboardingScreenUseCase(appConfiguration)
         val screens = useCase()
 
         assertTrue(screens.contains(OnboardingScreen.WELCOME))
@@ -37,7 +37,7 @@ class GetOnboardingScreenUseCaseTest {
     @Test
     fun `should omit ANALYTICS screen when build is FOSS`() {
         every { appConfiguration.isFoss } returns true
-        useCase = GetOnboardingScreenUseCase(appConfiguration, Build.VERSION_CODES.P)
+        useCase = GetOnboardingScreenUseCase(appConfiguration)
         val screens = useCase()
 
         assertFalse(screens.contains(OnboardingScreen.ANALYTICS))
@@ -46,7 +46,8 @@ class GetOnboardingScreenUseCaseTest {
 
     @Test
     fun `should omit ACCESSIBILITY screen when SDK is lower than P`() {
-        useCase = GetOnboardingScreenUseCase(appConfiguration, Build.VERSION_CODES.O)
+        every { appConfiguration.sdkInt } returns 26
+        useCase = GetOnboardingScreenUseCase(appConfiguration)
         val screens = useCase()
 
         assertFalse(screens.contains(OnboardingScreen.ACCESSIBILITY))
@@ -56,7 +57,8 @@ class GetOnboardingScreenUseCaseTest {
     @Test
     fun `should omit both ANALYTICS and ACCESSIBILITY when FOSS and SDK is lower than P`() {
         every { appConfiguration.isFoss } returns true
-        useCase = GetOnboardingScreenUseCase(appConfiguration, Build.VERSION_CODES.O)
+        every { appConfiguration.sdkInt } returns 26
+        useCase = GetOnboardingScreenUseCase(appConfiguration)
         val screens = useCase()
 
         assertFalse(screens.contains(OnboardingScreen.ANALYTICS))

@@ -1,5 +1,6 @@
 package com.geecee.escapelauncher.feature.onboarding
 
+import android.content.Intent
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -38,7 +39,7 @@ class OnboardingViewModel @Inject constructor(
         _isDefaultLauncher.value = getIsDefaultLauncherUseCase()
     }
 
-    fun getPromptDefaultLauncherIntent(): android.content.Intent {
+    fun getPromptDefaultLauncherIntent(): Intent {
         return setDefaultLauncherUseCase()
     }
 

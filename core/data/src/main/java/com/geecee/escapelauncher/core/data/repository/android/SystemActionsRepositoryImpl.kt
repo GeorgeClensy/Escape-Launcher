@@ -14,6 +14,7 @@ import android.graphics.Paint
 import android.graphics.Rect
 import android.os.Build
 import android.provider.Settings
+import android.util.Log
 import androidx.annotation.RequiresPermission
 import androidx.core.content.FileProvider
 import androidx.core.graphics.createBitmap
@@ -153,5 +154,43 @@ class SystemActionsRepositoryImpl @Inject constructor(
 
     override fun lockScreen() {
         AccessibilityEventManager.triggerLockScreen()
+    }
+
+    override fun launchApp(app: InstalledApp) {
+        val options = ActivityOptions.makeBasic()
+
+        try {
+            val launcherApps = context.getSystemService(Context.LAUNCHER_APPS_SERVICE) as? LauncherApps
+            if (launcherApps != null) {
+                launcherApps.startMainActivity(
+                    app.componentName,
+                    app.user,
+                    Rect(),
+                    options.toBundle()
+                )
+            } else {
+                throw SecurityException("LauncherApps service is unavailable")
+            }
+        } catch (e: SecurityException) {
+            Log.e("SystemActionsRepo", "SecurityException opening app: ${e.message}")
+            if (app.user != android.os.Process.myUserHandle()) {
+                throw e
+            }
+            try {
+                val intent = context.packageManager.getLaunchIntentForPackage(app.packageName)
+                intent?.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                if (intent != null) {
+                    context.startActivity(intent)
+                } else {
+                    throw Exception("Launch intent not found for fallback launch of ${app.packageName}", e)
+                }
+            } catch (fallbackException: Exception) {
+                Log.e("SystemActionsRepo", "Failed to launch app even with fallback", fallbackException)
+                throw fallbackException
+            }
+        } catch (e: Exception) {
+            Log.e("SystemActionsRepo", "Error opening app", e)
+            throw e
+        }
     }
 }

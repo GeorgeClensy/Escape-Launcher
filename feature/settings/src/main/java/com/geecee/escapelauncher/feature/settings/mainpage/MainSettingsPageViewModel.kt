@@ -1,5 +1,6 @@
 package com.geecee.escapelauncher.feature.settings.mainpage
 
+import android.content.Intent
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.geecee.escapelauncher.core.common.DefaultSettings
@@ -129,7 +130,7 @@ class MainSettingsPageViewModel @Inject constructor(
         _isDefaultLauncher.value = getIsDefaultLauncherUseCase()
     }
 
-    fun getPromptDefaultLauncherIntent(): android.content.Intent {
+    fun getPromptDefaultLauncherIntent(): Intent {
         return setDefaultLauncherUseCase()
     }
 

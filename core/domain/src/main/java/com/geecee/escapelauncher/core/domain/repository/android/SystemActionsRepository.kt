@@ -1,5 +1,6 @@
 package com.geecee.escapelauncher.core.domain.repository.android
 
+import android.content.Intent
 import android.graphics.Rect
 import com.geecee.escapelauncher.core.model.InstalledApp
 import kotlinx.coroutines.flow.Flow
@@ -28,7 +29,7 @@ interface SystemActionsRepository {
     /**
      * Returns an Intent to prompt the user to set Escape Launcher as the default home app.
      */
-    fun getPromptDefaultLauncherIntent(): android.content.Intent
+    fun getPromptDefaultLauncherIntent(): Intent
 
     /**
      * Sets a solid color as the system wallpaper for the home screen.
@@ -39,4 +40,9 @@ interface SystemActionsRepository {
      * Locks the device screen using the accessibility service.
      */
     fun lockScreen()
+
+    /**
+     * Launches the provided app using the system's LauncherApps or fallback intent.
+     */
+    fun launchApp(app: InstalledApp)
 }

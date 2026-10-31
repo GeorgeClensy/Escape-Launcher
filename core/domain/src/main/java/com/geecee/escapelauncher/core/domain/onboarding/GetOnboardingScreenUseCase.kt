@@ -1,7 +1,5 @@
 package com.geecee.escapelauncher.core.domain.onboarding
 
-import android.os.Build
-import androidx.annotation.VisibleForTesting
 import com.geecee.escapelauncher.core.domain.repository.AppConfiguration
 import jakarta.inject.Inject
 
@@ -35,17 +33,6 @@ enum class OnboardingScreen {
 class GetOnboardingScreenUseCase @Inject constructor(
     private val appConfiguration: AppConfiguration,
 ) {
-    @get:VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
-    internal var sdkInt: Int = Build.VERSION.SDK_INT
-
-    @VisibleForTesting
-    internal constructor(
-        appConfiguration: AppConfiguration,
-        sdkInt: Int
-    ) : this(appConfiguration) {
-        this.sdkInt = sdkInt
-    }
-
     /**
      * Executes the use case to retrieve the ordered list of onboarding screens.
      *
@@ -60,7 +47,7 @@ class GetOnboardingScreenUseCase @Inject constructor(
      */
     operator fun invoke(): List<OnboardingScreen> {
         val isFoss = appConfiguration.isFoss
-        val showAccessibility = sdkInt >= Build.VERSION_CODES.P
+        val showAccessibility = appConfiguration.sdkInt >= MIN_SDK_ACCESSIBILITY
 
         val screens = listOfNotNull(
             OnboardingScreen.WELCOME,
@@ -73,5 +60,9 @@ class GetOnboardingScreenUseCase @Inject constructor(
         )
 
         return screens
+    }
+
+    private companion object {
+        const val MIN_SDK_ACCESSIBILITY = 28 // Android 9 (Pie)
     }
 }

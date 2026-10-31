@@ -1,6 +1,6 @@
 package com.geecee.escapelauncher.core.domain.managedprofiles
 
-import android.os.Build
+import com.geecee.escapelauncher.core.domain.repository.AppConfiguration
 import javax.inject.Inject
 
 /**
@@ -10,7 +10,9 @@ import javax.inject.Inject
  * Toggling typically requires Android 9 (Pie) or higher for Work Profiles, and
  * Android 15 (Vanilla Ice Cream) for Private Space.
  */
-class CanToggleManagedProfileUseCase @Inject constructor() {
+class CanToggleManagedProfileUseCase @Inject constructor(
+    private val appConfiguration: AppConfiguration
+) {
     /**
      * Checks if the lock state of the given [ManagedProfileType] can be toggled on this device.
      *
@@ -20,11 +22,17 @@ class CanToggleManagedProfileUseCase @Inject constructor() {
     operator fun invoke(type: ManagedProfileType): Boolean {
         return when (type) {
             ManagedProfileType.PrivateSpace -> {
-                Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM
+                appConfiguration.sdkInt >= MIN_SDK_PRIVATE_SPACE
             }
+
             ManagedProfileType.WorkApps -> {
-                Build.VERSION.SDK_INT >= Build.VERSION_CODES.P
+                appConfiguration.sdkInt >= MIN_SDK_WORK_PROFILE
             }
         }
+    }
+
+    private companion object {
+        const val MIN_SDK_PRIVATE_SPACE = 35 // Android 15 (Vanilla Ice Cream)
+        const val MIN_SDK_WORK_PROFILE = 28  // Android 9 (Pie)
     }
 }
