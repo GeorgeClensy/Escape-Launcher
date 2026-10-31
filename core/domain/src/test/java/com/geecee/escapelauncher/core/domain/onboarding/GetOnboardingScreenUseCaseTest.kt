@@ -55,6 +55,15 @@ class GetOnboardingScreenUseCaseTest {
     }
 
     @Test
+    fun `should omit ACCESSIBILITY screen on API 27`() {
+        every { appConfiguration.sdkInt } returns 27
+        useCase = GetOnboardingScreenUseCase(appConfiguration)
+        val screens = useCase()
+
+        assertFalse(screens.contains(OnboardingScreen.ACCESSIBILITY))
+    }
+
+    @Test
     fun `should omit both ANALYTICS and ACCESSIBILITY when FOSS and SDK is lower than P`() {
         every { appConfiguration.isFoss } returns true
         every { appConfiguration.sdkInt } returns 26

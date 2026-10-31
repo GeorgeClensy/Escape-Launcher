@@ -42,7 +42,16 @@ interface SystemActionsRepository {
     fun lockScreen()
 
     /**
-     * Launches the provided app using the system's LauncherApps or fallback intent.
+     * Launches the main activity of [app].
+     *
+     * Uses [android.content.pm.LauncherApps] so apps in other profiles (work profile,
+     * private space) can be launched. If that fails with a [SecurityException] for an app
+     * belonging to the current user, a best-effort fallback through the package manager
+     * launch intent is attempted. The fallback is deliberately skipped for apps in other
+     * profiles, because it could launch an unrelated app with the same package name.
+     *
+     * @throws SecurityException if [app] belongs to a different profile and cannot be launched.
+     * @throws Exception if neither the primary nor the fallback launch path succeeds.
      */
     fun launchApp(app: InstalledApp)
 }
