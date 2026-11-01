@@ -6,6 +6,7 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Lock
@@ -51,6 +52,7 @@ fun MainPagerScreen(
     appsListViewModel: AppsListViewModel = hiltViewModel(),
     screenTimeViewModel: ScreenTimeViewModel = hiltViewModel(LocalActivity.current as ComponentActivity),
 ) {
+    val appslistScrollState = rememberLazyListState()
     val haptics = LocalHapticFeedback.current
     val hideScreenTimePage by viewModel.hideScreenTimePage.collectAsState()
     val doubleTapToLock by viewModel.doubleTapToLock.collectAsState(initial = DefaultSettings.DOUBLE_TAP_TO_LOCK)
@@ -149,6 +151,7 @@ fun MainPagerScreen(
     LaunchedEffect(isAppsListVisible) {
         if (!isAppsListVisible) {
             appsListViewModel.onSearchExpandedChanged(false)
+            appslistScrollState.scrollToItem(0)
             viewModel.setBottomSheetVisible(false)
         } else if (autoOpenSearch) {
             appsListViewModel.onSearchExpandedChanged(true)
@@ -208,6 +211,7 @@ fun MainPagerScreen(
             )
 
             appsListPageIndex -> AppsListTabScreen(
+                scrollState = appslistScrollState,
                 appsListViewModel = appsListViewModel,
                 appsListTabs = appsListTabs,
                 handleAppClick = handleAppClick,

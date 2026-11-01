@@ -23,6 +23,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.AndroidUiDispatcher
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
@@ -60,6 +61,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -154,6 +156,9 @@ class MainHomeScreenActivity : ComponentActivity() {
                 val isFirstTime = globalViewModel.firstTime.first()
                 if (!isFirstTime) {
                     navRouter.navigateTo(AppNavKey.Home, true)
+                    withContext(AndroidUiDispatcher.Main) {
+                        mainPagerViewModel.animatedGoToMainPage()
+                    }
                 }
             }
         }

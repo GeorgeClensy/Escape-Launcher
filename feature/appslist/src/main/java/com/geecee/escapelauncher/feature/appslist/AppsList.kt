@@ -12,8 +12,8 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -32,6 +32,7 @@ import com.geecee.escapelauncher.core.ui.composables.HomeScreenItem
 @Composable
 fun AppsList(
     modifier: Modifier = Modifier,
+    scrollState: LazyListState,
     padding: PaddingValues = PaddingValues(),
     onAppOpened: (app: InstalledApp) -> Unit = {},
     onAppLongClick: (app: InstalledApp) -> Unit = {},
@@ -41,8 +42,6 @@ fun AppsList(
     val appsListAlignment by appsListViewModel.appsAlignment.collectAsState(initial = DefaultSettingsUi.APPS_ALIGNMENT)
     val showWallpaper by appsListViewModel.showWallpaper.collectAsState(initial = false)
     val appListItems by appsListViewModel.appListItems.collectAsState()
-
-    val scrollState = rememberLazyListState()
 
     Box(
         modifier

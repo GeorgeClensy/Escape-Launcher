@@ -1,5 +1,6 @@
 package com.geecee.escapelauncher.screens
 
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Apps
 import androidx.compose.runtime.Composable
@@ -20,6 +21,7 @@ import com.geecee.escapelauncher.feature.appslist.AppsListViewModel
 
 @Composable
 fun AppsListTabScreen(
+    scrollState: LazyListState,
     appsListViewModel: AppsListViewModel,
     appsListTabs: List<TabbedScreen?>,
     handleAppClick: (InstalledApp) -> Unit,
@@ -43,6 +45,7 @@ fun AppsListTabScreen(
             TabbedScreen(
                 title = "All Apps", icon = Icons.Rounded.Apps, content = { padding ->
                     AppsList(
+                        scrollState = scrollState,
                         padding = padding,
                         onAppOpened = { app ->
                             handleAppClick(app)
