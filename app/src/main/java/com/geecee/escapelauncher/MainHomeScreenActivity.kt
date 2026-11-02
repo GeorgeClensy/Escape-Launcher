@@ -148,6 +148,7 @@ class MainHomeScreenActivity : ComponentActivity() {
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         setIntent(intent)
+        mainPagerViewModel.cancelCountdown()
 
         // Responsible for taking you to the favourites page when you press the home button
         if (intent.action == Intent.ACTION_MAIN && intent.hasCategory(Intent.CATEGORY_HOME)) {
@@ -179,6 +180,11 @@ class MainHomeScreenActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    override fun onPause() {
+        mainPagerViewModel.cancelCountdown()
+        super.onPause()
     }
 
     override fun onStop() {

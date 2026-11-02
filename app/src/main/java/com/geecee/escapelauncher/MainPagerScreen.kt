@@ -72,7 +72,6 @@ fun MainPagerScreen(
     val handleAppClick: (InstalledApp) -> Unit = { app ->
         viewModel.openApp(
             app = app,
-            overrideChallenge = false,
             onAppOpened = {
                 screenTimeViewModel.onAppOpened(it)
                 appsListViewModel.onSearchExpandedChanged(false)
@@ -88,6 +87,7 @@ fun MainPagerScreen(
 
     // Make it that if you go back you go back to main page
     BackHandler(enabled = true) {
+        viewModel.cancelCountdown()
         coroutineScope.launch {
             viewModel.animatedGoToMainPage()
         }
@@ -227,7 +227,6 @@ fun MainPagerScreen(
     // Open Challenge
     OpenChallengeOverlay(
         viewModel = viewModel,
-        screenTimeViewModel = screenTimeViewModel,
         hapticFeedbackEnabled = hapticFeedbackEnabled
     )
 }
