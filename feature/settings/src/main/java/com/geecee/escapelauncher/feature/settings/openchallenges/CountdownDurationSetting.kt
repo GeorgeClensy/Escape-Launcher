@@ -50,7 +50,12 @@ internal fun CountdownDurationSetting(
             DefaultSettings.MIN_COUNTDOWN_SECONDS..DefaultSettings.MAX_COUNTDOWN_SECONDS
         AlertDialog(
             onDismissRequest = { isEditing = false },
-            title = { Text(stringResource(R.string.countdown_duration_title)) },
+            title = {
+                Text(
+                    text = stringResource(R.string.countdown_duration_title),
+                    style = MaterialTheme.typography.bodyLarge
+                )
+            },
             text = {
                 OutlinedTextField(
                     value = input,
