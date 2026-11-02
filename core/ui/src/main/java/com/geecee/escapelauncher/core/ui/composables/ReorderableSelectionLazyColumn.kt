@@ -13,6 +13,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DragHandle
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
@@ -22,6 +23,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyListState
@@ -44,6 +47,9 @@ fun <T> ReorderableSelectionLazyColumn(
     hideBack: Boolean = false,
     titleColor: Color = MaterialTheme.colorScheme.onSurface,
     topPadding: Boolean = true,
+    headerContent: (@Composable () -> Unit)? = null,
+    selectedSectionTitle: String? = null,
+    unselectedSectionTitle: String? = null,
 ) {
     val lazyListState = rememberLazyListState()
     val localSelectedItems = remember { mutableStateListOf<T>() }
@@ -58,15 +64,21 @@ fun <T> ReorderableSelectionLazyColumn(
         }
     }
 
-    val displayData by remember(items) {
+    val displayData by remember(items, selectedSectionTitle, unselectedSectionTitle) {
         derivedStateOf {
             val selectedIds = localSelectedItems.map(id).toSet()
             val unselected = items.filter { !selectedIds.contains(id(it)) }
 
             val combined = buildList {
+                if (localSelectedItems.isNotEmpty() && selectedSectionTitle != null) {
+                    add(ReorderableSelectionListItem.SectionHeader(selectedSectionTitle, true))
+                }
                 addAll(localSelectedItems.map { ReorderableSelectionListItem.Entry(it, isSelected = true) })
-                if (localSelectedItems.isNotEmpty() && unselected.isNotEmpty()) {
+                if (localSelectedItems.isNotEmpty() && unselected.isNotEmpty() && unselectedSectionTitle == null) {
                     add(ReorderableSelectionListItem.Spacer)
+                }
+                if (unselected.isNotEmpty() && unselectedSectionTitle != null) {
+                    add(ReorderableSelectionListItem.SectionHeader(unselectedSectionTitle, false))
                 }
                 addAll(unselected.map { ReorderableSelectionListItem.Entry(it, isSelected = false) })
             }
@@ -85,7 +97,9 @@ fun <T> ReorderableSelectionLazyColumn(
     val combinedItems = displayData.first
     val boundaryIds = displayData.second
 
-    val headerCount = if (title != null && onBackClicked != null) 1 else 0
+    val headerCount = (if (title != null && onBackClicked != null) 1 else 0) +
+        (if (headerContent != null) 1 else 0) +
+        (if (localSelectedItems.isNotEmpty() && selectedSectionTitle != null) 1 else 0)
     val reorderableState = rememberReorderableLazyListState(lazyListState) { from, to ->
         val adjustedFrom = from.index - headerCount
         val adjustedTo = to.index - headerCount
@@ -117,11 +131,16 @@ fun <T> ReorderableSelectionLazyColumn(
             }
         }
 
+        if (headerContent != null) {
+            item(key = "header_content") { headerContent() }
+        }
+
         items(
             items = combinedItems,
             key = { item ->
                 when (item) {
                     is ReorderableSelectionListItem.Entry -> "${if (item.isSelected) "sel" else "avail"}_${id(item.item)}"
+                    is ReorderableSelectionListItem.SectionHeader -> "section_${item.isSelected}"
                     ReorderableSelectionListItem.Spacer -> "spacer"
                 }
             }
@@ -183,6 +202,18 @@ fun <T> ReorderableSelectionLazyColumn(
                     }
                 }
 
+                is ReorderableSelectionListItem.SectionHeader -> {
+                    Text(
+                        text = listItem.title,
+                        style = MaterialTheme.typography.titleSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(start = 16.dp, top = 30.dp, bottom = 12.dp)
+                            .semantics { heading() }
+                    )
+                }
+
                 ReorderableSelectionListItem.Spacer -> {
                     SettingsSpacer()
                 }
@@ -193,6 +224,7 @@ fun <T> ReorderableSelectionLazyColumn(
 
 private sealed class ReorderableSelectionListItem<out T> {
     data class Entry<T>(val item: T, val isSelected: Boolean) : ReorderableSelectionListItem<T>()
+    data class SectionHeader(val title: String, val isSelected: Boolean) : ReorderableSelectionListItem<Nothing>()
     object Spacer : ReorderableSelectionListItem<Nothing>()
 }
 

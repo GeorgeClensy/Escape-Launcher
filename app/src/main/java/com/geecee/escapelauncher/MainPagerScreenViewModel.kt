@@ -6,7 +6,6 @@ import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.pager.PagerState
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
@@ -42,12 +41,14 @@ import com.geecee.escapelauncher.feature.newwidgets.WidgetHostManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import jakarta.inject.Inject
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
@@ -60,7 +61,7 @@ class MainPagerScreenViewModel @Inject constructor(
     @ApplicationContext context: Context,
     private val onboardingRepository: OnboardingRepository,
     private val screenTimeSettingsRepository: ScreenTimeSettingsRepository,
-    launcherBehaviorRepository: LauncherBehaviorRepository,
+    private val launcherBehaviorRepository: LauncherBehaviorRepository,
     widgetSettingsRepository: WidgetSettingsRepository,
     appearanceRepository: AppearanceRepository,
     val widgetHostManager: WidgetHostManager,
@@ -116,9 +117,15 @@ class MainPagerScreenViewModel @Inject constructor(
         lockScreenUseCase()
     }
 
-    var currentSelectedApp = mutableStateOf(InstalledApp("", "", android.content.ComponentName("", "")))
+    private val _countdownRemaining = MutableStateFlow<Int?>(null)
+    val countdownRemaining: StateFlow<Int?> = _countdownRemaining.asStateFlow()
+    private var appLaunchJob: Job? = null
 
-    var showOpenChallenge = mutableStateOf(false)
+    fun cancelCountdown() {
+        appLaunchJob?.cancel()
+        appLaunchJob = null
+        _countdownRemaining.value = null
+    }
 
     val interactionSource = MutableInteractionSource()
 
@@ -160,15 +167,10 @@ class MainPagerScreenViewModel @Inject constructor(
         }
     }
 
-    fun updateSelectedApp(app: InstalledApp) {
-        currentSelectedApp.value = app
-    }
-
     /**
      * Logic to handle what happens when an app is launched
      */
-    fun onAppLaunched(app: InstalledApp) {
-        updateSelectedApp(app)
+    fun onAppLaunched() {
         viewModelScope.launch {
             delay(500.milliseconds)
             goToMainPage()
@@ -180,24 +182,22 @@ class MainPagerScreenViewModel @Inject constructor(
      */
     fun openApp(
         app: InstalledApp,
-        overrideChallenge: Boolean = false,
         onAppOpened: ((String) -> Unit)? = null
     ) {
-        viewModelScope.launch {
-            when (tryOpenAppUseCase(app.packageName, overrideChallenge)) {
-                TryOpenAppResult.ShowChallenge -> {
-                    showOpenChallenge.value = true
-                    updateSelectedApp(app)
+        cancelCountdown()
+        appLaunchJob = viewModelScope.launch {
+            if (tryOpenAppUseCase(app.packageName) == TryOpenAppResult.ShowChallenge) {
+                // Read persisted settings before starting, rather than a UI flow's initial value.
+                val duration = launcherBehaviorRepository.countdownSeconds.first()
+                for (remaining in duration downTo 1) {
+                    _countdownRemaining.value = remaining
+                    delay(1000.milliseconds)
                 }
-                TryOpenAppResult.Launch -> {
-                    if (launchAppUseCase(app, onAppOpened)) {
-                        onAppLaunched(app)
-
-                        if (overrideChallenge) {
-                            showOpenChallenge.value = false
-                        }
-                    }
-                }
+            }
+            // Clear the challenge before launching; recomposition cannot launch it again.
+            _countdownRemaining.value = null
+            if (launchAppUseCase(app, onAppOpened)) {
+                onAppLaunched()
             }
         }
     }

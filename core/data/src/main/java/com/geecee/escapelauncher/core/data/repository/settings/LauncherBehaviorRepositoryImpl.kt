@@ -13,6 +13,18 @@ import kotlinx.coroutines.flow.map
 class LauncherBehaviorRepositoryImpl @Inject constructor(
     private val dataStore: DataStore<Preferences>
 ) : LauncherBehaviorRepository {
+    override val countdownSeconds: Flow<Int> = dataStore.data.map {
+        (it[PreferencesKeys.COUNTDOWN_SECONDS] ?: DefaultSettings.COUNTDOWN_SECONDS)
+            .coerceIn(DefaultSettings.MIN_COUNTDOWN_SECONDS, DefaultSettings.MAX_COUNTDOWN_SECONDS)
+    }
+    override suspend fun setCountdownSeconds(seconds: Int) {
+        dataStore.edit {
+            it[PreferencesKeys.COUNTDOWN_SECONDS] = seconds.coerceIn(
+                DefaultSettings.MIN_COUNTDOWN_SECONDS, DefaultSettings.MAX_COUNTDOWN_SECONDS
+            )
+        }
+    }
+
     override val hapticFeedBackEnabled: Flow<Boolean> = dataStore.data.map { it[PreferencesKeys.HAPTIC_FEEDBACK] ?: DefaultSettings.HAPTIC_FEEDBACK }
     override suspend fun setHapticFeedback(enabld: Boolean) {
         dataStore.edit { it[PreferencesKeys.HAPTIC_FEEDBACK] = enabld }
