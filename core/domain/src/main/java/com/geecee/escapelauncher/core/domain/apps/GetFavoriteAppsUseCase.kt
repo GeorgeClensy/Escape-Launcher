@@ -1,6 +1,7 @@
 package com.geecee.escapelauncher.core.domain.apps
 
 import com.geecee.escapelauncher.core.domain.repository.android.AppsRepository
+import com.geecee.escapelauncher.core.domain.repository.settings.HiddenAppsPasswordRepository
 import com.geecee.escapelauncher.core.domain.repository.db.ModifiedAppsRepository
 import com.geecee.escapelauncher.core.model.InstalledApp
 import jakarta.inject.Inject
@@ -13,15 +14,18 @@ import kotlinx.coroutines.flow.combine
  */
 class GetFavoriteAppsUseCase @Inject constructor(
     private val appsRepository: AppsRepository,
-    private val modifiedAppsRepository: ModifiedAppsRepository
+    private val modifiedAppsRepository: ModifiedAppsRepository,
+    private val passwordRepository: HiddenAppsPasswordRepository
 ) {
     operator fun invoke(): Flow<List<InstalledApp>> {
         return combine(
             appsRepository.mainUserApps,
-            modifiedAppsRepository.getFavouriteAppsInOrderFlow()
-        ) { apps, entities ->
+            modifiedAppsRepository.getFavouriteAppsInOrderFlow(),
+            passwordRepository.isPasswordSet
+        ) { apps, entities, isProtected ->
             entities.mapNotNull { entity ->
-                apps.find { it.packageName == entity.packageId }
+                if (isProtected && entity.isHidden) null
+                else apps.find { it.packageName == entity.packageId }
             }
         }
     }

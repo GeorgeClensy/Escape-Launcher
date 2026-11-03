@@ -1,7 +1,11 @@
 package com.geecee.escapelauncher
 
 import android.app.Application
+import android.content.ComponentName
+import android.content.pm.PackageManager
 import android.content.Context
+import android.content.Intent
+import android.util.Log
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -116,7 +120,7 @@ class MainPagerScreenViewModel @Inject constructor(
         lockScreenUseCase()
     }
 
-    var currentSelectedApp = mutableStateOf(InstalledApp("", "", android.content.ComponentName("", "")))
+    var currentSelectedApp = mutableStateOf(InstalledApp("", "", ComponentName("", "")))
 
     var showOpenChallenge = mutableStateOf(false)
 
@@ -185,6 +189,10 @@ class MainPagerScreenViewModel @Inject constructor(
     ) {
         viewModelScope.launch {
             when (tryOpenAppUseCase(app.packageName, overrideChallenge)) {
+                TryOpenAppResult.RequireHiddenAppsUnlock -> {
+                    showOpenChallenge.value = false
+                    navRouter.navigateTo(AppNavKey.Settings.HiddenApps)
+                }
                 TryOpenAppResult.ShowChallenge -> {
                     showOpenChallenge.value = true
                     updateSelectedApp(app)
@@ -198,6 +206,50 @@ class MainPagerScreenViewModel @Inject constructor(
                         }
                     }
                 }
+            }
+        }
+    }
+
+    /** Apply the hidden-app gate to the launcher's clock, calendar and weather links too. */
+    fun openHomeIntent(intent: Intent) {
+        viewModelScope.launch {
+            val context = getApplication<Application>()
+            try {
+                val resolved = intent.resolveActivity(context.packageManager) ?: return@launch
+                val packageName = resolved.packageName
+                if (tryOpenAppUseCase(packageName, bypassChallenge = true) ==
+                    TryOpenAppResult.RequireHiddenAppsUnlock) {
+                    navRouter.navigateTo(AppNavKey.Settings.HiddenApps)
+                } else {
+                    val handlers = context.packageManager.queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY)
+                    if (intent.component != null || handlers.any {
+                        ComponentName(it.activityInfo.packageName, it.activityInfo.name) == resolved
+                    }) {
+                        context.startActivity(Intent(intent).setComponent(resolved))
+                        return@launch
+                    }
+                    val excluded = handlers.filter {
+                        tryOpenAppUseCase(it.activityInfo.packageName, bypassChallenge = true) ==
+                            TryOpenAppResult.RequireHiddenAppsUnlock
+                    }.map { ComponentName(it.activityInfo.packageName, it.activityInfo.name) }
+                    val allowed = handlers.map {
+                        ComponentName(it.activityInfo.packageName, it.activityInfo.name)
+                    }.distinct() - excluded.toSet()
+                    if (allowed.size == 1) {
+                        context.startActivity(Intent(intent).setComponent(allowed.single()))
+                    } else if (excluded.isEmpty()) {
+                        context.startActivity(intent)
+                    } else if (excluded.size == handlers.size) {
+                        navRouter.navigateTo(AppNavKey.Settings.HiddenApps)
+                    } else {
+                        context.startActivity(Intent.createChooser(intent, null).apply {
+                            putExtra(Intent.EXTRA_EXCLUDE_COMPONENTS, excluded.toTypedArray())
+                            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        })
+                    }
+                }
+            } catch (error: Exception) {
+                Log.e("HomeApp", "Unable to open home screen app", error)
             }
         }
     }
@@ -299,10 +351,15 @@ class MainPagerScreenViewModel @Inject constructor(
             AppAction(
                 label = shortcut.label,
                 onClick = { clickedApp ->
-                    startShortcutUseCase(clickedApp.packageName, shortcut.id)
                     _showBottomSheet.value = false
                     viewModelScope.launch {
-                        navRouter.navigateTo(AppNavKey.Home, true)
+                        if (tryOpenAppUseCase(clickedApp.packageName, bypassChallenge = true) ==
+                            TryOpenAppResult.RequireHiddenAppsUnlock) {
+                            navRouter.navigateTo(AppNavKey.Settings.HiddenApps)
+                        } else {
+                            startShortcutUseCase(clickedApp.packageName, shortcut.id)
+                            navRouter.navigateTo(AppNavKey.Home, true)
+                        }
                     }
                 }
             )

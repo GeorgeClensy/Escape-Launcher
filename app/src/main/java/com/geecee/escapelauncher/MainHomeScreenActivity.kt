@@ -6,6 +6,7 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
+import android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -16,6 +17,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -51,6 +53,10 @@ import com.geecee.escapelauncher.feature.settings.favourites.BulkFavouritesManag
 import com.geecee.escapelauncher.feature.settings.font.ChooseFont
 import com.geecee.escapelauncher.feature.settings.font.FontLicenceDialog
 import com.geecee.escapelauncher.feature.settings.hiddenapps.BulkManageHiddenApps
+import com.geecee.escapelauncher.feature.settings.hiddenapps.HiddenAppsLockViewModel
+import com.geecee.escapelauncher.feature.settings.hiddenapps.HiddenAppsRecoverySettings
+import com.geecee.escapelauncher.feature.settings.hiddenapps.HiddenAppsPasswordGate
+import com.geecee.escapelauncher.feature.settings.hiddenapps.HiddenAppsPasswordSettings
 import com.geecee.escapelauncher.feature.settings.hiddenapps.HiddenApps
 import com.geecee.escapelauncher.feature.settings.mainpage.MainSettingsPage
 import com.geecee.escapelauncher.feature.settings.openchallenges.OpenChallengeSettings
@@ -66,6 +72,7 @@ import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainHomeScreenActivity : ComponentActivity() {
+    private val hiddenAppsLockViewModel: HiddenAppsLockViewModel by viewModels()
     private val globalViewModel: GlobalViewModel by viewModels()
     private val mainPagerViewModel: MainPagerScreenViewModel by viewModels()
     private val screenTimeViewModel: ScreenTimeViewModel by viewModels()
@@ -148,6 +155,7 @@ class MainHomeScreenActivity : ComponentActivity() {
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         setIntent(intent)
+        hiddenAppsLockViewModel.lock()
 
         // Responsible for taking you to the favourites page when you press the home button
         if (intent.action == Intent.ACTION_MAIN && intent.hasCategory(Intent.CATEGORY_HOME)) {
@@ -179,6 +187,11 @@ class MainHomeScreenActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    override fun onPause() {
+        hiddenAppsLockViewModel.lock()
+        super.onPause()
     }
 
     override fun onStop() {
@@ -245,6 +258,21 @@ class MainHomeScreenActivity : ComponentActivity() {
     @Composable
     private fun SetupNavDisplay(startDestination: AppNavKey) {
         val backStack = rememberNavBackStack(startDestination)
+        val hiddenAppsLockState by hiddenAppsLockViewModel.state.collectAsState()
+        DisposableEffect(hiddenAppsLockState.recoverySecondsRemaining != null) {
+            if (hiddenAppsLockState.recoverySecondsRemaining != null) {
+                window.addFlags(FLAG_KEEP_SCREEN_ON)
+            } else {
+                window.clearFlags(FLAG_KEEP_SCREEN_ON)
+            }
+            onDispose { window.clearFlags(FLAG_KEEP_SCREEN_ON) }
+        }
+        LaunchedEffect(backStack.lastOrNull()) {
+            if (backStack.lastOrNull() != AppNavKey.Settings.HiddenApps &&
+                backStack.lastOrNull() != AppNavKey.Settings.BulkHiddenApps) {
+                hiddenAppsLockViewModel.lock()
+            }
+        }
         val showWallpaper by globalViewModel.showWallpaper.collectAsState(initial = false)
 
         // Listener for all nav events
@@ -313,10 +341,30 @@ class MainHomeScreenActivity : ComponentActivity() {
                         )
                     }
                     entry<AppNavKey.Settings.HiddenApps> {
-                        HiddenApps(
-                            goToManageHiddenApps = {
-                                backStack.add(AppNavKey.Settings.BulkHiddenApps)
-                            }) { backStack.removeLastOrNull() }
+                        HiddenAppsPasswordGate(
+                            state = hiddenAppsLockState,
+                            onBack = { hiddenAppsLockViewModel.lock(); backStack.removeLastOrNull() },
+                            onUnlock = hiddenAppsLockViewModel::unlock,
+                            onStartRecovery = hiddenAppsLockViewModel::startRecovery,
+                            onCancelRecovery = hiddenAppsLockViewModel::cancelRecovery,
+                            onFinishRecovery = hiddenAppsLockViewModel::finishRecovery
+                        ) {
+                            HiddenApps(
+                                passwordProtected = hiddenAppsLockState.isPasswordSet == true,
+                                goToManageHiddenApps = { backStack.add(AppNavKey.Settings.BulkHiddenApps) },
+                                goBack = { hiddenAppsLockViewModel.lock(); backStack.removeLastOrNull() },
+                                passwordSettings = {
+                                    HiddenAppsPasswordSettings(
+                                        state = hiddenAppsLockState,
+                                        onUpdate = hiddenAppsLockViewModel::updatePassword
+                                    )
+                                    HiddenAppsRecoverySettings(
+                                        state = hiddenAppsLockState,
+                                        onUpdate = hiddenAppsLockViewModel::updateRecoveryMinutes
+                                    )
+                                }
+                            )
+                        }
                     }
                     entry<AppNavKey.Settings.OpenChallenges> {
                         OpenChallengeSettings()
@@ -334,7 +382,14 @@ class MainHomeScreenActivity : ComponentActivity() {
                         WidgetOptions(onBackClick = { backStack.removeLastOrNull() })
                     }
                     entry<AppNavKey.Settings.BulkHiddenApps> {
-                        BulkManageHiddenApps()
+                        HiddenAppsPasswordGate(
+                            state = hiddenAppsLockState,
+                            onBack = { hiddenAppsLockViewModel.cancelRecovery(); backStack.removeLastOrNull() },
+                            onUnlock = hiddenAppsLockViewModel::unlock,
+                            onStartRecovery = hiddenAppsLockViewModel::startRecovery,
+                            onCancelRecovery = hiddenAppsLockViewModel::cancelRecovery,
+                            onFinishRecovery = hiddenAppsLockViewModel::finishRecovery
+                        ) { BulkManageHiddenApps() }
                     }
                     entry<AppNavKey.Settings.BulkFavouriteApps> {
                         BulkFavouritesManager()

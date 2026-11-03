@@ -185,6 +185,7 @@ fun MainPagerScreen(
             screenTimePageIndex -> ScreenTimeDashboard()
 
             homePageIndex -> HomeScreen(
+                onSystemAppClick = viewModel::openHomeIntent,
                 onAppClick = handleAppClick,
                 onAppLongClick = handleAppLongClick,
                 widget = {
@@ -201,6 +202,7 @@ fun MainPagerScreen(
                     if (showWeather) {
                         if (!viewModel.isFoss) {
                             HomeWeatherImpl(
+                                onOpenApp = viewModel::openHomeIntent,
                                 alignment = homeAlignment,
                                 shadow = showWallpaper,
                                 color = if (showWallpaper) MaterialTheme.colorScheme.primaryFixed else MaterialTheme.colorScheme.primary
