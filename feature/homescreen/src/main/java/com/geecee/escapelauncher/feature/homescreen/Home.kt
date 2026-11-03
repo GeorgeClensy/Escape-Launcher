@@ -65,6 +65,7 @@ fun HomeScreen(
     widget: @Composable () -> Unit = {},
     onAppClick: (app: InstalledApp) -> Unit = {},
     onAppLongClick: (app: InstalledApp) -> Unit = {},
+    onSystemAppClick: (Intent) -> Unit = {},
     homeViewModel: NewHomeScreenViewModel = hiltViewModel(),
 ) {
     val context = LocalContext.current
@@ -157,7 +158,7 @@ fun HomeScreen(
                                 val intent = Intent(AlarmClock.ACTION_SHOW_ALARMS).apply {
                                     flags = Intent.FLAG_ACTIVITY_NEW_TASK
                                 }
-                                context.startActivity(intent)
+                                onSystemAppClick(intent)
                             } catch (e: Exception) {
                                 Log.e("Error", e.message.orEmpty())
                             }
@@ -205,7 +206,7 @@ fun HomeScreen(
                                         addCategory(Intent.CATEGORY_APP_CALENDAR)
                                         flags = Intent.FLAG_ACTIVITY_NEW_TASK
                                     }
-                                    context.startActivity(intent)
+                                    onSystemAppClick(intent)
                                 } catch (e: Exception) {
                                     homeViewModel.logException(e)
                                 }

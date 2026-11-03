@@ -7,6 +7,9 @@ import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 
 object PreferencesKeys {
+    val HIDDEN_APPS_PASSWORD_RECORD = stringPreferencesKey("hidden_apps_password_v1")
+    val HIDDEN_APPS_RECOVERY_MINUTES = intPreferencesKey("hidden_apps_recovery_minutes")
+
     val ALLOW_ANALYTICS = booleanPreferencesKey(name = "allow_analytics")
     val HAPTIC_FEEDBACK = booleanPreferencesKey(name = "haptic_feedback")
 

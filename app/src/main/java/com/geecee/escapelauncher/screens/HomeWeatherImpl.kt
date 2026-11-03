@@ -26,6 +26,7 @@ import com.geecee.escapelauncher.feature.weather.WeatherViewModel
 @Composable
 fun HomeWeatherImpl(
     alignment: Alignment.Horizontal,
+    onOpenApp: (Intent) -> Unit,
     color: Color = MaterialTheme.colorScheme.primary,
     shadow: Boolean = false,
     weatherViewModel: WeatherViewModel = hiltViewModel(LocalActivity.current as ComponentActivity)
@@ -57,7 +58,7 @@ fun HomeWeatherImpl(
                         )
                     launchIntent?.let {
                         it.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                        context.startActivity(it)
+                        onOpenApp(it)
                     }
                 } else {
                     Toast.makeText(
