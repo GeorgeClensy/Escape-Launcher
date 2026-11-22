@@ -42,7 +42,10 @@ import com.geecee.escapelauncher.feature.newwidgets.WidgetHostManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import jakarta.inject.Inject
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -123,22 +126,18 @@ class MainPagerScreenViewModel @Inject constructor(
     val interactionSource = MutableInteractionSource()
 
     val pagerState = PagerState(
-        currentPage = if (hideScreenTimePage.value) 0 else 1,
+        currentPage = MainPagerLayout.HOME_PAGE_INDEX,
         currentPageOffsetFraction = 0f
     ) {
-        if (hideScreenTimePage.value) 2 else 3
-    }
-
-    private fun getMainPageIndex(): Int {
-        return if (hideScreenTimePage.value) 0 else 1
+        MainPagerLayout.pageCount(hideScreenTimePage.value)
     }
 
     suspend fun goToMainPage() {
-        pagerState.scrollToPage(getMainPageIndex())
+        pagerState.scrollToPage(MainPagerLayout.HOME_PAGE_INDEX)
     }
 
     suspend fun animatedGoToMainPage() {
-        val targetPage = getMainPageIndex()
+        val targetPage = MainPagerLayout.HOME_PAGE_INDEX
 
         if (pagerState.currentPage == targetPage && pagerState.currentPageOffsetFraction == 0f) {
             return
@@ -156,7 +155,33 @@ class MainPagerScreenViewModel @Inject constructor(
         viewModelScope.launch {
             screenTimeSettingsRepository.hideScreenTimePage
                 .distinctUntilChanged()
-                .collect { hide -> pagerState.scrollToPage(if (hide) 0 else 1) }
+                .collect { hide ->
+                    // The page indices are stable across this setting, so only
+                    // relocate the user when the page they are on (or heading
+                    // towards mid-scroll) is removed. This intentionally deviates
+                    // from the original behaviour, which snapped home on every
+                    // toggle because the old page indices shifted with it
+                    if (MainPagerLayout.isPageBeingRemoved(
+                            currentPage = pagerState.currentPage,
+                            targetPage = pagerState.targetPage,
+                            hideScreenTimePage = hide
+                        )
+                    ) {
+                        // The jump is best-effort: a drag the user is still
+                        // driving outranks it (the jump is rejected before
+                        // running, and a drag started mid-jump cancels it),
+                        // while a fling in flight is cut off by the jump.
+                        // Swallow the cancellation so the collector keeps
+                        // serving future toggles — the pager's measure
+                        // coercion still lands the user on a page that exists.
+                        // Real cancellation of this scope propagates
+                        try {
+                            pagerState.scrollToPage(MainPagerLayout.HOME_PAGE_INDEX)
+                        } catch (cancellation: CancellationException) {
+                            if (!currentCoroutineContext().isActive) throw cancellation
+                        }
+                    }
+                }
         }
     }
 

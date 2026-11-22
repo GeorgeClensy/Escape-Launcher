@@ -8,8 +8,8 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.ArrowForward
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.rounded.ArrowUpward
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -39,7 +39,7 @@ fun FirstTimeHelp(swipeForAllAppsText: String, holdForSettingsText: String) {
                     .align(Alignment.CenterHorizontally)
             ) {
                 Icon(
-                    Icons.AutoMirrored.Rounded.ArrowForward,
+                    Icons.Rounded.ArrowUpward,
                     "",
                     Modifier.align(Alignment.CenterVertically),
                     tint = MaterialTheme.colorScheme.onSurface

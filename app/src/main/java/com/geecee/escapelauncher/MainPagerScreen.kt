@@ -7,7 +7,7 @@ import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.VerticalPager
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Work
@@ -44,7 +44,11 @@ import kotlinx.coroutines.launch
 
 /**
  * Main composable for home screen:
- * contains a pager with all the pages inside of it, contains bottom sheet, contains open challenge UI
+ * contains a vertical pager with all the pages inside of it, contains bottom sheet, contains open challenge UI
+ *
+ * The pages stack top to bottom as described by [MainPagerLayout]: home on top,
+ * the apps list directly below it (opened with a swipe up) and the optional
+ * screen time dashboard below that.
  */
 @Composable
 fun MainPagerScreen(
@@ -138,18 +142,22 @@ fun MainPagerScreen(
         }
     )
 
-    // Figure out where all the pages are
-    val screenTimePageIndex = if (!hideScreenTimePage) 0 else -1
-    val homePageIndex = if (hideScreenTimePage) 0 else 1
-    val appsListPageIndex = if (hideScreenTimePage) 1 else 2
+    // Dashboard page index, or no page when hidden (home and apps list indices live in MainPagerLayout)
+    val screenTimePageIndex = MainPagerLayout.screenTimePageIndex(hideScreenTimePage)
 
     // Some apps list stuff
-    val isAppsListVisible = viewModel.pagerState.currentPage == appsListPageIndex
+    // Settled page rather than current page: an animated scroll home from the
+    // dashboard below sweeps past the apps list page, and with search auto
+    // open enabled, reacting to the transient current page would flash the
+    // drawer's search open mid-flight. Cleanup and auto-open search therefore
+    // also run when a drag settles rather than halfway through it, so a
+    // dismissed drawer keeps its search expanded until the release finishes it.
+    val isAppsListSettled = viewModel.pagerState.settledPage == MainPagerLayout.APPS_LIST_PAGE_INDEX
     val autoOpenSearch by appsListViewModel.searchAutoOpen.collectAsState(initial = DefaultSettings.SEARCH_AUTO_OPEN)
 
     // Tidy up apps list when it closes or opens
-    LaunchedEffect(isAppsListVisible) {
-        if (!isAppsListVisible) {
+    LaunchedEffect(isAppsListSettled) {
+        if (!isAppsListSettled) {
             appsListViewModel.onSearchExpandedChanged(false)
             appslistScrollState.scrollToItem(0)
             viewModel.setBottomSheetVisible(false)
@@ -158,9 +166,16 @@ fun MainPagerScreen(
         }
     }
 
-    // Home Screen Pages
-    HorizontalPager(
+    // Launcher pages
+    // No overscroll effect: the axis change already removed the old pager's
+    // horizontal edge stretch, and without this the vertical pager would grow
+    // a new stretch on strips it handles directly — areas inside a page that
+    // the page's own scrollable does not cover, plus fling leftovers reaching
+    // a bound. Pages only ever move through the scroll itself, so paging
+    // behaviour is unchanged
+    VerticalPager(
         state = viewModel.pagerState,
+        overscrollEffect = null,
         modifier = Modifier
             .fillMaxSize()
             .combinedClickable(
@@ -184,7 +199,7 @@ fun MainPagerScreen(
         when (page) {
             screenTimePageIndex -> ScreenTimeDashboard()
 
-            homePageIndex -> HomeScreen(
+            MainPagerLayout.HOME_PAGE_INDEX -> HomeScreen(
                 onAppClick = handleAppClick,
                 onAppLongClick = handleAppLongClick,
                 widget = {
@@ -210,7 +225,7 @@ fun MainPagerScreen(
                 }
             )
 
-            appsListPageIndex -> AppsListTabScreen(
+            MainPagerLayout.APPS_LIST_PAGE_INDEX -> AppsListTabScreen(
                 scrollState = appslistScrollState,
                 appsListViewModel = appsListViewModel,
                 appsListTabs = appsListTabs,
