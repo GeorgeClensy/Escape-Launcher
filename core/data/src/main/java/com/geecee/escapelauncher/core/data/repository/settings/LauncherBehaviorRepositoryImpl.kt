@@ -29,4 +29,8 @@ class LauncherBehaviorRepositoryImpl @Inject constructor(
     override suspend fun setHidePrivateSpace(enabled: Boolean) {
         dataStore.edit { it[PreferencesKeys.HIDE_PRIVATE_SPACE] = enabled }
     }
+    override val screenLayout: Flow<String> = dataStore.data.map { it[PreferencesKeys.SCREEN_LAYOUT] ?: DefaultSettings.SCREEN_LAYOUT }
+    override suspend fun setScreenLayout(layout: String) {
+        dataStore.edit { it[PreferencesKeys.SCREEN_LAYOUT] = layout }
+    }
 }

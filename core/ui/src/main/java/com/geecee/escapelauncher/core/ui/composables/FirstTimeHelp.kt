@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.ArrowForward
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.rounded.ArrowUpward
 import androidx.compose.material3.Icon
@@ -22,9 +23,19 @@ import androidx.compose.ui.unit.dp
 
 /**
  * Block with tips for first time users
+ *
+ * @param swipeForAllAppsText Text of the swipe hint
+ * @param holdForSettingsText Text of the hold for settings hint
+ * @param swipeUp Whether the gesture that opens the apps list swipes up (the
+ * vertical layout) or across (the original horizontal layout); it picks the
+ * arrow shown next to the swipe hint
  */
 @Composable
-fun FirstTimeHelp(swipeForAllAppsText: String, holdForSettingsText: String) {
+fun FirstTimeHelp(
+    swipeForAllAppsText: String,
+    holdForSettingsText: String,
+    swipeUp: Boolean = true
+) {
     Box(
         Modifier.clip(
             MaterialTheme.shapes.extraLarge
@@ -39,7 +50,7 @@ fun FirstTimeHelp(swipeForAllAppsText: String, holdForSettingsText: String) {
                     .align(Alignment.CenterHorizontally)
             ) {
                 Icon(
-                    Icons.Rounded.ArrowUpward,
+                    if (swipeUp) Icons.Rounded.ArrowUpward else Icons.AutoMirrored.Rounded.ArrowForward,
                     "",
                     Modifier.align(Alignment.CenterVertically),
                     tint = MaterialTheme.colorScheme.onSurface

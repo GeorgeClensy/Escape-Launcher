@@ -41,6 +41,11 @@ fun AppsListTabScreen(
     val autoOpenAppInSearch by appsListViewModel.automaticallyOpenAppsInSearch.collectAsState(
         initial = DefaultSettings.AUTOMATICALLY_OPEN_APPS_IN_SEARCH
     )
+    // Search auto open callers get the keyboard instantly on expansion;
+    // without the setting the search pill keeps its original cadence
+    val searchAutoOpen by appsListViewModel.searchAutoOpen.collectAsState(
+        initial = DefaultSettings.SEARCH_AUTO_OPEN
+    )
 
     TabDisplay(
         modifier = modifier,
@@ -65,6 +70,7 @@ fun AppsListTabScreen(
         showSearch = showSearchBox,
         searchText = searchText,
         searchExpanded = searchExpanded,
+        autoFocusSearch = searchAutoOpen,
         onSearchExpandedChange = {
             appsListViewModel.onSearchExpandedChanged(it)
             doHapticFeedBack(haptics, hapticFeedbackEnabled)

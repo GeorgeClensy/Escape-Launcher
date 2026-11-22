@@ -227,6 +227,7 @@ fun TabBar(
     showSearch: Boolean = true,
     searchText: String = "",
     searchExpanded: Boolean = false,
+    autoFocusSearch: Boolean = false,
     onSearchExpandedChange: (Boolean) -> Unit = {},
     onSearchTextChanged: (String) -> Unit = {},
     onSearchDone: (String, SoftwareKeyboardController?) -> Unit = { _, _ -> }
@@ -322,7 +323,7 @@ fun TabBar(
                 },
                 searchText = searchText,
                 isExpanded = searchExpanded,
-                autoFocus = false,
+                autoFocus = autoFocusSearch,
                 onExpandedChange = onSearchExpandedChange,
                 onSearchTextChanged = onSearchTextChanged,
                 onSearchDone = onSearchDone
@@ -350,7 +351,7 @@ fun TabBar(
             AnimatedPillSearchBar(
                 searchText = searchText,
                 isExpanded = searchExpanded,
-                autoFocus = false,
+                autoFocus = autoFocusSearch,
                 onExpandedChange = onSearchExpandedChange,
                 onSearchTextChanged = onSearchTextChanged,
                 onSearchDone = onSearchDone
@@ -375,6 +376,7 @@ fun TabDisplay(
     showSearch: Boolean = true,
     searchText: String = "",
     searchExpanded: Boolean = false,
+    autoFocusSearch: Boolean = false,
     onSearchExpandedChange: (Boolean) -> Unit = {},
     onSearchTextChanged: (String) -> Unit = {},
     onSearchDone: (String, SoftwareKeyboardController?) -> Unit = { _, _ -> }
@@ -466,6 +468,7 @@ fun TabDisplay(
             showSearch = showSearch,
             searchText = searchText,
             searchExpanded = searchExpanded,
+            autoFocusSearch = autoFocusSearch,
             onSearchExpandedChange = onSearchExpandedChange,
             onSearchTextChanged = onSearchTextChanged,
             onSearchDone = onSearchDone

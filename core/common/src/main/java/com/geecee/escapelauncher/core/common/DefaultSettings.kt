@@ -61,4 +61,9 @@ object DefaultSettings {
     const val HIDE_SCREEN_TIME_PAGE = false
     const val SHOW_HIDDEN_APPS_IN_SEARCH = false
     const val FIRST_TIME = true
+
+    // Screen layout (how the launcher's pages are arranged)
+    const val SCREEN_LAYOUT_VERTICAL = "Vertical"
+    const val SCREEN_LAYOUT_HORIZONTAL = "Horizontal"
+    const val SCREEN_LAYOUT = SCREEN_LAYOUT_VERTICAL
 }

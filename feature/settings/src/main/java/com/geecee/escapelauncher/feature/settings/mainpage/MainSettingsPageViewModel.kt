@@ -41,7 +41,10 @@ data class MainSettingsUiState(
     val hideScreenTimePage: Boolean = DefaultSettings.HIDE_SCREEN_TIME_PAGE,
     val allowAnalytics: Boolean = DefaultSettings.ALLOW_ANALYTICS,
     val isDefaultLauncher: Boolean = false,
-    val isAccessibilityServiceEnabled: Boolean = false
+    val isAccessibilityServiceEnabled: Boolean = false,
+    // The segmented picker works in indexes: 0 is the vertical layout (the
+    // default), 1 is the original horizontal layout
+    val screenLayout: Int = 0
 )
 
 @HiltViewModel
@@ -83,7 +86,9 @@ class MainSettingsPageViewModel @Inject constructor(
         screenTimeSettingsRepository.hideScreenTimePage,
         launcherBehaviorRepository.allowAnalyitics,
         _isDefaultLauncher,
-        systemActionsRepository.isAccessibilityServiceEnabled
+        systemActionsRepository.isAccessibilityServiceEnabled,
+        // Appended last so the existing args indices keep their meaning
+        launcherBehaviorRepository.screenLayout
     ) { args: Array<Any?> ->
         MainSettingsUiState(
             hapticFeedBackEnabled = args[0] as Boolean,
@@ -118,7 +123,8 @@ class MainSettingsPageViewModel @Inject constructor(
             hideScreenTimePage = args[17] as Boolean,
             allowAnalytics = args[18] as Boolean,
             isDefaultLauncher = args[19] as Boolean,
-            isAccessibilityServiceEnabled = args[20] as Boolean
+            isAccessibilityServiceEnabled = args[20] as Boolean,
+            screenLayout = if (args[21] as String == DefaultSettings.SCREEN_LAYOUT_HORIZONTAL) 1 else 0
         )
     }.stateIn(
         scope = viewModelScope,
@@ -270,6 +276,18 @@ class MainSettingsPageViewModel @Inject constructor(
     fun setAllowAnalytics(value: Boolean) {
         viewModelScope.launch {
             launcherBehaviorRepository.setAllowAnalytics(value)
+        }
+    }
+
+    fun setScreenLayout(index: Int) {
+        // The picker only offers two layouts, and anything but the horizontal
+        // index falls back to the vertical default
+        val value = when (index) {
+            1 -> DefaultSettings.SCREEN_LAYOUT_HORIZONTAL
+            else -> DefaultSettings.SCREEN_LAYOUT_VERTICAL
+        }
+        viewModelScope.launch {
+            launcherBehaviorRepository.setScreenLayout(value)
         }
     }
 

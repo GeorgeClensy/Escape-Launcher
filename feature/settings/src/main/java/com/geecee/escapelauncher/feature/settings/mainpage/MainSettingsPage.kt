@@ -152,12 +152,28 @@ fun MainSettingsPage(
             item(key = "haptic") {
                 SettingsSwitch(
                     label = stringResource(id = R.string.haptic_feedback),
-                    isBottomOfGroup = true,
                     checked = uiState.hapticFeedBackEnabled,
                     onCheckedChange = {
                         mainSettingsPageViewModel.setHapticFeedback(it)
                         view.isHapticFeedbackEnabled = it
                     })
+            }
+
+            item(key = "screen_layout") {
+                val screenLayoutOptions = listOf(
+                    stringResource(R.string.layout_vertical),
+                    stringResource(R.string.layout_horizontal)
+                )
+
+                SettingsSingleChoiceSegmentedButtons(
+                    label = stringResource(id = R.string.screen_layout),
+                    options = screenLayoutOptions,
+                    selectedIndex = uiState.screenLayout,
+                    onSelectedIndexChange = { newIndex ->
+                        mainSettingsPageViewModel.setScreenLayout(newIndex)
+                    },
+                    isBottomOfGroup = true
+                )
             }
 
             // Home options

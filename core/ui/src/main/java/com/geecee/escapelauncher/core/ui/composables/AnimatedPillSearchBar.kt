@@ -97,7 +97,12 @@ fun AnimatedPillSearchBar(
     // Handle Auto-focus and Expansion changes
     LaunchedEffect(isExpanded, autoFocus) {
         if (isExpanded) {
-            delay(150.milliseconds)
+            // Auto focus callers (search auto open) want the keyboard as
+            // early as possible, so they skip the wait; manual expansion
+            // keeps the original cadence where the pill leads the keyboard
+            if (!autoFocus) {
+                delay(150.milliseconds)
+            }
             focusRequester.requestFocus()
             keyboardController?.show()
         } else {

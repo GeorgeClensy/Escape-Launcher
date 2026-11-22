@@ -106,6 +106,10 @@
     <string name="set_escape">Imposta Escape come launcher predefinito</string>
     <string name="stop_going_back">Questo impedirà di tornare alla tua home screen predefinita</string>
     <string name="swipe_for_all_apps">Scorri verso l\'alto per tutte le app</string>
+    <string name="swipe_across_for_all_apps">Scorri per tutte le app</string>
+    <string name="screen_layout">Disposizione delle schermate</string>
+    <string name="layout_vertical">Verticale</string>
+    <string name="layout_horizontal">Orizzontale</string>
     <string name="hold_for_settings">Tieni premuto per impostazioni</string>
     <string name="accessibility_title">Permesso Blocco Schermo</string>
     <string name="accessibility_description">Escape Launcher utilizza le API di accessibilità di Android per bloccare lo schermo quando la funzione doppio tocco per bloccare è attivata. Se scegli di non concedere questo permesso, potrai sempre concederlo in seguito nelle impostazioni.</string>

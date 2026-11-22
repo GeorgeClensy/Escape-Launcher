@@ -58,6 +58,7 @@ fun calculateOveragePercentage(screenTime: Long): Int {
  */
 @Composable
 fun ScreenTimeDashboard(
+    modifier: Modifier = Modifier,
     screenTimeViewModel: ScreenTimeViewModel = hiltViewModel(LocalActivity.current as ComponentActivity)
 ) {
     val todayUsage by screenTimeViewModel.totalUsage.collectAsState()
@@ -66,7 +67,7 @@ fun ScreenTimeDashboard(
 
     // UI for ScreenTime screen
     Column(
-        Modifier
+        modifier
             .fillMaxSize()
             .padding(15.dp, 0.dp)
             .verticalScroll(rememberScrollState())

@@ -11,4 +11,6 @@ interface LauncherBehaviorRepository {
     suspend fun setAllowAnalytics(value: Boolean)
     val hidePrivateSpace: Flow<Boolean>
     suspend fun setHidePrivateSpace(enabled: Boolean)
+    val screenLayout: Flow<String>
+    suspend fun setScreenLayout(layout: String)
 }

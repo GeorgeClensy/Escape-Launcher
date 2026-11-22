@@ -107,6 +107,10 @@
     <string name="set_escape">Establece Escape como app lanzadora predeterminada</string>
     <string name="stop_going_back">Isto vai evitar que volvas á túa pantalla de inicio predeterminada</string>
     <string name="swipe_for_all_apps">Despraza cara arriba para todas as apps</string>
+    <string name="swipe_across_for_all_apps">Desprazar para Todas as Apps</string>
+    <string name="screen_layout">Disposición de pantallas</string>
+    <string name="layout_vertical">Vertical</string>
+    <string name="layout_horizontal">Horizontal</string>
     <string name="hold_for_settings">Manter premido para Axustes</string>
     <string name="accessibility_title">Permiso para Bloquear Pantalla</string>
     <string name="grant_accessibility">Permitir</string>

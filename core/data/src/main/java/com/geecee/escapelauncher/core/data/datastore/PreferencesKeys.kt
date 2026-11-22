@@ -55,6 +55,7 @@ object PreferencesKeys {
     val HIDE_SCREEN_TIME_PAGE = booleanPreferencesKey(name = "hide_screen_time_page")
     val SHOW_HIDDEN_APPS_IN_SEARCH = booleanPreferencesKey(name = "show_hidden_apps_in_search")
     val FIRST_TIME = booleanPreferencesKey(name = "first_time")
+    val SCREEN_LAYOUT = stringPreferencesKey(name = "screen_layout")
 
     //Screen Time
     val ACTIVE_SESSION_PACKAGE = stringPreferencesKey("active_session_package")

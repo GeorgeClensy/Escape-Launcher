@@ -1,5 +1,6 @@
 package com.geecee.escapelauncher
 
+import com.geecee.escapelauncher.core.common.DefaultSettings
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -185,5 +186,70 @@ class MainPagerLayoutTest {
                 hideScreenTimePage = true
             )
         )
+    }
+
+    @Test
+    fun `horizontal layout keeps the original screen order`() {
+        // The original upstream order: dashboard, home page, apps list, opened
+        // with sideways swipes. The indices shift with the hide setting
+        // exactly like the original did: hiding the dashboard removes the page
+        // in front of them
+        assertEquals(1, MainPagerLayout.horizontalHomePageIndex(hideScreenTimePage = false))
+        assertEquals(0, MainPagerLayout.horizontalHomePageIndex(hideScreenTimePage = true))
+        assertEquals(2, MainPagerLayout.horizontalAppsListPageIndex(hideScreenTimePage = false))
+        assertEquals(1, MainPagerLayout.horizontalAppsListPageIndex(hideScreenTimePage = true))
+        assertEquals(0, MainPagerLayout.horizontalScreenTimePageIndex(hideScreenTimePage = false))
+        assertEquals(-1, MainPagerLayout.horizontalScreenTimePageIndex(hideScreenTimePage = true))
+    }
+
+    @Test
+    fun `both layouts use the same page counts`() {
+        // MainPagerLayout has one pageCount for both layouts: the horizontal
+        // pager composes exactly as many pages as the vertical one
+        assertEquals(2, MainPagerLayout.pageCount(hideScreenTimePage = true))
+        assertEquals(3, MainPagerLayout.pageCount(hideScreenTimePage = false))
+
+        // The hidden dashboard never matches a page the pager composes
+        val hiddenIndex = MainPagerLayout.horizontalScreenTimePageIndex(hideScreenTimePage = true)
+        assertFalse(hiddenIndex in 0 until MainPagerLayout.pageCount(hideScreenTimePage = true))
+    }
+
+    @Test
+    fun `main page index follows the screen layout setting`() {
+        // The vertical layout's main page is stable across the hide setting
+        assertEquals(
+            MainPagerLayout.HOME_PAGE_INDEX,
+            MainPagerLayout.mainPageIndex(DefaultSettings.SCREEN_LAYOUT_VERTICAL, hideScreenTimePage = false)
+        )
+        assertEquals(
+            MainPagerLayout.HOME_PAGE_INDEX,
+            MainPagerLayout.mainPageIndex(DefaultSettings.SCREEN_LAYOUT_VERTICAL, hideScreenTimePage = true)
+        )
+        // The horizontal layout's main page shifts with the hide setting
+        assertEquals(
+            1,
+            MainPagerLayout.mainPageIndex(DefaultSettings.SCREEN_LAYOUT_HORIZONTAL, hideScreenTimePage = false)
+        )
+        assertEquals(
+            0,
+            MainPagerLayout.mainPageIndex(DefaultSettings.SCREEN_LAYOUT_HORIZONTAL, hideScreenTimePage = true)
+        )
+    }
+
+    @Test
+    fun `every composed page maps to content in the horizontal layout when the dashboard is shown or hidden`() {
+        for (hideDashboard in listOf(false, true)) {
+            val dashboardIndex = MainPagerLayout.horizontalScreenTimePageIndex(hideScreenTimePage = hideDashboard)
+            val homeIndex = MainPagerLayout.horizontalHomePageIndex(hideScreenTimePage = hideDashboard)
+            val appsListIndex = MainPagerLayout.horizontalAppsListPageIndex(hideScreenTimePage = hideDashboard)
+
+            for (page in 0 until MainPagerLayout.pageCount(hideScreenTimePage = hideDashboard)) {
+                val hasContent = page == homeIndex ||
+                    page == appsListIndex ||
+                    page == dashboardIndex
+
+                assertTrue("page $page has no content with the dashboard hidden = $hideDashboard", hasContent)
+            }
+        }
     }
 }
