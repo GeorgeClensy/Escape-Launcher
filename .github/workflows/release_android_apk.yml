@@ -1,0 +1,76 @@
+name: Release Android APK
+
+on:
+  push:
+    branches: [master]
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Test, Build and Publish FOSS Release APK
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Check out the repository code
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 2. Set up Java 17 (Standard for modern Android builds)
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: 'gradle' # Automatically caches Gradle dependencies to speed up future builds
+
+      # 3. Make the Gradle wrapper executable
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      # 4. Run unit tests first so a broken merge never gets published
+      - name: Run unit tests
+        run: ./gradlew testFossDebugUnitTest
+
+      # 5. Build the release APK (targeting the FOSS variant to avoid Google API requirements)
+      - name: Build FOSS Release APK
+        run: ./gradlew assembleFossRelease --stacktrace
+
+      # 6. Read the app version from app/build.gradle.kts (e.g. "3.0")
+      - name: Extract version name
+        id: version
+        run: |
+          VERSION=$(grep -oE 'baseVersionCode[[:space:]]*=[[:space:]]*"[^"]+"' app/build.gradle.kts \
+            | head -n 1 | sed -E 's/.*"([^"]+)".*/\1/')
+          if [ -z "$VERSION" ]; then
+            echo "Could not extract version from app/build.gradle.kts" >&2
+            exit 1
+          fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      # 7. Give the APK a friendly, versioned file name
+      - name: Rename APK
+        env:
+          APK_PATH: app/build/outputs/apk/foss/release/app-foss-release.apk
+        run: |
+          DEST="Escape-Launcher-v${{ steps.version.outputs.version }}-${{ github.run_number }}.apk"
+          mv "$APK_PATH" "$DEST"
+          echo "artifact=$DEST" >> "$GITHUB_ENV"
+
+      # 8. Publish a new GitHub release with the APK attached
+      - name: Create release and upload APK
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.version.outputs.version }}-${{ github.run_number }}
+          name: Escape Launcher v${{ steps.version.outputs.version }} (Build ${{ github.run_number }})
+          body: |
+            Automatic release built from commit ${{ github.sha }}.
+
+            **Flavor:** FOSS (no Google API dependencies)
+
+            Download `Escape-Launcher-v${{ steps.version.outputs.version }}-${{ github.run_number }}.apk` below and sideload it onto your device.
+          generate_release_notes: true
+          files: ${{ env.artifact }}
