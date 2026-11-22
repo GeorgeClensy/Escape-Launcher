@@ -37,20 +37,22 @@ import com.geecee.escapelauncher.core.common.DefaultSettings
  *   anywhere on it engages the pager directly, so the apps list is one short
  *   swipe away regardless of how much content the home page has, and content
  *   taller than the viewport is cropped — this launcher's home is meant to
- *   stay short. Symmetrically, a swipe down on the apps list returns home
- *   from any scroll position instead of scrolling the list back to its top
- *   first, and a swipe down on the dashboard returns to the apps list the
+ *   stay short. Symmetrically, a swipe down on the apps list scrolls the
+ *   list back towards its top first and only dismisses home from that top
+ *   edge, and a swipe down on the dashboard returns to the apps list the
  *   same way (see [MainPagerScreen] and
  *   [com.geecee.escapelauncher.rememberPagerDismissConnection]): the dismiss
- *   gesture takes the swipe in pre-scroll, once it has accumulated more than
- *   touch slop of downward travel, and from there drives the pager through a
+ *   gesture takes the swipe's leftovers in pre-scroll — the deltas the
+ *   page's own content cannot consume because it sits at its top edge —
+ *   once they have accumulated more than touch slop of downward travel, and
+ *   from there it drives the pager through a
  *   real UserInput-priority scroll session — so a fresh grab cancels a
  *   settle in flight, the settled page stays frozen while the drag is in
  *   flight, and the release settles by position and velocity together: a
  *   dismissward flick carries to the target page while the drag has not
  *   already swept past it, and a slower release lands on the nearest page.
- *   The list resets to its top every time the drawer closes. At the pager's
- *   boundaries the native machinery keeps its content-first handoff: upward
+ *   The list resets to its top every time the drawer closes. Both scroll
+ *   directions now keep a content-first handoff at the pager's boundaries:
  *   browsing scrolls the page's own content and only hands the leftover to
  *   the pager at the edge. Hosted widgets that consume vertical drags
  *   themselves can keep a swipe started on them from reaching the pager,

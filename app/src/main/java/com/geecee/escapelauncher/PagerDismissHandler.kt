@@ -89,15 +89,21 @@ internal object PagerScrollPolicy {
 
 /**
  * A nested scroll connection that dismisses the pager's current page
- * towards [dismissTargetPage] on a downward swipe, from any scroll position
- * of the page's own scrolling content.
+ * towards [dismissTargetPage] on a downward swipe, from the page's top
+ * edge: mid-content swipes scroll the page's own content back towards its
+ * top first, and the deltas the content cannot consume at the edge start
+ * the dismissal.
  *
  * Nested scroll deltas and fling velocities follow the pointer's screen
  * convention, so a downward drag or fling arrives as positive y even
  * though it scrolls the content and the pager backwards. The takeover
- * happens in pre-scroll because a swipe started mid-content would
- * otherwise be consumed by the content scrolling itself back towards its
- * top before the pager ever sees it.
+ * happens in pre-scroll — pre-scroll dispatch walks from the innermost
+ * scrollable outwards, so this connection sees each delta before the
+ * content consumes it — but while [canScrollBackward] reports the content
+ * can still scroll backwards the whole delta is left to it, mirroring the
+ * content-first handoff the pager's own boundaries give the other
+ * direction. Consuming mid-content deltas instead would hijack upward
+ * browsing and make the content's top unreachable.
  *
  * The drag does not feed the pager raw deltas: once the slop gate
  * ([PagerScrollPolicy.shouldStartDismissDrag]) passes, this connection
@@ -125,6 +131,14 @@ internal class PagerDismissHandler(
     private val pagerState: PagerState,
     private val scope: CoroutineScope,
     private val dismissTargetPage: () -> Int,
+
+    /**
+     * Whether the page's own scrolling content can still scroll backwards —
+     * towards its top — so the dismissal must leave the delta to it. Backed
+     * by the content's scroll state ([LazyListState.canScrollBackward],
+     * [androidx.compose.foundation.ScrollState.canScrollBackward]).
+     */
+    private val canScrollBackward: () -> Boolean,
     private val touchSlopPx: Float,
     private val flingVelocityThreshold: Float
 ) : NestedScrollConnection {
@@ -160,6 +174,12 @@ internal class PagerDismissHandler(
         // same delta through the session twice. Displacement now only
         // ever comes from real scroll sessions, so this guard is exact
         if (pagerState.currentPageOffsetFraction != 0f) return Offset.Zero
+        // Content first: while the page's own content can still scroll back
+        // towards its top the whole delta belongs to it, so it is left
+        // unconsumed here — the dismissal may only take the leftovers once
+        // the content sits at its top edge (mid-content swipes must browse
+        // the content, not dismiss)
+        if (canScrollBackward()) return Offset.Zero
         // The slop gate: nothing starts before the gesture has carried
         // more than touch slop of downward travel
         gestureDownwardPx += available.y
@@ -281,7 +301,10 @@ internal class PagerDismissHandler(
 
 /**
  * Remembers the dismiss connection for one page of the vertical pager:
- * downward swipes on that page dismiss the pager towards [targetPage].
+ * downward swipes on that page dismiss the pager towards [targetPage] from
+ * the page's top edge — mid-content swipes scroll the page's own content
+ * back towards its top first ([canScrollBackward] reports whether it still
+ * can), and the deltas it cannot consume at the edge start the dismissal.
  *
  * Only the vertical layout composes this — the horizontal layout has no
  * dismissal, and a connection constructed there would be dead state that
@@ -292,6 +315,7 @@ internal fun rememberPagerDismissConnection(
     pagerState: PagerState,
     coroutineScope: CoroutineScope,
     targetPage: () -> Int,
+    canScrollBackward: () -> Boolean,
     touchSlopPx: Float,
     flingVelocityThreshold: Float
 ): NestedScrollConnection = remember {
@@ -299,6 +323,7 @@ internal fun rememberPagerDismissConnection(
         pagerState = pagerState,
         scope = coroutineScope,
         dismissTargetPage = targetPage,
+        canScrollBackward = canScrollBackward,
         touchSlopPx = touchSlopPx,
         flingVelocityThreshold = flingVelocityThreshold
     )

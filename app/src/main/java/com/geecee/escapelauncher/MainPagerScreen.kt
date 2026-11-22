@@ -301,24 +301,27 @@ fun MainPagerScreen(
         val touchSlopPx = viewConfiguration.scaledTouchSlop.toFloat()
         val flingVelocityThreshold = viewConfiguration.scaledMinimumFlingVelocity.toFloat()
         // A downward swipe on a vertically scrolling page dismisses it
-        // towards the page above: the dismiss handler takes the swipe in
-        // pre-scroll, before the page's own scrollable can eat it
-        // scrolling its content back towards its top, so returning is
-        // always one short swipe from any scroll position. The takeover
-        // only happens once the gesture has carried more than touch slop
-        // downward, and from there the drag drives the pager through a
-        // real UserInput scroll session — a channel-drained scrollBy loop
-        // — so a fresh grab cancels a settle in flight, the settled page
-        // freezes for the drag's duration, the target page flips on the
-        // position threshold like in a native drag, and the release
-        // settles by position and velocity together: a dismissward flick
-        // carries to the target page while the drag has not already swept
-        // past it, and a slower release lands on the nearest one (see
-        // [rememberPagerDismissConnection] for the session machinery)
+        // towards the page above, with a content-first handoff: the page's
+        // own scrollable keeps the swipe while it can still scroll its
+        // content back towards its top, and the dismiss handler takes only
+        // the leftovers at the content's top edge — so mid-content swipes
+        // browse the content and a dismissal starts once it sits at its
+        // top. The takeover only happens once those leftovers have carried
+        // more than touch slop downward, and from there the drag drives
+        // the pager through a real UserInput scroll session — a
+        // channel-drained scrollBy loop — so a fresh grab cancels a settle
+        // in flight, the settled page freezes for the drag's duration, the
+        // target page flips on the position threshold like in a native
+        // drag, and the release settles by position and velocity together:
+        // a dismissward flick carries to the target page while the drag
+        // has not already swept past it, and a slower release lands on the
+        // nearest one (see [rememberPagerDismissConnection] for the
+        // session machinery)
         val appsListDismissConnection = rememberPagerDismissConnection(
             pagerState = viewModel.pagerState,
             coroutineScope = coroutineScope,
             targetPage = { MainPagerLayout.HOME_PAGE_INDEX },
+            canScrollBackward = { appslistScrollState.canScrollBackward },
             touchSlopPx = touchSlopPx,
             flingVelocityThreshold = flingVelocityThreshold
         )
@@ -326,6 +329,7 @@ fun MainPagerScreen(
             pagerState = viewModel.pagerState,
             coroutineScope = coroutineScope,
             targetPage = { MainPagerLayout.APPS_LIST_PAGE_INDEX },
+            canScrollBackward = { dashboardScrollState.canScrollBackward },
             touchSlopPx = touchSlopPx,
             flingVelocityThreshold = flingVelocityThreshold
         )
