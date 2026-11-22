@@ -1,6 +1,7 @@
 package com.geecee.escapelauncher
 
 import android.os.Build
+import android.view.ViewConfiguration
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.LocalActivity
@@ -9,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.VerticalPager
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Work
@@ -20,13 +22,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
-import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
-import androidx.compose.ui.unit.Velocity
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.geecee.escapelauncher.core.common.DefaultSettings
 import com.geecee.escapelauncher.core.domain.managedprofiles.ManagedProfileType
@@ -47,7 +45,6 @@ import com.geecee.escapelauncher.screens.AppsListTabScreen
 import com.geecee.escapelauncher.screens.HomeWidgetSlot
 import com.geecee.escapelauncher.screens.OpenChallengeOverlay
 import com.geecee.escapelauncher.screens.HomeWeatherImpl
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 /**
@@ -68,6 +65,10 @@ fun MainPagerScreen(
     screenTimeViewModel: ScreenTimeViewModel = hiltViewModel(LocalActivity.current as ComponentActivity),
 ) {
     val appslistScrollState = rememberLazyListState()
+    // The dashboard's scroll position is hoisted so the pager host keeps it
+    // alive across page recompositions — the dashboard page itself only
+    // exists while composed
+    val dashboardScrollState = rememberScrollState()
     val haptics = LocalHapticFeedback.current
     val hideScreenTimePage by viewModel.hideScreenTimePage.collectAsState()
     val screenLayout by viewModel.screenLayout.collectAsState(initial = DefaultSettings.SCREEN_LAYOUT)
@@ -108,23 +109,6 @@ fun MainPagerScreen(
             viewModel.animatedGoToMainPage()
         }
     }
-
-    // A downward swipe on a vertically scrolling page dismisses it towards
-    // the page above: the pager takes the swipe before the page's own
-    // scrollable can eat it scrolling its content back towards its top, so
-    // returning is always one short swipe from any scroll position. The
-    // horizontal layout keeps the original behaviour instead and attaches
-    // neither connection
-    val appsListDismissConnection = rememberPageDismissConnection(
-        viewModel = viewModel,
-        coroutineScope = coroutineScope,
-        targetPage = { MainPagerLayout.HOME_PAGE_INDEX }
-    )
-    val dashboardDismissConnection = rememberPageDismissConnection(
-        viewModel = viewModel,
-        coroutineScope = coroutineScope,
-        targetPage = { MainPagerLayout.APPS_LIST_PAGE_INDEX }
-    )
 
     // Generate Apps List tabs
     val isDefaultLauncher by viewModel.isDefaultLauncher.collectAsState()
@@ -172,12 +156,15 @@ fun MainPagerScreen(
     )
 
     // Some apps list stuff
-    // Settled page rather than current page: an animated scroll home from the
-    // dashboard below sweeps past the apps list page, and with search auto
-    // open enabled, reacting to the transient current page would flash the
-    // drawer's search open mid-flight. Cleanup therefore runs when a drag
-    // settles rather than halfway through it, so a dismissed drawer keeps its
-    // search expanded until the release finishes it.
+    // Settled page rather than current page: an animated scroll home from
+    // the dashboard below sweeps past the apps list page, and with search
+    // auto open enabled, reacting to the transient current page would
+    // flash the drawer's search open mid-flight. Cleanup therefore runs
+    // when a scroll settles rather than halfway through it — and since
+    // the dismiss gesture now drives the pager through real scroll
+    // sessions (see [rememberPagerDismissConnection]), the settled page
+    // stays frozen for every drag kind, so a dismissed drawer keeps its
+    // search expanded until the release's settle finishes it.
     // The apps list settles on a different page per layout — and in the
     // horizontal layout it shifts with the hide setting — so this has to
     // check the layout's own index
@@ -200,11 +187,16 @@ fun MainPagerScreen(
     }
 
     // Auto open search the moment the pager is heading for the apps page
-    // rather than after it settles: the settle animation is most of the wait,
-    // and the keyboard riding in alongside the drawer hides the rest. The
-    // target page flips early in the opening drag and never equals the apps
-    // page while sweeping past it on the way home from the dashboard, and an
-    // abandoned drag retracts here through the settled-page cleanup above
+    // rather than after it settles: the settle animation is most of the
+    // wait, and the keyboard riding in alongside the drawer hides the
+    // rest. The target page flips early in the opening drag — every drag
+    // is a real scroll session now (see [rememberPagerDismissConnection]),
+    // so the target page derived state reacts to the position threshold
+    // while the drag is in flight, dismiss drags included — and it never
+    // equals the apps page while an animated scroll sweeps past it on the
+    // way home from the dashboard, because programmatic scrolls pin their
+    // own target. An abandoned drag retracts here through the settled-page
+    // cleanup above
     val isHeadingToAppsList = viewModel.pagerState.targetPage == appsListPageIndex
     LaunchedEffect(isHeadingToAppsList, autoOpenSearch) {
         if (isHeadingToAppsList && autoOpenSearch) {
@@ -214,7 +206,7 @@ fun MainPagerScreen(
 
     // The three pages' content, built once so both layouts share it: the
     // scrolling pages take their modifier as a parameter because only the
-    // vertical layout attaches the dismiss connections to them
+    // vertical layout builds and attaches the dismiss connections to them
     val home: @Composable () -> Unit = {
         HomeScreen(
             onAppClick = handleAppClick,
@@ -254,7 +246,7 @@ fun MainPagerScreen(
         )
     }
     val dashboard: @Composable (Modifier) -> Unit = { modifier ->
-        ScreenTimeDashboard(modifier = modifier)
+        ScreenTimeDashboard(modifier = modifier, scrollState = dashboardScrollState)
     }
 
     // The long-press settings and double-tap lock gestures belong to the
@@ -282,6 +274,8 @@ fun MainPagerScreen(
     if (screenLayout == DefaultSettings.SCREEN_LAYOUT_HORIZONTAL) {
         // Original behaviour: the pages keep the default overscroll effect and
         // their own scrolling in both directions, with no dismiss connections
+        // built or attached here — the pages cannot dismiss, so constructing
+        // the handlers would only be dead state no gesture could reach
         HorizontalPager(
             state = viewModel.pagerState,
             modifier = pagerModifier
@@ -299,12 +293,58 @@ fun MainPagerScreen(
             )
         }
     } else {
-        // No overscroll effect: the home page does not scroll, so a swipe down on
-        // it is a drag the pager cannot scroll — with the default effect that
-        // drag would be consumed by a top-edge stretch, and the home page's
-        // notification shade observer never sees it. The axis change also
-        // removed the old pager's horizontal edge stretch, so this keeps both
-        // directions free of new artifacts
+        // The dismiss mechanism lives here only. The system's own view
+        // configuration supplies the gesture constants: the touch slop
+        // the takeover must first exceed, and the minimum fling velocity
+        // below which a release settles by position alone
+        val viewConfiguration = remember(context) { ViewConfiguration.get(context) }
+        val touchSlopPx = viewConfiguration.scaledTouchSlop.toFloat()
+        val flingVelocityThreshold = viewConfiguration.scaledMinimumFlingVelocity.toFloat()
+        // A downward swipe on a vertically scrolling page dismisses it
+        // towards the page above: the dismiss handler takes the swipe in
+        // pre-scroll, before the page's own scrollable can eat it
+        // scrolling its content back towards its top, so returning is
+        // always one short swipe from any scroll position. The takeover
+        // only happens once the gesture has carried more than touch slop
+        // downward, and from there the drag drives the pager through a
+        // real UserInput scroll session — a channel-drained scrollBy loop
+        // — so a fresh grab cancels a settle in flight, the settled page
+        // freezes for the drag's duration, the target page flips on the
+        // position threshold like in a native drag, and the release
+        // settles by position and velocity together: a dismissward flick
+        // carries to the target page while the drag has not already swept
+        // past it, and a slower release lands on the nearest one (see
+        // [rememberPagerDismissConnection] for the session machinery)
+        val appsListDismissConnection = rememberPagerDismissConnection(
+            pagerState = viewModel.pagerState,
+            coroutineScope = coroutineScope,
+            targetPage = { MainPagerLayout.HOME_PAGE_INDEX },
+            touchSlopPx = touchSlopPx,
+            flingVelocityThreshold = flingVelocityThreshold
+        )
+        val dashboardDismissConnection = rememberPagerDismissConnection(
+            pagerState = viewModel.pagerState,
+            coroutineScope = coroutineScope,
+            targetPage = { MainPagerLayout.APPS_LIST_PAGE_INDEX },
+            touchSlopPx = touchSlopPx,
+            flingVelocityThreshold = flingVelocityThreshold
+        )
+        // No overscroll effect on the pager: its job is keeping a downward
+        // drag on the home page unconsumed for the home page's shade
+        // observer. The home page does not scroll, so that drag is one the
+        // pager cannot scroll — with a stretch effect in place the pager
+        // would hand the drag's leftover to the stretch, consuming the
+        // pointer events, and the home page's observer (which only counts
+        // movement nothing else consumed) would never see them, so the
+        // shade would never open. The scrolling pages keep their own
+        // inner-list stretch effects, which do not get in the dismissal's
+        // way: in the nested scroll phase order ancestors consume a delta
+        // in pre-scroll before any overscroll sees the leftover, so the
+        // dismiss connections still take the swipe first from any scroll
+        // position. Dismissal itself does not lean on this null either —
+        // it runs through real scroll sessions now. The axis change also
+        // removed the old pager's horizontal edge stretch, so this keeps
+        // both directions free of new artifacts
         VerticalPager(
             state = viewModel.pagerState,
             overscrollEffect = null,
@@ -337,9 +377,9 @@ fun MainPagerScreen(
 
 /**
  * The content of one page of the launcher's main pager, shared by both
- * layouts: the vertical layout attaches its dismiss connections through
- * [appsListModifier] and [screenTimeModifier] while the horizontal layout
- * passes plain modifiers and keeps the pages' own scrolling.
+ * layouts: the vertical layout builds and attaches its dismiss connections
+ * through [appsListModifier] and [screenTimeModifier] while the horizontal
+ * layout passes plain modifiers and keeps the pages' own scrolling.
  *
  * The when needs no else: the hidden dashboard reports its index as -1, which
  * never matches a page the pager composes, and the home and apps list
@@ -364,67 +404,3 @@ private fun LauncherPage(
     }
 }
 
-/**
- * A nested scroll connection that dismisses the pager's current page towards
- * [targetPage] on a downward swipe, from any scroll position of the page's
- * own scrolling content.
- *
- * Nested scroll deltas and fling velocities follow the pointer's screen
- * convention, so a downward drag or fling arrives as positive y even though
- * it scrolls the content backwards. The pager is fed in onPreScroll because
- * a swipe started mid-content would otherwise be consumed by the content
- * scrolling itself back towards its top before the pager ever sees it.
- */
-@Composable
-private fun rememberPageDismissConnection(
-    viewModel: MainPagerScreenViewModel,
-    coroutineScope: CoroutineScope,
-    targetPage: () -> Int
-): NestedScrollConnection = remember {
-    object : NestedScrollConnection {
-        override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
-            // Only a downward user drag dismisses: an upward drag browses the
-            // page's own content and must reach it untouched
-            if (source != NestedScrollSource.UserInput || available.y <= 0f) return Offset.Zero
-            val pagerState = viewModel.pagerState
-            // Once the pager is displaced its own nested scroll connection
-            // takes the drag over in pre-scroll (it sits above this one, so
-            // it has already run by now); consuming here as well would
-            // double-drive the pager
-            if (pagerState.currentPageOffsetFraction != 0f) return Offset.Zero
-            // dispatchRawDelta takes the scroll-position convention: the
-            // negated downward delta scrolls the pager backwards, towards
-            // the target page
-            val consumedByPager = pagerState.dispatchRawDelta(-available.y)
-            // The pager reports what it consumed in its argument's sign
-            // (negative here); flip it into available's sign and never claim
-            // more than available, or the page would keep scrolling on top
-            // of the dismissal
-            return Offset(0f, (-consumedByPager).coerceIn(0f, available.y))
-        }
-
-        override suspend fun onPreFling(available: Velocity): Velocity {
-            // An upward release fling belongs to the page's own content
-            if (available.y <= 0f) return Velocity.Zero
-            val pagerState = viewModel.pagerState
-            val target = targetPage()
-            // A downward fling scrolls the pager backwards, so it can only
-            // carry the user to the target page while the pager sits at or
-            // beyond it. A real dismissal also leaves the pager displaced —
-            // its drag phase was fed above — so requiring a displacement
-            // keeps the release of an upward browsing drag, whose velocity
-            // dips downward as the finger lifts, from closing the drawer
-            val dismissing = pagerState.currentPage >= target &&
-                pagerState.currentPageOffsetFraction != 0f
-            if (!dismissing) return Velocity.Zero
-            // The drag displaced the pager through raw deltas, so no fling of
-            // the page's own will settle it: finish the dismissal with the
-            // pager's own animation and eat the whole downward velocity so
-            // the page does not fling backwards too
-            coroutineScope.launch {
-                pagerState.animateScrollToPage(target)
-            }
-            return available
-        }
-    }
-}

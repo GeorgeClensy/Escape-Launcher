@@ -37,16 +37,31 @@ import com.geecee.escapelauncher.core.common.DefaultSettings
  *   anywhere on it engages the pager directly, so the apps list is one short
  *   swipe away regardless of how much content the home page has, and content
  *   taller than the viewport is cropped — this launcher's home is meant to
- *   stay short. Symmetrically, a swipe down on the apps list returns home from
- *   any scroll position instead of scrolling the list back to its top first,
- *   and a swipe down on the dashboard returns to the apps list the same way
- *   (see [MainPagerScreen]) — the list resets to its top every time the drawer
- *   closes. Hosted widgets that consume vertical drags themselves can keep a
- *   swipe started on them from reaching the pager, like any launcher with
- *   vertical gestures. The main pager disables its own overscroll effect (see
- *   [MainPagerScreen]): a swipe down on home is a drag the pager cannot
- *   scroll, and a stretch effect would consume it before the home page's shade
- *   observer sees it.
+ *   stay short. Symmetrically, a swipe down on the apps list returns home
+ *   from any scroll position instead of scrolling the list back to its top
+ *   first, and a swipe down on the dashboard returns to the apps list the
+ *   same way (see [MainPagerScreen] and
+ *   [com.geecee.escapelauncher.rememberPagerDismissConnection]): the dismiss
+ *   gesture takes the swipe in pre-scroll, once it has accumulated more than
+ *   touch slop of downward travel, and from there drives the pager through a
+ *   real UserInput-priority scroll session — so a fresh grab cancels a
+ *   settle in flight, the settled page stays frozen while the drag is in
+ *   flight, and the release settles by position and velocity together: a
+ *   dismissward flick carries to the target page while the drag has not
+ *   already swept past it, and a slower release lands on the nearest page.
+ *   The list resets to its top every time the drawer closes. At the pager's
+ *   boundaries the native machinery keeps its content-first handoff: upward
+ *   browsing scrolls the page's own content and only hands the leftover to
+ *   the pager at the edge. Hosted widgets that consume vertical drags
+ *   themselves can keep a swipe started on them from reaching the pager,
+ *   like any launcher with vertical gestures. The main pager disables its
+ *   own overscroll effect (see [MainPagerScreen]): a swipe down on home is
+ *   a drag the pager cannot scroll, and a stretch effect would consume it
+ *   before the home page's shade observer sees it. The known upstream
+ *   cross-axis fling-catch regression (b/532946466, unfixed in foundation
+ *   1.12.1) can catch an opposite-axis fling mid-dismissal; it is a
+ *   residual jerk source on the next compose upgrade, not something this
+ *   codebase works around.
  * - In the horizontal layout the pages keep the original upstream behaviour:
  *   the home page scrolls, the apps list scrolls in both directions, and the
  *   page indices shift with the hide setting exactly like the original did

@@ -2,6 +2,7 @@ package com.geecee.escapelauncher.feature.screentime
 
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.LocalActivity
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -55,10 +56,14 @@ fun calculateOveragePercentage(screenTime: Long): Int {
 
 /**
  * Parent UI for ScreenTimeDashboard
+ *
+ * [scrollState] is hoistable so the pager host can preserve the dashboard's
+ * scroll position across page recompositions
  */
 @Composable
 fun ScreenTimeDashboard(
     modifier: Modifier = Modifier,
+    scrollState: ScrollState = rememberScrollState(),
     screenTimeViewModel: ScreenTimeViewModel = hiltViewModel(LocalActivity.current as ComponentActivity)
 ) {
     val todayUsage by screenTimeViewModel.totalUsage.collectAsState()
@@ -70,7 +75,7 @@ fun ScreenTimeDashboard(
         modifier
             .fillMaxSize()
             .padding(15.dp, 0.dp)
-            .verticalScroll(rememberScrollState())
+            .verticalScroll(scrollState)
     ) {
         Spacer(Modifier.height(120.dp))
 

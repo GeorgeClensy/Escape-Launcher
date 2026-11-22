@@ -6,7 +6,9 @@ import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.pager.PagerState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
@@ -106,6 +108,16 @@ class MainPagerScreenViewModel @Inject constructor(
         started = SharingStarted.Eagerly,
         initialValue = false
     )
+
+    // The PagerState's page count lambda runs inside composition's measure,
+    // so it must read snapshot-observable state: a StateFlow is not
+    // snapshot-observable, and reading its value in the lambda never
+    // invalidates the pager's measure, so toggling the hide setting would
+    // leave the pager measuring against the stale count — the first swipe
+    // after hiding stops dead via the measure coercion. This snapshot starts
+    // with the same default the flow starts with and is refreshed by the
+    // collector below before it relocates, so the two always agree
+    private var hideScreenTimePageSnapshot by mutableStateOf(false)
     val screenLayout = launcherBehaviorRepository.screenLayout.stateIn(
         scope = viewModelScope,
         started = SharingStarted.Eagerly,
@@ -135,7 +147,11 @@ class MainPagerScreenViewModel @Inject constructor(
         currentPage = MainPagerLayout.HOME_PAGE_INDEX,
         currentPageOffsetFraction = 0f
     ) {
-        MainPagerLayout.pageCount(hideScreenTimePage.value)
+        // The snapshot mirror rather than the flow: a measure-side read of
+        // the flow value would never be invalidated, so hiding or showing
+        // the dashboard would not resize the pager until an unrelated
+        // measure happened to run
+        MainPagerLayout.pageCount(hideScreenTimePageSnapshot)
     }
 
     suspend fun goToMainPage() {
@@ -162,6 +178,11 @@ class MainPagerScreenViewModel @Inject constructor(
             screenTimeSettingsRepository.hideScreenTimePage
                 .distinctUntilChanged()
                 .collect { hide ->
+                    // Refresh the snapshot the pager's page count reads
+                    // before anything below relocates, so the relocation
+                    // (and the pager's next measure coercion) already sees
+                    // the new count
+                    hideScreenTimePageSnapshot = hide
                     if (screenLayout.value == DefaultSettings.SCREEN_LAYOUT_HORIZONTAL) {
                         // The horizontal layout's page indices shift with this
                         // setting, so always return to the main page like the
@@ -198,12 +219,20 @@ class MainPagerScreenViewModel @Inject constructor(
     }
 
     /**
-     * A jump to [page] is best-effort: a drag the user is still driving
-     * outranks it (the jump is rejected before running, and a drag started
-     * mid-jump cancels it), while a fling in flight is cut off by the jump.
-     * Swallow the cancellation so the calling collector keeps serving future
-     * emissions — the pager's measure coercion still lands the user on a page
-     * that exists. Real cancellation of this scope propagates
+     * A jump to [page] is best-effort in the pager's MutatorMutex terms: a
+     * mutation whose priority equals or exceeds the ongoing one's cancels
+     * it, and a lower-priority caller is rejected outright, before its
+     * block ever runs. User drags are UserInput-priority sessions — the
+     * pager's own gesture machinery and the dismiss handler's
+     * channel-drained drags alike — so they outrank these Default-priority
+     * jumps: a jump attempted while the user is dragging is rejected, and a
+     * drag started while a jump animates cancels the jump. Nothing
+     * coexists silently with a live drag (the pre-redesign raw-delta
+     * dismissals bypassed the mutex entirely and did). A fling in flight
+     * is a Default-priority mutation too, so the newer jump cuts it off.
+     * Swallow the rejection so the calling collector keeps serving future
+     * emissions — the pager's measure coercion still lands the user on a
+     * page that exists. Real cancellation of this scope propagates
      */
     private suspend fun scrollToPageBestEffort(page: Int) {
         try {
@@ -224,7 +253,20 @@ class MainPagerScreenViewModel @Inject constructor(
         updateSelectedApp(app)
         viewModelScope.launch {
             delay(500.milliseconds)
-            goToMainPage()
+            // The delayed snap fires blindly into whatever the user is
+            // doing half a second after the launch, so guard it at fire
+            // time: skip when a gesture is in flight (a jump into a live
+            // drag session would be rejected by the pager's MutatorMutex
+            // anyway — the user's hands win) and when the user is already
+            // on the main page
+            if (PagerScrollPolicy.shouldSnapToMainPageAfterAppLaunch(
+                    currentPage = pagerState.currentPage,
+                    mainPage = MainPagerLayout.mainPageIndex(screenLayout.value, hideScreenTimePage.value),
+                    isScrollInProgress = pagerState.isScrollInProgress
+                )
+            ) {
+                goToMainPage()
+            }
         }
     }
 
