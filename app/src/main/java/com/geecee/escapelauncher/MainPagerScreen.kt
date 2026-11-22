@@ -16,10 +16,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.unit.Velocity
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.geecee.escapelauncher.core.common.DefaultSettings
 import com.geecee.escapelauncher.core.domain.managedprofiles.ManagedProfileType
@@ -94,6 +100,39 @@ fun MainPagerScreen(
     BackHandler(enabled = true) {
         coroutineScope.launch {
             viewModel.animatedGoToMainPage()
+        }
+    }
+
+    // A downward drag or fling on the apps list closes the drawer from any
+    // scroll position: the pager takes it before the list can scroll back
+    // towards its top, so going back home is always one short swipe down
+    val appsListDismissConnection = remember {
+        object : NestedScrollConnection {
+            override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
+                if (source != NestedScrollSource.UserInput || available.y <= 0f) return Offset.Zero
+
+                // Feed the downward drag straight to the pager so the drawer
+                // starts dismissing immediately. Once the pager is displaced
+                // its own nested scroll connection takes the gesture over
+                val consumed = viewModel.pagerState.dispatchRawDelta(-available.y)
+                return Offset(0f, consumed)
+            }
+
+            override suspend fun onPreFling(available: Velocity): Velocity {
+                val dismissing = viewModel.pagerState.currentPage == MainPagerLayout.APPS_LIST_PAGE_INDEX ||
+                    viewModel.pagerState.currentPageOffsetFraction != 0f
+
+                if (available.y > 0f && dismissing) {
+                    // The user let go of a dismiss: finish it with the pager's
+                    // own animation and keep the list from flinging backwards
+                    coroutineScope.launch {
+                        viewModel.pagerState.animateScrollToPage(MainPagerLayout.HOME_PAGE_INDEX)
+                    }
+                    return available
+                }
+
+                return Velocity.Zero
+            }
         }
     }
 
@@ -226,6 +265,7 @@ fun MainPagerScreen(
             )
 
             MainPagerLayout.APPS_LIST_PAGE_INDEX -> AppsListTabScreen(
+                modifier = Modifier.nestedScroll(appsListDismissConnection),
                 scrollState = appslistScrollState,
                 appsListViewModel = appsListViewModel,
                 appsListTabs = appsListTabs,

@@ -8,6 +8,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.SoftwareKeyboardController
 import com.geecee.escapelauncher.core.common.DefaultSettings
@@ -21,6 +22,7 @@ import com.geecee.escapelauncher.feature.appslist.AppsListViewModel
 
 @Composable
 fun AppsListTabScreen(
+    modifier: Modifier = Modifier,
     scrollState: LazyListState,
     appsListViewModel: AppsListViewModel,
     appsListTabs: List<TabbedScreen?>,
@@ -41,6 +43,7 @@ fun AppsListTabScreen(
     )
 
     TabDisplay(
+        modifier = modifier,
         screens = listOf(
             TabbedScreen(
                 title = "All Apps", icon = Icons.Rounded.Apps, content = { padding ->

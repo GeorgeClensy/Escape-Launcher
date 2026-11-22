@@ -32,12 +32,15 @@ package com.geecee.escapelauncher
  * - The home page does not scroll: a swipe up from anywhere on it engages the
  *   pager directly, so the apps list is one short swipe away regardless of how
  *   much content the home page has, and content taller than the viewport is
- *   cropped — this launcher's home is meant to stay short. Hosted widgets that
- *   consume vertical drags themselves can keep a swipe started on them from
- *   reaching the pager, like any launcher with vertical gestures. The main pager
- *   disables its own overscroll effect (see [MainPagerScreen]): a swipe down on
- *   home is a drag the pager cannot scroll, and a stretch effect would consume
- *   it before the home page's shade observer sees it.
+ *   cropped — this launcher's home is meant to stay short. Symmetrically, a
+ *   swipe down on the apps list returns home from any scroll position instead
+ *   of scrolling the list back to its top first (see [MainPagerScreen]), and
+ *   the list resets to its top every time the drawer closes. Hosted widgets
+ *   that consume vertical drags themselves can keep a swipe started on them
+ *   from reaching the pager, like any launcher with vertical gestures. The
+ *   main pager disables its own overscroll effect (see [MainPagerScreen]): a
+ *   swipe down on home is a drag the pager cannot scroll, and a stretch effect
+ *   would consume it before the home page's shade observer sees it.
  */
 object MainPagerLayout {
     const val HOME_PAGE_INDEX = 0
