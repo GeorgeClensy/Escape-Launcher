@@ -10,15 +10,13 @@ package com.geecee.escapelauncher
  *
  * This order is load bearing, so do not reorder pages without checking the
  * gestures below:
- * - The home page must stay the top page. The home screen hosts a nested scroll
- *   connection (see [com.geecee.escapelauncher.feature.homescreen.HomeScreen])
- *   that expands the notification shade on downward overscroll. With a page
- *   above home, the pager would accept the downward leftover the connection
- *   declines below its drag threshold and drag that page in over home; from
- *   then on the pager either takes over the gesture or keeps racing the
- *   connection's accumulator, so the shade either never opens or fires together
- *   with the page dragging in — broken either way. With home on top the pager
- *   has no page above it and leaves downward swipes to the shade gesture.
+ * - The home page must stay the top page. The home screen observes downward
+ *   swipes for the notification shade (see
+ *   [com.geecee.escapelauncher.feature.homescreen.HomeScreen]) and only counts
+ *   movement nothing else consumed. With a page above home, the pager would
+ *   consume those swipes to drag the page in over home, so the shade would
+ *   never open. With home on top the pager has no page above it and downward
+ *   swipes belong to the shade.
  * - The apps list must sit directly below home so a swipe up on home opens it.
  *   On devices with gesture navigation the bottom edge of the screen belongs to
  *   the system home gesture, so like every launcher with a vertical drawer the
@@ -31,16 +29,15 @@ package com.geecee.escapelauncher
  *   is a linear stack and the animated return keeps the original animation, so
  *   the sweep is inherent to it (the instant jump used when launching an app
  *   skips it).
- * - When home content overflows the viewport (large clock, widget, lots of
- *   favourites), a swipe up scrolls the home list first and the apps list opens
- *   from the list's end, the same continuous-scroll model other vertically paged
- *   launchers use. A home list that fits the viewport consumes no vertical
- *   scroll, so the swipe reaches the pager directly. Hosted widgets that
+ * - The home page does not scroll: a swipe up from anywhere on it engages the
+ *   pager directly, so the apps list is one short swipe away regardless of how
+ *   much content the home page has, and content taller than the viewport is
+ *   cropped — this launcher's home is meant to stay short. Hosted widgets that
  *   consume vertical drags themselves can keep a swipe started on them from
  *   reaching the pager, like any launcher with vertical gestures. The main pager
- *   disables its own overscroll effect (see [MainPagerScreen]) so vertical drags
- *   it cannot scroll show no stretch, matching the horizontal pager, which never
- *   rendered vertical overscroll.
+ *   disables its own overscroll effect (see [MainPagerScreen]): a swipe down on
+ *   home is a drag the pager cannot scroll, and a stretch effect would consume
+ *   it before the home page's shade observer sees it.
  */
 object MainPagerLayout {
     const val HOME_PAGE_INDEX = 0

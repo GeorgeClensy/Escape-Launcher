@@ -1,6 +1,7 @@
 package com.geecee.escapelauncher.feature.homescreen
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.content.Intent
 import android.provider.AlarmClock
 import android.util.Log
@@ -9,6 +10,8 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,9 +21,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material3.MaterialTheme
@@ -32,10 +32,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
-import androidx.compose.ui.input.nestedscroll.NestedScrollSource
-import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.positionChange
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
@@ -57,6 +56,21 @@ import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 import kotlin.time.Duration.Companion.milliseconds
+
+/**
+ * Reflection call to expand the system notification shade from the launcher
+ */
+private fun expandNotificationsPanel(context: Context) {
+    try {
+        @SuppressLint("WrongConstant") val service = context.getSystemService("statusbar")
+
+        val statusBarManager = Class.forName("android.app.StatusBarManager")
+        val expand = statusBarManager.getMethod("expandNotificationsPanel")
+        expand.invoke(service)
+    } catch (e: Exception) {
+        e.printStackTrace()
+    }
+}
 
 @Composable
 fun HomeScreen(
@@ -92,157 +106,142 @@ fun HomeScreen(
         homeViewModel.startClockTicker(twelveHourClock)
     }
 
-    val scrollState = rememberLazyListState()
-
-    // This is for the swipe down to get to quick settings thing
-    val nestedScrollConnection = remember {
-        object : NestedScrollConnection {
-            var totalDrag = 0f
-
-            override fun onPostScroll(
-                consumed: Offset,
-                available: Offset,
-                source: NestedScrollSource
-            ): Offset {
-                if (source == NestedScrollSource.UserInput && available.y > 0) {
-                    totalDrag += available.y
-
-                    if (totalDrag > 150f) {
-                        try {
-                            @SuppressLint("WrongConstant") val service =
-                                context.getSystemService("statusbar")
-
-                            val statusBarManager = Class.forName("android.app.StatusBarManager")
-                            val expand = statusBarManager.getMethod("expandNotificationsPanel")
-                            expand.invoke(service)
-                        } catch (e: Exception) {
-                            e.printStackTrace()
-                        }
-                        totalDrag = 0f
-                        return available
-                    }
-                } else {
-                    totalDrag = 0f
-                }
-                return Offset.Zero
-            }
-        }
-    }
-
     Box(modifier.fillMaxSize()) {
-        LazyColumn(
-            state = scrollState,
+        // The home page does not scroll: a swipe up belongs to the pager below
+        // it (the apps list) and a swipe down is observed for the notification
+        // shade. This keeps the apps list one short swipe away no matter how
+        // much content the home page has
+        Column(
             verticalArrangement = homeVAlignment,
             horizontalAlignment = homeAlignment,
             modifier = Modifier
                 .fillMaxSize()
                 .padding(30.dp, 0.dp)
-                .nestedScroll(nestedScrollConnection)
+                .pointerInput(Unit) {
+                    // This is for the swipe down to get to quick settings thing.
+                    // Observed on the final pass so only movement nothing else
+                    // consumed counts: the shade never fires on a drag that
+                    // belongs to the pager
+                    awaitEachGesture {
+                        awaitFirstDown(requireUnconsumed = false, pass = PointerEventPass.Final)
+
+                        var totalDrag = 0f
+                        while (true) {
+                            val event = awaitPointerEvent(pass = PointerEventPass.Final)
+                            if (event.changes.none { it.pressed }) break
+
+                            val drag = event.changes.fold(0f) { total, change ->
+                                total + change.positionChange().y
+                            }
+
+                            if (drag > 0f) {
+                                totalDrag += drag
+
+                                if (totalDrag > 150f) {
+                                    expandNotificationsPanel(context)
+                                    break
+                                }
+                            } else {
+                                totalDrag = 0f
+                            }
+                        }
+                    }
+                }
         ) {
             //Top padding
-            item {
-                Spacer(Modifier.height(90.dp))
-            }
+            Spacer(Modifier.height(90.dp))
 
             //Clock
-            item {
-                if (showClock) {
-                    Clock(
-                        hour = hour,
-                        minute = minute,
-                        bigClock = bigClock,
+            if (showClock) {
+                Clock(
+                    hour = hour,
+                    minute = minute,
+                    bigClock = bigClock,
+                    homeAlignment = homeAlignment,
+                    onClockClick = {
+                        try {
+                            val intent = Intent(AlarmClock.ACTION_SHOW_ALARMS).apply {
+                                flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                            }
+                            context.startActivity(intent)
+                        } catch (e: Exception) {
+                            Log.e("Error", e.message.orEmpty())
+                        }
+                    },
+                    color = if (showWallpaper) MaterialTheme.colorScheme.primaryFixed else MaterialTheme.colorScheme.primary,
+                    shadow = showWallpaper
+                )
+            }
+
+            //Glance widgets
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+            ) {
+                if (showDate) {
+                    val dateFormat =
+                        remember { SimpleDateFormat("EEE d MMM", Locale.getDefault()) }
+                    var dateText by remember { mutableStateOf(dateFormat.format(Date())) }
+
+                    LaunchedEffect(Unit) {
+                        while (true) {
+                            val calendar = Calendar.getInstance()
+                            val now = calendar.timeInMillis
+                            calendar.add(Calendar.DAY_OF_YEAR, 1)
+                            calendar.set(Calendar.HOUR_OF_DAY, 0)
+                            calendar.set(Calendar.MINUTE, 0)
+                            calendar.set(Calendar.SECOND, 0)
+                            calendar.set(Calendar.MILLISECOND, 0)
+                            val delayMillis = calendar.timeInMillis - now
+                            delay(delayMillis.milliseconds)
+                            dateText = dateFormat.format(Date())
+                        }
+                    }
+
+                    GlanceWidget(
+                        text = dateText,
+                        icon = null,
+                        iconContentDescription = "",
                         homeAlignment = homeAlignment,
-                        onClockClick = {
+                        small = true,
+                        onClick = {
                             try {
-                                val intent = Intent(AlarmClock.ACTION_SHOW_ALARMS).apply {
+                                val intent = Intent(Intent.ACTION_MAIN).apply {
+                                    addCategory(Intent.CATEGORY_APP_CALENDAR)
                                     flags = Intent.FLAG_ACTIVITY_NEW_TASK
                                 }
                                 context.startActivity(intent)
                             } catch (e: Exception) {
-                                Log.e("Error", e.message.orEmpty())
+                                homeViewModel.logException(e)
                             }
                         },
-                        color = if (showWallpaper) MaterialTheme.colorScheme.primaryFixed else MaterialTheme.colorScheme.primary,
-                        shadow = showWallpaper
+                        shadow = showWallpaper,
+                        color = if (showWallpaper) MaterialTheme.colorScheme.primaryFixed else MaterialTheme.colorScheme.primary
                     )
                 }
-            }
 
-            //Glance widgets
-            item {
-                FlowRow(
-                    horizontalArrangement = Arrangement.spacedBy(10.dp),
-                ) {
-                    if (showDate) {
-                        val dateFormat =
-                            remember { SimpleDateFormat("EEE d MMM", Locale.getDefault()) }
-                        var dateText by remember { mutableStateOf(dateFormat.format(Date())) }
-
-                        LaunchedEffect(Unit) {
-                            while (true) {
-                                val calendar = Calendar.getInstance()
-                                val now = calendar.timeInMillis
-                                calendar.add(Calendar.DAY_OF_YEAR, 1)
-                                calendar.set(Calendar.HOUR_OF_DAY, 0)
-                                calendar.set(Calendar.MINUTE, 0)
-                                calendar.set(Calendar.SECOND, 0)
-                                calendar.set(Calendar.MILLISECOND, 0)
-                                val delayMillis = calendar.timeInMillis - now
-                                delay(delayMillis.milliseconds)
-                                dateText = dateFormat.format(Date())
-                            }
-                        }
-
-                        GlanceWidget(
-                            text = dateText,
-                            icon = null,
-                            iconContentDescription = "",
-                            homeAlignment = homeAlignment,
-                            small = true,
-                            onClick = {
-                                try {
-                                    val intent = Intent(Intent.ACTION_MAIN).apply {
-                                        addCategory(Intent.CATEGORY_APP_CALENDAR)
-                                        flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                                    }
-                                    context.startActivity(intent)
-                                } catch (e: Exception) {
-                                    homeViewModel.logException(e)
-                                }
-                            },
-                            shadow = showWallpaper,
-                            color = if (showWallpaper) MaterialTheme.colorScheme.primaryFixed else MaterialTheme.colorScheme.primary
-                        )
-                    }
-
-                    if (showScreenTimeHome) {
-                        GlanceWidget(
-                            text = formatScreenTime(totalUsage),
-                            icon = Icons.Default.Timer,
-                            iconContentDescription = "Screen Time",
-                            homeAlignment = homeAlignment,
-                            small = true,
-                            onClick = {},
-                            shadow = showWallpaper,
-                            color = if (showWallpaper) MaterialTheme.colorScheme.primaryFixed else MaterialTheme.colorScheme.primary
-                        )
-                    }
-
-                    glanceWidgets()
+                if (showScreenTimeHome) {
+                    GlanceWidget(
+                        text = formatScreenTime(totalUsage),
+                        icon = Icons.Default.Timer,
+                        iconContentDescription = "Screen Time",
+                        homeAlignment = homeAlignment,
+                        small = true,
+                        onClick = {},
+                        shadow = showWallpaper,
+                        color = if (showWallpaper) MaterialTheme.colorScheme.primaryFixed else MaterialTheme.colorScheme.primary
+                    )
                 }
+
+                glanceWidgets()
             }
 
-            item {
-                Spacer(Modifier.height(10.dp))
-            }
+            Spacer(Modifier.height(10.dp))
 
             //Widgets
-            item {
-                widget()
-            }
+            widget()
 
             //Apps
-            items(favoriteApps, key = { app -> app.packageName }) { app ->
+            favoriteApps.forEach { app ->
                 val screenTime = remember(appUsageList) {
                     homeViewModel.getScreenTime(app.packageName)
                 }
@@ -268,26 +267,22 @@ fun HomeScreen(
                 )
             }
 
-            item {
-                AnimatedVisibility(
-                    visible = firstTimeHelp,
-                    enter = slideInVertically() + fadeIn(),
-                    exit = slideOutVertically() + fadeOut()
-                ) {
-                    Column {
-                        Spacer(Modifier.height(15.dp))
+            AnimatedVisibility(
+                visible = firstTimeHelp,
+                enter = slideInVertically() + fadeIn(),
+                exit = slideOutVertically() + fadeOut()
+            ) {
+                Column {
+                    Spacer(Modifier.height(15.dp))
 
-                        FirstTimeHelp(
-                            swipeForAllAppsText = stringResource(R.string.swipe_for_all_apps),
-                            holdForSettingsText = stringResource(R.string.hold_for_settings)
-                        )
-                    }
+                    FirstTimeHelp(
+                        swipeForAllAppsText = stringResource(R.string.swipe_for_all_apps),
+                        holdForSettingsText = stringResource(R.string.hold_for_settings)
+                    )
                 }
             }
 
-            item {
-                Spacer(Modifier.height(90.dp))
-            }
+            Spacer(Modifier.height(90.dp))
         }
     }
 }

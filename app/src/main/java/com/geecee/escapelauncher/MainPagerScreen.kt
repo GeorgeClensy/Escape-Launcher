@@ -167,12 +167,12 @@ fun MainPagerScreen(
     }
 
     // Launcher pages
-    // No overscroll effect: the axis change already removed the old pager's
-    // horizontal edge stretch, and without this the vertical pager would grow
-    // a new stretch on strips it handles directly — areas inside a page that
-    // the page's own scrollable does not cover, plus fling leftovers reaching
-    // a bound. Pages only ever move through the scroll itself, so paging
-    // behaviour is unchanged
+    // No overscroll effect: the home page does not scroll, so a swipe down on
+    // it is a drag the pager cannot scroll — with the default effect that
+    // drag would be consumed by a top-edge stretch, and the home page's
+    // notification shade observer never sees it. The axis change also
+    // removed the old pager's horizontal edge stretch, so this keeps both
+    // directions free of new artifacts
     VerticalPager(
         state = viewModel.pagerState,
         overscrollEffect = null,
