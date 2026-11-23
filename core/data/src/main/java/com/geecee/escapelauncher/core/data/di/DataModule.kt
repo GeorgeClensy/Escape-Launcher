@@ -20,6 +20,12 @@ import javax.inject.Singleton
 abstract class DataModule {
     @Binds
     @Singleton
+    abstract fun bindHiddenAppsPasswordRepository(
+        impl: HiddenAppsPasswordRepositoryImpl
+    ): HiddenAppsPasswordRepository
+
+    @Binds
+    @Singleton
     abstract fun bindAppearanceRepository(
         impl: AppearanceRepositoryImpl
     ): AppearanceRepository

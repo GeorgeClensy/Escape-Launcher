@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -50,7 +51,9 @@ import kotlin.time.Duration.Companion.milliseconds
 fun HiddenApps(
     hiddenAppsViewModel: HiddenAppsViewModel = hiltViewModel(),
     goToManageHiddenApps: () -> Unit,
-    goBack: () -> Unit
+    goBack: () -> Unit,
+    passwordProtected: Boolean = false,
+    passwordSettings: @Composable () -> Unit = {}
 ) {
     val installedApps by hiddenAppsViewModel.installedApps.collectAsState()
     val coroutineScope = rememberCoroutineScope()
@@ -75,10 +78,13 @@ fun HiddenApps(
                 EscapeHeader(goBack, stringResource(R.string.hidden_apps))
             }
 
+            item { passwordSettings() }
+
             item {
                 SettingsButton(
                     label = stringResource(R.string.manage_hidden_apps),
                     isTopOfGroup = true,
+                    isBottomOfGroup = passwordProtected,
                     onClick = {
                         goToManageHiddenApps()
                     }
@@ -86,7 +92,13 @@ fun HiddenApps(
             }
 
             item {
-                SettingsSwitch(
+                if (passwordProtected) {
+                    Text(
+                        stringResource(R.string.hidden_password_search_disabled),
+                        modifier = Modifier.padding(vertical = 16.dp),
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                } else SettingsSwitch(
                     label = stringResource(R.string.show_hidden_apps_in_search),
                     checked = showHiddenAppsInSearch,
                     onCheckedChange = {

@@ -1,6 +1,7 @@
 package com.geecee.escapelauncher.core.domain.search
 
 import com.geecee.escapelauncher.core.domain.repository.android.AppsRepository
+import com.geecee.escapelauncher.core.domain.repository.settings.HiddenAppsPasswordRepository
 import com.geecee.escapelauncher.core.domain.repository.db.ModifiedAppsRepository
 import com.geecee.escapelauncher.core.model.InstalledApp
 import kotlinx.coroutines.flow.Flow
@@ -12,15 +13,17 @@ import jakarta.inject.Inject
  */
 class SearchAppsUseCase @Inject constructor(
     private val appsRepository: AppsRepository,
-    private val modifiedAppsRepository: ModifiedAppsRepository
+    private val modifiedAppsRepository: ModifiedAppsRepository,
+    private val passwordRepository: HiddenAppsPasswordRepository
 ) {
     operator fun invoke(queryFlow: Flow<String>, showHiddenFlow: Flow<Boolean>): Flow<List<InstalledApp>> {
         return combine(
             appsRepository.mainUserApps,
             modifiedAppsRepository.getHiddenPackageIdsFlow(),
             queryFlow,
-            showHiddenFlow
-        ) { allApps, hiddenIds, rawQuery, showHidden ->
+            showHiddenFlow,
+            passwordRepository.isPasswordSet
+        ) { allApps, hiddenIds, rawQuery, showHidden, isProtected ->
             val query = rawQuery.trim()
             val hiddenSet = hiddenIds.toSet()
 
@@ -30,7 +33,7 @@ class SearchAppsUseCase @Inject constructor(
                 allApps.filter { app ->
                     val isHidden = hiddenSet.contains(app.packageName)
                     val matchesQuery = fuzzyMatch(app.displayName, query)
-                    matchesQuery && (!isHidden || showHidden)
+                    matchesQuery && (!isHidden || (showHidden && !isProtected))
                 }
             }
 
