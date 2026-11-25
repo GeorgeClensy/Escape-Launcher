@@ -7,15 +7,22 @@ package com.geecee.escapelauncher.core.model
  * @property isFavoritesLoaded Whether the user's favorite apps have been loaded from the database.
  * @property isSettingsLoaded Whether the essential launcher settings have been loaded from DataStore.
  * @property isScreenTimeLoaded Whether the screen time usage and settings have been loaded.
+ * @property isMigrationComplete Whether the legacy SharedPreferences migration has completed.
  */
 data class AppInitializationState(
     val isAppsLoaded: Boolean = false,
     val isFavoritesLoaded: Boolean = false,
     val isSettingsLoaded: Boolean = false,
-    val isScreenTimeLoaded: Boolean = false
+    val isScreenTimeLoaded: Boolean = false,
+    val isMigrationComplete: Boolean = false
 ) {
     /**
      * Returns true if all essential data has been loaded and the splash screen can be dismissed.
      */
-    val isAllLoaded: Boolean get() = isAppsLoaded && isFavoritesLoaded && isSettingsLoaded && isScreenTimeLoaded
+    val isAllLoaded: Boolean
+        get() = isAppsLoaded &&
+            isFavoritesLoaded &&
+            isSettingsLoaded &&
+            isScreenTimeLoaded &&
+            isMigrationComplete
 }

@@ -5,11 +5,13 @@ import com.geecee.escapelauncher.core.data.repository.android.ManagedProfileRepo
 import com.geecee.escapelauncher.core.data.repository.android.SystemActionsRepositoryImpl
 import com.geecee.escapelauncher.core.data.repository.db.ModifiedAppsRepositoryImpl
 import com.geecee.escapelauncher.core.data.repository.db.ScreenTimeRepositoryImpl
+import com.geecee.escapelauncher.core.data.repository.migration.LegacyMigrationRepositoryImpl
 import com.geecee.escapelauncher.core.domain.repository.android.AppsRepository
 import com.geecee.escapelauncher.core.domain.repository.android.ManagedProfileRepository
 import com.geecee.escapelauncher.core.domain.repository.android.SystemActionsRepository
 import com.geecee.escapelauncher.core.domain.repository.db.ModifiedAppsRepository
 import com.geecee.escapelauncher.core.domain.repository.db.ScreenTimeRepository
+import com.geecee.escapelauncher.core.domain.repository.migration.LegacyMigrationRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -20,6 +22,12 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class RepositoryModule {
+    @Binds
+    @Singleton
+    abstract fun bindLegacyMigrationRepository(
+        legacyMigrationRepositoryImpl: LegacyMigrationRepositoryImpl
+    ): LegacyMigrationRepository
+
     @Binds
     @Singleton
     abstract fun bindScreenTimeRepository(

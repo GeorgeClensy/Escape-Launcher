@@ -1,14 +1,13 @@
 package com.geecee.escapelauncher.core.data.datastore
 
 import android.content.Context
+import android.content.SharedPreferences
 import android.util.Log
 import androidx.datastore.core.DataMigration
+import androidx.datastore.preferences.core.MutablePreferences
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStore
-import androidx.room.Room
-import com.geecee.escapelauncher.core.data.database.ModifiedAppsDatabase
-import com.geecee.escapelauncher.core.data.entity.ModifiedAppEntity
-import androidx.core.content.edit
+import java.io.File
 
 private class SharedPreferencesToDataStoreMigration(
     private val context: Context
@@ -20,56 +19,56 @@ private class SharedPreferencesToDataStoreMigration(
     }
 
     override suspend fun migrate(currentData: Preferences): Preferences {
-        val mutablePrefs = currentData.toMutablePreferences()
+        val prefsDir = File(context.applicationInfo.dataDir, "shared_prefs")
+        val allPrefNames = prefsDir.listFiles()
+            ?.filter { it.extension == "xml" }
+            ?.map { it.nameWithoutExtension }
+            .orEmpty()
 
-        // Check if com.geecee.escapelauncher exists and has entries
-        var sharedPrefs = context.getSharedPreferences("com.geecee.escapelauncher", Context.MODE_PRIVATE)
-        if (sharedPrefs.all.isEmpty()) {
-            // If empty, check 2131755384
-            sharedPrefs = context.getSharedPreferences("2131755384", Context.MODE_PRIVATE)
-        }
+        val prefsList = allPrefNames
+            .map { context.getSharedPreferences(it, Context.MODE_PRIVATE) }
+            .filter { it.all.isNotEmpty() }
 
-        if (sharedPrefs.all.isEmpty()) {
+        if (prefsList.isEmpty()) {
             return currentData
         }
 
-        Log.d("SettingsDataStore", "Migrating from shared preferences: ${sharedPrefs.all.keys}")
+        val mutablePrefs = currentData.toMutablePreferences()
 
-        // Type-specific helpers to migrate settings keys safely without type erasure issues
-        fun migrateBoolean(spKey: String, dsKey: Preferences.Key<Boolean>) {
-            if (sharedPrefs.contains(spKey)) {
+        fun migrateBoolean(sp: SharedPreferences, spKey: String, dsKey: Preferences.Key<Boolean>) {
+            if (sp.contains(spKey)) {
                 try {
-                    mutablePrefs[dsKey] = sharedPrefs.getBoolean(spKey, false)
+                    mutablePrefs[dsKey] = sp.getBoolean(spKey, false)
                 } catch (e: Exception) {
                     Log.e("SettingsDataStore", "Failed to migrate boolean key $spKey", e)
                 }
             }
         }
 
-        fun migrateInt(spKey: String, dsKey: Preferences.Key<Int>) {
-            if (sharedPrefs.contains(spKey)) {
+        fun migrateInt(sp: SharedPreferences, spKey: String, dsKey: Preferences.Key<Int>) {
+            if (sp.contains(spKey)) {
                 try {
-                    mutablePrefs[dsKey] = sharedPrefs.getInt(spKey, 0)
+                    mutablePrefs[dsKey] = sp.getInt(spKey, 0)
                 } catch (e: Exception) {
                     Log.e("SettingsDataStore", "Failed to migrate int key $spKey", e)
                 }
             }
         }
 
-        fun migrateFloat(spKey: String, dsKey: Preferences.Key<Float>) {
-            if (sharedPrefs.contains(spKey)) {
+        fun migrateFloat(sp: SharedPreferences, spKey: String, dsKey: Preferences.Key<Float>) {
+            if (sp.contains(spKey)) {
                 try {
-                    mutablePrefs[dsKey] = sharedPrefs.getFloat(spKey, 0f)
+                    mutablePrefs[dsKey] = sp.getFloat(spKey, 0f)
                 } catch (e: Exception) {
                     Log.e("SettingsDataStore", "Failed to migrate float key $spKey", e)
                 }
             }
         }
 
-        fun migrateString(spKey: String, dsKey: Preferences.Key<String>) {
-            if (sharedPrefs.contains(spKey)) {
+        fun migrateString(sp: SharedPreferences, spKey: String, dsKey: Preferences.Key<String>) {
+            if (sp.contains(spKey)) {
                 try {
-                    val value = sharedPrefs.getString(spKey, null)
+                    val value = sp.getString(spKey, null)
                     if (value != null) {
                         mutablePrefs[dsKey] = value
                     }
@@ -79,143 +78,125 @@ private class SharedPreferencesToDataStoreMigration(
             }
         }
 
-        // Migrate all mapped settings
-        migrateInt("Theme", PreferencesKeys.THEME)
-        migrateBoolean("Analytics", PreferencesKeys.ALLOW_ANALYTICS)
-        migrateString("HomeAlignment", PreferencesKeys.HOME_ALIGNMENT)
-        migrateString("HomeVAlignment", PreferencesKeys.HOME_V_ALIGNMENT)
-        migrateString("AppsAlignment", PreferencesKeys.APPS_ALIGNMENT)
-        migrateBoolean("showSearchBox", PreferencesKeys.SHOW_SEARCH_BOX)
-        migrateBoolean("searchAutoOpen", PreferencesKeys.SEARCH_AUTO_OPEN)
-        migrateBoolean("ShowClock", PreferencesKeys.SHOW_CLOCK)
-        migrateBoolean("BigClock", PreferencesKeys.BIG_CLOCK)
-        migrateBoolean("screenTimeOnApp", PreferencesKeys.SHOW_SCREEN_TIME_APP)
-        migrateBoolean("screenTimeOnHome", PreferencesKeys.SHOW_SCREEN_TIME_HOME)
-        migrateString("font", PreferencesKeys.FONT)
-        migrateBoolean("FirstTime", PreferencesKeys.FIRST_TIME)
-        migrateBoolean("FirstTimeAppDrawHelp", PreferencesKeys.FIRST_TIME_HELP)
-        migrateBoolean("searchHiddenPrivateSpace", PreferencesKeys.HIDE_PRIVATE_SPACE)
-        migrateBoolean("ShowDate", PreferencesKeys.SHOW_DATE)
-        migrateBoolean("TwelveHourClock", PreferencesKeys.TWELVE_HOUR_CLOCK)
-        migrateBoolean("HideScreenTimePage", PreferencesKeys.HIDE_SCREEN_TIME_PAGE)
-        migrateBoolean("ShowHiddenAppsInSearch", PreferencesKeys.SHOW_HIDDEN_APPS_IN_SEARCH)
-        migrateBoolean("AppsListAutoSearch", PreferencesKeys.AUTOMATICALLY_OPEN_APPS_IN_SEARCH)
-        migrateString("weather_app_package", PreferencesKeys.WEATHER_APP_PACKAGE)
-        migrateBoolean("DoubleTapToLock", PreferencesKeys.DOUBLE_TAP_TO_LOCK)
-        migrateBoolean("UseFahrenheit", PreferencesKeys.USE_FAHRENHEIT)
-        migrateFloat("widget_offset", PreferencesKeys.WIDGET_OFFSET)
-        migrateFloat("widget_height", PreferencesKeys.WIDGET_HEIGHT)
-        migrateFloat("widget_width", PreferencesKeys.WIDGET_WIDTH)
-        migrateInt("widget_ID", PreferencesKeys.WIDGET_ID)
-        migrateBoolean("haptic_feedback", PreferencesKeys.HAPTIC_FEEDBACK)
-        migrateBoolean("show_weather", PreferencesKeys.SHOW_WEATHER)
+        // Track if any of our own legacy prefs actually existed (vs third-party GMS/Firebase XMLs)
+        var foundLegacyLauncherPrefs = false
 
-        // 3. Migrate app lists to Room database
-        try {
-            val favoriteAppsJson = sharedPrefs.getString("FavoriteApps", null)
-            val favoriteApps = parseJsonStringList(favoriteAppsJson)
+        for (sp in prefsList) {
+            migrateBoolean(sp, "Analytics", PreferencesKeys.ALLOW_ANALYTICS)
+            migrateString(sp, "HomeAlignment", PreferencesKeys.HOME_ALIGNMENT)
+            migrateString(sp, "HomeVAlignment", PreferencesKeys.HOME_V_ALIGNMENT)
+            migrateString(sp, "AppsAlignment", PreferencesKeys.APPS_ALIGNMENT)
+            migrateBoolean(sp, "showSearchBox", PreferencesKeys.SHOW_SEARCH_BOX)
+            migrateBoolean(sp, "searchAutoOpen", PreferencesKeys.SEARCH_AUTO_OPEN)
+            migrateBoolean(sp, "ShowClock", PreferencesKeys.SHOW_CLOCK)
+            migrateBoolean(sp, "BigClock", PreferencesKeys.BIG_CLOCK)
+            migrateBoolean(sp, "screenTimeOnApp", PreferencesKeys.SHOW_SCREEN_TIME_APP)
+            migrateBoolean(sp, "screenTimeOnHome", PreferencesKeys.SHOW_SCREEN_TIME_HOME)
+            migrateString(sp, "font", PreferencesKeys.FONT)
+            migrateBoolean(sp, "FirstTime", PreferencesKeys.FIRST_TIME)
+            migrateBoolean(sp, "FirstTimeAppDrawHelp", PreferencesKeys.FIRST_TIME_HELP)
+            migrateBoolean(sp, "searchHiddenPrivateSpace", PreferencesKeys.HIDE_PRIVATE_SPACE)
+            migrateBoolean(sp, "ShowDate", PreferencesKeys.SHOW_DATE)
+            migrateBoolean(sp, "TwelveHourClock", PreferencesKeys.TWELVE_HOUR_CLOCK)
+            migrateBoolean(sp, "HideScreenTimePage", PreferencesKeys.HIDE_SCREEN_TIME_PAGE)
+            migrateBoolean(sp, "ShowHiddenAppsInSearch", PreferencesKeys.SHOW_HIDDEN_APPS_IN_SEARCH)
+            migrateBoolean(sp, "AppsListAutoSearch", PreferencesKeys.AUTOMATICALLY_OPEN_APPS_IN_SEARCH)
+            migrateString(sp, "weather_app_package", PreferencesKeys.WEATHER_APP_PACKAGE)
+            migrateBoolean(sp, "DoubleTapToLock", PreferencesKeys.DOUBLE_TAP_TO_LOCK)
+            migrateBoolean(sp, "UseFahrenheit", PreferencesKeys.USE_FAHRENHEIT)
+            migrateBoolean(sp, "haptic_feedback", PreferencesKeys.HAPTIC_FEEDBACK)
+            migrateBoolean(sp, "show_weather", PreferencesKeys.SHOW_WEATHER)
 
-            val hiddenAppsJson = sharedPrefs.getString("HiddenApps", null)
-            val hiddenApps = parseJsonStringList(hiddenAppsJson)
+            // Widget settings (old Widgets.kt keys + newer snake_case keys)
+            migrateFloat(sp, "WidgetOffset", PreferencesKeys.WIDGET_OFFSET)
+            migrateFloat(sp, "widget_offset", PreferencesKeys.WIDGET_OFFSET)
+            migrateFloat(sp, "WidgetHeight", PreferencesKeys.WIDGET_HEIGHT)
+            migrateFloat(sp, "widget_height", PreferencesKeys.WIDGET_HEIGHT)
+            migrateFloat(sp, "WidgetWidth", PreferencesKeys.WIDGET_WIDTH)
+            migrateFloat(sp, "widget_width", PreferencesKeys.WIDGET_WIDTH)
+            migrateInt(sp, "widget_id", PreferencesKeys.WIDGET_ID)
+            migrateInt(sp, "widget_ID", PreferencesKeys.WIDGET_ID)
 
-            val challengeAppsJson = sharedPrefs.getString("ChallengeApps", null)
-            val challengeApps = parseJsonStringList(challengeAppsJson)
+            // Theme mapping
+            migrateOldTheme(sp, mutablePrefs)
 
-            if (favoriteApps.isNotEmpty() || hiddenApps.isNotEmpty() || challengeApps.isNotEmpty()) {
-                val db = Room.databaseBuilder(
-                    context,
-                    ModifiedAppsDatabase::class.java,
-                    "modified_apps_database"
-                ).build()
-                val dao = db.modifiedAppsDao()
-
-                val appMap = mutableMapOf<String, ModifiedAppEntity>()
-
-                // Migrate favorite apps
-                favoriteApps.forEachIndexed { index, pkg ->
-                    appMap[pkg] = ModifiedAppEntity(
-                        packageId = pkg,
-                        displayName = null,
-                        isHidden = false,
-                        isChallenge = false,
-                        favouritePosition = index.toDouble()
-                    )
-                }
-
-                // Migrate hidden apps
-                hiddenApps.forEach { pkg ->
-                    val existing = appMap[pkg]
-                    if (existing != null) {
-                        appMap[pkg] = existing.copy(isHidden = true)
-                    } else {
-                        appMap[pkg] = ModifiedAppEntity(
-                            packageId = pkg,
-                            displayName = null,
-                            isHidden = true,
-                            isChallenge = false,
-                            favouritePosition = null
-                        )
-                    }
-                }
-
-                // Migrate challenge apps
-                challengeApps.forEach { pkg ->
-                    val existing = appMap[pkg]
-                    if (existing != null) {
-                        appMap[pkg] = existing.copy(isChallenge = true)
-                    } else {
-                        appMap[pkg] = ModifiedAppEntity(
-                            packageId = pkg,
-                            displayName = null,
-                            isHidden = false,
-                            isChallenge = true,
-                            favouritePosition = null
-                        )
-                    }
-                }
-
-                if (appMap.isNotEmpty()) {
-                    dao.upsertAll(appMap.values.toList())
-                    Log.d("SettingsDataStore", "Migrated ${appMap.size} apps to database")
-                }
-                db.close()
+            if (sp.contains("FirstTime") || sp.contains("HomeAlignment") || sp.contains("WidgetOffset") ||
+                sp.contains("widget_id") || sp.contains("FavoriteApps") || sp.contains("Theme") || sp.contains("theme")
+            ) {
+                foundLegacyLauncherPrefs = true
             }
-        } catch (e: Exception) {
-            Log.e("SettingsDataStore", "Failed to migrate apps to database", e)
+        }
+
+        // Preserve old app defaults for upgrading users who left those settings untouched
+        if (foundLegacyLauncherPrefs) {
+            if (PreferencesKeys.HOME_ALIGNMENT !in mutablePrefs) mutablePrefs[PreferencesKeys.HOME_ALIGNMENT] = "Center"
+            if (PreferencesKeys.APPS_ALIGNMENT !in mutablePrefs) mutablePrefs[PreferencesKeys.APPS_ALIGNMENT] = "Center"
+            if (PreferencesKeys.FONT !in mutablePrefs) mutablePrefs[PreferencesKeys.FONT] = "Jost"
+            if (PreferencesKeys.SHOW_DATE !in mutablePrefs) mutablePrefs[PreferencesKeys.SHOW_DATE] = false
+            if (PreferencesKeys.SHOW_WEATHER !in mutablePrefs) mutablePrefs[PreferencesKeys.SHOW_WEATHER] = false
+            if (PreferencesKeys.SHOW_SCREEN_TIME_HOME !in mutablePrefs) mutablePrefs[PreferencesKeys.SHOW_SCREEN_TIME_HOME] = false
+            if (PreferencesKeys.SHOW_SCREEN_TIME_APP !in mutablePrefs) mutablePrefs[PreferencesKeys.SHOW_SCREEN_TIME_APP] = false
+            if (PreferencesKeys.DOUBLE_TAP_TO_LOCK !in mutablePrefs) mutablePrefs[PreferencesKeys.DOUBLE_TAP_TO_LOCK] = false
+            if (PreferencesKeys.WIDGET_WIDTH !in mutablePrefs) mutablePrefs[PreferencesKeys.WIDGET_WIDTH] = 150f
+
+            // Old default theme was 11 (OFF_LIGHT)
+            if (PreferencesKeys.THEME !in mutablePrefs) {
+                mutablePrefs[PreferencesKeys.THEME] = 11 // ORANGE
+                mutablePrefs[PreferencesKeys.NIGHT_MODE] = 2 // Light
+            }
         }
 
         return mutablePrefs
     }
 
-    override suspend fun cleanUp() {
-        try {
-            // Delete com.geecee.escapelauncher
-            context.getSharedPreferences("com.geecee.escapelauncher", Context.MODE_PRIVATE).edit { clear() }
-            context.deleteSharedPreferences("com.geecee.escapelauncher")
+    private fun migrateOldTheme(
+        sp: SharedPreferences,
+        mutablePrefs: MutablePreferences
+    ) {
+        val autoSwitch = sp.getBoolean("autoThemeSwitch", false)
+        val oldThemeId = when {
+            autoSwitch -> {
+                val d = sp.getInt("dTheme", -1)
+                val l = sp.getInt("lTheme", -1)
+                if (d != -1) d else l
+            }
+            sp.contains("Theme") -> sp.getInt("Theme", -1)
+            sp.contains("theme") -> sp.getInt("theme", -1)
+            else -> -1
+        }
 
-            // Delete 2131755384
-            context.getSharedPreferences("2131755384", Context.MODE_PRIVATE).edit { clear() }
-            context.deleteSharedPreferences("2131755384")
-            Log.d("SettingsDataStore", "Cleaned up migrated SharedPreferences files")
-        } catch (e: Exception) {
-            Log.e("SettingsDataStore", "Failed to cleanup SharedPreferences", e)
+        if (oldThemeId == -1) return
+
+        when (oldThemeId) {
+            0 -> { // Old DARK
+                mutablePrefs[PreferencesKeys.THEME] = 0 // MONOCHROME
+                mutablePrefs[PreferencesKeys.NIGHT_MODE] = if (autoSwitch) 0 else 1
+            }
+            1 -> { // Old LIGHT
+                mutablePrefs[PreferencesKeys.THEME] = 0 // MONOCHROME
+                mutablePrefs[PreferencesKeys.NIGHT_MODE] = if (autoSwitch) 0 else 2
+            }
+            2 -> { // Old PITCH_DARK
+                mutablePrefs[PreferencesKeys.THEME] = 0 // MONOCHROME
+                mutablePrefs[PreferencesKeys.BLACK_BACKGROUND] = true
+                mutablePrefs[PreferencesKeys.NIGHT_MODE] = 1
+            }
+            3, 5, 7, 9, 11 -> { // Old LIGHT_RED, LIGHT_GREEN, LIGHT_BLUE, LIGHT_YELLOW, OFF_LIGHT
+                mutablePrefs[PreferencesKeys.THEME] = oldThemeId
+                mutablePrefs[PreferencesKeys.NIGHT_MODE] = if (autoSwitch) 0 else 2
+            }
+            4, 6, 8, 10 -> { // Old DARK_RED, DARK_GREEN, DARK_BLUE, DARK_YELLOW
+                mutablePrefs[PreferencesKeys.THEME] = oldThemeId - 1
+                mutablePrefs[PreferencesKeys.NIGHT_MODE] = if (autoSwitch) 0 else 1
+            }
+            12 -> { // Old SYSTEM
+                mutablePrefs[PreferencesKeys.THEME] = 12
+                mutablePrefs[PreferencesKeys.NIGHT_MODE] = 0
+            }
         }
     }
 
-    private fun parseJsonStringList(json: String?): List<String> {
-        if (json.isNullOrBlank()) return emptyList()
-        return try {
-            json.trim()
-                .removePrefix("[")
-                .removeSuffix("]")
-                .split(",")
-                .map { it.trim().removeSurrounding("\"").removeSurrounding("'") }
-                .filter { it.isNotEmpty() }
-        } catch (e: Exception) {
-            Log.e("SettingsDataStore", "Failed to parse json string list: $json", e)
-            emptyList()
-        }
-    }
+    override suspend fun cleanUp() = Unit
 }
 
 val Context.settingsDataStore by preferencesDataStore(

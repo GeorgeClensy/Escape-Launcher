@@ -56,6 +56,9 @@ object PreferencesKeys {
     val SHOW_HIDDEN_APPS_IN_SEARCH = booleanPreferencesKey(name = "show_hidden_apps_in_search")
     val FIRST_TIME = booleanPreferencesKey(name = "first_time")
 
+    // Migration
+    val LEGACY_APPS_MIGRATED = booleanPreferencesKey(name = "legacy_apps_migrated")
+
     //Screen Time
     val ACTIVE_SESSION_PACKAGE = stringPreferencesKey("active_session_package")
     val ACTIVE_SESSION_START_TIME = longPreferencesKey("active_session_start_time")

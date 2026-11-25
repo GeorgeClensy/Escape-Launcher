@@ -144,9 +144,21 @@ class ModifiedAppsRepositoryImpl @Inject constructor(
     override suspend fun deleteByPackageId(packageId: String) {
         modifiedAppsDao.deleteByPackageId(packageId)
     }
+
+    override suspend fun upsertAll(apps: List<ModifiedApp>) {
+        modifiedAppsDao.upsertAll(apps.map { it.asEntity() })
+    }
 }
 
 fun ModifiedAppEntity.asExternalModel() = ModifiedApp(
+    packageId = packageId,
+    displayName = displayName,
+    isHidden = isHidden,
+    isChallenge = isChallenge,
+    favouritePosition = favouritePosition
+)
+
+fun ModifiedApp.asEntity() = ModifiedAppEntity(
     packageId = packageId,
     displayName = displayName,
     isHidden = isHidden,

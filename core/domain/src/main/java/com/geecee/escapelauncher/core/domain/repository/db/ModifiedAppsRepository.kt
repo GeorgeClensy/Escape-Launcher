@@ -28,4 +28,5 @@ interface ModifiedAppsRepository {
     suspend fun getChallengePackageIds(): List<String>
     suspend fun purgeAppsWithNoData(): Int
     suspend fun deleteByPackageId(packageId: String)
+    suspend fun upsertAll(apps: List<ModifiedApp>)
 }
