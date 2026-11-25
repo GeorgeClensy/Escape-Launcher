@@ -43,9 +43,13 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import jakarta.inject.Inject
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
@@ -148,6 +152,20 @@ class MainPagerScreenViewModel @Inject constructor(
             targetPage,
             animationSpec = tween(durationMillis = 500, easing = FastOutSlowInEasing)
         )
+    }
+
+    private val _animatedScrollToMainPage = MutableSharedFlow<Unit>(
+        extraBufferCapacity = 1,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST
+    )
+    val animatedScrollToMainPage: SharedFlow<Unit> = _animatedScrollToMainPage.asSharedFlow()
+
+    fun requestAnimatedGoToMainPage() {
+        _animatedScrollToMainPage.tryEmit(Unit)
+    }
+
+    fun snapToMainPage() {
+        pagerState.requestScrollToPage(getMainPageIndex())
     }
 
     init {

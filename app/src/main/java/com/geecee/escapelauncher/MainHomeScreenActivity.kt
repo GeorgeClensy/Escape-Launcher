@@ -23,10 +23,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.AndroidUiDispatcher
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
+import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
@@ -61,7 +61,6 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -82,6 +81,8 @@ class MainHomeScreenActivity : ComponentActivity() {
         ActivityResultContracts.RequestMultiplePermissions()
     ) { _ -> }
     private var runtimePermissionsRequested = false
+
+    private var activeBackStack: List<NavKey>? = null
 
     override fun onStart() {
         super.onStart()
@@ -151,14 +152,14 @@ class MainHomeScreenActivity : ComponentActivity() {
 
         // Responsible for taking you to the favourites page when you press the home button
         if (intent.action == Intent.ACTION_MAIN && intent.hasCategory(Intent.CATEGORY_HOME)) {
-            // Only navigate home if we've finished onboarding
-            lifecycleScope.launch {
-                val isFirstTime = globalViewModel.firstTime.first()
-                if (!isFirstTime) {
+            when (activeBackStack?.lastOrNull()) {
+                null, AppNavKey.Onboarding -> return // Don't leave onboarding or navigate before composition
+                AppNavKey.Home -> {
+                    mainPagerViewModel.requestAnimatedGoToMainPage()
+                }
+                else -> {
                     navRouter.navigateTo(AppNavKey.Home, true)
-                    withContext(AndroidUiDispatcher.Main) {
-                        mainPagerViewModel.animatedGoToMainPage()
-                    }
+                    mainPagerViewModel.snapToMainPage()
                 }
             }
         }
@@ -245,6 +246,7 @@ class MainHomeScreenActivity : ComponentActivity() {
     @Composable
     private fun SetupNavDisplay(startDestination: AppNavKey) {
         val backStack = rememberNavBackStack(startDestination)
+        activeBackStack = backStack
         val showWallpaper by globalViewModel.showWallpaper.collectAsState(initial = false)
 
         // Listener for all nav events
