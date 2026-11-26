@@ -3,6 +3,8 @@ package com.geecee.escapelauncher.core.domain.repository.settings
 import kotlinx.coroutines.flow.Flow
 
 interface LauncherBehaviorRepository {
+    val countdownSeconds: Flow<Int>
+    suspend fun setCountdownSeconds(seconds: Int)
     val hapticFeedBackEnabled: Flow<Boolean>
     suspend fun setHapticFeedback(enabld: Boolean)
     val doubleTapToLock: Flow<Boolean>

@@ -149,4 +149,15 @@
     <string name="back">Back</string>
     <string name="launch_secure_folder">Secure Folder</string>
     <string name="enable_secure_folder_on_settings">Enable the Secure Folder in settings</string>
+    <plurals name="countdown_duration">
+        <item quantity="one">Countdown: %1$d second</item>
+        <item quantity="other">Countdown: %1$d seconds</item>
+    </plurals>
+    <string name="countdown_duration_title">Countdown duration</string>
+    <string name="countdown_duration_range">Seconds (1–600; up to 10 minutes)</string>
+    <string name="countdown_save">Save</string>
+    <string name="countdown_cancel">Cancel</string>
+    <string name="reset_countdown_duration">Reset countdown duration</string>
+    <string name="countdown_apps_heading">Apps with countdown</string>
+    <string name="countdown_other_apps_heading">Apps without countdown</string>
 </resources>

@@ -2,9 +2,11 @@ package com.geecee.escapelauncher.feature.settings.openchallenges
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.geecee.escapelauncher.core.common.DefaultSettings
 import com.geecee.escapelauncher.core.domain.challenges.GetOpenChallengeAppsUseCase
 import com.geecee.escapelauncher.core.domain.repository.android.AppsRepository
 import com.geecee.escapelauncher.core.domain.repository.db.ModifiedAppsRepository
+import com.geecee.escapelauncher.core.domain.repository.settings.LauncherBehaviorRepository
 import com.geecee.escapelauncher.core.model.InstalledApp
 import com.geecee.escapelauncher.core.navigation.NavRouter
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -19,8 +21,21 @@ class OpenChallengeViewModel @Inject constructor(
     private val modifiedAppsRepository: ModifiedAppsRepository,
     getOpenChallengeAppsUseCase: GetOpenChallengeAppsUseCase,
     appsRepository: AppsRepository,
+    private val launcherBehaviorRepository: LauncherBehaviorRepository,
     val navRouter: NavRouter
 ) : ViewModel() {
+    val countdownSeconds: StateFlow<Int> = launcherBehaviorRepository.countdownSeconds.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = DefaultSettings.COUNTDOWN_SECONDS
+    )
+
+    fun setCountdownSeconds(seconds: Int) {
+        viewModelScope.launch {
+            launcherBehaviorRepository.setCountdownSeconds(seconds)
+        }
+    }
+
     val installedApps = appsRepository.mainUserApps
 
     val challengeAppIds: StateFlow<List<InstalledApp>> = getOpenChallengeAppsUseCase()

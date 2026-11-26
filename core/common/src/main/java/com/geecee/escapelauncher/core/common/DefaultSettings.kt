@@ -1,6 +1,9 @@
 package com.geecee.escapelauncher.core.common
 
 object DefaultSettings {
+    const val COUNTDOWN_SECONDS = 20
+    const val MIN_COUNTDOWN_SECONDS = 1
+    const val MAX_COUNTDOWN_SECONDS = 600
     const val ALLOW_ANALYTICS = false
     const val HAPTIC_FEEDBACK = true
 

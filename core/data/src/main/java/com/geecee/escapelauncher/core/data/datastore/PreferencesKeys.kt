@@ -7,6 +7,7 @@ import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 
 object PreferencesKeys {
+    val COUNTDOWN_SECONDS = intPreferencesKey("countdown_seconds")
     val ALLOW_ANALYTICS = booleanPreferencesKey(name = "allow_analytics")
     val HAPTIC_FEEDBACK = booleanPreferencesKey(name = "haptic_feedback")
 
