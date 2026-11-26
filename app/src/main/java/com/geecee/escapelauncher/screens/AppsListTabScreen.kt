@@ -1,5 +1,6 @@
 package com.geecee.escapelauncher.screens
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Apps
@@ -39,6 +40,10 @@ fun AppsListTabScreen(
     val autoOpenAppInSearch by appsListViewModel.automaticallyOpenAppsInSearch.collectAsState(
         initial = DefaultSettings.AUTOMATICALLY_OPEN_APPS_IN_SEARCH
     )
+
+    BackHandler(enabled = searchExpanded) {
+        appsListViewModel.setSearchExpanded(false)
+    }
 
     TabDisplay(
         screens = listOf(

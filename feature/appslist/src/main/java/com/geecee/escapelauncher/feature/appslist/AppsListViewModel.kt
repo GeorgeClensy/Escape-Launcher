@@ -53,6 +53,10 @@ class AppsListViewModel @Inject constructor(
     val searchText: StateFlow<String> = _searchText.asStateFlow()
     private val _searchExpanded = MutableStateFlow(false)
     val searchExpanded: StateFlow<Boolean> = _searchExpanded.asStateFlow()
+
+    fun setSearchExpanded(value: Boolean) {
+        _searchExpanded.value = value
+    }
     fun onSearchTextChanged(query: String) {
         if (_searchExpanded.value) {
             _searchText.value = query
